@@ -110,8 +110,8 @@ class CreateDepartmentController extends Controller
             $from = $dt->copy()->format('Ymd');
             $department_model->setParamapplytermfromAttribute($from);
             $department_model->setParamcodeAttribute($code);
-            $department_model->setKillvalueAttribute($killvalue);
             $department_model->setParamAccountidAttribute($login_user_code_4);
+            $department_model->setKillvalueAttribute($killvalue);
             $details = $department_model->getDetails();
             return $details;
         }catch(\PDOException $pe){
@@ -266,7 +266,8 @@ class CreateDepartmentController extends Controller
                 $code = 1;
             }
             $department->setApplytermfromAttribute($from);
-            $department->setCodeAttribute($login_user_code_4.$code);
+            $department->setAccountidAttribute($login_user_code_4);
+            $department->setCodeAttribute($code);
             $department->setNameAttribute($name);
             $department->setKillfromdateAttribute($maxdate);
             $department->setCreatedatAttribute($systemdate);
@@ -317,6 +318,7 @@ class CreateDepartmentController extends Controller
             $department_model->setUpdatedatAttribute($systemdate);   
             $department_model->setUpdateduserAttribute($login_user_code);   
             if ($details['id'] == "" || $details['id'] == null) {
+                $department_model->setAccountidAttribute($login_user_code_4);
                 $department_model->insertDepartment();
             } else {
                 $department_model->setParamAccountidAttribute($login_user_code_4);

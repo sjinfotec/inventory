@@ -144,6 +144,7 @@ class MonthlyWorkingAlertController extends Controller
         $working_date_12 = date_format($w_date->addMonthNoOverflow(),'Y年m月');
 
         // 累計時間取得
+        $array_alert_date = $workingtimedate_model->setParamAccountidAttribute($login_user_code_4);
         $array_alert_date = $workingtimedate_model->setParamEmploymentStatusAttribute($employmentstatus);
         $array_alert_date = $workingtimedate_model->setParamDepartmentcodeAttribute($departmentcode);
         $array_alert_date = $workingtimedate_model->setParamUsercodeAttribute($usercode);

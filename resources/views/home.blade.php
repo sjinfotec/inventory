@@ -38,6 +38,8 @@
 					<div class="row justify-content-between">
 						<home-component
 							v-bind:authusers="{{ $authusers }}"
+							v-bind:accountid='{{ $accountid }}'
+							v-bind:edition="{{ $edition }}"
 							v-bind:isexistdownload="{{ $isexistdownload }}"
 							v-bind:settingcompanies="{{ $settingtable['companies'] }}"
 							v-bind:settingdepartments="{{ $settingtable['departments'] }}"
@@ -45,7 +47,6 @@
 							v-bind:settingworkingtimetables="{{ $settingtable['working_timetables'] }}"
 							v-bind:settingcalendarsettinginformations="{{ $settingtable['calendar_setting_informations'] }}"
 							v-bind:settingusers="{{ $settingtable['users'] }}"
-							v-bind:accountdatas="{{ $account_datas }}"
 							v-bind:menudatas="{{ $menu_selections }}"
 							v-bind:const_generaldatas="{{ $const_general_datas }}"
 							v-bind:feature_item_selections="{{ $feature_item_selections }}"

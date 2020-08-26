@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApiCommonController;
 use Carbon\Carbon;
 
@@ -19,6 +20,7 @@ class CalendarSettingInformation extends Model
     protected $table_working_timetables = 'working_timetables';
  
     private $id;
+    private $account_id;                        // ログインユーザーのアカウント
     private $date;
     private $department_code;
     private $employment_status;
@@ -42,6 +44,17 @@ class CalendarSettingInformation extends Model
     public function setIdAttribute($value)
     {
         $this->id = $value;
+    }
+
+    // ログインユーザーのアカウント
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
     }
    
     // 日付
@@ -315,10 +328,11 @@ class CalendarSettingInformation extends Model
      *
      * @return void
      */
-    public function insert(){
+    public function insertCalendarSetting(){
         try {
             DB::table($this->table)->insert(
                 [
+                    'account_id' => $this->account_id,
                     'date' => $this->date,
                     'department_code' => $this->department_code,
                     'employment_status' => $this->employment_status,
@@ -407,6 +421,7 @@ class CalendarSettingInformation extends Model
                 $array_update_item['updated_user'] = $this->updated_user;
                 $array_update_item['updated_at'] = $this->updated_at;
                 $mainquery
+                    ->where($this->table.'.account_id', $this->param_account_id)
                     ->where($this->table.'.is_deleted', 0)
                     ->update($array_update_item);
             }
@@ -427,7 +442,7 @@ class CalendarSettingInformation extends Model
      *
      * @return boolean
      */
-    public function isExists(){
+    public function isExistsCalendarSetting(){
         try {
             $mainquery = DB::table($this->table);
             if(!empty($this->paramfromdate)) {
@@ -447,6 +462,7 @@ class CalendarSettingInformation extends Model
                     ->where($this->table.'.user_code',$this->paramusercode);
             }
             $is_exists = $mainquery
+                ->where($this->table.'.account_id', $this->param_account_id)
                 ->where($this->table.'.is_deleted', 0)
                 ->exists();
             return $is_exists;
@@ -466,7 +482,7 @@ class CalendarSettingInformation extends Model
      *
      * @return boolean
      */
-    public function isExistsDate(){
+    public function isExistsCalendarSettingDate(){
         try {
             $mainquery = DB::table($this->table);
             if(!empty($this->paramfromdate)) {
@@ -490,6 +506,7 @@ class CalendarSettingInformation extends Model
                     ->where($this->table.'.user_code',$this->paramusercode);
             }
             $is_exists = $mainquery
+                ->where($this->table.'.account_id', $this->param_account_id)
                 ->where($this->table.'.is_deleted', 0)
                 ->exists();
             return $is_exists;
@@ -509,7 +526,7 @@ class CalendarSettingInformation extends Model
      *
      * @return void
      */
-    public function delDate(){
+    public function delCalendarSettingDate(){
         try {
             $mainquery = DB::table($this->table);
             if(!empty($this->paramfromdate) && !empty($this->paramtodate)) {
@@ -534,6 +551,7 @@ class CalendarSettingInformation extends Model
                     ->where($this->table.'.user_code',$this->paramusercode);
             }
             $mainquery
+                ->where($this->table.'.account_id', $this->param_account_id)
                 ->where($this->table.'.is_deleted', 0)
                 ->delete();
         }catch(\PDOException $pe){
@@ -557,6 +575,7 @@ class CalendarSettingInformation extends Model
             $mainquery = DB::table($this->table)
                 ->select(
                     $this->table.'.id',
+                    $this->table.'.account_id',
                     $this->table.'.date',
                     $this->table.'.department_code',
                     $this->table.'.employment_status',
@@ -587,6 +606,7 @@ class CalendarSettingInformation extends Model
                 $mainquery
                     ->where($this->table.'.user_code',$this->paramusercode);
             }
+            $mainquery->where($this->table.'.account_id',$this->param_account_id);
             $mainquery->where($this->table.'.is_deleted',0);
             $result = null;
             if(empty($this->paramlimit)) {
@@ -698,6 +718,7 @@ class CalendarSettingInformation extends Model
             $sqlString .= "  ".$this->table." as t1 ";
             $sqlString .= "  where ";
             $sqlString .= "    ? = ? ";
+            $sqlString .= "    and t1.account_id = ? ";
             if(!empty($this->paramfromdate) && !empty($this->paramtodate)) {
                 $sqlString .= "    and t1.date between ? and ? ";
             } else {
@@ -724,6 +745,7 @@ class CalendarSettingInformation extends Model
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             if(!empty($this->paramfromdate) && !empty($this->paramtodate)) {
                 $array_setBindingsStr[] = $this->paramfromdate;
                 $array_setBindingsStr[] = $this->paramtodate;
@@ -759,7 +781,7 @@ class CalendarSettingInformation extends Model
      *
      * @return void
      */
-    public function getDetail(){
+    public function getDetailcarendarSettingInfo(){
         try {
             $mainquery = DB::table($this->table)
                 ->select(
@@ -794,27 +816,33 @@ class CalendarSettingInformation extends Model
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             // usersの最大適用開始日付subquery
-            $subquery1 = $apicommon->getUserApplyTermSubquery($this->paramtodate);
+            $subquery1 = $apicommon->getUserApplyTermSubquery($this->paramtodate, $this->param_account_id);
             // departmentsの最大適用開始日付subquery
-            $subquery2 = $apicommon->getDepartmentApplyTermSubquery($this->paramtodate);
+            $subquery2 = $apicommon->getDepartmentApplyTermSubquery($this->paramtodate, $this->param_account_id);
             // working_timetablesの最大適用開始日付subquery
             $subquery3 = $apicommon->getTimetableApplyTermSubquery($this->paramtodate, $this->param_account_id);
             $mainquery
                 ->leftJoin($this->table_users.' as t1', function ($join) { 
+                    $join->on('t1.account_id', '=', $this->table.'.account_id');
                     $join->on('t1.code', '=', $this->table.'.user_code');
                     $join->on('t1.department_code', '=', $this->table.'.department_code');
                     $join->on('t1.employment_status', '=', $this->table.'.employment_status')
+                    ->where('t1.account_id', $this->param_account_id)
                     ->where('t1.is_deleted',0)
                     ->where($this->table.'.is_deleted',0);
             });
             $mainquery
                 ->JoinSub($subquery1, 't2', function ($join) { 
+                    $join->on('t2.account_id', '=', 't1.account_id');
                     $join->on('t2.code', '=', 't1.code');
-                    $join->on('t2.max_apply_term_from', '=', 't1.apply_term_from');
+                    $join->on('t2.max_apply_term_from', '=', 't1.apply_term_from')
+                    ->where('t1.account_id', $this->param_account_id);
             });
             $mainquery
                 ->leftJoinSub($subquery2, 't3', function ($join) { 
+                    $join->on('t3.account_id', '=', $this->table.'.account_id');
                     $join->on('t3.code', '=', $this->table.'.department_code')
+                    ->where('t3.account_id', $this->param_account_id)
                     ->where($this->table.'.is_deleted',0);
             });
             // 祝日
@@ -847,7 +875,9 @@ class CalendarSettingInformation extends Model
             // タイムテーブル
             $mainquery
                 ->leftJoinSub($subquery3, 't8', function ($join) { 
+                    $join->on('t8.account_id', '=', $this->table.'.account_id');
                     $join->on('t8.no', '=', $this->table.'.working_timetable_no')
+                    ->where('t8.account_id', $this->param_account_id)
                     ->where('t8.working_time_kubun',Config::get('const.C004.out_of_regular_night_working_time'))
                     ->where($this->table.'.is_deleted',0);
             });
@@ -878,7 +908,7 @@ class CalendarSettingInformation extends Model
             if(!empty($this->paramholidaykubun)){
                 $mainquery->where($this->table.'.holiday_kubun',$this->paramholidaykubun);
             }
-            $mainquery->where($this->table.'.is_deleted',0);
+            $mainquery->where($this->table.'.account_id', $this->param_account_id)->where($this->table.'.is_deleted',0);
             $mainquery
                 ->orderBy($this->table.'.department_code', 'asc')
                 ->orderBy($this->table.'.employment_status', 'asc')
@@ -1089,7 +1119,8 @@ class CalendarSettingInformation extends Model
             $sqlString .= "    inner join ( ";
             $sqlString .= "      ".$subquery1." ";
             $sqlString .= "    ) as t2 ";
-            $sqlString .= "      on t2.code = t1.code ";
+            $sqlString .= "      on t2.account_id = t1.account_id ";
+            $sqlString .= "      and t2.code = t1.code ";
             $sqlString .= "      and t2.max_apply_term_from = t1.apply_term_from ";
             $sqlString .= "    left join (  ";
             $sqlString .= "      ".$subquery2." ";
@@ -1122,7 +1153,8 @@ class CalendarSettingInformation extends Model
             $sqlString .= "        , t1.weekday_kubun ";
             $sqlString .= "      ) t5 ";
             $sqlString .= "    left join ".$this->table." as t6 ";
-            $sqlString .= "      on t6.date = t5.date ";
+            $sqlString .= "      on t6.account_id = t1.account_id ";
+            $sqlString .= "      and t6.date = t5.date ";
             $sqlString .= "      and t6.department_code = t1.department_code ";
             $sqlString .= "      and t6.user_code = t1.code ";
             $sqlString .= "      and t6.is_deleted = ? ";
@@ -1140,7 +1172,8 @@ class CalendarSettingInformation extends Model
             $sqlString .= "      left join (  ";
             // ------------ min,max使用のため$subquery3使わず start --------------
             $sqlString .= "        select ";
-            $sqlString .= "          t1.no as no ";
+            $sqlString .= "          t1.account_id as account_id ";
+            $sqlString .= "         , t1.no as no ";
             $sqlString .= "          , t1.name as name ";
             $sqlString .= "          , t1.ago_time_no as ago_time_no ";
             $sqlString .= "          , t1.working_time_kubun as working_time_kubun  ";
@@ -1150,26 +1183,31 @@ class CalendarSettingInformation extends Model
             $sqlString .= "          ".$this->table_working_timetables." as t1  ";
             $sqlString .= "          inner join (  ";
             $sqlString .= "            select ";
-            $sqlString .= "              no as no ";
+            $sqlString .= "              account_id as account_id ";
+            $sqlString .= "              , no as no ";
             $sqlString .= "              , MAX(apply_term_from) as max_apply_term_from  ";
             $sqlString .= "            from ";
             $sqlString .= "              ".$this->table_working_timetables."  ";
             $sqlString .= "            where ";
             $sqlString .= "              ? = ? ";
+            $sqlString .= "              and account_id = ? ";
             $sqlString .= "              and apply_term_from <= ? ";
             $sqlString .= "              and is_deleted = ? ";
             $sqlString .= "            group by ";
-            $sqlString .= "              no ";
+            $sqlString .= "              account_id, no ";
             $sqlString .= "          ) as t2  ";
-            $sqlString .= "            on t1.no = t2.no ";
+            $sqlString .= "            on t1.account_id = t2.account_id ";
+            $sqlString .= "            and t1.no = t2.no ";
             $sqlString .= "            and t1.apply_term_from = t2.max_apply_term_from ";
             $sqlString .= "        where ";
             $sqlString .= "          ? = ? ";
+            $sqlString .= "          and t1.account_id = ? ";
             $sqlString .= "          and t1.from_time is not null ";
             $sqlString .= "          and t1.working_time_kubun = ? ";
             $sqlString .= "         and t1.is_deleted = ? ";
             $sqlString .= "        group by ";
-            $sqlString .= "          t1.no ";
+            $sqlString .= "          t1.account_id ";
+            $sqlString .= "          , t1.no ";
             $sqlString .= "          , t1.name ";
             $sqlString .= "          , t1.ago_time_no ";
             $sqlString .= "          , t1.working_time_kubun ";
@@ -1236,16 +1274,19 @@ class CalendarSettingInformation extends Model
             // $subquery1
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = $target_end_date;
             $array_setBindingsStr[] = Config::get('const.C025.admin_user');
             $array_setBindingsStr[] = 0;
             // $subquery2
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = $target_end_date;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = $target_end_date;
             $array_setBindingsStr[] = 0;
             // t4
@@ -1278,10 +1319,12 @@ class CalendarSettingInformation extends Model
             // $subquery3
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = $target_end_date;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = Config::get('const.C004.regular_working_time');
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 0;
@@ -1393,7 +1436,8 @@ class CalendarSettingInformation extends Model
             }
 
             $mainquery = DB::table(DB::raw('('.$subquery3.') AS t2'))
-                ->select('t2.dt as date');
+                ->selectRaw("'".$this->account_id."' as account_id")
+                ->addselect('t2.dt as date');
             $mainquery
                 ->selectRaw("'".$this->department_code."' as department_code")
                 ->selectRaw($this->employment_status.' as employment_status')

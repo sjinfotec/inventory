@@ -86,7 +86,11 @@ class EditWorkTimesController extends Controller
             $closing_end = $closing_end->format('Y/m/d H:i:s');
             $code =  $params['code'];
     
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
             $work_times = new WorkTime();
+            $work_times->setParamAccountidAttribute($login_user_code_4);
             $work_times->setParamUsercodeAttribute($code);
             $work_times->setParamStartDateAttribute($ymd_start);
             $work_times->setParamEndDateAttribute($ymd_end);

@@ -214,7 +214,7 @@
           v-bind:target-date="''"
           v-bind:login-user="authusers['code']"
           v-bind:login-role="authusers['role']"
-          v-bind:account-data="accountdatas['account_id']"
+          v-bind:account-data="get_accountid"
           v-bind:menu-data="menudatas"
         ></table-working-status>
       </div>
@@ -302,6 +302,14 @@ export default {
       type: Array,
       default: []
     },
+    accountid: {
+      type: String,
+      default: ""
+    },
+    edition: {
+      type: String,
+      default: ""
+    },
     isexistdownload: {
       type: String,
       default: ""
@@ -329,10 +337,6 @@ export default {
     settingusers: {
       type: String,
       default: ""
-    },
-    accountdatas: {
-      type: Array,
-      default: []
     },
     menudatas: {
       type: Array,
@@ -406,6 +410,9 @@ export default {
     },
     get_isexistdownload: function() {
       return this.isexistdownload;
+    },
+    get_accountid: function() {
+      return this.accountid;
     }
   },
   // マウント時
@@ -414,7 +421,7 @@ export default {
     this.login_user_role = this.authusers["role"];
     this.getDayAlert();
     this.getPostInformations();
-    if (this.isexistdownload == "0") {
+    if (this.get_isexistdownload == "0") {
       this.installdownload();
     } else {
       this.getNotSetting();
@@ -436,11 +443,11 @@ export default {
       } else if (this.settingsettings == 0) {
         this.getThenSetting();
       } else if (this.settingworkingtimetables == 0) {
-        // this.getThenSetting();
-      } else if (this.settingcalendarsettinginformations == 0) {
-        // this.getThenSetting();
+        this.getThenWorkingtimetables();
       } else if (this.settingusers == 0) {
-        // this.getThenSetting();
+        this.getThenUsers();
+      } else if (this.settingcalendarsettinginformations == 0) {
+        this.getThenCalendarSettingInfos();
       }
     },
     // 日次警告取得処理
@@ -510,91 +517,6 @@ export default {
         });
     },
     // -------------------- 共通 ----------------------------
-    // -------正常処理（インストールダウンロード処理）
-    getThenDownload() {
-      this.settingmessage.push(
-        "打刻端末の打刻プログラムをダウンロードしてインストールします。"
-      );
-      this.htmlMessageSwalLink("通知",
-        this.settingmessage,
-        "info",
-        false,
-        true,
-        '<a href="http://192.168.0.47/file_download">インストールする</a>')
-    },
-    // 取得正常処理（会社情報処理）
-    getThenCompany() {
-      this.settingmessage.push(
-        "会社情報を設定する必要がありますので会社を設定します。"
-      );
-      this.htmlMessageSwalLink("通知",
-        this.settingmessage,
-        "info",
-        false,
-        true,
-        '<a href="http://192.168.0.47/create_company_information">会社を設定する</a>')
-        .then(result  => {
-          if (!result) {
-            if (this.settingdepartments == 0) {
-              this.getThenDepartment();
-            } else if (this.settingsettings == 0) {
-              this.getThenSetting();
-            } else if (this.settingworkingtimetables == 0) {
-              // this.getThenSetting();
-            } else if (this.settingcalendarsettinginformations == 0) {
-              // this.getThenSetting();
-            } else if (this.settingusers == 0) {
-              // this.getThenSetting();
-            }
-          }
-        });
-    },
-    // 部署取得正常処理
-    getThenDepartment() {
-      this.settingmessage.push(
-        "部署情報を設定する必要がありますので部署を設定します。"
-      );
-      this.htmlMessageSwalLink("通知",
-        this.settingmessage,
-        "info",
-        false,
-        true,
-        '<a href="http://192.168.0.47/create_department">部署を設定する</a>')
-        .then(result  => {
-          if (!result) {
-            if (this.settingsettings == 0) {
-              this.getThenSetting();
-            } else if (this.settingworkingtimetables == 0) {
-              // this.getThenSetting();
-            } else if (this.settingcalendarsettinginformations == 0) {
-              // this.getThenSetting();
-            } else if (this.settingusers == 0) {
-              // this.getThenSetting();
-            }
-          }
-        });
-    },
-    // 設定情報正常処理
-    getThenSetting(response) {
-      this.settingmessage.push(
-        "労働時間の基本設定する必要がありますので基本設定します。"
-      );
-      this.htmlMessageSwalLink("通知",
-        this.settingmessage,
-        "info",
-        false,
-        true,
-        '<a href="http://192.168.0.47/setting_calc">労働時間基本を設定する</a>')
-        .then(result  => {
-            if (this.settingworkingtimetables == 0) {
-              // this.getThenSetting();
-            } else if (this.settingcalendarsettinginformations == 0) {
-              // this.getThenSetting();
-            } else if (this.settingusers == 0) {
-              // this.getThenSetting();
-            }
-        });
-    },
     // 取得正常処理（アラート）
     getThen(response) {
       var res = response.data;

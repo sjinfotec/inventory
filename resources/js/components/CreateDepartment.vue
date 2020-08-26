@@ -524,19 +524,6 @@ export default {
           this.serverCatch("取得");
         });
     },
-    // 設定情報取得処理
-    getItemSetting() {
-      var nowDate = moment(new Date());
-      var nowYaer = moment(nowDate).format("YYYY");
-      var arrayParams = { year : nowYaer };
-      this.postRequest("/setting_calc/get", arrayParams)
-        .then(response  => {
-          this.getThenSetting(response);
-        })
-        .catch(reason => {
-          this.serverCatch("取得");
-        });
-    },
     // 部署登録処理
     store() {
       var messages = [];
@@ -590,30 +577,6 @@ export default {
         }
       }
     },
-    // 設定情報正常処理
-    getThenSetting(response) {
-      this.settingmessage = [];
-      this.settingmessage.push(
-        "労働時間の基本設定する必要がありますので基本設定します。"
-      );
-      this.htmlMessageSwalLink("通知",
-        this.settingmessage,
-        "info",
-        false,
-        true,
-        '<a href="http://192.168.0.47/setting_calc">労働時間基本を設定する</a>')
-      .then(result  => {
-        if (!result) {
-          if (this.settingworkingtimetables == 0) {
-            // this.getThenSetting();
-          } else if (this.settingcalendarsettinginformations == 0) {
-            // this.getThenSetting();
-          } else if (this.settingusers == 0) {
-            // this.getThenSetting();
-          }
-        }
-      });
-    },
     // 更新系正常処理
     putThenHead(response, eventtext) {
       var messages = [];
@@ -652,15 +615,17 @@ export default {
     
     // 設定要否取得処理
     getNotSetting() {
+      if (this.infoMsgcnt > 0) { return; }
       if (this.settingsettings == 0) {
         this.getThenSetting();
       } else if (this.settingworkingtimetables == 0) {
-        // this.getThenSetting();
-      } else if (this.settingcalendarsettinginformations == 0) {
-        // this.getThenSetting();
+        this.getThenWorkingtimetables();
       } else if (this.settingusers == 0) {
-        // this.getThenSetting();
+        this.getThenUsers();
+      } else if (this.settingcalendarsettinginformations == 0) {
+        this.getThenCalendarSettingInfos();
       }
+      this.infoMsgcnt++;
     },
     // 異常処理
     serverCatch(eventtext) {

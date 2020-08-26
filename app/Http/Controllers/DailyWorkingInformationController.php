@@ -304,6 +304,9 @@ class DailyWorkingInformationController extends Controller
         $working_time_dates = new collection();
         $array_working_time_dates = array();
         $working_time_sum = new collection();
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         DB::beginTransaction();
         try {
             // -------------- debug -------------- start --------
@@ -328,7 +331,7 @@ class DailyWorkingInformationController extends Controller
             // 日次集計表示
             //feature selection
             $feature_model = new FeatureItemSelection();
-            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamaccountidAttribute($login_user_code_4);
             $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
             $feature_data = $feature_model->getItem();
             $feature_attendance_count = 0;          // 出勤回数
@@ -348,10 +351,14 @@ class DailyWorkingInformationController extends Controller
                     // 2なら緊急取集使用
                     if ($mode_list == 2) {
                         // 緊急収集のタイムテーブルを取得する
+                        $user = Auth::user();
+                        $login_user_code = $user->code;
+                        $login_user_code_4 = substr($login_user_code, 0 ,4);
                         $time_table = new WorkingTimeTable();
                         $time_table->setNoAttribute(Config::get('const.C999_NAME.emergency_timetable_no'));
                         $time_table->setParamapplytermfromAttribute($datefrom);
-                        $em_details = $time_table->getDetail();
+                        $time_table->setParamaccountidAttribute($login_user_code_4);
+                        $em_details = $time_table->getDetailTimeTable();
                     }
                 }
                 if ($item->item_code == Config::get('const.C042.early_time')) {
@@ -379,6 +386,7 @@ class DailyWorkingInformationController extends Controller
             // temporary作成
             $addCalc = $this->addDailyCalc($array_impl_addDailyCalc);
             if ($addCalc) {
+                $working_model->setParamAccountidAttribute($login_user_code_4);
                 $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
                 $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
                 $working_model->setParamEmploymentStatusAttribute($employmentstatus);
@@ -477,6 +485,10 @@ class DailyWorkingInformationController extends Controller
         $nextdt = $apicommon->getNextDay($dateto, 'Y/m/d');
         // getWorkTimegetParamDatetoAttributeしている
         $work_time->setParamDatetoAttribute($nextdt);
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $work_time->setParamAccountidAttribute($login_user_code_4);
         // 終了日付で検索（最新の情報として）
         $work_time_results = $work_time->getWorkTimes($datefrom, $dateto, $business_kubun);
         if(count($work_time_results) > 0){
@@ -499,11 +511,15 @@ class DailyWorkingInformationController extends Controller
                     );
                     $calc_result = $this->calcWorkingTimeDate($array_impl_calcWorkingTimeDate);
                     if ($calc_result) {
+                        $user = Auth::user();
+                        $login_user_code = $user->code;
+                        $login_user_code_4 = substr($login_user_code, 0 ,4);
                         // タイムテーブルを取得
                         $timetable_model->setParamdatefromAttribute($datefrom);
                         $timetable_model->setParamdatetoAttribute($dateto);
                         $timetable_model->setParamemploymentstatusAttribute($employmentstatus);
                         $timetable_model->setParamDepartmentcodeAttribute($departmentcode);
+                        $timetable_model->setParamaccountidAttribute($login_user_code_4);
                         $timetables = $timetable_model->getWorkingTimeTableJoin();
                         if (count($timetables) > 0) {
                             // 日次集計
@@ -590,6 +606,9 @@ class DailyWorkingInformationController extends Controller
         $departmentcode = $params['departmentcode'];
         $usercode = $params['usercode'];
         $calc_date = $params['calc_date'];
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
 
         // Log::debug('                       datefrom = '.$datefrom);
         // Log::debug('                       dateto = '.$dateto);
@@ -599,6 +618,7 @@ class DailyWorkingInformationController extends Controller
         // Log::debug('                       calc_date = '.$calc_date);
         // 出勤・退勤データtempから登録
         $temp_working_model = new TempWorkingTimeDate();
+        $temp_working_model->setParamAccountidAttribute($login_user_code_4);
         $temp_working_model->setParamdatefromAttribute(date_format(new Carbon($calc_date), 'Ymd'));
         $temp_working_model->setParamdatetoAttribute(date_format(new Carbon($calc_date), 'Ymd'));
         $temp_working_model->setParamEmploymentStatusAttribute($employmentstatus);
@@ -5525,6 +5545,10 @@ class DailyWorkingInformationController extends Controller
         $timetable_model = new WorkingTimeTable();
         $timetable_model->setParamdatefromAttribute($target_date);
         $timetable_model->setParamdatetoAttribute($target_date);
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $timetable_model->setParamaccountidAttribute($login_user_code_4);
         $array_break_worktimetable_result = $timetable_model->getAllTimeTables();
         // ユーザー単位処理
         $temp_calc_model = new TempCalcWorkingTime();
@@ -10934,10 +10958,14 @@ class DailyWorkingInformationController extends Controller
                     }
                     // Log::debug('         setWorkingtimetabletime 出退勤 $calc_times = '.$calc_times);
                     if ($calc_times >= 3600) {
+                        $user = Auth::user();
+                        $login_user_code = $user->code;
+                        $login_user_code_4 = substr($login_user_code, 0 ,4);
                         $time_table = new WorkingTimeTable();
                         $time_table->setNoAttribute($result->ago_time_no);
                         $time_table->setParamapplytermfromAttribute($target_date);
-                        $ago_time_no_details = $time_table->getDetail();
+                        $time_table->setParamaccountidAttribute($login_user_code_4);
+                        $ago_time_no_details = $time_table->getDetailTimeTable();
                         foreach($ago_time_no_details as $item) {
                             $working_timetable_no = $item->no;
                             // 名称は設定しない

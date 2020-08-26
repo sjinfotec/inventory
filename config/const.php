@@ -884,6 +884,10 @@ return [
         'account_id' => 'SSJJOO00'
     ],
 
+    'TRIALACCOUNTID' => [
+        'account_id' => 'TRIAL000'
+    ],
+
     // メニュー項目数   未使用
     'MENUITEMCOUNT' => [
         'count' => 26
@@ -941,7 +945,8 @@ return [
         'early_time' => 5,                  // 早出時間集計
         'select_clear' => 6,                // 日付変更時の選択リストクリア
         'half_holiday' => 7,                // 休暇区分選択リスト設定項目
-        'calc_list_allselect' => 8          // 日次月次集計選択リスト
+        'calc_list_allselect' => 8,         // 日次月次集計選択リスト
+        'account_id_valid' => 9             // アカウントID有効
     ]
 
 ];

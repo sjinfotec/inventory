@@ -19,6 +19,7 @@ class TempWorkingTimeDate extends Model
 
     //--------------- 項目属性 -----------------------------------
 
+    private $account_id;                    // ログインユーザーのアカウント
     private $working_date;                  // 日付
     private $employment_status;             // 雇用形態
     private $department_code;               // 部署ID
@@ -117,6 +118,17 @@ class TempWorkingTimeDate extends Model
     private $positions;                     // 位置情報
     private $fixedtime;                     // 確定
     private $systemdate;
+
+    // ログインユーザーのアカウント
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
+    }
 
     // 日付
     public function getWorkingdateAttribute()
@@ -1311,6 +1323,7 @@ class TempWorkingTimeDate extends Model
 
     //--------------- パラメータ項目属性 -----------------------------------
 
+    private $param_account_id;                  // ログインユーザーのアカウント
     private $param_employment_status;           // 雇用形態
     private $param_user_code;                   // ユーザー
     private $param_department_code;             // 部署
@@ -1319,6 +1332,16 @@ class TempWorkingTimeDate extends Model
     private $array_record_time;                 // 日付範囲配列
     private $massegedata;                       // メッセージ
 
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
+    }
 
     // 雇用形態
     public function getParamEmploymentStatusAttribute()
@@ -1425,6 +1448,7 @@ class TempWorkingTimeDate extends Model
         try{
             $subquery1 = DB::table($this->table)
                 ->select(
+                    $this->table.'.account_id',
                     $this->table.'.working_date',
                     $this->table.'.employment_status',
                     $this->table.'.department_code',
@@ -1759,9 +1783,9 @@ class TempWorkingTimeDate extends Model
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             // usersの最大適用開始日付subquery
-            $subquery2 = $apicommon->getUserApplyTermSubquery($targetdate);
+            $subquery2 = $apicommon->getUserApplyTermSubquery($targetdate, $this->param_account_id);
             // departmentsの最大適用開始日付subquery
-            $subquery3 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
+            $subquery3 = $apicommon->getDepartmentApplyTermSubquery($targetdate, $this->param_account_id);
 
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
                 $date = date_create($this->param_date_from);
@@ -2069,15 +2093,21 @@ class TempWorkingTimeDate extends Model
             $mainquery->selectRaw(Auth::user()->id.' as created_user');
             $mainquery->selectRaw('null as updated_user');
             $mainquery->leftJoinSub($subquery1, 't2', function ($join) { 
+                    $join->on('t2.account_id', '=', 't1.account_id');
                     $join->on('t2.user_code', '=', 't1.code');
                     $join->on('t2.department_code', '=', 't1.department_code');
-                    $join->on('t2.employment_status', '=', 't1.employment_status');
+                    $join->on('t2.employment_status', '=', 't1.employment_status')
+                    ->where('t2.account_id', '=', $this->param_account_id);
                 })
                 ->leftJoinSub($subquery3, 't3', function ($join) { 
-                    $join->on('t3.code', '=', 't1.department_code');
+                    $join->on('t3.account_id', '=', 't1.account_id');
+                    $join->on('t3.code', '=', 't1.department_code')
+                    ->where('t3.account_id', '=', $this->param_account_id);
                 })
                 ->leftJoin($this->table_generalcodes.' as t4', function ($join) { 
+                    $join->on('t4.account_id', '=', 't1.account_id');
                     $join->on('t4.code', '=', 't1.employment_status')
+                    ->where('t4.account_id', '=', $this->param_account_id)
                     ->where('t4.identification_id', '=', Config::get('const.C001.value'))
                     ->where('t4.is_deleted', '=', 0);
                 })
@@ -2092,8 +2122,10 @@ class TempWorkingTimeDate extends Model
                     ->where('t7.is_deleted', '=', 0);
                 })
                 ->JoinSub($subquery2, 't6', function ($join) { 
+                    $join->on('t6.account_id', '=', 't1.account_id');
                     $join->on('t6.code', '=', 't1.code');
                     $join->on('t6.max_apply_term_from', '=', 't1.apply_term_from')
+                    ->where('t6.account_id', '=', $this->param_account_id)
                     ->where('t1.kill_from_date', '>', $this->targetdate);
                 });
                         
@@ -2110,6 +2142,7 @@ class TempWorkingTimeDate extends Model
             }
             $result = 
                 $mainquery
+                    ->where('t1.account_id', '=', $this->param_account_id)
                     ->where('t1.is_deleted', '=', 0)
                     ->where('t1.role', '<', Config::get('const.C017.admin_user'))
                     ->get();

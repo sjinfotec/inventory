@@ -66,6 +66,7 @@ class EditAttendanceLogController extends Controller
     
                 // ログインユーザ
             $login_user_id = Auth::user()->code;
+            $login_user_code_4 = substr($login_user_id, 0 ,4);
             $user_code = $params['user_code'];
             $employment_status = null;
             if (isset($params['employment_status'])) {
@@ -85,6 +86,7 @@ class EditAttendanceLogController extends Controller
             }
             // 勤怠ログデータ取得
             $attendance_model = new AttendanceLog();
+            $attendance_model->setParamAccountidAttribute($login_user_code_4);
             $attendance_model->setParamemploymentstatusAttribute($employment_status);
             $attendance_model->setParamdepartmentcodeAttribute($department_code);
             $attendance_model->setParamusercodeAttribute($user_code);

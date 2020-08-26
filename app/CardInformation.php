@@ -14,12 +14,24 @@ class CardInformation extends Model
     protected $table_users = 'users';
     protected $guarded = array('id');
 
+    private $account_id;                        // ログインユーザーのアカウント
     private $user_code;
     private $department_code;
     private $card_idm;
     private $created_user;
     private $updated_user;
     private $systemdate;
+
+    // ログインユーザーのアカウント
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
+    }
 
     public function getUserCodeAttribute()
     {
@@ -84,6 +96,7 @@ class CardInformation extends Model
     // ------------- implements --------------
 
     private $param_id;                          // id
+    private $param_account_id;                  // ログインユーザーのアカウント
     private $param_department_code;             // 部署コード
     private $param_user_code;                   // ユーザー
 
@@ -96,6 +109,17 @@ class CardInformation extends Model
     public function setParamidAttribute($value)
     {
         $this->param_id = $value;
+    }
+
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
     }
 
     // 部署コード
@@ -132,7 +156,7 @@ class CardInformation extends Model
             // usersの最大適用開始日付subquery
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
-            $subquery2 = $apicommon->getUserApplyTermSubquery(null);
+            $subquery2 = $apicommon->getUserApplyTermSubquery(null, $this->param_account_id);
             $mainquery = DB::table($this->table)
                 ->join($this->table_users, function ($join) {
                     $join->on($this->table_users.'.code', '=', $this->table.'.user_code');
@@ -144,6 +168,7 @@ class CardInformation extends Model
                     $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                 });
             $mainquery
+                ->where($this->table.'.account_id',$this->param_account_id)
                 ->where($this->table.'.card_idm',$this->card_idm)
                 ->where($this->table_users.'.is_deleted',0)
                 ->where($this->table.'.is_deleted',0);

@@ -99,8 +99,10 @@ export default {
     getThen(response) {
       this.itemList = [];
       var res = response.data;
+      console.log('selecDepartmentList getThen = res.result' + res.result);
       if (res.result) {
         // 固有処理 START
+        console.log('selecDepartmentList getThen = res.details' + res.details.length);
         this.itemList = res.details;
         if (this.addNew) {
           this.object = { name: "新規に部署を登録する", code: "" };

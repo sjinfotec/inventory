@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApiCommonController;
 use Carbon\Carbon;
 
@@ -33,6 +34,7 @@ class WorkTime extends Model
     //--------------- メンバー属性 -----------------------------------
 
     private $id;
+    private $account_id;                    // ログインユーザーのアカウント
     private $user_code;                     // ユーザーコード
     private $department_code;               // 部署コード
     private $record_time;                   // 打刻時間
@@ -59,6 +61,17 @@ class WorkTime extends Model
     public function setIdAttribute($value)
     {
         $this->id = $value;
+    }
+
+    // ログインユーザーのアカウント
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
     }
 
     // ユーザーコード
@@ -263,6 +276,7 @@ class WorkTime extends Model
 
     //--------------- パラメータ項目属性 -----------------------------------
 
+    private $param_account_id;                  // ログインユーザーのアカウント
     private $param_date_from;                   // 開始日付（00:00:00から）
     private $param_date_to;                     // 終了日付（23:59:59まで）
     private $param_employment_status;           // 雇用形態
@@ -276,6 +290,17 @@ class WorkTime extends Model
     private $param_start_date;                  // 開始
     private $param_end_date;                    // 終了
 
+
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
+    }
 
     // 開始日付（00:00:00から）
     public function getParamdatefromAttribute()
@@ -416,9 +441,11 @@ class WorkTime extends Model
             if ($this->check_result == "" || $this->check_result == null) { $this->check_result = 0; }
             if ($this->check_max_time == "" || $this->check_max_time == null) { $this->check_max_time = 0; }
             if ($this->check_interval == "" || $this->check_interval == null) { $this->check_interval = 0; }
+            Log::debug('insertWorkTime account_id = '.$this->account_id);
             if(isset($this->positions)){
                 DB::table($this->table)->insert(
                     [
+                        'account_id' => $this->account_id,
                         'user_code' => $this->user_code,
                         'department_code' => $this->department_code,
                         'record_time' => $this->record_time,
@@ -438,6 +465,7 @@ class WorkTime extends Model
             }else{
                 DB::table($this->table)->insert(
                     [
+                        'account_id' => $this->account_id,
                         'user_code' => $this->user_code,
                         'department_code' => $this->department_code,
                         'record_time' => $this->record_time,
@@ -639,11 +667,11 @@ class WorkTime extends Model
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             // usersの最大適用開始日付subquery
-            $subquery3 = $apicommon->getUserApplyTermSubquery($targetdateto);
+            $subquery3 = $apicommon->getUserApplyTermSubquery($targetdateto, $this->param_account_id);
             // departmentsの最大適用開始日付subquery
-            $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdateto);
+            $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdateto, $this->param_account_id);
             // working_timetablesの最大適用開始日付subquery
-            $subquery5 = $apicommon->getTimetableApplyTermSubquery($targetdateto);
+            $subquery5 = $apicommon->getTimetableApplyTermSubquery($targetdateto, $this->param_account_id);
 
             // mainqueryにsunqueryを組み込む
             // mainquery    users
@@ -712,35 +740,45 @@ class WorkTime extends Model
                 ->selectRaw("'' as shift_from_time ")
                 ->selectRaw("'' as shift_to_time ")
                 ->leftJoinSub($subquery1, 't2', function ($join) { 
+                    $join->on('t2.account_id', '=', 't1.account_id');
                     $join->on('t2.user_code', '=', 't1.code');
                     $join->on('t2.department_code', '=', 't1.department_code')
+                    ->where('t2.account_id', '=', $this->param_account_id)
                     ->where('t2.is_deleted', '=', 0)
                     ->where('t1.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_calendar_setting_informations.' as t9', function ($join) use ($targetdatefrom) {    // 20200817001 use add
                     // $join->on('t9.date', '=', 't2.record_date');     // 20200817001 del
+                    $join->on('t9.account_id', '=', 't1.account_id');
                     $join->on('t9.department_code', '=', 't1.department_code');
                     $join->on('t9.user_code', '=', 't1.code')
                     ->where('t9.date', '=', $targetdatefrom)            // 20200817001 add
+                    ->where('t9.account_id', '=', $this->param_account_id)
                     ->where('t9.is_deleted', '=', 0)
                     ->where('t1.is_deleted', '=', 0);
                 })
                 // 20200817001 add start
                 ->leftJoin($this->table_calendar_setting_informations.' as t20', function ($join) use ($targetdatefrom) {
+                    $join->on('t20.account_id', '=', 't1.account_id');
                     $join->on('t20.department_code', '=', 't1.department_code');
                     $join->on('t20.user_code', '=', 't1.code')
                     ->where('t20.date', '=', $targetdatefrom)
+                    ->where('t20.account_id', '=', $this->param_account_id)
                     ->where('t20.is_deleted', '=', 0)
                     ->where('t1.is_deleted', '=', 0);
                 })
                 // 20200817001 add end
                 ->leftJoinSub($subquery4, 't5', function ($join) { 
+                    $join->on('t5.account_id', '=', 't1.account_id');
                     $join->on('t5.code', '=', 't1.department_code')
+                    ->where('t1.account_id', '=', $this->param_account_id)
                     ->where('t1.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_settings.' as t4', function ($join) { 
+                    $join->on('t4.account_id', '=', 't2.account_id');
                     $join->on('t4.year', '=', 't2.record_year');
                     $join->on('t4.fiscal_month', '=', 't2.record_month')
+                    ->where('t4.account_id', '=', $this->param_account_id)
                     ->where('t4.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_generalcodes.' as t8', function ($join) { 
@@ -750,7 +788,9 @@ class WorkTime extends Model
                     ->where('t8.is_deleted', '=', 0);
                 })
                 ->leftJoinSub($subquery5, 't10', function ($join) { 
+                    $join->on('t10.account_id', '=', 't9.account_id');
                     $join->on('t10.no', '=', 't9.working_timetable_no')
+                    ->where('t10.account_id', '=', $this->param_account_id)
                     ->where('t10.working_time_kubun', '=', Config::get('const.C004.regular_working_time'));
                 })
                 ->leftJoin($this->table_generalcodes.' as t11', function ($join) { 
@@ -778,19 +818,27 @@ class WorkTime extends Model
                     ->where('t15.is_deleted', '=', 0);
                 })
                 ->leftJoinSub($subquery4, 't16', function ($join) { 
-                    $join->on('t16.code', '=', 't2.editor_department_code');
+                    $join->on('t16.account_id', '=', 't2.account_id');
+                    $join->on('t16.code', '=', 't2.editor_department_code')
+                    ->where('t16.account_id', '=', $this->param_account_id);
                 })
                 ->leftJoin($this->table_users.' as t17', function ($join) { 
+                    $join->on('t17.account_id', '=', 't2.account_id');
                     $join->on('t17.code', '=', 't2.editor_user_code')
+                    ->where('t17.account_id', '=', $this->param_account_id)
                     ->where('t17.is_deleted', '=', 0);
                 })
                 ->leftJoinSub($subquery3, 't18', function ($join) { 
+                    $join->on('t18.account_id', '=', 't2.account_id');
                     $join->on('t18.code', '=', 't17.code');
-                    $join->on('t18.max_apply_term_from', '=', 't17.apply_term_from');
+                    $join->on('t18.max_apply_term_from', '=', 't17.apply_term_from')
+                    ->where('t18.account_id', '=', $this->param_account_id);
                 })
                 ->JoinSub($subquery3, 't19', function ($join) { 
+                    $join->on('t19.account_id', '=', 't2.account_id');
                     $join->on('t19.code', '=', 't1.code');
-                    $join->on('t19.max_apply_term_from', '=', 't1.apply_term_from');
+                    $join->on('t19.max_apply_term_from', '=', 't1.apply_term_from')
+                    ->where('t19.account_id', '=', $this->param_account_id);
                 });
 
             if(!empty($this->param_employment_status)){
@@ -808,6 +856,7 @@ class WorkTime extends Model
                 $mainquery->whereNotNull('t2.record_datetime');
             }*/
             $result = $mainquery
+                ->where('t1.account_id', '=', $this->param_account_id)
                 ->where('t1.is_deleted', '=', 0)
                 ->distinct()
                 ->orderBy('t1.department_code', 'asc')
@@ -1722,15 +1771,18 @@ class WorkTime extends Model
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = $target_end_date;
             $array_setBindingsStr[] = Config::get('const.C025.admin_user');
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = $target_end_date;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = $target_end_date;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = Config::get('const.C005.value');
@@ -1847,6 +1899,7 @@ class WorkTime extends Model
     public function delWorkTime(){
         try {
             DB::table($this->table)
+                ->where('account_id', $this->param_account_id)
                 ->where('id', $this->id)
                 ->where('is_deleted', 0)
                 ->update([
@@ -1876,6 +1929,7 @@ class WorkTime extends Model
     public function delWorkTimeBysystem(){
         try {
             DB::table($this->table)
+                ->where('account_id', $this->param_account_id)
                 ->where('id', $this->id)
                 ->where('is_deleted', 0)
                 ->update([
@@ -1902,6 +1956,7 @@ class WorkTime extends Model
     public function delWorkTimeByHoliday(){
         try {
             DB::table($this->table)
+                ->where('account_id', $this->param_account_id)
                 ->where('user_code', $this->user_code)
                 ->where('department_code', $this->department_code)
                 ->where('record_time', $this->record_time)
@@ -1987,9 +2042,9 @@ class WorkTime extends Model
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             // usersの最大適用開始日付subquery
-            $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate);
+            $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate, $this->param_account_id);
             // departmentsの最大適用開始日付subquery
-            $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
+            $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate, $this->param_account_id);
 
             // mainqueryにsunqueryを組み込む
             $mainquery = DB::table($this->table_users.' AS t1')
@@ -2029,12 +2084,16 @@ class WorkTime extends Model
             $mainquery
                 ->selectRaw($alert_memo)
                 ->leftJoinSub($subquery1, 't2', function ($join) { 
+                    $join->on('t2.account_id', '=', 't1.account_id');
                     $join->on('t2.user_code', '=', 't1.code');
                     $join->on('t2.department_code', '=', 't1.department_code')
+                    ->where('t1.account_id', '=', $this->param_account_id)
                     ->where('t1.is_deleted', '=', 0);
                 })
                 ->leftJoinSub($subquery4, 't3', function ($join) { 
+                    $join->on('t3.account_id', '=', 't1.account_id');
                     $join->on('t3.code', '=', 't1.department_code')
+                    ->where('t3.account_id', '=', $this->param_account_id)
                     ->where('t1.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_generalcodes.' as t5', function ($join) { 
@@ -2077,9 +2136,11 @@ class WorkTime extends Model
                 //     ->where('t11.is_deleted', '=', 0);
                 // });
                 ->leftJoin($this->table_calendar_setting_informations.' as t11', function ($join) { 
+                    $join->on('t11.account_id', '=', 't1.account_id');
                     $join->on('t11.department_code', '=', 't1.department_code');
                     $join->on('t11.user_code', '=', 't1.code');
                     $join->on('t11.date', '=', 't2.record_date')
+                    ->where('t11.account_id', '=', $this->param_account_id)
                     ->where('t11.is_deleted', '=', 0);
                 });
 
@@ -2096,8 +2157,10 @@ class WorkTime extends Model
             }
             $mainquery
                 ->JoinSub($subquery3, 't4', function ($join) { 
+                    $join->on('t4.account_id', '=', 't1.account_id');
                     $join->on('t4.code', '=', 't1.code');
-                    $join->on('t4.max_apply_term_from', '=', 't1.apply_term_from');
+                    $join->on('t4.max_apply_term_from', '=', 't1.apply_term_from')
+                    ->where('t4.account_id', '=', $this->param_account_id);
                 });
 
             // 緊急はチェックなし
@@ -2116,6 +2179,7 @@ class WorkTime extends Model
                     ->where('t1.management', '<', Config::get('const.C017.admin_user'));
             }
             $mainquery
+                ->where('t1.account_id', '=', $this->param_account_id)
                 ->where('t1.is_deleted', '=', 0)
                 ->orderBy('t2.record_date', 'asc')
                 ->orderBy('t2.record_time', 'asc')

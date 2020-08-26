@@ -232,6 +232,23 @@ class CustomerInformation extends Model
         $this->updated_at = $value;
     }
 
+    // ------------- implements --------------
+
+    private $param_account_id;                  // ログインユーザーのアカウント
+
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
+    }
+
+    // ------------- メソッド --------------
+
     /**
      * 会社情報登録
      *

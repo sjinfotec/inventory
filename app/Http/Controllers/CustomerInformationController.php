@@ -82,11 +82,14 @@ class CustomerInformationController extends Controller
         $company = new Company();
         $systemdate = Carbon::now();
         $user = Auth::user();
-        $user_code = $user->code;
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         $apply_term_from = Config::get('const.INIT_DATE.initdate');
 
         DB::beginTransaction();
         try{
+            $company->setParamAccountidAttribute($login_user_code_4);
+            $company->setAccountidAttribute($login_user_code_4);
             $company->setApplytermfromAttribute($apply_term_from);
             $company->setNameAttribute($details['name']);
             $company->setKanaAttribute($details['kana']);
@@ -99,7 +102,7 @@ class CustomerInformationController extends Controller
             $company->setRepresentnameAttribute($details['represent_name']);
             $company->setRepresentkanaAttribute($details['represent_kana']);
             $company->setEmailAttribute($details['email']);
-            $company->setCreateduserAttribute($user_code);
+            $company->setCreateduserAttribute($login_user_code);
             $company->setCreatedatAttribute($systemdate);
             $is_exists = $company->isExistsInfo();
 

@@ -137,6 +137,174 @@ export const dialogable = {
                 // });
             });
         },
+        // -------正常処理（インストールダウンロード処理）
+        getThenDownload: function() {
+            var settingmessage = [];
+            settingmessage.push(
+            "打刻端末の打刻プログラムをダウンロードしてインストールします。"
+            );
+            this.htmlMessageSwalLink("通知",
+            settingmessage,
+            "info",
+            false,
+            true,
+            '<a href="http://192.168.0.47/file_download">インストールする</a>')
+        },
+        // 取得正常処理（会社情報処理）
+        getThenCompany: function(
+            settingdepartments,
+            settingsettings,
+            settingworkingtimetables,
+            settingusers,
+            settingcalendarsettinginformations
+        ) {
+            var settingmessage = [];
+            settingmessage.push(
+            "会社情報を設定する必要がありますので会社を設定します。"
+            );
+            this.htmlMessageSwalLink("通知",
+            settingmessage,
+            "info",
+            false,
+            true,
+            '<a href="http://192.168.0.47/create_company_information">会社を設定する</a>')
+            .then(result  => {
+                if (!result) {
+                    if (settingdepartments == 0) {
+                        this.getThenDepartment();
+                    } else if (settingsettings == 0) {
+                        this.getThenSetting();
+                    } else if (settingworkingtimetables == 0) {
+                        this.getThenWorkingtimetables();
+                    } else if (settingusers == 0) {
+                        this.getThenUsers();
+                    } else if (settingcalendarsettinginformations == 0) {
+                        this.getThenCalendarSettingInfos();
+                    }
+                }
+            });
+        },
+        // 部署取得正常処理
+        getThenDepartment: function(
+            settingsettings,
+            settingworkingtimetables,
+            settingusers,
+            settingcalendarsettinginformations
+        ) {
+            var settingmessage = [];
+            settingmessage.push(
+                "部署情報を設定する必要がありますので部署を設定します。"
+            );
+            this.htmlMessageSwalLink("通知",
+            settingmessage,
+            "info",
+            false,
+            true,
+            '<a href="http://192.168.0.47/create_department">部署を設定する</a>')
+            .then(result  => {
+                if (!result) {
+                    if (settingsettings == 0) {
+                        this.getThenSetting();
+                    } else if (settingworkingtimetables == 0) {
+                        this.getThenWorkingtimetables();
+                    } else if (settingusers == 0) {
+                        this.getThenUsers();
+                    } else if (settingcalendarsettinginformations == 0) {
+                        this.getThenCalendarSettingInfos();
+                    }
+                }
+            });
+        },
+        // 設定情報正常処理
+        getThenSetting: function(
+            settingworkingtimetables,
+            settingusers,
+            settingcalendarsettinginformations
+        ) {
+            var settingmessage = [];
+            settingmessage.push(
+            "労働時間の基本設定する必要がありますので基本設定します。"
+            );
+            this.htmlMessageSwalLink("通知",
+            settingmessage,
+            "info",
+            false,
+            true,
+            '<a href="http://192.168.0.47/setting_calc">労働時間基本を設定する</a>')
+            .then(result  => {
+                if (!result) {
+                    if (settingworkingtimetables == 0) {
+                        this.getThenWorkingtimetables();
+                    } else if (settingusers == 0) {
+                        this.getThenUsers();
+                    } else if (settingcalendarsettinginformations == 0) {
+                        this.getThenCalendarSettingInfos();
+                    }
+                }
+            });
+        },
+        // 設定情報正常処理
+        getThenWorkingtimetables: function(
+            settingusers,
+            settingcalendarsettinginformations
+        ) {
+            var settingmessage = [];
+            settingmessage.push(
+            "勤務帯の時間設定する必要がありますので設定します。"
+            );
+            this.htmlMessageSwalLink("通知",
+            settingmessage,
+            "info",
+            false,
+            true,
+            '<a href="http://192.168.0.47/create_time_table">勤務帯時間を設定する</a>')
+            .then(result  => {
+                if (!result) {
+                    if (settingusers == 0) {
+                        this.getThenUsers();
+                    } else if (settingcalendarsettinginformations == 0) {
+                        this.getThenCalendarSettingInfos();
+                    }
+                }
+            });
+        },
+        // ユーザー情報正常処理
+        getThenUsers: function(
+            settingcalendarsettinginformations
+        ) {
+            var settingmessage = [];
+            settingmessage.push(
+            "ユーザー情報の設定する必要がありますので設定します。"
+            );
+            this.htmlMessageSwalLink("通知",
+            settingmessage,
+            "info",
+            false,
+            true,
+            '<a href="http://192.168.0.47/edit_user">ユーザー情報を設定する</a>')
+            .then(result  => {
+                if (!result) {
+                    if (settingcalendarsettinginformations == 0) {
+                        this.getThenCalendarSettingInfos();
+                    }
+                }
+            });
+        },
+        // カレンダー情報正常処理
+        getThenCalendarSettingInfos: function(
+        ) {
+            var settingmessage = [];
+            settingmessage.push(
+            "ユーザーのカレンダーを設定する必要がありますので設定します。"
+            );
+            this.htmlMessageSwalLink("通知",
+            settingmessage,
+            "info",
+            false,
+            true,
+            '<a href="http://192.168.0.47/setting_calendar">カレンダー情報を設定する</a>')
+            ;
+        },
         // -------------------------- private メソッド ------------------------
         // 配列→String改行
         arrayTostring(arrayMessage) {

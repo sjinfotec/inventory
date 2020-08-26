@@ -37,10 +37,11 @@ class ApiGetAttendanceResultController extends Controller
         try{
             $card_id = $request->card_id;       // カードID
             $mode = $request->mode;             // 打刻モード
+            $account_id = $request->account_id; // アカウントID
             $user = new User();
             $work_time = new WorkTime();
             $systemdate = Carbon::now();
-            Log::debug('store systemdate = '.$systemdate);
+            Log::debug('store account_id = '.$account_id);
             $response = collect();              // 端末の戻り値
             $this->source_mode = '';
             $array_chkAttendance_result = 
@@ -49,9 +50,9 @@ class ApiGetAttendanceResultController extends Controller
                     , Config::get('const.RESULT_CODE.normal')
                     , null);
             // カード情報存在チェック
-            $is_exists = DB::table('card_informations')->where('card_idm', $card_id)->exists();
+            $is_exists = DB::table('card_informations')->where('account_id', $account_id)->where('card_idm', $card_id)->exists();
             if($is_exists){
-                $user_datas = $user->getUserCardData($card_id);
+                $user_datas = $user->getUserCardData($card_id, $account_id);
                 if (count($user_datas) > 0) {
                     foreach($user_datas as $user_data) {
                         // chkAttendance implement
@@ -65,6 +66,7 @@ class ApiGetAttendanceResultController extends Controller
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
                             // insertTable implement
                             $array_impl_insertTable = array (
+                                'account_id' => $account_id,
                                 'user_data' => $user_data,
                                 'mode' => $mode,
                                 'card_id' => $card_id,
@@ -78,6 +80,7 @@ class ApiGetAttendanceResultController extends Controller
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.mode_illegal'));
                             // insertTable implement
                             $array_impl_insertTable = array (
+                                'account_id' => $account_id,
                                 'user_data' => $user_data,
                                 'mode' => $mode,
                                 'card_id' => $card_id,
@@ -92,6 +95,7 @@ class ApiGetAttendanceResultController extends Controller
                             Log::debug('store time_autoset');
                             // insertTable implement
                             $array_impl_insertTable = array (
+                                'account_id' => $account_id,
                                 'user_data' => $user_data,
                                 'mode' => $mode,
                                 'card_id' => $card_id,
@@ -107,6 +111,7 @@ class ApiGetAttendanceResultController extends Controller
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.unknown'));
                             // insertTable implement
                             $array_impl_insertTable = array (
+                                'account_id' => $account_id,
                                 'user_data' => $user_data,
                                 'mode' => $mode,
                                 'card_id' => $card_id,
@@ -199,6 +204,7 @@ class ApiGetAttendanceResultController extends Controller
                 $dt = new Carbon();
             }
             $mode = $request->mode;
+            $account_id = $request->account_id;
             Log::debug('buttonAttendance  company = '.$company);
             Log::debug('buttonAttendance  usercode = '.$usercode);
             Log::debug('buttonAttendance  departmentcode = '.$departmentcode);
@@ -216,7 +222,7 @@ class ApiGetAttendanceResultController extends Controller
                     , Config::get('const.RESULT_CODE.normal')
                     , Config::get('const.RESULT_CODE.normal')
                     , null);
-            $user_datas = $user->getUserData($usercode);
+            $user_datas = $user->getUserData($usercode, $account_id);
             if (count($user_datas) > 0) {
                 foreach($user_datas as $user_data) {
                     // chkAttendance implement
@@ -230,6 +236,7 @@ class ApiGetAttendanceResultController extends Controller
                         $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
                         // insertTable implement
                         $array_impl_insertTable = array (
+                            'account_id' => $account_id,
                             'user_data' => $user_data,
                             'mode' => $mode,
                             'card_id' => null,
@@ -243,6 +250,7 @@ class ApiGetAttendanceResultController extends Controller
                         $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.mode_illegal'));
                         // insertTable implement
                         $array_impl_insertTable = array (
+                            'account_id' => $account_id,
                             'user_data' => $user_data,
                             'mode' => $mode,
                             'card_id' => null,
@@ -257,6 +265,7 @@ class ApiGetAttendanceResultController extends Controller
                         Log::debug('store time_autoset');
                         // insertTable implement
                         $array_impl_insertTable = array (
+                            'account_id' => $account_id,
                             'user_data' => $user_data,
                             'mode' => $mode,
                             'card_id' => null,
@@ -272,6 +281,7 @@ class ApiGetAttendanceResultController extends Controller
                         $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.unknown'));
                         // insertTable implement
                         $array_impl_insertTable = array (
+                            'account_id' => $account_id,
                             'user_data' => $user_data,
                             'mode' => $mode,
                             'card_id' => null,
@@ -521,6 +531,7 @@ class ApiGetAttendanceResultController extends Controller
      */
     private function insertTable($params) {
         // パラメータ
+        $account_id = $params['account_id'];
         $user_data = $params['user_data'];
         $mode = $params['mode'];
         $card_id = $params['card_id'];
@@ -535,6 +546,7 @@ class ApiGetAttendanceResultController extends Controller
             Log::debug('insertTable mode_id = '.$mode_id);
             if ($mode_id != null) {
                 $work_time = new WorkTime();
+                $work_time->setParamAccountidAttribute($account_id);
                 $work_time->setIdAttribute($mode_id);
                 $work_time->setSystemDateAttribute($systemdate);
                 $work_time->delWorkTimeBysystem();
@@ -542,6 +554,7 @@ class ApiGetAttendanceResultController extends Controller
             }
             // insertTime implement
             $array_impl_insertTime = array (
+                'account_id' => $account_id,
                 'user_data' => $user_data,
                 'mode' => $mode,
                 'array_chkAttendance_result' => $array_chkAttendance_result,
@@ -549,6 +562,7 @@ class ApiGetAttendanceResultController extends Controller
             );
             $this->insertTime($array_impl_insertTime);
             $array_impl_insertTimeLogs = array (
+                'account_id' => $account_id,
                 'user_data' => $user_data,
                 'mode' => $mode,
                 'card_id' => $card_id,
@@ -576,6 +590,7 @@ class ApiGetAttendanceResultController extends Controller
      */
     private function insertTime($params) {
         // パラメータ
+        $account_id = $params['account_id'];
         $user_data = $params['user_data'];
         $mode = $params['mode'];
         $array_chkAttendance_result = $params['array_chkAttendance_result'];
@@ -583,6 +598,7 @@ class ApiGetAttendanceResultController extends Controller
 
         try{
             $work_time = new WorkTime();
+            $work_time->setAccountidAttribute($account_id);
             $work_time->setUsercodeAttribute($user_data->code);
             $work_time->setDepartmentcodeAttribute($user_data->department_code);
             $work_time->setRecordtimeAttribute($systemdate);
@@ -612,6 +628,7 @@ class ApiGetAttendanceResultController extends Controller
      */
     private function insertTimeLogs($params) {
         // パラメータ
+        $account_id = $params['account_id'];
         $user_data = $params['user_data'];
         $mode = $params['mode'];
         $card_id = $params['card_id'];
@@ -619,6 +636,7 @@ class ApiGetAttendanceResultController extends Controller
 
         try{
             $work_time_log = new WorkTimeLog();
+            $work_time_log->setAccountidAttribute($account_id);
             $work_time_log->setUsercodeAttribute($user_data->code);
             $work_time_log->setDepartmentcodeAttribute($user_data->department_code);
             $work_time_log->setEmploymentstatusAttribute($user_data->employment_status);

@@ -1107,30 +1107,6 @@ export default {
         }
       }
     },
-    // 設定情報正常処理
-    getThenWorkingtimetables(response) {
-      this.settingmessage = [];
-      this.settingmessage.push(
-        "勤務帯の時間設定する必要がありますので設定します。"
-      );
-      this.htmlMessageSwalLink("通知",
-        this.settingmessage,
-        "info",
-        false,
-        true,
-        '<a href="http://192.168.0.47/create_time_table">勤務帯時間を設定する</a>')
-      .then(result  => {
-        if (!result) {
-          if (this.settingworkingtimetables == 0) {
-            // this.getThenSetting();
-          } else if (this.settingcalendarsettinginformations == 0) {
-            // this.getThenSetting();
-          } else if (this.settingusers == 0) {
-            // this.getThenSetting();
-          }
-        }
-      });
-    },
     // 更新系正常処理
     putThenHead(response, eventtext) {
       var messages = [];
@@ -1157,10 +1133,10 @@ export default {
     getNotSetting() {
       if (this.settingworkingtimetables == 0) {
         this.getThenWorkingtimetables();
-      } else if (this.settingcalendarsettinginformations == 0) {
-        // this.getThenSetting();
       } else if (this.settingusers == 0) {
-        // this.getThenSetting();
+        this.getThenUsers();
+      } else if (this.settingcalendarsettinginformations == 0) {
+        this.getThenCalendarSettingInfos();
       }
     },
     // 項目クリア

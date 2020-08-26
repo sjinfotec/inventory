@@ -22,11 +22,12 @@ class ApiCardRegisterController extends Controller
      * @param Request $request
      * @return void
      */
-    public function index(){
+    public function index(Request $request){
+        $account_id = $request->account_id;                 // ユーザーコード
         $user = new User();
         $result = '';
-        $response = collect();              // 端末の戻り値
-        $lists = $user->getNotRegistUser();
+        $response = collect();                              // 端末の戻り値
+        $lists = $user->getNotRegistUser($account_id);
         if(count($lists) > 0){
             $result = Config::get('const.RESULT_CODE.success');
         } else {         // 該当ユーザーがいない
@@ -43,15 +44,17 @@ class ApiCardRegisterController extends Controller
      * @return void
      */
     public function store(Request $request) { 
-        $card_id = $request->card_id;               // カードID
-        $user_code = $request->user_code;           // ユーザーコード
+        $card_id = $request->card_id;                   // カードID
+        $user_code = $request->user_code;               // ユーザーコード
+        $account_id = $request->account_id;             // アカウントID
         $department_code = $request->department_code;   // 部署ID
         $user = new User();
         $card_info = new CardInformation();
         $systemdate = Carbon::now();
         $result = '';
-        $response = collect();              // 端末の戻り値
+        $response = collect();                          // 端末の戻り値
         // 存在チェック
+        $card_info->setParamAccountidAttribute($account_id);
         $card_info->setCardIdmAttribute($card_id);
         $is_card_exists = $card_info->isCardInfoExists();
         if($is_card_exists){
@@ -62,7 +65,7 @@ class ApiCardRegisterController extends Controller
             DB::beginTransaction();
             try{
                 $result = $this->insCardInfo($user_code,$card_id,$department_code);
-                $user_datas = $user->getUserCardData($card_id);
+                $user_datas = $user->getUserCardData($card_id, $account_id);
                 if (count($user_datas) > 0) {
                     DB::commit();
                     $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));

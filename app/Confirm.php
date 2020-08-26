@@ -17,6 +17,7 @@ class Confirm extends Model
     protected $table_generalcodes = 'generalcodes';
  
     private $id;                  
+    private $account_id;                        // ログインユーザーのアカウント
     private $confirm_no;                  
     private $main_sub;                  
     private $seq;    
@@ -37,6 +38,17 @@ class Confirm extends Model
     public function setIdAttribute($value)
     {
         $this->id = $value;
+    }
+
+    // ログインユーザーのアカウント
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
     }
 
     // 承認ルート番号
@@ -150,12 +162,24 @@ class Confirm extends Model
     }
 
     // -------------------------- param ---------------------------------------
+    private $param_account_id;                  // ログインユーザーのアカウント
     private $param_confirm_no;
     private $param_user_department_code;
     private $param_confirm_department_code;
     private $param_user_code;
     private $param_seq;
     private $param_main_sub;
+
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
+    }
 
     // 承認ルート番号
     public function getParamConfirmnoAttribute()
@@ -227,16 +251,19 @@ class Confirm extends Model
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             // usersの最大適用開始日付subquery
-            $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate);
+            $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate, $this->param_account_id);
             $subquery1 = DB::table($this->table_users.' as t1')
-                ->select('t1.code', 't1.name', 't1.department_code')
+                ->select('t1.account_id', 't1.code', 't1.name', 't1.department_code')
                 ->JoinSub($subquery3, 't2', function ($join) { 
+                    $join->on('t2.account_id', '=', 't1.account_id');
                     $join->on('t2.code', '=', 't1.code');
-                    $join->on('t2.max_apply_term_from', '=', 't1.apply_term_from');
+                    $join->on('t2.max_apply_term_from', '=', 't1.apply_term_from')
+                    ->where('t2.account_id', '=', $this->param_account_id)
+                    ->where('t1.is_deleted', '=', 0);
                 })
                 ->where('t1.is_deleted', '=', 0);
             // departmentsの最大適用開始日付subquery
-            $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
+            $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate, $this->param_account_id);
 
             $mainquery = DB::table($this->table.' AS t1')
                 ->select(
@@ -264,18 +291,25 @@ class Confirm extends Model
                 });
             $mainquery
                 ->leftJoinSub($subquery4, 't3', function ($join) { 
+                    $join->on('t3.account_id', '=', 't1.account_id');
                     $join->on('t3.code', '=', 't1.confirm_department_code')
+                    ->where('t3.account_id', '=', $this->param_account_id)
                     ->where('t1.is_deleted', '=', 0);
                 });
             $mainquery
                 ->leftJoinSub($subquery4, 't4', function ($join) { 
+                    $join->on('t4.account_id', '=', 't1.account_id');
                     $join->on('t4.code', '=', 't1.user_department_code')
+                    ->where('t4.account_id', '=', $this->param_account_id)
                     ->where('t1.is_deleted', '=', 0);
                 });
             $mainquery
                 ->leftJoinSub($subquery1, 't5', function ($join) { 
+                    $join->on('t4.account_id', '=', 't1.account_id');
                     $join->on('t5.department_code', '=', 't1.user_department_code');
-                    $join->on('t5.code', '=', 't1.user_code');
+                    $join->on('t5.code', '=', 't1.user_code')
+                    ->where('t5.account_id', '=', $this->param_account_id)
+                    ->where('t1.is_deleted', '=', 0);
                 });
             if (isset($this->param_confirm_no)) {
                 $mainquery->where('t1.confirm_no', $this->param_confirm_no);
@@ -300,6 +334,7 @@ class Confirm extends Model
                 $mainquery->where('t1.main_sub', $this->param_main_sub);
             }
             $result = $mainquery
+                ->where('t1.account_id', $this->param_account_id)
                 ->where('t1.is_deleted', 0)
                 ->orderBy('t1.confirm_no')
                 ->orderBy('t1.seq')
@@ -328,9 +363,9 @@ class Confirm extends Model
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             // usersの最大適用開始日付subquery
-            $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate);
+            $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate, $this->param_account_id);
             // departmentsの最大適用開始日付subquery
-            $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
+            $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate, $this->param_account_id);
 
             $list_name = 'CASE '.$this->table.'.main_sub'.' WHEN 1 THEN ';
             $list_name .= "CONCAT('＜正＞',t3.name,'：',t2.name) ";
@@ -344,20 +379,28 @@ class Confirm extends Model
                 ->selectRaw($list_name);
             $mainquery
                 ->Join($this->table_users.' as t2', function ($join) { 
+                    $join->on('t2.account_id', '=', $this->table.'.account_id');
                     $join->on('t2.code', '=', $this->table.'.user_code');
                     $join->on('t2.department_code', '=', $this->table.'.confirm_department_code')
+                    ->where('t2.account_id', '=', $this->param_account_id);
                     ->where('t2.is_deleted', '=', 0);
                 })
                 ->Join($this->table_departments.' as t3', function ($join) { 
+                    $join->on('t3.account_id', '=', $this->table.'.account_id');
                     $join->on('t3.code', '=', $this->table.'.confirm_department_code')
+                    ->where('t3.account_id', '=', $this->param_account_id);
                     ->where('t3.is_deleted', '=', 0);
                 })
                 ->JoinSub($subquery3, 't4', function ($join) { 
+                    $join->on('t4.account_id', '=', $this->table.'.account_id');
                     $join->on('t4.code', '=', $this->table.'.user_code');
-                    $join->on('t4.max_apply_term_from', '=', 't2.apply_term_from');
+                    $join->on('t4.max_apply_term_from', '=', 't2.apply_term_from')
+                    ->where('t4.account_id', '=', $this->param_account_id);
                 })
                 ->JoinSub($subquery4, 't5', function ($join) { 
-                    $join->on('t5.code', '=', $this->table.'.confirm_department_code');
+                    $join->on('t5.account_id', '=', $this->table.'.account_id');
+                    $join->on('t5.code', '=', $this->table.'.confirm_department_code')
+                    ->where('t5.account_id', '=', $this->param_account_id);
                 });
             if (isset($this->param_seq)) {
                 if ($this->param_seq == Config::get('const.CONFIRM_SEQ.final_confirm')) {
@@ -374,6 +417,7 @@ class Confirm extends Model
                 }
             }
             $result = $mainquery
+                ->where($this->table.'.account_id', $this->table.'.account_id')
                 ->where($this->table.'.is_deleted', 0)
                 ->orderBy($this->table.'.seq')
                 ->orderBy($this->table.'.main_sub')

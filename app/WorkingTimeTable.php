@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApiCommonController;
 use Carbon\Carbon;
 
@@ -20,6 +21,7 @@ class WorkingTimeTable extends Model
     protected $table_calendar_setting_informations = 'calendar_setting_informations';
 
     private $id;
+    private $account_id;                        // ログインユーザーのアカウント
     private $no;                  
     private $name;                  
     private $working_time_kubun;                  
@@ -42,6 +44,17 @@ class WorkingTimeTable extends Model
     public function setIdAttribute($value)
     {
         $this->id = $value;
+    }
+
+    // ログインユーザーのアカウント
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
     }
 
     public function getNoAttribute()
@@ -315,12 +328,12 @@ class WorkingTimeTable extends Model
 
     private function maxNoSql(){
         $sql = "select";
-        $sql .= " max(CAST((substr(no, 5,char_length(no) - 4)) as unsigned)) as max_no";
+        $sql .= " max(no) as max_no";
         $sql .= " from";
-        $sql .= " ".$this->table
+        $sql .= " ".$this->table;
         $sql .= " where";
-        $sql .= " no like '".$this->param_account_id."%'";
-        $sql .= " no <> ".Config::get('const.C999_NAME.from_timetable_no');
+        $sql .= " account_id = '".$this->param_account_id."'";
+        $sql .= " and no <> ".Config::get('const.C999_NAME.from_timetable_no');
         $sql .= " and is_deleted = 0";
 
         return $sql;
@@ -354,12 +367,12 @@ class WorkingTimeTable extends Model
             // subquery2
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
-            $array_setBindingsStr[] = $this->param_account_id."%";
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = $target_date;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
-            $array_setBindingsStr[] = $this->param_account_id."%";
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = Config::get('const.C999_NAME.from_timetable_no');
             $array_setBindingsStr[] = 0;
             $result = DB::select($sqlString, $array_setBindingsStr);
@@ -404,7 +417,8 @@ class WorkingTimeTable extends Model
             $sqlString .= "    from ";
             $sqlString .= "      ".$this->table." as t3 ";
             $sqlString .= "    where ";
-            $sqlString .= "      t1.ago_time_no = ? ";
+            $sqlString .= "      t1.account_id = ? ";
+            $sqlString .= "      and t1.ago_time_no = ? ";
             $sqlString .= "  ) ";
             $sqlString .= "  and t1.working_time_kubun = ? ";
             $sqlString .= " order by ";
@@ -414,14 +428,15 @@ class WorkingTimeTable extends Model
             // subquery2
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
-            $array_setBindingsStr[] = $this->param_account_id."%";
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = $target_date;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
-            $array_setBindingsStr[] = $this->param_account_id."%";
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = Config::get('const.C999_NAME.from_timetable_no');
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = Config::get('const.C999_NAME.link_end_timetable_no');
             $array_setBindingsStr[] = Config::get('const.C004.out_of_regular_night_working_time');
             $result = DB::select($sqlString, $array_setBindingsStr);
@@ -444,10 +459,11 @@ class WorkingTimeTable extends Model
      *
      * @return void
      */
-    public function insert(){
+    public function insertTimeTable(){
         try {
             DB::table($this->table)->insert(
             [
+                'account_id' => $this->account_id,
                 'apply_term_from' => $this->apply_term_from,
                 'no' => $this->no,
                 'name' => $this->name,
@@ -511,7 +527,7 @@ class WorkingTimeTable extends Model
      *
      * @return void
      */
-    public function getDetail(){
+    public function getDetailTimeTable(){
         // 適用期間日付の取得
         $dt = new Carbon();
         if (isset($this->param_apply_term_from)) {
@@ -521,13 +537,16 @@ class WorkingTimeTable extends Model
         }
         $target_date = $dt->format('Ymd');
         try {
-            // usersの最大適用開始日付subquery
+            // working_timetablesの最大適用開始日付subquery
             $subquery = DB::table($this->table)
-                ->select('no as no')
+                ->select(
+                    'account_id as account_id',
+                    'no as no')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->where('account_id', '=', $this->param_account_id)
                 ->where('apply_term_from', '<=',$target_date)
                 ->where('is_deleted', '=', 0)
-                ->groupBy('no');
+                ->groupBy('account_id', 'no');
             $case_sql2 = "CASE t2.max_apply_term_from = t1.apply_term_from ";
             $case_sql2 = $case_sql2." WHEN TRUE THEN 1";
             $case_sql2 = $case_sql2." ELSE CASE t2.max_apply_term_from < t1.apply_term_from ";
@@ -535,7 +554,7 @@ class WorkingTimeTable extends Model
             $case_sql2 = $case_sql2." END  as result";
             $mainquery = DB::table($this->table.' AS t1')
                 ->select(
-                    't1.id', 't1.no', 't1.name', 't1.working_time_kubun')
+                    't1.id', 't1.account_id', 't1.no', 't1.name', 't1.working_time_kubun')
                 ->selectRaw("DATE_FORMAT(t1.apply_term_from, '%Y-%m-%d') as apply_term_from")
                 ->selectRaw("DATE_FORMAT(t1.from_time, '%H:%i') as from_time")
                 ->selectRaw("DATE_FORMAT(t1.to_time, '%H:%i') as to_time")
@@ -545,14 +564,19 @@ class WorkingTimeTable extends Model
                 ->addselect('t1.updated_user');
             $mainquery
                 ->leftJoinSub($subquery, 't2', function ($join) { 
+                    $join->on('t2.account_id', '=', 't1.account_id');
                     $join->on('t2.no', '=', 't1.no');
                 });
+           $mainquery
+                ->where('t1.account_id', '=', $this->param_account_id);
+            if ($this->no !== null && $this->no !== "" && $this->no !== "0") {
+                $mainquery->where('t1.no', $this->no);
+            }
             $results = $mainquery
-                ->where('t1.no', $this->no)
                 ->where('t1.is_deleted', 0)
                 ->orderBy('t1.apply_term_from', 'desc')
                 ->orderBy('t1.working_time_kubun', 'asc')
-                ->orderBy('t1.id', 'asc')
+                ->orderBy('t1.no', 'asc')
                 ->get();
             //                 ->whereNotNull('from_time')
         }catch(\PDOException $pe){
@@ -593,7 +617,9 @@ class WorkingTimeTable extends Model
             $sqlString .= "    from ";
             $sqlString .= $this->table;
             $sqlString .= "    where ";
-            $sqlString .= "      apply_term_from <= ? ";
+            $sqlString .= "      ? = ? ";
+            $sqlString .= "      and account_id = ? ";
+            $sqlString .= "      and apply_term_from <= ? ";
             $sqlString .= "      and is_deleted = ? ";
             $sqlString .= "    group by ";
             $sqlString .= "      no ";
@@ -601,7 +627,9 @@ class WorkingTimeTable extends Model
             $sqlString .= " on t2.no = t1.no ";
             $sqlString .= " and t2.max_apply_term_from = t1.apply_term_from ";
             $sqlString .= "where ";
-            $sqlString .= "  t1.no < ? ";
+            $sqlString .= "  ? = ? ";
+            $sqlString .= "  and t1.account_id = ? ";
+            $sqlString .= "  and t1.no < ? ";
             $sqlString .= "  and t1.working_time_kubun in (?,?) ";
             $sqlString .= "  and t1.from_time is not null ";
             $sqlString .= "  and t1.is_deleted = ? ";
@@ -609,10 +637,16 @@ class WorkingTimeTable extends Model
             $sqlString .= "  t1.no asc ";
             $sqlString .= "  , t1.working_time_kubun asc ";
             $sqlString .= "  , t1.from_time asc ";
-            // バインド
+            // バインド;
             $array_setBindingsStr = array();
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = $this->param_date_from;
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = Config::get('const.C999_NAME.from_timetable_no');
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 2;
@@ -637,9 +671,10 @@ class WorkingTimeTable extends Model
      *
      * @return void
      */
-    public function updateIsDelete(){
+    public function updateIsDeleteTimeTable(){
         try {
             DB::table($this->table)
+            ->where('account_id', '=', $this->param_account_id)
             ->where('id', $this->id)
             ->update(['is_deleted' => 1]);
 
@@ -664,6 +699,7 @@ class WorkingTimeTable extends Model
         try {
             $subquery1 = DB::table($this->table_temp_calc_workingtimes)
                 ->select(
+                    $this->table_temp_calc_workingtimes.'.account_id as account_id',
                     $this->table_temp_calc_workingtimes.'.working_timetable_no as working_timetable_no'
                 );
 
@@ -689,11 +725,12 @@ class WorkingTimeTable extends Model
 
             // working_timetablesの最大適用開始日付subquery
             $apicommon = new ApiCommonController();
-            $subquery5 = $apicommon->getTimetableApplyTermSubquery($this->param_date_to);
+            $subquery5 = $apicommon->getTimetableApplyTermSubquery($this->param_date_to, $this->param_account_id);
             $subquery51 = $subquery5->toSql();
             // ---------------- mainquery ----------------------------
             $mainquery = DB::table(DB::raw('('.$subquery51.') as t1'))
                 ->select(
+                    't1.account_id as account_id',
                     't1.no as no',
                     't1.name as name',
                     't1.working_time_kubun as working_time_kubun',
@@ -702,6 +739,7 @@ class WorkingTimeTable extends Model
                     't1.ago_time_no as ago_time_no'
                 )
                 ->Join(DB::raw('('.$subquery11.') AS t2'), function ($join) { 
+                    $join->on('t2.account_id', '=', 't1.account_id');
                     $join->on('t2.working_timetable_no', '=', 't1.no');
                 });
 
@@ -761,6 +799,7 @@ class WorkingTimeTable extends Model
     public function isExistsName(){
         try {
             $is_exists = DB::table($this->table)
+                ->where('account_id', '=', $this->param_account_id)
                 ->where('name',$this->name)
                 ->where('is_deleted',0)
                 ->exists();
@@ -866,16 +905,19 @@ class WorkingTimeTable extends Model
             // subquery31
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = $this->param_date_to;
             $array_setBindingsStr[] = Config::get('const.C025.admin_user');
             $array_setBindingsStr[] = 0;
             // subquery32
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = $this->param_date_to;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = $this->param_date_to;
             $array_setBindingsStr[] = 0;
             // subquery34
@@ -884,10 +926,12 @@ class WorkingTimeTable extends Model
             // subquery33
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = $this->param_date_to;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = Config::get('const.C999_NAME.from_timetable_no');
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;

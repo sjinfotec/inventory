@@ -59,9 +59,13 @@ class DemandController extends Controller
         $array_demandResult = array();
         $get_demands = array();
         $get_demandsdetail = array();
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         try {
             // パラメータ設定
             $demand_model = new Demand();
+            $demand_model->setParamAccountidAttribute($login_user_code_4);
             $demand_model->setParamDoccodeAttribute($doc_code);
             $demand_model->setParamUsercodeAttribute($usercode);
             // $demand_model->setParamLimitAttribute(10);
@@ -193,6 +197,9 @@ class DemandController extends Controller
         $justbefore_result = null;
         // 申請状況確認
         $demand_model = new Demand();
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         try {
             if (isset($demandedit["demandno"])) {
                 if ($demandedit["demandno"] != "") {
@@ -362,8 +369,10 @@ class DemandController extends Controller
             $demand_model->setNmailUserCodeAttribute($confirm_user_code);
             // 承認者の承認順番を取得
             $confirm_model = new Confirm();
+            $confirm_model->setParamAccountidAttribute($login_user_code_4 );
             $confirm_model->setParamConfirmdepartmentcodeAttribute($confirm_departmentcode);
             $confirm_model->setParamUsercodeAttribute($confirm_user_code);
+            Log::debug('    $login_user_code_4 = '.$login_user_code_4);
             Log::debug('    $confirm_departmentcode = '.$confirm_departmentcode);
             Log::debug('    $confirm_user_code = '.$confirm_user_code);
             $confirms = $confirm_model->selectConfirm();

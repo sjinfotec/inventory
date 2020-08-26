@@ -853,7 +853,8 @@ export default {
       regularRestTime_count: 5,
       midnightTime_count: 1,
       attendance_code: "",
-      rest_code: ""
+      rest_code: "",
+      infoMsgcnt: 0
     };
   },
   computed: {
@@ -1537,6 +1538,7 @@ export default {
         this.$toasted.show("タイムテーブルを" + eventtext + "しました");
         this.refreshItemList();
         this.form.no = res.no;
+        this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -1554,6 +1556,7 @@ export default {
         this.getItem();
         this.count = this.details.length / this.timeRow_count;
         this.before_count = this.count;
+        this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -1562,7 +1565,19 @@ export default {
         }
       }
     },
-    // 異常処理
+    
+    // 設定要否取得処理
+    getNotSetting() {
+      if (this.infoMsgcnt > 0) { return; }
+      if (this.settingusers == 0) {
+        this.getThenUsers();
+      } else if (this.settingcalendarsettinginformations == 0) {
+        this.getThenCalendarSettingInfos();
+      }
+      this.infoMsgcnt++;
+    },
+
+// 異常処理
     serverCatch(eventtext) {
       var messages = [];
       messages.push("タイムテーブル情報" + eventtext + "に失敗しました");

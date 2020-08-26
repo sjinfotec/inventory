@@ -62,9 +62,14 @@ class CreateApprovalRouteNoController extends Controller
             if (isset($params['killvalue'])) {
                 $killvalue = $params['killvalue']; // 未使用
             }
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
             $time_table = new WorkingTimeTable();
             $time_table->setNoAttribute($no);
-            $details = $time_table->getDetail();
+            $time_table->setParamaccountidAttribute($login_user_code_4);
+
+            $details = $time_table->getDetailTimeTable();
             return response()->json(
                 ['result' => true, 'details' => $details,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
@@ -127,8 +132,12 @@ class CreateApprovalRouteNoController extends Controller
             $name = $params['name'];
             // タイムテーブル名チェック
             if ($name != "") {
+                $user = Auth::user();
+                $login_user_code = $user->code;
+                $login_user_code_4 = substr($login_user_code, 0 ,4);
                 $WorkingTimeTable_model = new WorkingTimeTable();
                 $WorkingTimeTable_model->setNameAttribute($name);
+                $time_table->setParamaccountidAttribute($login_user_code_4);
                 $isExists = $WorkingTimeTable_model->isExistsName();
                 if ($isExists) {
                     $this->array_messagedata[] = str_replace('{0}', "タイムテーブル", Config::get('const.MSG_ERROR.already_name'));
@@ -405,17 +414,19 @@ class CreateApprovalRouteNoController extends Controller
         $systemdate = Carbon::now();
         $time_table = new WorkingTimeTable();
         $user = Auth::user();
-        $user_code = $user->code;
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         DB::beginTransaction();
         try{
             $start_index = ($index - 1) * 7;
             $end_index = $start_index + 6;
             for ($i=$start_index; $i <= $end_index; $i++) {
                 // Log::debug('$details[$i] = '.$details[$i]['id']);
+                $time_table->setParamAccountidAttribute($login_user_code_4);   
                 $time_table->setIdAttribute($details[$i]['id']);   
-                $time_table->setUpdateduserAttribute($user_code);
+                $time_table->setUpdateduserAttribute($login_user_code);
                 $time_table->setUpdatedatAttribute($systemdate);
-                $time_table->updateIsDelete();
+                $time_table->updateIsDeleteTimeTable();
             }
             DB::commit();
         }catch(\PDOException $pe){

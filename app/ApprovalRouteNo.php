@@ -16,6 +16,7 @@ class ApprovalRouteNo extends Model
     protected $table_departments = 'departments';
 
     private $id;                                // id
+    private $account_id;                        // ログインユーザーのアカウント
     private $approval_route_no;                 // 承認ルート番号
     private $apply_department_code;             // 適用部署
     private $name;                              // 承認ルート名称
@@ -34,6 +35,17 @@ class ApprovalRouteNo extends Model
     public function setIdAttribute($value)
     {
         $this->id = $value;
+    }
+
+    // ログインユーザーのアカウント
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
     }
 
     // 承認ルート番号
@@ -122,6 +134,7 @@ class ApprovalRouteNo extends Model
     // ------------- implements --------------
 
     private $param_id;                          // id
+    private $param_account_id;                  // ログインユーザーのアカウント
     private $param_approval_route_no;           // 承認ルート番号
     private $param_apply_department_code;       // 適用部署
 
@@ -134,6 +147,17 @@ class ApprovalRouteNo extends Model
     public function setParamidAttribute($value)
     {
         $this->param_id = $value;
+    }
+
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
     }
 
     // 承認ルート番号
@@ -203,7 +227,7 @@ class ApprovalRouteNo extends Model
      *
      * @return void
      */
-    public function getDetail(){
+    public function getDetailApprovalRouteNo(){
 
         try {
             $mainquery = DB::table($this->table)
@@ -224,37 +248,47 @@ class ApprovalRouteNo extends Model
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             // usersの最大適用開始日付subquery
-            $subquery1 = $apicommon->getUserApplyTermSubquery($this->paramtodate);
+            $subquery1 = $apicommon->getUserApplyTermSubquery($this->paramtodate, $this->param_account_id);
             // departmentsの最大適用開始日付subquery
-            $subquery2 = $apicommon->getDepartmentApplyTermSubquery($this->paramtodate);
+            $subquery2 = $apicommon->getDepartmentApplyTermSubquery($this->paramtodate, $this->param_account_id);
             // 明細
             $mainquery
                 ->Join($this->table_approval_authorizers.' as t1', function ($join) { 
+                    $join->on('t1.account_id', '=', $this->table.'.account_id')
                     $join->on('t1.approval_route_no', '=', $this->table.'.approval_route_no')
+                    ->where('t1.account_id',$this->param_account_id);
                     ->where('t1.is_deleted',0);
             });
             // 適用部署名
             $mainquery
                 ->leftJoinSub($subquery2, 't2', function ($join) { 
+                    $join->on('t2.account_id', '=', $this->table.'.account_id')
                     $join->on('t2.code', '=', $this->table.'.apply_department_code')
+                    ->where('t2.account_id',$this->param_account_id);
                     ->where($this->table.'.is_deleted',0);
             });
             // 承認者部署名
             $mainquery
                 ->leftJoinSub($subquery2, 't3', function ($join) { 
+                    $join->on('t3.account_id', '=', $this->table.'.account_id')
                     $join->on('t3.code', '=', $this->table.'.approval_department_code')
+                    ->where('t3.account_id',$this->param_account_id);
                     ->where($this->table.'.is_deleted',0);
             });
             // 承認者名
             $mainquery
                 ->leftJoin($this->table_users.' as t4', function ($join) { 
+                    $join->on('t4.account_id', '=', 't1.account_id')
                     $join->on('t4.department_code', '=', 't1.approval_department_code');
                     $join->on('t4.code', '=', 't1.approval_user_code')
+                    ->where('t4.account_id',$this->param_account_id);
                     ->where('t4.is_deleted', '=', 0);
                 })
                 ->JoinSub($subquery3, 't5', function ($join) { 
+                    $join->on('t5.account_id', '=', 't4.account_id')
                     $join->on('t5.code', '=', 't4.code');
                     $join->on('t5.max_apply_term_from', '=', 't4.apply_term_from');
+                    ->where('t5.account_id',$this->param_account_id);
                 });
             // 雇用形態
             $mainquery
@@ -274,7 +308,7 @@ class ApprovalRouteNo extends Model
                 $mainquery
                     ->where($this->table.'.apply_department_code',$this->param_apply_department_code);
             }
-            $mainquery->where($this->table.'.is_deleted',0);
+            $mainquery->where($this->table.'.account_id',$this->param_account_id)->where($this->table.'.is_deleted',0);
             $mainquery
                 ->orderBy($this->table.'.approval_route_no', 'asc');
             $result = $mainquery->get();
