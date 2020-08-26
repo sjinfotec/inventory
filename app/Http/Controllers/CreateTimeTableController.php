@@ -72,9 +72,7 @@ class CreateTimeTableController extends Controller
             if (isset($params['killvalue'])) {
                 $killvalue = $params['killvalue']; // 未使用
             }
-            $time_table = new WorkingTimeTable();
-            $time_table->setNoAttribute($no);
-            $details = $time_table->getDetail();
+            $details = $this->getDetailsFunc($params);
             return response()->json(
                 ['result' => true, 'details' => $details,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
@@ -82,6 +80,34 @@ class CreateTimeTableController extends Controller
         }catch(\PDOException $pe){
             throw $pe;
         }catch(\Exception $e){
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * タイムテーブル取得
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function getDetailsFunc($params){
+        $no =  $params['no'];
+        $killvalue =  $params['killvalue'];
+        $this->array_messagedata = array();
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        try {
+            $time_table = new WorkingTimeTable();
+            $time_table->setParamaccountidAttribute($login_user_code_4);
+            $time_table->setNoAttribute($no);
+            $details = $time_table->getDetailTimeTable();
+            return $details;
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
             Log::error($e->getMessage());
             throw $e;
         }
@@ -137,8 +163,12 @@ class CreateTimeTableController extends Controller
             $name = $params['name'];
             // タイムテーブル名チェック
             if ($name != "") {
+                $user = Auth::user();
+                $login_user_code = $user->code;
+                $login_user_code_4 = substr($login_user_code, 0 ,4);
                 $WorkingTimeTable_model = new WorkingTimeTable();
                 $WorkingTimeTable_model->setNameAttribute($name);
+                $WorkingTimeTable_model->setParamaccountidAttribute($login_user_code_4);
                 $isExists = $WorkingTimeTable_model->isExistsName();
                 if ($isExists) {
                     $this->array_messagedata[] = str_replace('{0}', "タイムテーブル", Config::get('const.MSG_ERROR.already_name'));
@@ -150,8 +180,11 @@ class CreateTimeTableController extends Controller
                 }
             }
             //feature selection
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
             $feature_model = new FeatureItemSelection();
-            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamaccountidAttribute($login_user_code_4);
             $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
             $feature_data = $feature_model->getItem();
             $attendance_count = 0;
@@ -233,14 +266,14 @@ class CreateTimeTableController extends Controller
             $time_table = new WorkingTimeTable();
             $term_from = Config::get('const.INIT_DATE.initdate');
             $time_table->setParamaccountidAttribute($login_user_code_4);
-            $time_table->setNoAttribute($maxno);
             $maxno = $time_table->getMaxNo();
             if (isset($maxno)) {
                 $maxno = $maxno + 1;
             } else {
                 $maxno = 1;
             }
-            $time_table->setNoAttribute($login_user_code_4.$maxno);
+            $time_table->setAccountidAttribute($login_user_code_4);
+            $time_table->setNoAttribute($maxno);
             $time_table->setApplytermfromAttribute($term_from);
             $time_table->setNameAttribute($name);
             $time_table->setCreateduserAttribute($login_user_code);
@@ -249,7 +282,7 @@ class CreateTimeTableController extends Controller
                 $time_table->setWorkingtimekubunAttribute($data[$i]['working_time_kubun']);
                 $time_table->setFromtimeAttribute($data[$i]['from_time']);
                 $time_table->setTotimeAttribute($data[$i]['to_time']);
-                $time_table->insert();
+                $time_table->insertTimeTable();
             }
             DB::commit();
             return $maxno;
@@ -327,14 +360,15 @@ class CreateTimeTableController extends Controller
         $systemdate = Carbon::now();
         $time_table = new WorkingTimeTable();
         $user = Auth::user();
-        $user_code = $user->code;
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         $no = 0;
         $name = "";
         DB::beginTransaction();
         try{
             //feature selection
             $feature_model = new FeatureItemSelection();
-            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamaccountidAttribute($login_user_code_4);
             $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
             $feature_data = $feature_model->getItem();
             $attendance_count = 0;
@@ -380,13 +414,15 @@ class CreateTimeTableController extends Controller
                 // Log::debug('$details[from_time] = '.$details[$i]['from_time']);
                 // Log::debug('$details[to_time] = '.$details[$i]['to_time']);
                 if ($details[$i]['id'] == "" || $details[$i]['id'] == null) {
-                    $time_table->setCreateduserAttribute($user_code);
+                    $time_table->setAccountidAttribute($login_user_code_4);
+                    $time_table->setCreateduserAttribute($login_user_code);
                     $time_table->setCreatedatAttribute($systemdate);
-                    $time_table->insert();
+                    $time_table->insertTimeTable();
                 } else {
                     $time_table->setIdAttribute($details[$i]['id']);   
-                    $time_table->setUpdateduserAttribute($user_code);
+                    $time_table->setUpdateduserAttribute($login_user_code);
                     $time_table->setUpdatedatAttribute($systemdate);
+                    $time_table->setParamaccountidAttribute($login_user_code_4);
                     $time_table->updateDetail();
                 }
             }
@@ -467,12 +503,13 @@ class CreateTimeTableController extends Controller
         $systemdate = Carbon::now();
         $time_table = new WorkingTimeTable();
         $user = Auth::user();
-        $user_code = $user->code;
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         DB::beginTransaction();
         try{
             //feature selection
             $feature_model = new FeatureItemSelection();
-            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamaccountidAttribute($login_user_code_4);
             $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
             $feature_data = $feature_model->getItem();
             $attendance_count = 0;
@@ -496,9 +533,10 @@ class CreateTimeTableController extends Controller
             for ($i=$start_index; $i <= $end_index; $i++) {
                 // Log::debug('$details[$i] = '.$details[$i]['id']);
                 $time_table->setIdAttribute($details[$i]['id']);   
-                $time_table->setUpdateduserAttribute($user_code);
+                $time_table->setUpdateduserAttribute($login_user_code);
                 $time_table->setUpdatedatAttribute($systemdate);
-                $time_table->updateIsDelete();
+                $time_table->setParamaccountidAttribute($login_user_code_4);
+                $time_table->updateIsDeleteTimeTable();
             }
             DB::commit();
         }catch(\PDOException $pe){

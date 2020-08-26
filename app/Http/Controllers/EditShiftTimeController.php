@@ -191,6 +191,7 @@ class EditShiftTimeController extends Controller
         $user = Auth::user();
         $login_department_code = $user->department_code;
         $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         $calendar_setting_model = new CalendarSettingInformation();
         $apicommon_model = new ApiCommonController();
 
@@ -201,6 +202,7 @@ class EditShiftTimeController extends Controller
                 $userslist = $apicommon_model->getUserInfo($data['date'], $user_code, $department_code, $employment_status);
                 foreach ($userslist as $usersitem) {
                     // カレンダー更新
+                    $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
                     $calendar_setting_model->setParamdepartmentcodeAttribute($usersitem->department_code);
                     $calendar_setting_model->setParamemploymentstatusAttribute($usersitem->employment_status);
                     $calendar_setting_model->setParamusercodeAttribute($usersitem->code);

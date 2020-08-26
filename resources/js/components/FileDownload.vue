@@ -370,10 +370,6 @@ export default {
       type: String,
       default: ""
     },
-    accountdatas: {
-        type: Array,
-        default: []
-    },
     menudatas: {
         type: Array,
         default: []

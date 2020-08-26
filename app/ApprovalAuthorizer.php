@@ -13,6 +13,7 @@ class ApprovalAuthorizer extends Model
     protected $table = 'approval_authorizers';
 
     private $id;                                // id
+    private $account_id;                        // ログインユーザーのアカウント
     private $approval_route_no;                 // 承認ルート番号
     private $seq;                               // 承認順番
     private $main_sub;                          // 正副
@@ -33,6 +34,17 @@ class ApprovalAuthorizer extends Model
     public function setIdAttribute($value)
     {
         $this->id = $value;
+    }
+
+    // ログインユーザーのアカウント
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
     }
 
     // 承認ルート番号
@@ -143,6 +155,7 @@ class ApprovalAuthorizer extends Model
     // ------------- implements --------------
 
     private $param_id;                          // id
+    private $param_account_id;                  // ログインユーザーのアカウント
     private $param_approval_route_no;           // 承認ルート番号
     private $param_seq;                         // 承認順番
     private $param_main_sub;                    // 正副
@@ -158,6 +171,17 @@ class ApprovalAuthorizer extends Model
     public function setParamidAttribute($value)
     {
         $this->param_id = $value;
+    }
+
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
     }
 
     // 承認ルート番号

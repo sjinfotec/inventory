@@ -16,6 +16,7 @@ class Demand extends Model
     protected $table_confirms = 'confirms';
     protected $table_generalcodes = 'generalcodes';
 
+    private $account_id;                        // ログインユーザーのアカウント
     private $no;                        // 申請番号
     private $doc_code;                  // 申請書類コード
     private $demand_now;                // 申請当日日付
@@ -40,6 +41,17 @@ class Demand extends Model
     private $updated_at;                  
     private $is_deleted;                  
 
+
+    // ログインユーザーのアカウント
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
+    }
 
     // 申請番号
     public function getNoAttribute()
@@ -303,11 +315,23 @@ class Demand extends Model
 
     // ------------- implements --------------
 
+    private $param_account_id;                  // ログインユーザーのアカウント
     private $param_no;                          // 申請番号
     private $param_user_code;                   // 申請者
     private $param_doc_code;                    // 申請書類コード
     private $param_department_code;             // 申請者部署
     private $param_limit;                       // 取得件数最大
+
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
+    }
 
     // 申請番号
     public function getParamNoAttribute()
@@ -380,21 +404,23 @@ class Demand extends Model
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             // usersの最大適用開始日付subquery
-            $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate);
+            $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate, $this->param_account_id);
             // departmentsの最大適用開始日付subquery
-            $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
+            $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate, $this->param_account_id);
 
             $subquery5 = DB::table($this->table)
                 ->select(
+                    $this->table.'.account_id',
                     $this->table.'.no',
                     $this->table.'.doc_code',
                     $this->table.'.department_code',
                     $this->table.'.user_code');
             $subquery5
                 ->selectRaw('MAX('.$this->table.'.log_no) as log_no')
+                ->where($this->table.'.account_id', '=', $this->param_account_id)
                 ->where($this->table.'.user_code', '=', $this->param_user_code)
                 ->where($this->table.'.status', '<', Config::get('const.C028.unknown'))
-                ->groupBy($this->table.'.no', $this->table.'.doc_code', $this->table.'.department_code', $this->table.'.user_code');
+                ->groupBy($this->table.'.account_id', $this->table.'.no', $this->table.'.doc_code', $this->table.'.department_code', $this->table.'.user_code');
 
             // mainqueryにsunqueryを組み込む
             $mainquery = DB::table($this->table_users.' AS t1')
@@ -443,22 +469,30 @@ class Demand extends Model
                 ->addselect('t14.demand_reason as detail_demand_reason');
             $mainquery
                 ->JoinSub($subquery4, 't3', function ($join) { 
-                    $join->on('t3.code', '=', 't1.department_code');
+                    $join->on('t3.account_id', '=', 't1.account_id');
+                    $join->on('t3.code', '=', 't1.department_code')
+                    ->where('t3.account_id', '=', $this->param_account_id);
                 })
                 ->JoinSub($subquery3, 't4', function ($join) { 
+                    $join->on('t4.account_id', '=', 't1.account_id');
                     $join->on('t4.code', '=', 't1.code');
-                    $join->on('t4.max_apply_term_from', '=', 't1.apply_term_from');
+                    $join->on('t4.max_apply_term_from', '=', 't1.apply_term_from')
+                    ->where('t4.account_id', '=', $this->param_account_id);
                 })
                 ->JoinSub($subquery5, 't5', function ($join) { 
+                    $join->on('t5.account_id', '=', 't1.account_id');
                     $join->on('t5.department_code', '=', 't1.department_code');
-                    $join->on('t5.user_code', '=', 't1.code');
+                    $join->on('t5.user_code', '=', 't1.code')
+                    ->where('t5.account_id', '=', $this->param_account_id);
                 })
                 ->Join($this->table.' as t6', function ($join) { 
+                    $join->on('t6.account_id', '=', 't5.account_id');
                     $join->on('t6.department_code', '=', 't5.department_code');
                     $join->on('t6.user_code', '=', 't5.user_code');
                     $join->on('t6.no', '=', 't5.no');
                     $join->on('t6.doc_code', '=', 't5.doc_code');
-                    $join->on('t6.log_no', '=', 't5.log_no');
+                    $join->on('t6.log_no', '=', 't5.log_no')
+                    ->where('t6.account_id', '=', $this->param_account_id);
                 })
                 ->leftJoin($this->table_generalcodes.' as t7', function ($join) { 
                     $join->on('t7.code', '=', 't6.doc_code')
@@ -481,22 +515,31 @@ class Demand extends Model
                     ->where('t10.is_deleted', '=', 0);
                 })
                 ->JoinSub($subquery4, 't11', function ($join) { 
-                    $join->on('t11.code', '=', 't6.nmail_department_code');
+                    $join->on('t11.account_id', '=', 't6.account_id');
+                    $join->on('t11.code', '=', 't6.nmail_department_code')
+                    ->where('t11.account_id', '=', $this->param_account_id);
                 })
                 ->JoinSub($subquery3, 't12', function ($join) { 
-                    $join->on('t12.code', '=', 't6.nmail_user_code');
+                    $join->on('t12.account_id', '=', 't6.account_id');
+                    $join->on('t12.code', '=', 't6.nmail_user_code')
+                    ->where('t12.account_id', '=', $this->param_account_id);
                 })
                 ->Join($this->table_users.' as t13', function ($join) { 
-                    $join->on('t13.code', '=', 't6.nmail_user_code');
+                    $join->on('t13.account_id', '=', 't12.account_id');
+                    $join->on('t13.code', '=', 't12.nmail_user_code');
                     $join->on('t13.apply_term_from', '=', 't12.max_apply_term_from')
+                    ->where('t13.account_id', '=', $this->param_account_id)
                     ->where('t13.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_demand_details.' as t14', function ($join) { 
+                    $join->on('t14.account_id', '=', 't12.account_id');
                     $join->on('t14.no', '=', 't6.no');
                     $join->on('t14.log_no', '=', 't6.log_no')
+                    ->where('t14.account_id', '=', $this->param_account_id)
                     ->where('t14.is_deleted', '=', 0);
                 });
             $mainquery
+                ->where('t1.account_id', '=', $this->param_account_id)
                 ->where('t1.code', '=', $this->param_user_code);
         
             if (isset($this->param_doc_code)) {
@@ -539,16 +582,19 @@ class Demand extends Model
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             // usersの最大適用開始日付subquery
-            $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate);
+            $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate, $this->param_account_id);
 
             $subquery1 = DB::table($this->table)
                 ->select(
-                    $this->table.'.no as no');
+                    $this->table.'.account_id as account_id',
+                    $this->table.'.no as no'
+                );
             $subquery1
                 ->selectRaw('MAX('.$this->table.'.log_no) as log_no')
+                ->where($this->table.'.account_id', '=', $this->param_account_id)
                 ->where($this->table.'.no', '=', $this->param_no)
                 ->where($this->table.'.is_deleted', '=', 0)
-                ->groupBy($this->table.'.no');
+                ->groupBy($this->table.'.account_id', $this->table.'.no');
 
             // mainqueryにsunqueryを組み込む
             $mainquery = DB::table($this->table.' AS t1')
@@ -562,28 +608,39 @@ class Demand extends Model
                     );
             $mainquery
                 ->JoinSub($subquery1, 't2', function ($join) { 
+                    $join->on('t2.account_id', '=', 't1.account_id');
                     $join->on('t2.no', '=', 't1.no');
-                    $join->on('t2.log_no', '=', 't1.log_no');
+                    $join->on('t2.log_no', '=', 't1.log_no')
+                    ->where('t2.account_id', '=', $this->param_account_id);
                 })
                 ->Join($this->table_confirms.' as t3', function ($join) { 
+                    $join->on('t3.account_id', '=', 't1.account_id');
                     $join->on('t3.department_code', '=', 't1.department_code');
                     $join->on('t3.confirm_department_code', '=', 't1.nmail_department_code');
                     $join->on('t3.user_code', '=', 't1.nmail_user_code');
-                    $join->on('t3.seq', '=', 't1.nmail_seq');
+                    $join->on('t3.seq', '=', 't1.nmail_seq')
+                    ->where('t3.account_id', '=', $this->param_account_id);
                 })
                 ->Join($this->table_confirms.' as t4', function ($join) { 
+                    $join->on('t4.account_id', '=', 't3.account_id');
                     $join->on('t4.department_code', '=', 't3.department_code');
-                    $join->on('t4.seq', '=', 't3.seq');
+                    $join->on('t4.seq', '=', 't3.seq')
+                    ->where('t4.account_id', '=', $this->param_account_id);
                 })
                 ->JoinSub($subquery3, 't5', function ($join) { 
-                    $join->on('t5.code', '=', 't4.user_code');
+                    $join->on('t5.account_id', '=', 't4.account_id');
+                    $join->on('t5.code', '=', 't4.user_code')
+                    ->where('t5.account_id', '=', $this->param_account_id);
                 })
                 ->Join($this->table_users.' as t6', function ($join) { 
+                    $join->on('t6.account_id', '=', 't4.account_id');
                     $join->on('t6.code', '=', 't5.code');
                     $join->on('t6.department_code', '=', 't4.confirm_department_code');
-                    $join->on('t6.apply_term_from', '=', 't5.max_apply_term_from');
+                    $join->on('t6.apply_term_from', '=', 't5.max_apply_term_from')
+                    ->where('t6.account_id', '=', $this->param_account_id);
                 });
             $mainquery
+                ->where('t1.account_id', '=', $this->param_account_id);
                 ->where('t1.is_deleted', '=', 0)
                 ->where('t3.is_deleted', '=', 0)
                 ->where('t4.is_deleted', '=', 0)

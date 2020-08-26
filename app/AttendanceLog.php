@@ -17,6 +17,7 @@ class AttendanceLog extends Model
     protected $table_generalcodes = 'generalcodes';
 
     private $id;                                // id
+    private $account_id;                        // ログインユーザーのアカウント
     private $department_code;                   // 部署コード
     private $employment_status;                 // 雇用形態
     private $user_code;                         // ユーザー
@@ -39,6 +40,17 @@ class AttendanceLog extends Model
     public function setIdAttribute($value)
     {
         $this->id = $value;
+    }
+
+    // ログインユーザーのアカウント
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
     }
 
     // 部署コード
@@ -172,6 +184,7 @@ class AttendanceLog extends Model
     // ------------- implements --------------
 
     private $param_id;                          // id
+    private $param_account_id;                  // ログインユーザーのアカウント
     private $param_department_code;             // 部署コード
     private $param_employment_status;           // 雇用形態
     private $param_user_code;                   // ユーザー
@@ -190,6 +203,17 @@ class AttendanceLog extends Model
     public function setParamidAttribute($value)
     {
         $this->param_id = $value;
+    }
+
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
     }
 
     // 部署コード
@@ -302,9 +326,9 @@ class AttendanceLog extends Model
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             // usersの最大適用開始日付subquery
-            $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate);
+            $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate, $this->param_account_id);
             // departmentsの最大適用開始日付subquery
-            $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
+            $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate, $this->param_account_id);
 
             // ---------------- unionquery1 打刻 ----------------------------
             // unionquery1    work_times
@@ -325,18 +349,26 @@ class AttendanceLog extends Model
                 ->selectRaw("null as difference_reason");
             $unionquery1
                 ->join($this->table_work_times.' as t2', function ($join) { 
+                    $join->on('t2.account_id', '=', 't1.account_id');
                     $join->on('t2.user_code', '=', 't1.code');
                     $join->on('t2.department_code', '=', 't1.department_code')
+                    ->where('t2.account_id', '=', $this->param_account_id)
+                    ->where('t1.is_deleted', '=', 0);
                     ->where('t2.is_deleted', '=', 0);
                 });
             $unionquery1
                 ->JoinSub($subquery3, 't3', function ($join) { 
+                    $join->on('t3.account_id', '=', 't1.account_id');
                     $join->on('t3.code', '=', 't1.code');
-                    $join->on('t3.max_apply_term_from', '=', 't1.apply_term_from');
+                    $join->on('t3.max_apply_term_from', '=', 't1.apply_term_from')
+                    ->where('t3.account_id', '=', $this->param_account_id)
+                    ->where('t1.is_deleted', '=', 0);
                 });
             $unionquery1
                 ->JoinSub($subquery4, 't4', function ($join) { 
-                    $join->on('t4.code', '=', 't1.department_code');
+                    $join->on('t4.account_id', '=', 't1.account_id');
+                    $join->on('t4.code', '=', 't1.department_code')
+                    ->where('t1.is_deleted', '=', 0);
                 });
             $unionquery1
                 ->leftJoin($this->table_generalcodes.' as t5', function ($join) { 
@@ -364,15 +396,19 @@ class AttendanceLog extends Model
                 );
             $unionquery2
                 ->join($this->table.' as t2', function ($join) { 
+                    $join->on('t2.account_id', '=', 't1.account_id');
                     $join->on('t2.user_code', '=', 't1.code');
                     $join->on('t2.department_code', '=', 't1.department_code')
+                    ->where('t1.is_deleted', '=', 0)
                     ->where('t2.is_deleted', '=', 0);
                 })
                 ->JoinSub($subquery3, 't3', function ($join) { 
+                    $join->on('t3.account_id', '=', 't1.account_id');
                     $join->on('t3.code', '=', 't1.code');
                     $join->on('t3.max_apply_term_from', '=', 't1.apply_term_from');
                 })
                 ->JoinSub($subquery4, 't4', function ($join) { 
+                    $join->on('t4.account_id', '=', 't1.account_id');
                     $join->on('t4.code', '=', 't1.department_code');
                 })
                 ->leftJoin($this->table_generalcodes.' as t5', function ($join) { 

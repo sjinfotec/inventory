@@ -76,9 +76,15 @@ class UserAddController extends Controller
             }
             $details = $params['details'];
             // ログインIDチェック
+            $target_user_code = null;
             if ($details['code'] != "") {
+                $user = Auth::user();
+                $login_user_code = $user->code;
+                $login_user_code_4 = substr($login_user_code, 0 ,4);
                 $user_model = new UserModel();
-                $user_model->setParamcodeAttribute($details['code']);
+                $target_user_code = $login_user_code_4.$details['code'];
+                $user_model->setParamAccountidAttribute($login_user_code_4);
+                $user_model->setParamcodeAttribute($target_user_code);
                 $isExists = $user_model->isExistsCode();
                 if ($isExists) {
                     $this->array_messagedata[] = str_replace('{0}', "ログインID", Config::get('const.MSG_ERROR.already_item'));
@@ -90,7 +96,7 @@ class UserAddController extends Controller
                 }
             }
             // insert
-            $result = $this->insert($details);
+            $result = $this->insert($details, $login_user_code_4, $target_user_code);
             if (!$result) {
                 Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "calendarparam", Config::get('const.LOG_MSG.parameter_illegal')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
@@ -119,7 +125,7 @@ class UserAddController extends Controller
      * @param [type] $data
      * @return void
      */
-    private function insert($data){
+    private function insert($data, $account_id, $target_user_code){
         DB::beginTransaction();
         try{
             $users = new UserModel();
@@ -128,8 +134,9 @@ class UserAddController extends Controller
             $user_code = $user->code;
             // $users->setApplytermfromAttribute(Config::get('const.INIT_DATE.initdate'));
             $applyfrom = new Carbon($data['apply_term_from']);
+            $users->setAccountidAttribute($account_id);
             $users->setApplytermfromAttribute($applyfrom->format('Ymd'));
-            $users->setCodeAttribute($data['code']);
+            $users->setCodeAttribute($target_user_code);
             $users->setDepartmentcodeAttribute($data['department_code']);
             $users->setEmploymentstatusAttribute($data['employment_status']);
             $users->setNameAttribute($data['name']);
@@ -176,39 +183,42 @@ class UserAddController extends Controller
         $datas = $params['datas'];
         $fromdate = $users->getApplytermfromAttribute();
         $dt = new Carbon($fromdate);
-        Log::debug(' calendarByUser  $dt = '.$dt);
+        // Log::debug(' calendarByUser  $dt = '.$dt);
         $dtfrom = $dt->copy()->subDay();
-        Log::debug(' calendarByUser  $dt = '.$dt);
-        Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
+        // Log::debug(' calendarByUser  $dt = '.$dt);
+        // Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
         $todate = new Carbon($dtfrom);
-        Log::debug(' calendarByUser  $dt = '.$dt);
-        Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
-        Log::debug(' calendarByUser  $todate = '.$todate);
+        // Log::debug(' calendarByUser  $dt = '.$dt);
+        // Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
+        // Log::debug(' calendarByUser  $todate = '.$todate);
         $todate->addYear()->subDay();
-        Log::debug(' calendarByUser  $dt = '.$dt);
-        Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
-        Log::debug(' calendarByUser  $todate = '.$todate);
+        // Log::debug(' calendarByUser  $dt = '.$dt);
+        // Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
+        // Log::debug(' calendarByUser  $todate = '.$todate);
         try{
             $calendar_setting_model = new CalendarSettingInformation();
             // 作成
             $user = Auth::user();
             $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
             $calendar_setting_model->setCreateduserAttribute($login_user_code);
+            $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
             $calendar_setting_model->getParamemploymentstatusAttribute($users->getEmploymentstatusAttribute());
             $calendar_setting_model->getParamdepartmentcodeAttribute($users->getDepartmentcodeAttribute());
             $calendar_setting_model->setParamusercodeAttribute($users->getCodeAttribute());
-            Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
-            Log::debug(' calendarByUser  $todate = '.$todate);
+            // Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
+            // Log::debug(' calendarByUser  $todate = '.$todate);
             $calendar_setting_model->setParamfromdateAttribute($dtfrom->format('Ymd'));
             $calendar_setting_model->setParamtodateAttribute($todate->format('Ymd'));
             // 削除
-            $calendar_setting_model->delDate();
+            $calendar_setting_model->delCalendarSettingDate();
             // 作成
             $calendar_setting_model->setParamfromdateAttribute($dtfrom->format('Ymd'));
             $calendar_setting_model->setEmploymentstatusAttribute($users->getEmploymentstatusAttribute());
             $calendar_setting_model->setDepartmentcodeAttribute($users->getDepartmentcodeAttribute());
             $calendar_setting_model->setUsercodeAttribute($users->getCodeAttribute());
             $calendar_setting_model->setWorkingtimetablenoAttribute($users->getWorkingtimetablenoAttribute());
+            $calendar_setting_model->setAccountidAttribute($login_user_code_4);
             $results = $calendar_setting_model->getCalenderDateYear(Config::get('const.CALENDAR_PTN.ptn1'), $datas);
             $temp_array = array();
             foreach($results as $result) {
@@ -416,7 +426,7 @@ class UserAddController extends Controller
             if ($data['id'] == "" || $data['id'] == null) {
                 $user_model->setCreateduserAttribute($user_code);
                 $user_model->setCreatedatAttribute($systemdate);
-                // Log::debug('update password = '.$data['code']);
+                // // Log::debug('update password = '.$data['code']);
                 $user_model->setPasswordAttribute(bcrypt($data['code']));
                 $user_model->insertNewUser();
                 $isUpdateDepartment = true;
@@ -793,10 +803,11 @@ class UserAddController extends Controller
             // タイムテーブル情報
             $taimetable_model = new WorkingTimeTable();
             $taimetable_model->setParamapplytermfromAttribute($temp_systemdate);
+            $taimetable_model->setParamaccountidAttribute($login_user_code_4);
             $taimetables = $taimetable_model->getTimeTables();
             // 全部物理削除
             $user_model = new UserModel();
-            $user_model->setParamsystemcodeAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $user_model->setParamsystemcodeAttribute($login_user_code_4);
             //$user_model->setParamsystemcodeAttribute('CSD1000L');
             $user_model->delUserData();
             foreach ($usersups as $item) {
@@ -1042,12 +1053,16 @@ class UserAddController extends Controller
         $array_update = $params['array_update'];
         $applyfrom = new Carbon($details['apply_term_from']);
         $applyfromYmd = $applyfrom->format('Ymd');
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         try{
             // acalendar_setting_informationsの更新
             $calendarsetting_model = new CalendarSettingInformation();
+            $calendarsetting_model->setParamAccountidAttribute($login_user_code_4);
             $calendarsetting_model->setParamusercodeAttribute($details['code']);
             $calendarsetting_model->setParamfromdateAttribute($applyfromYmd);
-            $res = $calendarsetting_model->isExistsDate();
+            $res = $calendarsetting_model->isExistsCalendarSettingDate();
             if ($res) {
                 $calendarsetting_model->updateCommon($array_update);
             }
@@ -1407,17 +1422,21 @@ class UserAddController extends Controller
         $isUpdateEmployment = $params['isUpdateEmployment'];
         $login_user_code = $params['login_user_code'];
         $systemdate = $params['systemdate'];
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         try{
             // 修正前の適用日付から修正後の適用日付－１日まで更新
             // ただし削除時は以前の適用日付以降を更新
             // calendar_setting_informationsの更新
             $calendarsetting_model = new CalendarSettingInformation();
+            $calendarsetting_model->setParamAccountidAttribute($login_user_code_4);
             $calendarsetting_model->setParamusercodeAttribute($user_code);
             $calendarsetting_model->setParamfromdateAttribute($item_applyfromYmd);
             if (!$isDelete) {
                 $calendarsetting_model->setParamtodateAttribute($w_minus1_applyfromYmd);
             }
-            $res = $calendarsetting_model->isExistsDate();
+            $res = $calendarsetting_model->isExistsCalendarSettingDate();
             if ($res) {
                 $array_before_update = array();
                 if ($isUpdateDepartment) {

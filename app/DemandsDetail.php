@@ -15,6 +15,7 @@ class DemandsDetail extends Model
     protected $table_users = 'users';
     protected $table_generalcodes = 'generalcodes';
 
+    private $account_id;                // ログインユーザーのアカウント
     private $no;                        // 申請番号
     private $doc_code;                  // 申請書類コード
     private $log_no;                    // 履歴番号
@@ -34,6 +35,17 @@ class DemandsDetail extends Model
     private $updated_at;                  
     private $is_deleted;                  
 
+
+    // ログインユーザーのアカウント
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
+    }
 
     // 申請番号
     public function getNoAttribute()
@@ -241,12 +253,24 @@ class DemandsDetail extends Model
 
     // ------------- implements --------------
 
+    private $param_account_id;                  // ログインユーザーのアカウント
     private $param_no;                          // 申請番号
     private $param_log_no;                      // 履歴番号
     private $param_department_code;             // 申請者部署
     private $param_user_code;                   // 申請者
     private $param_doc_code;                    // 申請書類コード
     private $param_limit;                       // 取得件数最大
+
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
+    }
 
     // 申請番号
     public function getParamNoAttribute()

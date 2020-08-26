@@ -97,6 +97,7 @@ class CreateCompanyInformationController extends Controller
 
         DB::beginTransaction();
         try{
+            $company->setParamAccountidAttribute($login_user_code_4);
             $company->setAccountidAttribute($login_user_code_4);
             $company->setApplytermfromAttribute($apply_term_from);
             $company->setNameAttribute($details['name']);
@@ -167,12 +168,11 @@ class CreateCompanyInformationController extends Controller
         $details = new Collection();
         $user = Auth::user();
         $login_user_code = $user->code;
-        // Log::debug('getCompanyInfo $user->code = '.substr($login_user_code, 0 ,4));
         $login_user_code_4 = substr($login_user_code, 0 ,4);
         $result = true;
         try {
             $company = new Company();
-            $company->setAccountidAttribute($login_user_code_4);
+            $company->setParamAccountidAttribute($login_user_code_4);
             $details =  $company->getCompanyInfo();
 
             return $details;

@@ -21,6 +21,7 @@ class UserModel extends Model
 
     //--------------- メンバー属性 -----------------------------------
     private $id;
+    private $account_id;                    // ログインユーザーのアカウント
     private $apply_term_from;                  
     private $code;                  
     private $department_code;                  
@@ -51,6 +52,17 @@ class UserModel extends Model
     public function setIdAttribute($value)
     {
         $this->id = $value;
+    }
+
+    // ログインユーザーのアカウント
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
     }
 
     public function getApplytermfromAttribute()
@@ -265,12 +277,24 @@ class UserModel extends Model
     }
 
     // ---------------- param --------------------------------
+    private $param_account_id;                      // ログインユーザーのアカウント
     private $param_code;                            // ユーザーCODE
     private $param_department_code;                 // 部署CODE
     private $param_employment_status;               // 雇用形態
     private $param_system_code;                     // システム管理者
     private $param_apply_term_from;                 // 適用期間開始
     private $param_killvalue;                       // 退職開始日を条件に含む(true)
+
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
+    }
      
     // ユーザーCODE
     public function getParamcodeAttribute()
@@ -338,7 +362,6 @@ class UserModel extends Model
         $this->param_killvalue = $value;
     }
 
-
     /**
      * ユーザー新規登録
      *
@@ -349,6 +372,7 @@ class UserModel extends Model
             if ($this->remember_token == null || $this->remember_token == "") {
                 DB::table($this->table)->insert(
                     [
+                        'account_id' => $this->account_id,
                         'apply_term_from' => $this->apply_term_from,
                         'code' => $this->code,
                         'employment_status' => $this->employment_status,
@@ -370,6 +394,7 @@ class UserModel extends Model
             } else {
                 DB::table($this->table)->insert(
                     [
+                        'account_id' => $this->account_id,
                         'apply_term_from' => $this->apply_term_from,
                         'code' => $this->code,
                         'employment_status' => $this->employment_status,
@@ -409,6 +434,7 @@ class UserModel extends Model
     public function updateUser(){
         try {
             DB::table($this->table)
+            ->where('account_id', $this->param_account_id)
             ->where('id', $this->id)
             ->update([
                 'apply_term_from' => $this->apply_term_from,
@@ -454,8 +480,9 @@ class UserModel extends Model
             }
             // usersの最大適用開始日付subquery
             $subquery1 = DB::table($this->table)
-                ->select('code as code')
+                ->select('account_id as account_id', 'code as code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->where('account_id', '=',$this->param_account_id)
                 ->where('apply_term_from', '<=',$this->param_apply_term_from)
                 ->where('role', '<', Config::get('const.C017.admin_user'));
 
@@ -472,6 +499,7 @@ class UserModel extends Model
             // ICカード
             $subquery2 = DB::table($this->table_card_infomations)
                 ->select('user_code', 'card_idm')
+                ->where('account_id', '=', $this->param_account_id)
                 ->where('is_deleted', '=', 0);
             $case_sql1 = "CASE t1.kill_from_date = ".Config::get('const.INIT_DATE.maxdate');
             $case_sql1 = $case_sql1." WHEN TRUE THEN NULL ELSE DATE_FORMAT(t1.kill_from_date, '%Y-%m-%d') END as kill_from_date";
@@ -503,12 +531,17 @@ class UserModel extends Model
                 ->selectRaw($case_sql2);
             $mainquery
                 ->leftJoinSub($subquery1, 't2', function ($join) { 
-                    $join->on('t2.code', '=', 't1.code');
+                    $join->on('t2.account_id', '=', 't1.account_id');
+                    $join->on('t2.code', '=', 't1.code')
+                    ->where('t2.account_id', $this->param_account_id);
                 })
                 ->leftJoinSub($subquery2, 't3', function ($join) { 
-                    $join->on('t3.user_code', '=', 't1.code');
+                    $join->on('t3.account_id', '=', 't1.account_id');
+                    $join->on('t3.user_code', '=', 't1.code')
+                    ->where('t3.account_id', $this->param_account_id);
                 });
             $results = $mainquery
+                ->where('t1.account_id', $this->param_account_id)
                 ->where('t1.code', $this->code)
                 ->where('t1.is_deleted', 0)
                 ->orderBy('t1.apply_term_from', 'desc')
@@ -541,8 +574,9 @@ class UserModel extends Model
             }
             // usersの最大適用開始日付subquery
             $subquery1 = DB::table($this->table)
-                ->select('code as code')
+                ->select('account_id as account_id', 'code as code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->where('account_id', '=',$this->param_account_id)
                 ->where('apply_term_from', '<=',$this->param_apply_term_from)
                 ->where('role', '<', Config::get('const.C017.admin_user'));
 
@@ -585,13 +619,16 @@ class UserModel extends Model
                 ->selectRaw($case_sql2);
             $mainquery
                 ->leftJoinSub($subquery1, 't2', function ($join) { 
-                    $join->on('t2.code', '=', 't1.code');
+                    $join->on('t2.account_id', '=', 't1.account_id');
+                    $join->on('t2.code', '=', 't1.code')
+                    ->where('t2.account_id', $this->param_account_id);
                 });
             if (!empty($this->code)) {
                 $mainquery
                     ->where('t1.code', $this->code);
             }
             $results = $mainquery
+                ->where('t1.account_id', $this->param_account_id)
                 ->where('t1.is_deleted', 0)
                 ->orderBy('t1.apply_term_from', 'desc')
                 ->get();
@@ -617,7 +654,8 @@ class UserModel extends Model
         try {
             $sqlString = "";
             $sqlString .= " select ";
-            $sqlString .= "   t1.code as user_code ";
+            $sqlString .= "   t1.account_id as account_id ";
+            $sqlString .= "   ,t1.code as user_code ";
             $sqlString .= "   ,ifnull(t1.department_code,'') as department_code ";
             $sqlString .= "   ,ifnull(t1.employment_status,'') as employment_status ";
             $sqlString .= "   ,ifnull(t1.name,'') as user_name ";
@@ -744,6 +782,7 @@ class UserModel extends Model
             if(!empty($this->param_department_code)){
                 $mainquery->where('department_code', $this->param_department_code);     //department_code指定
             }
+            $mainquery->where('account_id', $this->param_account_id);
             $mainquery->update([
                 'working_timetable_no' => $this->working_timetable_no,
                 'updated_user'=>$this->updated_user,
@@ -768,6 +807,7 @@ class UserModel extends Model
     public function updatePassWord(){
         try {
             DB::table($this->table)
+            ->where('account_id', $this->param_account_id)
             ->where('code', $this->code)
             ->update([
                 'password' => $this->password,
@@ -793,6 +833,7 @@ class UserModel extends Model
     public function updateIsDelete(){
         try {
             DB::table($this->table)
+                ->where('account_id', $this->param_account_id)
                 ->where('id', $this->id)
                 ->update(['is_deleted' => 1]);
         }catch(\PDOException $pe){
@@ -824,6 +865,7 @@ class UserModel extends Model
                     ->whereNotIn('code', [$this->param_system_code]);
             }
             $mainQuery
+                ->where('account_id', $this->param_account_id)
                 ->where('is_deleted', 0)
                 ->delete();
         }catch(\PDOException $pe){
@@ -845,6 +887,7 @@ class UserModel extends Model
     public function isExistsCode(){
         try {
             $is_exists = DB::table($this->table)
+                ->where('account_id',$this->param_account_id)
                 ->where('code',$this->param_code)
                 ->where('is_deleted',0)
                 ->exists();
@@ -859,5 +902,59 @@ class UserModel extends Model
         }
 
         return $is_exists;
+    }
+
+    /**
+     * ユーザー情報初期
+     *
+     * @return void
+     */
+    public function getUserDetailsFunc(){
+        $apicommon_controller = new ApiCommonController();
+        $dt = new Carbon();
+        $target_date = $dt->format('Ymd');
+        try {
+            $user_subquery = $apicommon_controller->makeUserApplyTermSql($target_date, Config::get('const.C025.admin_user'));
+            $sqlString = "";
+            $sqlString .= " select ";
+            $sqlString .= "   t1.code as user_code ";
+            $sqlString .= " from ";
+            $sqlString .= " ".$this->table." as t1 ";
+            $sqlString .= " inner join (";
+            $sqlString .= " ".$user_subquery;
+            $sqlString .= " ) t2  ";
+            $sqlString .= " on t1.code = t2.code  ";
+            $sqlString .= " and t1.apply_term_from = t2.max_apply_term_from  ";
+            $sqlString .= " where ";
+            $sqlString .= "   ? = ?  ";
+            $sqlString .= "   and t1.account_id = ? ";
+            $sqlString .= "   and t1.is_deleted = ?  ";
+            $sqlString .= " order by ";
+            $sqlString .= "   t1.department_code ";
+            $sqlString .= "   , t1.code ";
+            // バインド
+            $array_setBindingsStr = array();
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
+            $array_setBindingsStr[] = $target_date;
+            $array_setBindingsStr[] = Config::get('const.C025.admin_user');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
+            $array_setBindingsStr[] = 0;
+            $results = DB::select($sqlString, $array_setBindingsStr);
+            return $results;
+
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 }

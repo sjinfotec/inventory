@@ -28,6 +28,7 @@ use App\DownloadLog;
 use App\Http\Controllers\CreateCompanyInformationController;
 use App\Http\Controllers\CreateDepartmentController;
 use App\Http\Controllers\SettingCalcController;
+use App\Http\Controllers\CreateTimeTableController;
 
 
 /**
@@ -132,7 +133,7 @@ class ApiCommonController extends Controller
      *
      * @return string サブクエリー
      */
-    public function getUserApplyTermSubquery($targetdate){
+    public function getUserApplyTermSubquery($targetdate, $account_id){
         try {
             // 適用期間日付の取得
             $dt = null;
@@ -145,12 +146,14 @@ class ApiCommonController extends Controller
 
             // usersの最大適用開始日付subquery
             $subquery = DB::table($this->table_users)
-                ->select('code as code')
+                ->select(
+                    'account_id as account_id', 'code as code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->where('account_id', '=', $account_id)
                 ->where('apply_term_from', '<=',$target_date)
                 ->where('role', '<', Config::get('const.C017.admin_user'))
                 ->where('is_deleted', '=', 0)
-                ->groupBy('code');
+                ->groupBy('account_id', 'code');
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.subquery_illegal')).'$pe');
             Log::error($pe->getMessage());
@@ -170,11 +173,13 @@ class ApiCommonController extends Controller
     public function makeUserApplyTermSql($apply_date, $role){
         $makeSql = "";
         $makeSql .= " select ";
-        $makeSql .= "   code as code ";
+        $makeSql .= "   account_id as account_id ";
+        $makeSql .= "   ,code as code ";
         $makeSql .= "   ,MAX(apply_term_from) as max_apply_term_from ";
         $makeSql .= " from ";
         $makeSql .= " ".$this->table_users." ";
         $makeSql .= " where ? = ? ";
+        $makeSql .= " and account_id = ? ";
         if (!empty($apply_date)) {
             $makeSql .= " and apply_term_from <= ? ";
         }
@@ -182,7 +187,7 @@ class ApiCommonController extends Controller
             $makeSql .= " and role <= ? ";
         }
         $makeSql .= " and is_deleted = ? ";
-        $makeSql .= " group by code ";
+        $makeSql .= " group by account_id, code ";
 
         return $makeSql;
     }
@@ -191,7 +196,7 @@ class ApiCommonController extends Controller
      *
      * @return string サブクエリー
      */
-    public function getDepartmentApplyTermSubquery($targetdate){
+    public function getDepartmentApplyTermSubquery($targetdate, $account_id){
         try {
             // 適用期間日付の取得
             $dt = null;
@@ -204,17 +209,23 @@ class ApiCommonController extends Controller
 
             // departmentsの最大適用開始日付subquery
             $subquery1 = DB::table($this->table_departments)
-                ->select('code as code')
+                ->select(
+                    'account_id as account_id',
+                    'code as code'
+                )
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->where('account_id', '=', $account_id)
                 ->where('apply_term_from', '<=',$target_date)
                 ->where('is_deleted', '=', 0)
-                ->groupBy('code');
+                ->groupBy('account_id', 'code');
             $mainquery = DB::table($this->table_departments.' as t1')
                 ->select('t1.code as code', 't1.name as name')
                 ->JoinSub($subquery1, 't2', function ($join) { 
+                    $join->on('t1.account_id', '=', 't2.account_id');
                     $join->on('t1.code', '=', 't2.code');
                     $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
                 })
+                ->where('t1.account_id', '=', $account_id)
                 ->where('t1.kill_from_date', '>',$target_date)
                 ->where('t1.is_deleted', '=', 0);
         }catch(\PDOException $pe){
@@ -236,26 +247,31 @@ class ApiCommonController extends Controller
     public function makeDepartmentApplyTermSql($apply_date, $kill_date){
         $makeSql = "";
         $makeSql .= " select ";
-        $makeSql .= "   t1.code as code ";
+        $makeSql .= "   t1.account_id as account_id ";
+        $makeSql .= "   ,t1.code as code ";
         $makeSql .= "   ,t1.name as name ";
         $makeSql .= " from ";
         $makeSql .= " ".$this->table_departments." as t1 ";
         $makeSql .= "   inner join ( ";
         $makeSql .= "     select ";
-        $makeSql .= "       code as code ";
+        $makeSql .= "       account_id as account_id ";
+        $makeSql .= "       , code as code ";
         $makeSql .= "       , MAX(apply_term_from) as max_apply_term_from ";
         $makeSql .= "     from ";
         $makeSql .= "       ".$this->table_departments;
         $makeSql .= "     where ? = ? ";
+        $makeSql .= "       and account_id = ? ";
         if (!empty($apply_date)) {
             $makeSql .= "   and apply_term_from <= ? ";
         }
         $makeSql .= "       and is_deleted = ? ";
-        $makeSql .= "     group by code ";
+        $makeSql .= "     group by account_id, code ";
         $makeSql .= "   )  as t2 ";
-        $makeSql .= "   on t1.code = t2.code ";
+        $makeSql .= "   on t1.account_id = t2.account_id ";
+        $makeSql .= "   and t1.code = t2.code ";
         $makeSql .= "   and t1.apply_term_from = t2.max_apply_term_from ";
         $makeSql .= " where ? = ? ";
+        $makeSql .= "       and t1.account_id = ? ";
         if (!empty($kill_date)) {
             $makeSql .= "   and t1.kill_from_date >= ? ";
         }
@@ -279,16 +295,17 @@ class ApiCommonController extends Controller
             }
             $target_date = $dt->format('Ymd');
 
-            // departmentsの最大適用開始日付subquery
+            // working_timetablesの最大適用開始日付subquery
             $subquery1 = DB::table($this->table_working_timetables)
-                ->select('no as no')
+                ->select('account_id as account_id', 'no as no')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->where('no', 'like', $account_id."%")
+                ->where('account_id', '=', $account_id)
                 ->where('apply_term_from', '<=',$target_date)
                 ->where('is_deleted', '=', 0)
-                ->groupBy('no');
+                ->groupBy('account_id', 'no');
             $subquery2 = DB::table($this->table_working_timetables.' as t1')
                 ->select(
+                    't1.account_id as account_id',
                     't1.no as no',
                     't1.name as name',
                     't1.from_time as from_time',
@@ -297,10 +314,11 @@ class ApiCommonController extends Controller
                     't1.working_time_kubun as working_time_kubun'
                 )
                 ->JoinSub($subquery1, 't2', function ($join) { 
+                    $join->on('t1.account_id', '=', 't2.account_id');
                     $join->on('t1.no', '=', 't2.no');
                     $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
                 })
-                ->where('no', 'like', $account_id."%")
+                ->where('t1.account_id', '=', $account_id)
                 ->whereNotNull('t1.from_time')
                 ->where('t1.is_deleted', '=', 0);
                 return $subquery2;
@@ -322,7 +340,8 @@ class ApiCommonController extends Controller
     public function makeWorkingTimeTableApplyTermSql($apply_date){
         $makeSql = "";
         $makeSql .= " select ";
-        $makeSql .= "   t1.no as no ";
+        $makeSql .= "   t1.account_id as account_id ";
+        $makeSql .= "   ,t1.no as no ";
         $makeSql .= "   ,t1.name as name ";
         $makeSql .= "   ,t1.from_time as from_time ";
         $makeSql .= "   ,t1.to_time as to_time ";
@@ -332,22 +351,24 @@ class ApiCommonController extends Controller
         $makeSql .= " ".$this->table_working_timetables." as t1 ";
         $makeSql .= "   inner join ( ";
         $makeSql .= "     select ";
-        $makeSql .= "       no as no ";
+        $makeSql .= "       account_id as account_id ";
+        $makeSql .= "       , no as no ";
         $makeSql .= "       , MAX(apply_term_from) as max_apply_term_from ";
         $makeSql .= "     from ";
         $makeSql .= "       ".$this->table_working_timetables;
         $makeSql .= "     where ? = ? ";
-        $makeSql .= "       and t1.no like ? ";
+        $makeSql .= "       and account_id = ? ";
         if (!empty($apply_date)) {
             $makeSql .= "   and apply_term_from <= ? ";
         }
         $makeSql .= "       and is_deleted = ? ";
-        $makeSql .= "     group by no ";
+        $makeSql .= "     group by account_id, no ";
         $makeSql .= "   )  as t2 ";
-        $makeSql .= "   on t1.no = t2.no ";
+        $makeSql .= "   on t1.account_id = t2.account_id ";
+        $makeSql .= "   and t1.no = t2.no ";
         $makeSql .= "   and t1.apply_term_from = t2.max_apply_term_from ";
         $makeSql .= " where ? = ? ";
-        $makeSql .= "   and t1.no like ? ";
+        $makeSql .= "   and t1.account_id = ? ";
         $makeSql .= "   and t1.no < ? ";
         $makeSql .= "   and t1.from_time is not null ";
         $makeSql .= "   and t1.is_deleted = ? ";
@@ -425,11 +446,12 @@ class ApiCommonController extends Controller
                 $arrayrole =  $params['roles'];
             }
             // ログインユーザの権限取得
-            $chk_user_id = Auth::user()->code;
-            $role = $this->getUserRole($chk_user_id, $target_date);
+            $login_user_code = Auth::user()->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $role = $this->getUserRole($login_user_code, $target_date);
             if(!isset($role)) {
                 // エラー追加 20200121
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $chk_user_id, Config::get('const.LOG_MSG.not_setting_role')));
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $login_user_code, Config::get('const.LOG_MSG.not_setting_role')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_setting_role');
                 return response()->json(
                     ['result' => false, 'details' => $details,
@@ -437,11 +459,12 @@ class ApiCommonController extends Controller
                 );
             }
             $subquery1 = DB::table($this->table_users)
+                ->select('account_id as account_id', 'code as code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->selectRaw('code as code')
+                ->where('account_id', '=', $login_user_code_4)
                 ->where('apply_term_from', '<=',$targetdate)
                 ->where('is_deleted', '=', 0)
-                ->groupBy('code');
+                ->groupBy('account_id', 'code');
 
             if (isset($departmentcode)) {
                 if (isset($employmentcode)) {
@@ -453,7 +476,7 @@ class ApiCommonController extends Controller
                         ->where($this->table_users.'.department_code', $departmentcode)
                         ->where($this->table_users.'.employment_status', $employmentcode);
                     if($role == Config::get('const.C025.general_user')){
-                        $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
+                        $mainQuery->where($this->table_users.'.code','=',$login_user_code);
                     } else {
                         $mainQuery->where($this->table_users.'.management','<',$managementcode);
                     }
@@ -482,7 +505,7 @@ class ApiCommonController extends Controller
                         })
                         ->where($this->table_users.'.department_code', $departmentcode);
                     if($role == Config::get('const.C025.general_user')){
-                        $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
+                        $mainQuery->where($this->table_users.'.code','=',$login_user_code);
                     } else {
                         $mainQuery->where($this->table_users.'.management','<',$managementcode);
                     }
@@ -513,7 +536,7 @@ class ApiCommonController extends Controller
                         })
                         ->where($this->table_users.'.employment_status', $employmentcode);
                     if($role == Config::get('const.C025.general_user')){
-                        $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
+                        $mainQuery->where($this->table_users.'.code','=',$login_user_code);
                     } else {
                         $mainQuery->where($this->table_users.'.management','<',$managementcode);
                     }
@@ -541,7 +564,7 @@ class ApiCommonController extends Controller
                             $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                         });
                     if($role == Config::get('const.C025.general_user')){
-                        $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
+                        $mainQuery->where($this->table_users.'.code','=',$login_user_code);
                     } else {
                         $mainQuery->where($this->table_users.'.management','<',$managementcode);
                     }
@@ -587,7 +610,7 @@ class ApiCommonController extends Controller
      */
     public function getUserListCsv(Request $request){
 
-        // // Log::debug('getUserListCsv = ');
+        Log::debug('getUserListCsv = ');
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
@@ -655,6 +678,7 @@ class ApiCommonController extends Controller
      * @return list departments
      */
     public function getDepartmentList(Request $request){
+        Log::debug('getDepartmentList in');
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
@@ -680,31 +704,35 @@ class ApiCommonController extends Controller
             $target_date = $dt->format('Ymd');
 
             // ログインユーザの権限取得
-            $chk_user_id = Auth::user()->code;
-            $chk_user_id_4 = substr($chk_user_id,4, mb_strlen($chk_user_id) - 4);
-            $role = $this->getUserRole($chk_user_id, $target_date);
+            $login_user_code = Auth::user()->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            Log::debug('getDepartmentList login_user_code = '.$login_user_code);
+            Log::debug('getDepartmentList login_user_code_4 = '.$login_user_code_4);
+            $role = $this->getUserRole($login_user_code, $target_date);
+            Log::debug('getDepartmentList role = '.$role);
             if(!isset($role)) {
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_setting_role');
                 // エラー追加 20200121
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $chk_user_id, Config::get('const.LOG_MSG.not_setting_role')));
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $login_user_code, Config::get('const.LOG_MSG.not_setting_role')));
                 return response()->json(
                     ['result' => false, 'details' => $details,
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                 );
             }
             $subquery1 = DB::table($this->table_departments)
+                ->select('account_id as account_id', 'code as code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->selectRaw('code as code')
+                ->where('account_id', '=', $login_user_code_4)
                 ->where('apply_term_from', '<=',$target_date)
-                ->where('code', 'like', $chk_user_id_4.'%')
                 ->where('is_deleted', '=', 0)
-                ->groupBy('code');
+                ->groupBy('account_id', 'code');
 
             // 日次月次集計選択リスト取得
             //feature selection
             $feature_model = new FeatureItemSelection();
-            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamaccountidAttribute($login_user_code_4);
             $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+            Log::debug('getDepartmentList calc_list_allselect = '.Config::get('const.FEATUREITEM.calc_list_allselect'));
             $feature_model->setParamitemcodeAttribute(Config::get('const.FEATUREITEM.calc_list_allselect'));
             $feature_data = $feature_model->getItem();
             $calc_list_allselect = true;
@@ -713,24 +741,32 @@ class ApiCommonController extends Controller
                 break;
             }
             $role_general_user = false;
+            Log::debug('getDepartmentList role = '.$role);
+            Log::debug('getDepartmentList general_user = '.Config::get('const.C025.general_user'));
             if($role == Config::get('const.C025.general_user')){
+                Log::debug('getDepartmentList calc_list_allselect = '.$calc_list_allselect);
                 if (!$calc_list_allselect) {
+                    Log::debug('getDepartmentList role_general_user true = ');
                     $role_general_user = true;
                 }
             }
 
+            Log::debug('getDepartmentList role_general_user = '.$role_general_user);
             if($role_general_user){
                 $mainQuery = DB::table($this->table_departments)
                     ->JoinSub($subquery1, 't1', function ($join) { 
+                        $join->on('t1.account_id', '=', $this->table_departments.'.account_id');
                         $join->on('t1.code', '=', $this->table_departments.'.code');
                         $join->on('t1.max_apply_term_from', '=', $this->table_departments.'.apply_term_from');
                     })
                     ->Join($this->table_users, function ($join) { 
+                        $join->on($this->table_users.'.account_id', '=', $this->table_departments.'.account_id');
                         $join->on($this->table_users.'.department_code', '=', $this->table_departments.'.code')
                         ->where($this->table_users.'.is_deleted', '=', 0);
                     })
                     ->select($this->table_departments.'.code',$this->table_departments.'.name')
-                    ->where($this->table_users.'.code','=',$chk_user_id);
+                    ->where($this->table_users.'.account_id','=',$login_user_code_4)
+                    ->where($this->table_users.'.code','=',$login_user_code);
                 if (!$killvalue) {
                     $mainQuery
                         ->where($this->table_departments.'.kill_from_date', '>',$target_date)
@@ -746,6 +782,7 @@ class ApiCommonController extends Controller
                 $mainQuery = DB::table($this->table_departments)
                     ->select($this->table_departments.'.code',$this->table_departments.'.name')
                     ->JoinSub($subquery1, 't1', function ($join) { 
+                        $join->on('t1.account_id', '=', $this->table_departments.'.account_id');
                         $join->on('t1.code', '=', $this->table_departments.'.code');
                         $join->on('t1.max_apply_term_from', '=', $this->table_departments.'.apply_term_from');
                     });
@@ -760,6 +797,7 @@ class ApiCommonController extends Controller
                         ->orderby($this->table_departments.'.code','asc');
                 }
                 $details = $mainQuery->get();
+                Log::debug('getDepartmentList details = '.count($details));
             }
             return response()->json(
                 ['result' => true, 'details' => $details,
@@ -808,8 +846,12 @@ class ApiCommonController extends Controller
             } else {
                 $dt = new Carbon();
             }
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
             $time_tables = new WorkingTimeTable();
             $time_tables->setParamdatefromAttribute($dt);
+            $time_tables->setParamaccountidAttribute($login_user_code_4);
             $details = $time_tables->getTimeTables();
 
             return response()->json(
@@ -986,10 +1028,14 @@ class ApiCommonController extends Controller
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         try {
             $feature_model = new FeatureItemSelection();
-            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamaccountidAttribute($login_user_code_4);
             $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+            Log::debug('getModeList mode_list = '.Config::get('const.C042.mode_list'));
             $feature_model->setParamitemcodeAttribute(Config::get('const.C042.mode_list'));
             $feature_data = $feature_model->getItem();
             $value_select = "0";
@@ -1071,9 +1117,14 @@ class ApiCommonController extends Controller
     public function getGeneralList($identification_id){
         $details = new Collection();
         try {
-            $details =
+            $mainQuery =
                 DB::table($this->table_generalcodes)
-                    ->where('identification_id', $identification_id)
+                    ->where('identification_id', $identification_id);
+            if ($identification_id == Config::get('const.C025.value')) {
+                $mainQuery->where('code', '<', Config::get('const.C025.high_user'));
+            }
+            $details =
+                $mainQuery
                     ->where('is_deleted', 0)
                     ->orderby('sort_seq','asc')
                     ->get();
@@ -1096,6 +1147,9 @@ class ApiCommonController extends Controller
      */
     public function getConfirmlList(Request $request){
         $codeList = new Collection();
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         try {
             // パラメータチェック
             if (isset($request->getdo)) {
@@ -1123,6 +1177,7 @@ class ApiCommonController extends Controller
                 $mainorsub = "";
             }
             $confirm_model = new Confirm();
+            $confirm_model->setParamAccountidAttribute($login_user_code_4);
             $confirm_model->setParamSeqAttribute($orFinal);
             $confirm_model->setParamMainsubAttribute($mainorsub);
             $codeList = $confirm_model->selectConfirmList($target_date);
@@ -1154,10 +1209,13 @@ class ApiCommonController extends Controller
                 $dt = new Carbon();
             }
             $target_date = $dt->format('Ymd');
-            // usersの最大適用開始日付subquery
-            $subquery3 = $this->getUserApplyTermSubquery($target_date);
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
+                // usersの最大適用開始日付subquery
+            $subquery3 = $this->getUserApplyTermSubquery($target_date, $login_user_code_4);
             // departmentsの最大適用開始日付subquery
-            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date);
+            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date, $login_user_code_4);
             $mainquery = DB::table($this->table_users)
                 ->select(
                     $this->table_users.'.code as code',
@@ -1206,7 +1264,7 @@ class ApiCommonController extends Controller
      * @return list departments
      */
     public function getLoginUserInfo(Request $request){
-        // // Log::debug('getLoginUserInfo  in');
+        Log::debug('getLoginUserInfo  in');
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
@@ -1244,15 +1302,18 @@ class ApiCommonController extends Controller
             } else {
                 $dt = new Carbon();
             }
-            // // Log::debug('getLoginUserInfo  company = '.$company);
-            // // Log::debug('getLoginUserInfo  usercode = '.$usercode);
-            // // Log::debug('getLoginUserInfo  departmentcode = '.$departmentcode);
-            // // Log::debug('getLoginUserInfo  target_date = '.$target_date);
+            Log::debug('getLoginUserInfo  company = '.$company);
+            Log::debug('getLoginUserInfo  usercode = '.$usercode);
+            Log::debug('getLoginUserInfo  departmentcode = '.$departmentcode);
+            Log::debug('getLoginUserInfo  target_date = '.$target_date);
             $target_date = $dt->format('Ymd');
             // usersの最大適用開始日付subquery
-            $subquery3 = $this->getUserApplyTermSubquery($target_date);
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $subquery3 = $this->getUserApplyTermSubquery($target_date, $login_user_code_4);
             // departmentsの最大適用開始日付subquery
-            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date);
+            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date, $login_user_code_4);
             $mainquery = DB::table($this->table_users)
                 ->select(
                     $this->table_users.'.code as code',
@@ -1319,10 +1380,14 @@ class ApiCommonController extends Controller
         $details = array();
         $detail_dates = array();
         $result = true;
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         try {
             $dt1 = new Carbon($fromdate);
             $dt2 = new Carbon($todate);
             $calendar_setting_model = new CalendarSettingInformation();
+            $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
             $calendar_setting_model->setParamdepartmentcodeAttribute($departmentcode);
             $calendar_setting_model->setParamemploymentstatusAttribute($employmentstatus);
             $calendar_setting_model->setParamusercodeAttribute($usercode);
@@ -1333,7 +1398,7 @@ class ApiCommonController extends Controller
             $selection_code = Config::get('const.C037.csvshift');
             $csvitem_model = new CsvItemSelection();
             $csvitem_model->setParamaccountidAttribute(
-                array(Config::get('const.ACCOUNTID.account_id')));
+                array($login_user_code_4));
             $csvitem_model->setParamselectioncodeAttribute($selection_code);
             $csvitem_details = $csvitem_model->getCsvItem();
             $collect_csvitem_details = collect($csvitem_details);
@@ -1841,8 +1906,8 @@ class ApiCommonController extends Controller
         $result = true;
         try {
             // ログインユーザの権限取得
-            $chk_user_id = Auth::user()->code;
-            $details = $this->getUserDepartment($chk_user_id, null);
+            $login_user_code = Auth::user()->code;
+            $details = $this->getUserDepartment($login_user_code, null);
 
             return response()->json(
                 ['result' => $result, 'details' => $details,
@@ -1868,11 +1933,11 @@ class ApiCommonController extends Controller
         $result = true;
         try {
             // ログインユーザの権限取得
-            $chk_user_id = Auth::user()->code;
+            $login_user_code = Auth::user()->code;
             // 適用期間日付の取得（現在日付とする）
             $dt = new Carbon();
             $target_date = $dt->format('Ymd');
-            $role = $this->getUserRole($chk_user_id, $target_date);
+            $role = $this->getUserRole($login_user_code, $target_date);
 
             return response()->json(
                 ['result' => $result, 'role' => $role,
@@ -1901,14 +1966,16 @@ class ApiCommonController extends Controller
             } else {
                 $dt = new Carbon();
             }
+            $login_user_code_4 = substr($user_id, 0 ,4);
             $target_date = $dt->format('Ymd');
             $subquery1 = DB::table($this->table_users)
-                ->selectRaw('code as code')
+                ->select('account_id as account_id', 'code as code')
                 ->selectRaw('department_code as department_code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->where('account_id', '=',$login_user_code_4)
                 ->where('apply_term_from', '<=',$target_date)
                 ->where('is_deleted', '=', 0)
-                ->groupBy('code', 'department_code');
+                ->groupBy('account_id', 'code', 'department_code');
             $userrole = DB::table($this->table_users)
                 ->JoinSub($subquery1, 't1', function ($join) { 
                     $join->on('t1.code', '=', $this->table_users.'.code');
@@ -1946,9 +2013,13 @@ class ApiCommonController extends Controller
             }
             $target_date = $dt->format('Ymd');
             // usersの最大適用開始日付subquery
-            $subquery3 = $this->getUserApplyTermSubquery($target_date);
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($user_id, 0 ,4);
+            Log::debug('getUserDepartment login_user_code_4 = '.$login_user_code_4);
+            $subquery3 = $this->getUserApplyTermSubquery($target_date, $login_user_code_4);
             // departmentsの最大適用開始日付subquery
-            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date);
+            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date, $login_user_code_4);
             $mainquery = DB::table($this->table_users)
                 ->select(
                     $this->table_users.'.code as code',
@@ -1993,9 +2064,12 @@ class ApiCommonController extends Controller
             }
             $target_date = $dt->format('Ymd');
             // usersの最大適用開始日付subquery
-            $subquery3 = $this->getUserApplyTermSubquery($target_date);
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($user_id, 0 ,4);
+            $subquery3 = $this->getUserApplyTermSubquery($target_date, $login_user_code_4);
             // departmentsの最大適用開始日付subquery
-            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date);
+            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date, $login_user_code_4);
             $mainquery = DB::table($this->table_users)
                 ->select(
                     $this->table_users.'.code as code',
@@ -2052,14 +2126,18 @@ class ApiCommonController extends Controller
             } else {
                 $dt = new Carbon();
             }
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
             $target_date = $dt->format('Ymd');
             $subquery1 = DB::table($this->table_users)
-                ->selectRaw('code as code')
+                ->select('account_id as account_id', 'code as code')
                 ->selectRaw('department_code as department_code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->where('account_id', '=',$login_user_code_4)
                 ->where('apply_term_from', '<=',$target_date)
                 ->where('is_deleted', '=', 0)
-                ->groupBy('code', 'department_code');
+                ->groupBy('account_id', 'code', 'department_code');
             $useremail = DB::table($this->table_users)
                 ->JoinSub($subquery1, 't1', function ($join) { 
                     $join->on('t1.code', '=', $this->table_users.'.code');
@@ -2091,9 +2169,13 @@ class ApiCommonController extends Controller
      */
     public function getUserHolidaykbn($user_id, $target_date){
         $holiday_kbn = null;
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         try {
             // ユーザー休暇区分取得
             $calendar_setting_model = new CalendarSettingInformation();
+            $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
             $calendar_setting_model->setParamusercodeAttribute($user_id);
             $calendar_setting_model->setParamfromdateAttribute($target_date);
             $results = $calendar_setting_model->getCalenderInfo();
@@ -2200,12 +2282,16 @@ class ApiCommonController extends Controller
                 }
             }
             // usersのworking_timetables_noまたはshift_informationsのworking_timetables_noより取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
             $time_tables = new WorkingTimeTable();
             $target_dateYmd = date_format(new Carbon($target_date), 'Ymd');
             $time_tables->setParamdatefromAttribute($target_dateYmd);
             $time_tables->setParamdatetoAttribute($target_dateYmd);
             $time_tables->setParamDepartmentcodeAttribute($department_code);
             $time_tables->setParamUsercodeAttribute($user_code);
+            $time_tables->setParamaccountidAttribute($login_user_code_4);
             $workingHours = $time_tables->getWorkingTimeTable();
             $regular_start_time = null;
             $regular_start_recordtime = null;
@@ -2263,35 +2349,35 @@ class ApiCommonController extends Controller
                             // 所定時間が日またぎの場合
                             $w_working_timetable_from_record_datetime = $item->working_timetable_from_record_time;
                             $w_working_timetable_to_record_datetime = $item->working_timetable_to_record_time;
-                            // // Log::debug('getWorkingHours  $item->working_timetable_from_record_time = '.$item->working_timetable_from_record_time);
-                            // // Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
+                            Log::debug('getWorkingHours  $item->working_timetable_from_record_time = '.$item->working_timetable_from_record_time);
+                            Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
                             if ($item->working_timetable_from_record_time < $regular_start_recordtime) {
                                 $w_working_timetable_from_record_datetime = 
                                     date_format(new Carbon($regular_end_record_date.' '.$item->working_timetable_from_time),'Y-m-d H:i:s');
                             }
-                            // // Log::debug('getWorkingHours  $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
-                            // // Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
+                            Log::debug('getWorkingHours  $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
+                            Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
                             if ($item->working_timetable_to_record_time < $regular_start_recordtime) {
                                 $w_working_timetable_to_record_datetime = 
                                     date_format(new Carbon($regular_end_record_date.' '.$item->working_timetable_to_time),'Y-m-d H:i:s');
                             }
-                            // // Log::debug('getWorkingHours  $w_working_timetable_from_record_datetime = '.$w_working_timetable_from_record_datetime);
-                            // // Log::debug('getWorkingHours  $w_working_timetable_to_record_datetime = '.$w_working_timetable_to_record_datetime);
+                            Log::debug('getWorkingHours  $w_working_timetable_from_record_datetime = '.$w_working_timetable_from_record_datetime);
+                            Log::debug('getWorkingHours  $w_working_timetable_to_record_datetime = '.$w_working_timetable_to_record_datetime);
                             if (($w_working_timetable_from_record_datetime >= $regular_start_recordtime &&
                                 $w_working_timetable_from_record_datetime <= $regular_end_recordtime) &&
                                 ($w_working_timetable_to_record_datetime >= $regular_start_recordtime &&
                                 $w_working_timetable_to_record_datetime <= $regular_end_recordtime)) {
                                 $working_timetable_from_record_datetime = $w_working_timetable_from_record_datetime;
                                 $working_timetable_to_record_datetime = $w_working_timetable_to_record_datetime;
-                                // // Log::debug('getWorkingHours  $working_timetable_from_record_datetime = '.$working_timetable_from_record_datetime);
-                                // // Log::debug('getWorkingHours  $working_timetable_to_record_datetime = '.$working_timetable_to_record_datetime);
+                                Log::debug('getWorkingHours  $working_timetable_from_record_datetime = '.$working_timetable_from_record_datetime);
+                                Log::debug('getWorkingHours  $working_timetable_to_record_datetime = '.$working_timetable_to_record_datetime);
                             }
                         }
                         if ($working_timetable_from_record_datetime != null && $working_timetable_to_record_datetime != null) {
                             if ($working_timetable_from_record_datetime >= $regular_2after_recordtime) {
                                 $calc_times = $this->diffTimeSerial($working_timetable_from_record_datetime, $working_timetable_to_record_datetime);
                                 // from-toで30分以上か？
-                                // // Log::debug('getWorkingHours  $calc_times = '.$calc_times);
+                                Log::debug('getWorkingHours  $calc_times = '.$calc_times);
                                 if ($calc_times >= 1800) {
                                     $lunch_start_time = $item->working_timetable_from_time;
                                     $lunch_start_recordtime = $working_timetable_from_record_datetime;
@@ -2356,34 +2442,38 @@ class ApiCommonController extends Controller
                 }
             }
             $record_datetime = $params['record_datetime'];
-            // // Log::debug('         apicommon getWorkingHoursByStamp = '.date_format(new Carbon($record_datetime), 'H:i:s'));
+            Log::debug('         apicommon getWorkingHoursByStamp = '.date_format(new Carbon($record_datetime), 'H:i:s'));
             $record_datetime_date = date_format(new Carbon($target_date), 'Y-m-d')." ".date_format(new Carbon($record_datetime), 'H:i:s');
-            // // Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
+            Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
             // usersのカレンダーからタイムテーブルの所定時刻を取得する
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
             $time_tables = new WorkingTimeTable();
             $target_dateYmd = date_format(new Carbon($target_date), 'Ymd');
             $time_tables->setParamdatefromAttribute($target_dateYmd);
             $time_tables->setParamdatetoAttribute($target_dateYmd);
             $time_tables->setParamDepartmentcodeAttribute($department_code);
+            $time_tables->setParamaccountidAttribute($login_user_code_4);
             $time_tables->setParamUsercodeAttribute($user_code);
-            // // Log::debug('         apicommon getWorkingHoursByStamp $target_dateYmd = '.$target_dateYmd);
-            // // Log::debug('         apicommon getWorkingHoursByStamp $department_code = '.$department_code);
-            // // Log::debug('         apicommon getWorkingHoursByStamp $user_code = '.$user_code);
+            Log::debug('         apicommon getWorkingHoursByStamp $target_dateYmd = '.$target_dateYmd);
+            Log::debug('         apicommon getWorkingHoursByStamp $department_code = '.$department_code);
+            Log::debug('         apicommon getWorkingHoursByStamp $user_code = '.$user_code);
             $workingHours = $time_tables->getWorkingTimeTable();
             $working_from_time = null;
             $working_to_time = null;
             $working_to_time_date = null;
-            // // Log::debug('         apicommon getWorkingHoursByStamp $workingHours = '.count($workingHours));
+            Log::debug('         apicommon getWorkingHoursByStamp $workingHours = '.count($workingHours));
             foreach($workingHours as $item) {
-                // // Log::debug('         apicommon getWorkingHoursByStamp $item->working_time_kubun = '.$item->working_time_kubun);
+                Log::debug('         apicommon getWorkingHoursByStamp $item->working_time_kubun = '.$item->working_time_kubun);
                 if ($item->working_time_kubun == Config::get('const.C004.regular_working_time')) {
-                    // // Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
-                    // // Log::debug('         apicommon getWorkingHoursByStamp $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
+                    Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
+                    Log::debug('         apicommon getWorkingHoursByStamp $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
                     if ($mode == Config::get('const.C005.attendance_time') ||
                         $mode == Config::get('const.C005.missing_middle_time') ||
                         $mode == Config::get('const.C005.public_going_out_time')) {
                         if ($record_datetime_date < $item->working_timetable_to_record_time) {
-                            // // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
+                            Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
                             if ($working_from_time == null) {
                                 $working_from_time = $item->working_timetable_from_time;
                                 $working_to_time = $item->working_timetable_to_time;
@@ -2399,7 +2489,7 @@ class ApiCommonController extends Controller
                         if ($record_datetime_date > $item->working_timetable_to_record_time ||
                             ($record_datetime_date > $item->working_timetable_from_record_time &&
                             $record_datetime_date <= $item->working_timetable_to_record_time)) {
-                            // // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
+                            Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
                             if ($working_from_time == null) {
                                 $working_from_time = $item->working_timetable_from_time;
                                 $working_to_time = $item->working_timetable_to_time;
@@ -2410,12 +2500,12 @@ class ApiCommonController extends Controller
                             }
                         }
                     }
-                    // // Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
-                    // // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
+                    Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
+                    Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
                 }
             }
-            // // Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
-            // // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
+            Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
+            Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
             // 設定
             $array_workingHours = array(
                 'working_from_time' => $working_from_time,
@@ -2493,8 +2583,12 @@ class ApiCommonController extends Controller
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         try {
             $company_model = new Company();
+            $company_model->setParamAccountidAttribute($login_user_code_4);
             $details = $company_model->getCompanyInfoApply();
 
             return response()->json(
@@ -2768,6 +2862,9 @@ class ApiCommonController extends Controller
     public function getCsvItem(Request $request){
         $result = true;
         $details = array();
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         try {
             // パラメータチェック
             $params = array();
@@ -2795,7 +2892,7 @@ class ApiCommonController extends Controller
             }
             $csvitem_model = new CsvItemSelection();
             $csvitem_model->setParamaccountidAttribute(
-                array(Config::get('const.ACCOUNTID.account_id')));
+                array($login_user_code_4));
             $csvitem_model->setParamselectioncodeAttribute($selection_code);
             $csvitem_model->setParamisselectAttribute($is_select);
             $details = $csvitem_model->getCsvItem();
@@ -2834,8 +2931,8 @@ class ApiCommonController extends Controller
                 "departments" => 0,
                 "settings" => 0,
                 "working_timetables" => 0,
-                "calendar_setting_informations" => 0,
-                "users" => 0
+                "users" => 0,
+                "calendar_setting_informations" => 0
             );
             // 1.会社情報
             $company_controller = new CreateCompanyInformationController();
@@ -2847,12 +2944,12 @@ class ApiCommonController extends Controller
             }
             if ($r_cnt > 0) { $array_result["companies"] = 1; }
             // 2.部署情報
-            $department_controller = new CreateDepartmentController();
-            $array_impl_getCompanyInfoFunc = array (
+            $array_impl_getDetailFuncDepartment = array (
                 'code' => null,
-                'killvalue' => true
+                'killvalue' => null
             );
-            $details = $company_controller->getCompanyInfoFunc($array_impl_getCompanyInfoFunc);
+            $department_controller = new CreateDepartmentController();
+            $details = $department_controller->getDetailsFunc($array_impl_getDetailFuncDepartment);
             $r_cnt = 0;
             foreach($details as $item) {
                 $r_cnt++;
@@ -2863,16 +2960,65 @@ class ApiCommonController extends Controller
             $dt = new Carbon();
             $target_year = $dt->format('Y');
             $setting_controller = new SettingCalcController();
-            $array_impl_getDetailFunc = array (
+            $array_impl_getDetailFuncSetting = array (
                 'year' => $target_year
             );
-            $details = $setting_controller->getDetailFunc($array_impl_getDetailFunc);
+            $details = $setting_controller->getDetailFunc($array_impl_getDetailFuncSetting);
             $r_cnt = 0;
             foreach($details as $item) {
                 $r_cnt++;
                 break;
             }
             if ($r_cnt > 0) { $array_result["settings"] = 1; }
+            // 4.勤務帯時間設定
+            $dt = new Carbon();
+            $target_year = $dt->format('Y');
+            $timetable_controller = new CreateTimeTableController();
+            $array_impl_getDetailFuncTimetable = array (
+                'no' => null,
+                'killvalue' => null
+            );
+            $details = $timetable_controller->getDetailsFunc($array_impl_getDetailFuncTimetable);
+            $r_cnt = 0;
+            foreach($details as $item) {
+                $r_cnt++;
+                break;
+            }
+            if ($r_cnt > 0) { $array_result["working_timetables"] = 1; }
+            // 5.ユーザー情報設定
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $users_model = new UserModel();
+            $users_model->setParamaccountidAttribute($login_user_code_4);
+            $details = $users_model->getUserDetailsFunc();
+            // joinしてるのでカウントで判断しない
+            $r_cnt = 0;
+            foreach($details as $item) {
+                if (isset($item->user_code)) {
+                    $r_cnt++;
+                }
+                break;
+            }
+            if ($r_cnt > 0) { $array_result["users"] = 1; }
+            // 6.カレンダー設定
+            $dt = new Carbon();
+            $target_year = $dt->format('Y');
+            $timetable_controller = new CreateTimeTableController();
+            $array_impl_getDetailFuncTimetable = array (
+                'no' => null,
+                'killvalue' => null
+            );
+            $details = $timetable_controller->getDetailsFunc($array_impl_getDetailFuncTimetable);
+            // joinしてるのでカウントで判断しない
+            $r_cnt = 0;
+            foreach($details as $item) {
+                if (isset($item->no)) {
+                    $r_cnt++;
+                }
+                break;
+            }
+            if ($r_cnt > 0) { $array_result["calendar_setting_informations"] = 1; }
 
             return $array_result;
         }catch(\PDOException $pe){
@@ -3066,10 +3212,10 @@ class ApiCommonController extends Controller
         if (isset($setting_from_datetime) && isset($setting_to_datetime)) {
             // タイムテーブル設定時刻のチェックを行う場合
             // タイムテーブル時間範囲内に休憩開始終了時刻がある場合に計算する
-            // // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
-            // // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
-            // // Log::debug('calcBetweenBreakTime $setting_from_datetime = '.$setting_from_datetime);
-            // // Log::debug('calcBetweenBreakTime $setting_to_datetime = '.$setting_to_datetime);
+            Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
+            Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
+            Log::debug('calcBetweenBreakTime $setting_from_datetime = '.$setting_from_datetime);
+            Log::debug('calcBetweenBreakTime $setting_to_datetime = '.$setting_to_datetime);
             if (($time_calc_from <= $setting_from_datetime || $time_calc_from >= $setting_to_datetime) &&
                 ($time_calc_to <= $setting_from_datetime || $time_calc_to >= $setting_to_datetime)) {
                 $chk_time = false;
@@ -3077,10 +3223,10 @@ class ApiCommonController extends Controller
         }
         if ($chk_time) {
             //  指定時間範囲内に休憩開始終了時刻がある場合に計算する
-            // // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
-            // // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
-            // // Log::debug('calcBetweenBreakTime $target_from_datetime = '.$target_from_datetime);
-            // // Log::debug('calcBetweenBreakTime $target_to_datetime = '.$target_to_datetime);
+            Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
+            Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
+            Log::debug('calcBetweenBreakTime $target_from_datetime = '.$target_from_datetime);
+            Log::debug('calcBetweenBreakTime $target_to_datetime = '.$target_to_datetime);
             if (($time_calc_from >= $target_from_datetime && $time_calc_from <= $target_to_datetime) ||
                 ($time_calc_to >= $target_from_datetime && $time_calc_to <= $target_to_datetime)) {
                 if ($target_from_datetime > $time_calc_from) {
@@ -3089,8 +3235,8 @@ class ApiCommonController extends Controller
                 if ($target_to_datetime < $time_calc_to) {
                     $time_calc_to = $target_to_datetime;
                 }
-                // // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
-                // // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
+                Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
+                Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
                 if ($time_calc_from < $time_calc_to) {
                     $calc_times += $this->diffTimeSerial($time_calc_from, $time_calc_to);
                 }
@@ -3152,7 +3298,7 @@ class ApiCommonController extends Controller
         $time_rounding = $params['time_rounding'];
         $working_timetable_no = $params['working_timetable_no'];
         $array_get_timetable_result = $params['array_get_timetable_result'];
-        // // Log::debug('roundTimeByTimeStart $start_time = '.$start_time);
+        Log::debug('roundTimeByTimeStart $start_time = '.$start_time);
         // 1分単位の場合はそのまま
         if ($time_unit == Config::get('const.C009.round1')) {
             return $start_time;
@@ -3213,7 +3359,7 @@ class ApiCommonController extends Controller
             }
             $result_round_time = date('Y-m-d H:i:00',strtotime(('+'.$calc_times_round).' second',strtotime($source_dt)));
         }
-        // // Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
+        Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
         return $result_round_time;
     }
 
@@ -3230,7 +3376,7 @@ class ApiCommonController extends Controller
         $time_rounding = $params['time_rounding'];
         $working_timetable_no = $params['working_timetable_no'];
         $array_get_timetable_result = $params['array_get_timetable_result'];
-        // // Log::debug('roundTimeByTimeStart $end_time = '.$end_time);
+        Log::debug('roundTimeByTimeStart $end_time = '.$end_time);
         // 1分単位の場合はそのまま
         if ($time_unit == Config::get('const.C009.round1')) {
             return $end_time;
@@ -3297,7 +3443,7 @@ class ApiCommonController extends Controller
             }
             $result_round_time = date('Y-m-d H:i:00',strtotime(('+'.$calc_times_round).' second',strtotime($source_dt)));
         }
-        // // Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
+        Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
         return $result_round_time;
     }
 
@@ -3311,9 +3457,9 @@ class ApiCommonController extends Controller
         $round_time = $params['round_time'];
         $time_unit = $params['time_unit'];
         $time_rounding = $params['time_rounding'];
-        // // Log::debug('roundTimeStart $round_time = '.$round_time);
-        // // Log::debug('roundTimeStart $time_unit = '.$time_unit);
-        // // Log::debug('roundTimeStart $time_rounding = '.$time_rounding);
+        Log::debug('roundTimeStart $round_time = '.$round_time);
+        Log::debug('roundTimeStart $time_unit = '.$time_unit);
+        Log::debug('roundTimeStart $time_rounding = '.$time_rounding);
         $dt = new Carbon($round_time);
         $target_datetime = $dt->format("Y-m-d H:i:s");
         $target_ymd = $dt->format("Y-m-d");
@@ -3714,7 +3860,7 @@ class ApiCommonController extends Controller
             }
         }
 
-        // // Log::debug('roundTimeStart $target_datetime = '.$target_datetime);
+        Log::debug('roundTimeStart $target_datetime = '.$target_datetime);
         return $target_datetime;
     }
 
@@ -3728,9 +3874,9 @@ class ApiCommonController extends Controller
         $round_time = $params['round_time'];
         $time_unit = $params['time_unit'];
         $time_rounding = $params['time_rounding'];
-        // // Log::debug('roundTimeEnd $round_time = '.$round_time);
-        // // Log::debug('roundTimeEnd $time_unit = '.$time_unit);
-        // // Log::debug('roundTimeEnd $time_rounding = '.$time_rounding);
+        Log::debug('roundTimeEnd $round_time = '.$round_time);
+        Log::debug('roundTimeEnd $time_unit = '.$time_unit);
+        Log::debug('roundTimeEnd $time_rounding = '.$time_rounding);
         $dt = new Carbon($round_time);
         $target_datetime = $dt->format("Y-m-d H:i:s");
         $target_ymd = $dt->format("Y-m-d");
@@ -4136,14 +4282,14 @@ class ApiCommonController extends Controller
             }
         }
 
-        // // Log::debug('roundTimeEnd $target_datetime = '.$target_datetime);
+        Log::debug('roundTimeEnd $target_datetime = '.$target_datetime);
         return $target_datetime;
     }
     // public function roundTime($round_time, $time_unit, $time_rounding){
 
-    //     // // Log::debug('roundTime $round_time = '.$round_time);
-    //     // // Log::debug('roundTime $time_unit = '.$time_unit);
-    //     // // Log::debug('roundTime $time_rounding = '.$time_rounding);
+    //     Log::debug('roundTime $round_time = '.$round_time);
+    //     Log::debug('roundTime $time_unit = '.$time_unit);
+    //     Log::debug('roundTime $time_rounding = '.$time_rounding);
     //     if ($time_rounding == Config::get('const.C010.round_half_up')) {
     //         // 四捨五入
     //         if ($time_unit == Config::get('const.C009.round1')) {
@@ -4419,8 +4565,12 @@ class ApiCommonController extends Controller
         $employmentstatus = $params['employmentstatus'];
         $usercode = $params['usercode'];
         $datefrom = $params['datefrom'];
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         // 指定日が休日かどうか
         $calender_setting_model = new CalendarSettingInformation();
+        $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
         $calender_setting_model->setParamdepartmentcodeAttribute($departmentcode);
         $calender_setting_model->setParamemploymentstatusAttribute($employmentstatus);
         $calender_setting_model->setParamusercodeAttribute($usercode);
@@ -4540,8 +4690,8 @@ class ApiCommonController extends Controller
      */
     public function chkMode($target_mode, $source_mode, $is_chk_mode_autoset){
 
-        // // Log::debug('chkMode $target_mode = '.$target_mode);
-        // // Log::debug('chkMode $source_mode = '.$source_mode);
+        Log::debug('chkMode $target_mode = '.$target_mode);
+        Log::debug('chkMode $source_mode = '.$source_mode);
         if ( $source_mode == '') {
             if ($target_mode == Config::get('const.C005.attendance_time')) {
                 return Config::get('const.RESULT_CODE.normal');
@@ -4648,7 +4798,6 @@ class ApiCommonController extends Controller
             $downloadlog_model->setParamDownlodfilenameAttribute($downloadfile_name);
             $downloadlog_model->setParamDownlodfilecntAttribute($downloadfile_cnt);
             $isExists = $downloadlog_model->isExistsLogs();
-            Log::debug('isExists = '.$isExists);
             return $isExists;
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_download_logs, Config::get('const.LOG_MSG.data_select_error')).'$pe');
@@ -4895,8 +5044,8 @@ class ApiCommonController extends Controller
                 ->where('working_time_kubun', '!=', Config::get('const.C004.out_of_regular_working_time'))
                 ->sortBy('from_time');
             foreach($filtered as $result_time) {
-                // Log::debug('            analyzeTimeTable from_time = '.$result_time->from_time);
-                // Log::debug('            analyzeTimeTable to_time = '.$result_time->to_time);
+                Log::debug('            analyzeTimeTable from_time = '.$result_time->from_time);
+                Log::debug('            analyzeTimeTable to_time = '.$result_time->to_time);
                 if (isset($result_time->from_time) && isset($result_time->to_time)) {
                     $dt = new Carbon('2019-08-01 '.$result_time->from_time);
                     $check_from_hour = date_format($dt, 'H');
@@ -4970,14 +5119,14 @@ class ApiCommonController extends Controller
                             if ($array_sets[$i][$j] == 0) {
                                 if ($temp_from_time == "") {
                                     $temp_from_time = str_pad($i,2,0,STR_PAD_LEFT).':'.str_pad($j,2,0,STR_PAD_LEFT).':00';
-                                    // Log::debug('            analyzeTimeTable 配列=0の範囲を設定する temp_from_time = '.$temp_from_time);
+                                    Log::debug('            analyzeTimeTable 配列=0の範囲を設定する temp_from_time = '.$temp_from_time);
                                 }
                             } else {
                                 if ($temp_from_time == "") {
                                     $temp_to_time ="";
                                 } else {
                                     $temp_to_time = str_pad($i,2,0,STR_PAD_LEFT).':'.str_pad($j,2,0,STR_PAD_LEFT).':00';
-                                    // Log::debug('            analyzeTimeTable 配列=0の範囲を設定する temp_to_time = '.$temp_to_time);
+                                    Log::debug('            analyzeTimeTable 配列=0の範囲を設定する temp_to_time = '.$temp_to_time);
                                     $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time);
                                     // from to の判定は予備もとで行います。
                                     // if ($result_time->from_time < $result_time->to_time) {
@@ -5018,9 +5167,13 @@ class ApiCommonController extends Controller
     public function setWorkingStartEndTimeTable($target_date){
         try {
             // タイムテーブル取得（所定時間と休憩時間）
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
             $timetable_model = new WorkingTimeTable();
             $dt = new Carbon($target_date);
             $timetable_model->setParamdatefromAttribute(date_format($dt, 'Ymd'));
+            $time_table->setParamaccountidAttribute($login_user_code_4);
             // タイムテーブル取得(丸め）
             $results = $timetable_model->getWorkingTimeTableRound();
             $current_no = null;
@@ -5168,11 +5321,14 @@ class ApiCommonController extends Controller
         $work_time_model = new WorkTime();
         $apicommon_model = new ApiCommonController();
         $this->array_messagedata = array();
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
 
         DB::beginTransaction();
         try{
-            $user = Auth::user();
-            $login_user_code = $user->code;
+            Log::debug('addAttendanceWork login_user_code = '.$login_user_code);
+            Log::debug('addAttendanceWork login_user_code_4 = '.$login_user_code_4);
             $login_department_code = null;
             $dt = new Carbon($target_date);
             $target_date = $dt->format('Ymd');
@@ -5207,11 +5363,12 @@ class ApiCommonController extends Controller
             //     $user_holiday->delKbn();
             // }
             $calendar_setting_model = new CalendarSettingInformation();
+            $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
             $calendar_setting_model->setParamUsercodeAttribute($user_code);
             $calendar_setting_model->setParamDepartmentcodeAttribute($department_code);
             $calendar_setting_model->setParamfromdateAttribute($working_date);
             // 存在しない場合はエラーで返す
-            $is_exists = $calendar_setting_model->isExists();
+            $is_exists = $calendar_setting_model->isExistsCalendarSetting();
             if(!$is_exists){
                 DB::rollBack();
                 Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $user_name."さん", Config::get('const.MSG_ERROR.not_setting_calendar')));
@@ -5223,13 +5380,13 @@ class ApiCommonController extends Controller
             }
             $calendar_setting_model->setUpdatedatAttribute($systemdate);
             $calendar_setting_model->setUpdateduserAttribute($login_user_code);
-            // // Log::debug('addAttendanceWork count details = '.count($details));
+            Log::debug('addAttendanceWork count details = '.count($details));
             if (count($details) == 0) {
                 $calendar_setting_model->setHolidaykubunAttribute(0);
                 $calendar_setting_model->updateCalendar();
             } else {
                 foreach($details as $item) {
-                    // // Log::debug('addAttendanceWork kbn_flag = '.$item['kbn_flag']);
+                    Log::debug('addAttendanceWork kbn_flag = '.$item['kbn_flag']);
                     if($item['kbn_flag'] == 1){     // 休暇区分のみ登録
                         $calendar_setting_model->setHolidaykubunAttribute($item['user_holiday_kbn']);
                         // $user_holiday->setHolidaykubunAttribute($item['user_holiday_kbn']);
@@ -5246,6 +5403,9 @@ class ApiCommonController extends Controller
             }
             // 勤怠時刻登録
             // beforeidsが存在した場合は論理削除する
+            $work_time_model->setParamAccountidAttribute($login_user_code_4);
+            $work_time_model->setAccountidAttribute($login_user_code_4);
+            Log::debug('addAttendanceWork setAccountidAttribute login_user_code_4 = '.$login_user_code_4);
             for($i=0;$i<count($beforeids);$i++) {
                 $work_time_model->setIdAttribute($beforeids[$i]);
                 $work_time_model->setEditordepartmentcodeAttribute($login_department_code);

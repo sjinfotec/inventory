@@ -49,14 +49,15 @@ class User extends Authenticatable
      * @param [type] $card_id
      * @return void
      */
-    public function getUserCardData($card_id){
+    public function getUserCardData($card_id, $account_id){
         try {
             // usersの最大適用開始日付subquery
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
-            $subquery2 = $apicommon->getUserApplyTermSubquery(null);
+            $subquery2 = $apicommon->getUserApplyTermSubquery(null, $account_id);
             $mainquery = DB::table('users')
                 ->select(
+                    'users.account_id',
                     'users.id',
                     'users.department_code as department_code',
                     'users.employment_status as employment_status',
@@ -65,16 +66,20 @@ class User extends Authenticatable
                     'card_informations.card_idm as card_idm'
                 )
                 ->Join('card_informations', function ($join) { 
+                    $join->on('card_informations.account_id', '=', $account_id);
                     $join->on('card_informations.user_code', '=', 'users.code');
                     $join->on('card_informations.department_code', '=', 'users.department_code')
+                    ->where('card_informations.account_id', $account_id)
                     ->where('card_informations.is_deleted',0);
                 });
             $mainquery
                 ->JoinSub($subquery2, 't1', function ($join) { 
+                    $join->on('t1.account_id', '=', $account_id);
                     $join->on('t1.code', '=', 'users.code');
                     $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
                 });
             $mainquery
+                ->where('card_informations.account_id',$account_id)
                 ->where('card_informations.card_idm',$card_id)
                 ->where('users.role',"<>",10)
                 ->where('users.is_deleted',0);
@@ -98,14 +103,15 @@ class User extends Authenticatable
      * @param [type] $card_id
      * @return void
      */
-    public function getUserData($user_code){
+    public function getUserData($user_code, $account_id){
         try {
             // usersの最大適用開始日付subquery
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
-            $subquery2 = $apicommon->getUserApplyTermSubquery(null);
+            $subquery2 = $apicommon->getUserApplyTermSubquery(null, $account_id);
             $mainquery = DB::table('users')
                 ->select(
+                    'users.account_id',
                     'users.id',
                     'users.department_code as department_code',
                     'users.employment_status as employment_status',
@@ -114,10 +120,12 @@ class User extends Authenticatable
                 );
             $mainquery
                 ->JoinSub($subquery2, 't1', function ($join) { 
+                    $join->on('t1.account_id', '=', $account_id);
                     $join->on('t1.code', '=', 'users.code');
                     $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
                 });
             $mainquery
+                ->where('users.account_id',$account_id)
                 ->where('users.code',$user_code)
                 ->where('users.role',"<>",10)
                 ->where('users.is_deleted',0);
@@ -140,39 +148,47 @@ class User extends Authenticatable
      *
      * @return void
      */
-    public function getNotRegistUser(){
+    public function getNotRegistUser($account_id){
 
         try {
+            Log::debug('getNotRegistUser $account_id = '.$account_id);
             // usersの最大適用開始日付subquery
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
-            $subquery1 = $apicommon->getUserApplyTermSubquery(null);
+            $subquery1 = $apicommon->getUserApplyTermSubquery(null, $account_id);
             // departmentsの最大適用開始日付subquery
-            $subquery2 = $apicommon->getDepartmentApplyTermSubquery(null);
+            $subquery2 = $apicommon->getDepartmentApplyTermSubquery(null, $account_id);
 
             $mainquery = DB::table('users as t1')
                 ->select(
+                    't1.account_id as account_id',
                     't1.code as user_code',
                     't1.name as user_name',
                     't1.department_code as department_code'
                     )
                 ->selectRaw("IFNULL(t4.name,'') as department_name")
                 ->leftJoin('card_informations as t2', function ($join) { 
+                    $join->on('t2.account_id', '=', 't1.account_id');
                     $join->on('t2.user_code', '=', 't1.code');
                     $join->on('t2.department_code', '=', 't1.department_code')
+                    ->where('t2.account_id',$account_id)
                     ->where('t2.is_deleted',0);
                 });
             $mainquery
                 ->JoinSub($subquery1, 't3', function ($join) { 
+                    $join->on('t3.account_id', '=', 't1.account_id');
                     $join->on('t3.code', '=', 't1.code');
-                    $join->on('t3.max_apply_term_from', '=', 't1.apply_term_from');
+                    $join->on('t3.max_apply_term_from', '=', 't1.apply_term_from')
+                    ->where('t3.account_id',$account_id);
                 });
             $mainquery
                 ->leftJoinSub($subquery2, 't4', function ($join) { 
+                    $join->on('t4.account_id', '=', 't1.account_id');
                     $join->on('t4.code', '=', 't1.department_code')
                     ->where('t1.is_deleted', '=', 0);
                 });
             $mainquery
+                ->where('t1.account_id',"=",$account_id)
                 ->where('t1.role',"<>",10)
                 ->where('t1.is_deleted',0)
                 ->whereNull('t2.card_idm');      // whereNull 

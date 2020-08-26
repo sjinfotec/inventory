@@ -22,6 +22,7 @@ class TempCalcWorkingTime extends Model
 
     //--------------- 項目属性 -----------------------------------
 
+    private $account_id;                        // ログインユーザーのアカウント
     private $working_date;                      // 日付
     private $employment_status;                 // 雇用形態
     private $department_code;                   // 部署ID
@@ -78,6 +79,17 @@ class TempCalcWorkingTime extends Model
     private $editor_user_name;                  // 編集ユーザー名
     private $positions;                         // 位置情報
     private $systemdate;
+
+    // ログインユーザーのアカウント
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
+    }
 
     // 日付
     public function getWorkingdateAttribute()
@@ -746,6 +758,7 @@ class TempCalcWorkingTime extends Model
 
     //--------------- パラメータ項目属性 -----------------------------------
 
+    private $param_account_id;                  // ログインユーザーのアカウント
     private $param_date_from;                   // 開始日付（00:00:00から）
     private $param_date_to;                     // 終了日付（23:59:59まで）
     private $param_employment_status;           // 雇用形態
@@ -754,6 +767,16 @@ class TempCalcWorkingTime extends Model
     private $array_record_time;                 // 日付範囲配列
     private $massegedata;                       // メッセージ
 
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
+    }
 
     // 開始日付（00:00:00から）
     public function getParamdatefromAttribute()

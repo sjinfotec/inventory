@@ -246,6 +246,23 @@ class Company extends Model
         $this->updated_at = $value;
     }
 
+    // ------------- implements --------------
+
+    private $param_account_id;                  // ログインユーザーのアカウント
+
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
+    }
+
+    // ------------- メソッド --------------
+
     /**
      * 会社情報登録
      *
@@ -306,9 +323,7 @@ class Company extends Model
                     'represent_kana',
                     'email'
             );
-            if (!empty($this->account_id)) {
-                $data->where('account_id',$this->account_id);
-            }
+            $data->where('account_id',$this->param_account_id);
             $result = $data->where('is_deleted',0)
             ->get();
             return $result;
@@ -343,6 +358,7 @@ class Company extends Model
             // companyの最大適用開始日付subquery
             $subquery = DB::table($this->table)
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->where('account_id', '=',$this->param_account_id)
                 ->where('apply_term_from', '<=',$target_date)
                 ->where('is_deleted', '=', 0);
             $mainquery = DB::table($this->table.' as t1')
@@ -350,6 +366,7 @@ class Company extends Model
                 ->JoinSub($subquery, 't2', function ($join) { 
                     $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
                 })
+                ->where('account_id', '=',$this->param_account_id)
                 ->where('t1.is_deleted', '=', 0)
                 ->get();
             return $mainquery;
@@ -372,9 +389,7 @@ class Company extends Model
     public function isExistsInfo(){
         try {
             $mainQuery = DB::table($this->table);
-            if (!empty($this->account_id)) {
-                $mainQuery->where('account_id',$this->account_id);
-            }
+            $mainQuery->where('account_id',$this->param_account_id);
             $is_exists = $mainQuery->where('is_deleted',0)
                 ->exists();
         }catch(\PDOException $pe){
@@ -398,9 +413,7 @@ class Company extends Model
     public function delInfo(){
         try {
             $mainQuery = DB::table($this->table);
-            if (!empty($this->account_id)) {
-                $mainQuery->where('account_id',$this->account_id);
-            }
+            $mainQuery->where('account_id',$this->param_account_id);
             $result = $mainQuery->where('is_deleted',0)->delete();
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$pe');

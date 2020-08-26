@@ -30,8 +30,8 @@ class FileDownloadController extends Controller
             // 打刻端末インストールダウンロード情報
             $login_user_code = $authusers->code;
             $login_user_code_4 = substr($login_user_code, 0 ,4);
-            $apicommon = new ApiCommonController();
             $account_id = $login_user_code_4;
+            $apicommon = new ApiCommonController();
             $downloadfile_no = Config::get('const.FILE_DOWNLOAD_NO.file5');
             $downloadfile_cnt = 0;
             $array_impl_isExistDownloadLog = array (

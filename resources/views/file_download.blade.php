@@ -41,7 +41,6 @@
 		<file-download
 			v-bind:authusers="{{ $authusers }}"
 			v-bind:isexistdownload="{{ $isexistdownload }}"
-			v-bind:accountdatas="{{ $account_datas }}"
 			v-bind:menudatas="{{ $menu_selections }}"
 			v-bind:const_generaldatas="{{ $const_general_datas }}"
 		></file-download>

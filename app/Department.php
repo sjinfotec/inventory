@@ -16,6 +16,7 @@ class Department extends Model
     protected $guarded = array('id');
 
     private $id;
+    private $account_id;                    // ログインユーザーのアカウント
     private $apply_term_from;               // 適用期間開始
     private $code;                          // 部署コード
     private $name;                          // 部署名
@@ -36,6 +37,17 @@ class Department extends Model
     public function setIdAttribute($value)
     {
         $this->id = $value;
+    }
+
+    // ログインユーザーのアカウント
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
     }
 
     // 適用期間開始
@@ -138,10 +150,21 @@ class Department extends Model
     }
 
     // ---------------- param --------------------------------
+    private $param_account_id;                    // ログインユーザーのアカウント
     private $param_apply_term_from;               // 適用期間開始
     private $param_code;                          // 部署コード
     private $param_killvalue;                     // 廃止開始日を条件に含む(true)
-    private $param_account_id;                    // ログインユーザーのアカウント
+
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
+    }
 
     // 適用期間開始
     public function getParamapplytermfromAttribute()
@@ -175,17 +198,6 @@ class Department extends Model
     {
         $this->param_killvalue = $value;
     }
-
-    // ログインユーザーのアカウント
-    public function getParamAccountidAttribute()
-    {
-        return $this->param_account_id;
-    }
-
-    public function setParamAccountidAttribute($value)
-    {
-        $this->param_account_id = $value;
-    }
     
 
     /**
@@ -209,7 +221,7 @@ class Department extends Model
                 $subquery->where('kill_from_date', '>',$this->param_apply_term_from);
             }
             $subquery
-                ->where('code', 'like', $this->param_account_id."%")
+                ->where('account_id', '=', $this->param_account_id)
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code');
 
@@ -222,7 +234,7 @@ class Department extends Model
             $case_sql2 = $case_sql2." END  as result";
             $mainquery = DB::table($this->table.' AS t1')
                 ->select(
-                    't1.id as id', 't1.code as code', 't1.name as name')
+                    't1.id as id', 't1.account_id as account_id', 't1.code as code', 't1.name as name')
                 ->selectRaw("DATE_FORMAT(t1.apply_term_from, '%Y-%m-%d') as apply_term_from")
                 ->selectRaw($case_sql1)
                 ->selectRaw($case_sql2)
@@ -233,7 +245,7 @@ class Department extends Model
                 $mainquery->where('t1.code', $this->param_code);
             }
             $details = $mainquery
-                ->where('t1.code', 'like', $this->param_account_id."%")
+                ->where('t1.account_id', '=', $this->param_account_id)
                 ->where('t1.is_deleted', 0)
                 ->orderBy('t1.apply_term_from', 'desc')
                 ->get();
@@ -257,7 +269,7 @@ class Department extends Model
     public function isExistsName(){
         try {
             $is_exists = DB::table($this->table)
-                ->where('code', 'like', $this->param_account_id."%")
+                ->where('account_id', '=', $this->param_account_id)
                 ->where('name',$this->name)
                 ->where('is_deleted',0)
                 ->exists();
@@ -284,6 +296,7 @@ class Department extends Model
         try {
             DB::table($this->table)->insert(
                 [
+                    'account_id' => $this->account_id,
                     'apply_term_from' => $this->apply_term_from,
                     'code' => $this->code,
                     'name' => $this->name,
@@ -311,7 +324,7 @@ class Department extends Model
     public function updateDepartment(){
         try {
             DB::table($this->table)
-                ->where('code', 'like', $this->param_account_id."%")
+                ->where('account_id', '=', $this->param_account_id)
                 ->where('id', $this->id)
                 ->where('is_deleted', 0)
                 ->update([
@@ -359,11 +372,11 @@ class Department extends Model
 
     private function maxCodeSql(){
         $sql = "select";
-        $sql .= " max(CAST((substr(code, 5,char_length(code) - 4)) as unsigned)) as max_code";
+        $sql .= " max(code) as max_code";
         $sql .= " from";
         $sql .= " departments";
         $sql .= " where";
-        $sql .= " code like '".$this->param_account_id."%'";
+        $sql .= " account_id = '".$this->param_account_id."'";
         $sql .= " and is_deleted = 0";
 
         return $sql;

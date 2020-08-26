@@ -563,54 +563,6 @@ export default {
         }
       }
     },
-    // 部署取得正常処理
-    getThenDepartment(response) {
-      this.settingmessage = [];
-      this.settingmessage.push(
-        "部署情報を設定する必要がありますので部署を設定します。"
-      );
-      this.htmlMessageSwalLink("通知",
-        this.settingmessage,
-        "info",
-        false,
-        true,
-        '<a href="http://192.168.0.47/create_department">部署を設定する</a>')
-      .then(result  => {
-        if (!result) {
-          if (this.settingsettings == 0) {
-            this.getThenSetting();
-          } else if (this.settingworkingtimetables == 0) {
-            // this.getThenSetting();
-          } else if (this.settingcalendarsettinginformations == 0) {
-            // this.getThenSetting();
-          } else if (this.settingusers == 0) {
-            // this.getThenSetting();
-          }
-        }
-      });
-    },
-    // 設定情報正常処理
-    getThenSetting(response) {
-      this.settingmessage = [];
-      this.settingmessage.push(
-        "労働時間の基本設定する必要がありますので基本設定します。"
-      );
-      this.htmlMessageSwalLink("通知",
-        this.settingmessage,
-        "info",
-        false,
-        true,
-        '<a href="http://192.168.0.47/setting_calc">労働時間基本を設定する</a>')
-        .then(result  => {
-            if (this.settingworkingtimetables == 0) {
-              // this.getThenSetting();
-            } else if (this.settingcalendarsettinginformations == 0) {
-              // this.getThenSetting();
-            } else if (this.settingusers == 0) {
-              // this.getThenSetting();
-            }
-        });
-    },
     // 更新系正常処理
     putThenHead(response, eventtext) {
       var messages = [];
@@ -640,11 +592,11 @@ export default {
       } else if (this.settingsettings == 0) {
         this.getThenSetting();
       } else if (this.settingworkingtimetables == 0) {
-        // this.getThenSetting();
-      } else if (this.settingcalendarsettinginformations == 0) {
-        // this.getThenSetting();
+        this.getThenWorkingtimetables();
       } else if (this.settingusers == 0) {
-        // this.getThenSetting();
+        this.getThenUsers();
+      } else if (this.settingcalendarsettinginformations == 0) {
+        this.getThenCalendarSettingInfos();
       }
     },
     inputClear() {

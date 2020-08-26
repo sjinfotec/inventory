@@ -23,6 +23,7 @@ class WorkTimeLog extends Model
     //--------------- メンバー属性 -----------------------------------
 
     private $id;
+    private $account_id;                    // ログインユーザーのアカウント
     private $user_code;                     // ユーザーコード
     private $department_code;               // 部署コード
     private $employment_status;             // 雇用形態
@@ -34,7 +35,7 @@ class WorkTimeLog extends Model
     private $is_deleted;                    // 削除フラグ
     private $systemdate;
 
-    // ユーザーコード
+    // ユーザーID
     public function getIdAttribute()
     {
         return $this->id;
@@ -43,6 +44,17 @@ class WorkTimeLog extends Model
     public function setIdAttribute($value)
     {
         $this->id = $value;
+    }
+
+    // ログインユーザーのアカウント
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
     }
 
     // ユーザーコード
@@ -164,6 +176,7 @@ class WorkTimeLog extends Model
     // ------------- implements --------------
 
     private $param_id;                          // id
+    private $param_account_id;                  // ログインユーザーのアカウント
     private $param_user_code;                   // ユーザー
     private $param_department_code;             // 部署コード
     private $param_employment_status;           // 雇用形態
@@ -180,6 +193,17 @@ class WorkTimeLog extends Model
     public function setParamidAttribute($value)
     {
         $this->param_id = $value;
+    }
+
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
     }
 
     // ユーザー

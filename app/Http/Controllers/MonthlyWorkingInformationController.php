@@ -119,8 +119,12 @@ class MonthlyWorkingInformationController extends Controller
                 $usercode = $params['usercode'];
             }
             // 会社名を取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
             $company_name = Config::get('const.MEMO_DATA.MEMO_DATA_015');
             $company_model = new Company();
+            $company_model->setParamAccountidAttribute($login_user_code_4);
             $company_model->setApplytermfromAttribute($dateto);
             $companys = $company_model->getCompanyInfoApply();
             foreach ($companys as $company_result) {
@@ -396,6 +400,9 @@ class MonthlyWorkingInformationController extends Controller
         // Log::debug(' dt2 = '.$dt2);
         // Log::debug(' dt3 = '.$dt2);
         // Log::debug(' dt_end = '.$dt_end);
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         DB::beginTransaction();
         try{
             // パラメータの内容でworking_time_datesを削除
@@ -409,7 +416,7 @@ class MonthlyWorkingInformationController extends Controller
             };
             //feature selection
             $feature_model = new FeatureItemSelection();
-            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamaccountidAttribute($login_user_code_4);
             $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
             $feature_data = $feature_model->getItem();
             $feature_attendance_count = 0;          // 出勤回数
@@ -428,11 +435,15 @@ class MonthlyWorkingInformationController extends Controller
                     $mode_list = intval($item->value_select);
                     // 2なら緊急取集使用
                     if ($mode_list == 2) {
+                        $user = Auth::user();
+                        $login_user_code = $user->code;
+                        $login_user_code_4 = substr($login_user_code, 0 ,4);
                         // 緊急収集のタイムテーブルを取得する
                         $time_table = new WorkingTimeTable();
                         $time_table->setNoAttribute(Config::get('const.C999_NAME.emergency_timetable_no'));
                         $time_table->setParamapplytermfromAttribute($datefrom);
-                        $em_details = $time_table->getDetail();
+                        $time_table->setParamaccountidAttribute($login_user_code_4);
+                        $em_details = $time_table->getDetailTimeTable();
                     }
                 }
                 if ($item->item_code == Config::get('const.C042.early_time')) {
@@ -600,6 +611,10 @@ class MonthlyWorkingInformationController extends Controller
         $before_user_code = null;
         $before_date = null;
         $before_result = null;
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $workingtimedate_model->setParamAccountidAttribute($login_user_code_4);
         // 指定パラメータよりレコード取得パラメータはメインで設定済み
         $workingtimedates = $workingtimedate_model->getWorkingTimeDateTimeFormat(
             Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'), $workingtimedate_model->getParamdatetoAttribute(), '');

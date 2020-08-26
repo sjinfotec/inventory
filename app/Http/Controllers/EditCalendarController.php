@@ -390,6 +390,7 @@ class EditCalendarController extends Controller
         $user = Auth::user();
         $login_department_code = $user->department_code;
         $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         $calendar_setting_model = new CalendarSettingInformation();
         $apicommon_model = new ApiCommonController();
         $work_time_model =  new WorkTime();
@@ -404,6 +405,7 @@ class EditCalendarController extends Controller
                     $isupdate = true;
                     // 一括更新の場合は、元データがあった場合休日であれば更新しない
                     if ($isbatch && $initptn == Config::get('const.C040.holiday_noupdate')) {
+                        $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
                         $calendar_setting_model->setParamdepartmentcodeAttribute($usersitem->department_code);
                         $calendar_setting_model->setParamemploymentstatusAttribute($usersitem->employment_status);
                         $calendar_setting_model->setParamusercodeAttribute($usersitem->code);
@@ -420,6 +422,7 @@ class EditCalendarController extends Controller
                     }
                     if ($isupdate) {
                         // カレンダー更新
+                        $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
                         $calendar_setting_model->setParamdepartmentcodeAttribute($usersitem->department_code);
                         $calendar_setting_model->setParamemploymentstatusAttribute($usersitem->employment_status);
                         $calendar_setting_model->setParamusercodeAttribute($usersitem->code);
@@ -454,6 +457,9 @@ class EditCalendarController extends Controller
                                     $target_ymd_date = $target_ymd->format('Y-m-d');
                                     $record_time = $target_ymd_date." 00:00:01";
                                     // Log::debug("$record_time = ".$record_time);
+                                    $work_time_model->setParamAccountidAttribute($login_user_code_4);
+                                    $work_time_model->setAccountidAttribute($login_user_code_4);
+                                    Log::debug('fixData login_user_code_4 = '.$login_user_code_4);
                                     $work_time_model->setUsercodeAttribute($usersitem->code);
                                     $work_time_model->setDepartmentcodeAttribute($usersitem->department_code);
                                     $work_time_model->setRecordtimeAttribute($record_time);
@@ -1096,7 +1102,10 @@ class EditCalendarController extends Controller
             $dt = $fromdate->copy()->subDay();
             $user = Auth::user();
             $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
             $calendar_setting_model->setCreateduserAttribute($login_user_code);
+            $calendar_setting_model->setAccountidAttribute($login_user_code_4);
+            $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
             foreach($users_datas as $users_data) {
                 $isins = true;
                 if (isset($employmentstatus)) {
@@ -1114,14 +1123,16 @@ class EditCalendarController extends Controller
                         $isins = false;
                     }
                 }
+                $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
                 if ($isins) {
+                    $calendar_setting_model->setAccountidAttribute($login_user_code_4);
                     $calendar_setting_model->getParamemploymentstatusAttribute($users_data->employment_status);
                     $calendar_setting_model->getParamdepartmentcodeAttribute($users_data->department_code);
                     $calendar_setting_model->setParamusercodeAttribute($users_data->code);
                     $calendar_setting_model->setParamfromdateAttribute(date_format($dtfrom, 'Ymd'));
                     $calendar_setting_model->setParamtodateAttribute(date_format($todate, 'Ymd'));
                     // 削除
-                    $calendar_setting_model->delDate();
+                    $calendar_setting_model->delCalendarSettingDate();
                     // 作成
                     $calendar_setting_model->setParamfromdateAttribute(date_format($dt, 'Ymd'));
                     $calendar_setting_model->setEmploymentstatusAttribute($users_data->employment_status);
@@ -1381,6 +1392,9 @@ class EditCalendarController extends Controller
         $datemonth = $params['datemonth'];
         $fromdate = "";
         $todate = "";
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         DB::beginTransaction();
         try{
             $calendar_setting_model = new CalendarSettingInformation();
@@ -1396,12 +1410,13 @@ class EditCalendarController extends Controller
             if ($employmentstatus == "") { $employmentstatus = null; }
             if ($departmentcode == "") { $departmentcode = null; }
             if ($usercode == "") { $usercode = null; }
+            $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
             $calendar_setting_model->getParamdepartmentcodeAttribute($employmentstatus);
             $calendar_setting_model->getParamemploymentstatusAttribute($departmentcode);
             $calendar_setting_model->setParamusercodeAttribute($usercode);
             $calendar_setting_model->setParamfromdateAttribute(date_format($fromdate, 'Ymd'));
             $calendar_setting_model->setParamtodateAttribute(date_format($todate, 'Ymd'));
-            $calendar_setting_model->delDate();
+            $calendar_setting_model->delCalendarSettingDate();
             // 作成
             $apicommon = new ApiCommonController();
             $users_datas = $apicommon->getUserDepartmentEmploymentRole($usercode, date_format($todate, 'Ymd'));
@@ -1409,9 +1424,8 @@ class EditCalendarController extends Controller
             $dt->subDay();
             $calendar_setting_model->setParamfromdateAttribute(date_format($dt, 'Ymd'));
             $calendar_setting_model->setParamtodateAttribute(date_format($todate, 'Ymd'));
-            $user = Auth::user();
-            $login_user_code = $user->code;
             $calendar_setting_model->setCreateduserAttribute($login_user_code);
+            $calendar_setting_model->setAccountidAttribute($login_user_code_4);
             foreach($users_datas as $users_data) {
                 $calendar_setting_model->setDepartmentcodeAttribute($users_data->department_code);
                 $calendar_setting_model->setEmploymentstatusAttribute($users_data->employment_status);

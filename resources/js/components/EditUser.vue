@@ -1844,7 +1844,8 @@ export default {
       iscsvbutton: false,
       valuefromdate: "",
       valuetodate: "",
-      DatePickerFormat: "yyyy年MM月dd日"
+      DatePickerFormat: "yyyy年MM月dd日",
+      infoMsgcnt: 0
     };
   },
   // マウント時
@@ -3256,6 +3257,7 @@ export default {
         );
         this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
         this.refreshUserList();
+        this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -3272,6 +3274,7 @@ export default {
         this.$toasted.show("ユーザーを" + eventtext + "しました");
         this.refreshUserList();
         this.getItem();
+        this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -3300,6 +3303,7 @@ export default {
       var res = response.data;
       if (res.result) {
         this.$toasted.show("ユーザーを" + eventtext + "しました");
+        this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -3307,6 +3311,15 @@ export default {
           this.serverCatch("ユーザー", eventtext);
         }
       }
+    },
+    
+    // 設定要否取得処理
+    getNotSetting() {
+      if (this.infoMsgcnt > 0) { return; }
+      if (this.settingcalendarsettinginformations == 0) {
+        this.getThenCalendarSettingInfos();
+      }
+      this.infoMsgcnt++;
     },
     // 異常処理
     serverCatch(kbn, eventtext) {

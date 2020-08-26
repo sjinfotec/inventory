@@ -399,7 +399,7 @@ class DownloadLog extends Model
             if (!empty($this->param_downloadfile_name)) {
                 $mainQuery->where('downloadfile_name',$this->param_downloadfile_name);
             }
-            if ($this->param_downloadfile_cnt != null && $this->param_downloadfile_cnt != "") {
+            if ($this->param_downloadfile_cnt !== null && $this->param_downloadfile_cnt !== "") {
                 $mainQuery->where('downloadfile_cnt', ">", $this->param_downloadfile_cnt);
             }
             $is_exists = $mainQuery
