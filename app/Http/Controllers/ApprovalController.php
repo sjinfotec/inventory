@@ -48,7 +48,7 @@ class ApprovalController extends Controller
         $usercode = $apicommon->setRequestQeury($request->usercode);
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         if ($usercode == null || $usercode == "") {
             $usercode = $login_user_code;
         }
@@ -63,7 +63,7 @@ class ApprovalController extends Controller
         try {
             // パラメータ設定
             $approval_model = new Approval();
-            $approval_model->setParamAccountidAttribute($login_user_code_4);
+            $approval_model->setParamAccountidAttribute($login_account_id);
             $approval_model->setParamDoccodeAttribute($doc_code);
             $approval_model->setParamUsercodeAttribute($usercode);
             // 適用期間日付の取得
@@ -466,14 +466,14 @@ class ApprovalController extends Controller
             }
             $user = Auth::user();
             $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $login_account_id = $user->account_id;
                 // 承認テーブルに登録
             $approval_model = new Approval();
             $approval_model->setNoAttribute($target_demand_no);
             $approval_model->setDoccodeAttribute($doc_code);
             // 承認者の承認順番を取得
             $confirm_model = new Confirm();
-            $confirm_model->setParamAccountidAttribute($login_user_code_4);
+            $confirm_model->setParamAccountidAttribute($login_account_id);
             $confirm_model->setParamConfirmdepartmentcodeAttribute($confirm_departmentcode);
             $confirm_model->setParamUsercodeAttribute($confirm_user_code);
             $confirms = $confirm_model->selectConfirm();

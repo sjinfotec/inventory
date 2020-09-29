@@ -34,12 +34,35 @@ class UserAddController extends Controller
     public function index()
     {
         $authusers = Auth::user();
-        $apicommon = new ApiCommonController();
+        $login_user_code = $authusers->code;
+        $accountid = $authusers->account_id;
+        $edition = Config::get('const.EDITION.EDITION');
         // 設定項目要否判定
+        $apicommon = new ApiCommonController();
         $settingtable = $apicommon->getNotSetting();
+        // 打刻端末インストールダウンロード情報
+        $array_downloadfile_no = array();
+        $array_downloadfile_no[] = Config::get('const.FILE_DOWNLOAD_NO.file5');
+        $array_downloadfile_no[] = Config::get('const.FILE_DOWNLOAD_NO.file6');
+        $downloadfile_cnt = 0;
+        $array_impl_isExistDownloadLog = array (
+            'account_id' => $accountid,
+            'array_downloadfile_no' => $array_downloadfile_no,
+            'downloadfile_date' => null,
+            'downloadfile_time' => null,
+            'downloadfile_name' => null,
+            'downloadfile_cnt' => $downloadfile_cnt
+        );
+        $isExistDownloadLogs = $apicommon->isExistDownloadLog($array_impl_isExistDownloadLog);
+        $isexistdownload = "0";
+        if ($isExistDownloadLogs) {
+            $isexistdownload = "1";
+        }
+
         return view('edit_user',
             compact(
                 'authusers',
+                'isexistdownload',
                 'settingtable'
             ));
     }
@@ -78,12 +101,12 @@ class UserAddController extends Controller
             // ログインIDチェック
             $target_user_code = null;
             if ($details['code'] != "") {
-                $user = Auth::user();
-                $login_user_code = $user->code;
-                $login_user_code_4 = substr($login_user_code, 0 ,4);
+                $authuser = Auth::user();
+                $login_user_code = $authuser->code;
+                $login_account_id = $authuser->account_id;
                 $user_model = new UserModel();
-                $target_user_code = $login_user_code_4.$details['code'];
-                $user_model->setParamAccountidAttribute($login_user_code_4);
+                $target_user_code = $details['code'];
+                $user_model->setParamAccountidAttribute($login_account_id);
                 $user_model->setParamcodeAttribute($target_user_code);
                 $isExists = $user_model->isExistsCode();
                 if ($isExists) {
@@ -96,7 +119,7 @@ class UserAddController extends Controller
                 }
             }
             // insert
-            $result = $this->insert($details, $login_user_code_4, $target_user_code);
+            $result = $this->insert($details, $login_account_id, $target_user_code);
             if (!$result) {
                 Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "calendarparam", Config::get('const.LOG_MSG.parameter_illegal')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
@@ -130,8 +153,8 @@ class UserAddController extends Controller
         try{
             $users = new UserModel();
             $systemdate = Carbon::now();
-            $user = Auth::user();
-            $user_code = $user->code;
+            $authuser = Auth::user();
+            $user_code = $authuser->code;
             // $users->setApplytermfromAttribute(Config::get('const.INIT_DATE.initdate'));
             $applyfrom = new Carbon($data['apply_term_from']);
             $users->setAccountidAttribute($account_id);
@@ -163,7 +186,6 @@ class UserAddController extends Controller
             DB::commit();
             return true;
         }catch(\PDOException $pe){
-            Log::error($pe->getMessage());
             DB::rollBack();
             throw $pe;
         }catch(\Exception $e){
@@ -200,9 +222,9 @@ class UserAddController extends Controller
             // 作成
             $user = Auth::user();
             $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $login_account_id = $user->account_id;
             $calendar_setting_model->setCreateduserAttribute($login_user_code);
-            $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
+            $calendar_setting_model->setParamAccountidAttribute($login_account_id);
             $calendar_setting_model->getParamemploymentstatusAttribute($users->getEmploymentstatusAttribute());
             $calendar_setting_model->getParamdepartmentcodeAttribute($users->getDepartmentcodeAttribute());
             $calendar_setting_model->setParamusercodeAttribute($users->getCodeAttribute());
@@ -218,7 +240,7 @@ class UserAddController extends Controller
             $calendar_setting_model->setDepartmentcodeAttribute($users->getDepartmentcodeAttribute());
             $calendar_setting_model->setUsercodeAttribute($users->getCodeAttribute());
             $calendar_setting_model->setWorkingtimetablenoAttribute($users->getWorkingtimetablenoAttribute());
-            $calendar_setting_model->setAccountidAttribute($login_user_code_4);
+            $calendar_setting_model->setAccountidAttribute($login_account_id);
             $results = $calendar_setting_model->getCalenderDateYear(Config::get('const.CALENDAR_PTN.ptn1'), $datas);
             $temp_array = array();
             foreach($results as $result) {
@@ -393,13 +415,15 @@ class UserAddController extends Controller
     private function update($data, $before_data){
         $systemdate = Carbon::now();
         $user = Auth::user();
-        $user_code = $user->code;
+        $login_user_code = $user->code;
+        $login_account_id = $user->account_id;
         DB::beginTransaction();
         try{
             $user_model = new UserModel();
             $carbon = new Carbon($data['apply_term_from']);
             $temp_from = $carbon->copy()->format('Ymd');
             $apply_term_from = $temp_from;
+            $user_model->setAccountidAttribute($login_account_id);
             $user_model->setApplytermfromAttribute($apply_term_from);
             $user_model->setCodeAttribute($data['code']);
             $user_model->setDepartmentcodeAttribute($data['department_code']);
@@ -418,13 +442,13 @@ class UserAddController extends Controller
             $user_model->setEmailAttribute($data['email']);
             $user_model->setMobileEmailAttribute($data['mobile_email']);
             $user_model->setCreatedatAttribute($systemdate);
-            $user_model->setCreateduserAttribute($user_code);
+            $user_model->setCreateduserAttribute($login_user_code);
             $user_model->setManagementAttribute($data['management']);
             $user_model->setRoleAttribute($data['role']);
             $isUpdateDepartment = false;
             $isUpdateEmployment = false;
             if ($data['id'] == "" || $data['id'] == null) {
-                $user_model->setCreateduserAttribute($user_code);
+                $user_model->setCreateduserAttribute($login_user_code);
                 $user_model->setCreatedatAttribute($systemdate);
                 // // Log::debug('update password = '.$data['code']);
                 $user_model->setPasswordAttribute(bcrypt($data['code']));
@@ -433,7 +457,7 @@ class UserAddController extends Controller
                 $isUpdateEmployment = true;
             } else {
                 $user_model->setIdAttribute($data['id']);   
-                $user_model->setUpdateduserAttribute($user_code);
+                $user_model->setUpdateduserAttribute($login_user_code);
                 $user_model->setUpdatedatAttribute($systemdate);
                 $user_model->updateUser();
                 $updateapplytermfrom = null;
@@ -466,6 +490,8 @@ class UserAddController extends Controller
                 $array_impl_upDepartmentEmployment = array (
                     'isUpdateDepartment' => $isUpdateDepartment,
                     'isUpdateEmployment' => $isUpdateEmployment,
+                    'login_user_code' => $login_user_code,
+                    'account_id' => $login_account_id,
                     'details' => $data,
                     'before_details' => $before_data
                 );
@@ -560,6 +586,9 @@ class UserAddController extends Controller
         $this->array_messagedata = array();
         $code = "";
         $result = true;
+        $authuser = Auth::user();
+        $login_user_code = $authuser->code;
+        $login_account_id = $authuser->account_id;
         try {
             // パラメータチェック
             $params = array();
@@ -581,6 +610,7 @@ class UserAddController extends Controller
                 );
             }
             $details = $params['details'];
+            Log::debug('useradd del id = '.$details['id']);
             $id = $details['id'];
             DB::beginTransaction();
             // ユーザー履歴削除
@@ -591,6 +621,8 @@ class UserAddController extends Controller
                 'isUpdateDepartment' => true,
                 'isUpdateEmployment' => true,
                 'isDelete' => true,
+                'login_user_code' => $login_user_code,
+                'account_id' => $login_account_id,
                 'details' => $details
             );
             $this->upDepartmentEmploymentTableBefore($array_impl_upDepartmentEmploymentTableBefore);
@@ -665,7 +697,11 @@ class UserAddController extends Controller
             if (isset($params['killvalue'])) {
                 $killvalue = $params['killvalue'];
             }
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
             $users = new UserModel();
+            $users->setParamAccountidAttribute($login_account_id);
             $users->setCodeAttribute($code);
             $users->setKillvalueAttribute($killvalue);
             $details = $users->getUserDetails();
@@ -721,7 +757,6 @@ class UserAddController extends Controller
             );
         }catch(\PDOException $pe){
             DB::rollBack();
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
@@ -787,14 +822,15 @@ class UserAddController extends Controller
     public function insertCsv($usersups){
         DB::beginTransaction();
         try {
-            $login_user_code = Auth::user()->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $authuser = Auth::user();
+            $login_user_code = $authuser->code;
+            $login_account_id = $authuser->account_id;
             $systemdate = Carbon::now();
             $temp_systemdate = $systemdate->copy()->format('Ymd');
             // 部署情報
             $department_model = new Department();
             $department_model->setParamapplytermfromAttribute($temp_systemdate);
-            $department_model->setParamAccountidAttribute($login_user_code_4);
+            $department_model->setParamAccountidAttribute($login_account_id);
             $departments = $department_model->getDetails();
             // 雇用形態情報
             $generalcode_model = new GeneralCodes();
@@ -803,11 +839,13 @@ class UserAddController extends Controller
             // タイムテーブル情報
             $taimetable_model = new WorkingTimeTable();
             $taimetable_model->setParamapplytermfromAttribute($temp_systemdate);
-            $taimetable_model->setParamaccountidAttribute($login_user_code_4);
+            $taimetable_model->setParamaccountidAttribute($login_account_id);
             $taimetables = $taimetable_model->getTimeTables();
             // 全部物理削除
             $user_model = new UserModel();
-            $user_model->setParamsystemcodeAttribute($login_user_code_4);
+            $user_model->setParamsystemcodeAttribute($login_account_id);
+            $user_model->setParamAccountidAttribute($login_account_id);
+            $user_model->setAccountidAttribute($login_account_id);
             //$user_model->setParamsystemcodeAttribute('CSD1000L');
             $user_model->delUserData();
             foreach ($usersups as $item) {
@@ -892,7 +930,6 @@ class UserAddController extends Controller
             DB::commit();
         }catch(\PDOException $pe){
             DB::rollBack();
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.data_insert_error'));
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
@@ -912,11 +949,11 @@ class UserAddController extends Controller
     private function upDepartmentEmployment($params){
         $isUpdateDepartment = $params['isUpdateDepartment'];
         $isUpdateEmployment = $params['isUpdateEmployment'];
+        $login_user_code = $params['login_user_code'];
+        $account_id = $params['account_id'];
         $details = $params['details'];
         $before_details = $params['before_details'];
         $systemdate = Carbon::now();
-        $user = Auth::user();
-        $login_user_code = $user->code;
         try{
             $department_code = null;
             $employment_status = null;
@@ -938,6 +975,8 @@ class UserAddController extends Controller
                 $array_impl_upDepartmentEmploymentTable = array (
                     'isUpdateDepartment' => $isUpdateDepartment,
                     'isUpdateEmployment' => $isUpdateEmployment,
+                    'login_user_code' => $login_user_code,
+                    'account_id' => $account_id,
                     'details' => $details,
                     'before_details' => $before_details,
                     'array_update' => $array_update
@@ -962,6 +1001,8 @@ class UserAddController extends Controller
     private function upDepartmentEmploymentTable($params){
         $isUpdateDepartment = $params['isUpdateDepartment'];
         $isUpdateEmployment = $params['isUpdateEmployment'];
+        $login_user_code = $params['login_user_code'];
+        $account_id = $params['account_id'];
         $details = $params['details'];
         $before_details = $params['before_details'];
         $array_update = $params['array_update'];
@@ -971,6 +1012,8 @@ class UserAddController extends Controller
         try{
             // upDETable implement
             $array_impl_upDETable = array (
+                'login_user_code' => $login_user_code,
+                'account_id' => $account_id,
                 'details' => $details,
                 'array_update' => $array_update
             );
@@ -999,6 +1042,8 @@ class UserAddController extends Controller
                         'isUpdateDepartment' => $isUpdateDepartment,
                         'isUpdateEmployment' => $isUpdateEmployment,
                         'isDelete' => false,
+                        'login_user_code' => $login_user_code,
+                        'account_id' => $account_id,
                         'details' => $details
                     );
                     $this->upDepartmentEmploymentTableBefore($array_impl_upDepartmentEmploymentTableBefore);
@@ -1020,6 +1065,8 @@ class UserAddController extends Controller
      * @return boolean
      */
     private function upDEAttendancelogsTable($params){
+        $login_user_code = $params['login_user_code'];
+        $account_id = $params['account_id'];
         $details = $params['details'];
         $array_update = $params['array_update'];
         $applyfrom = new Carbon($details['apply_term_from']);
@@ -1027,6 +1074,7 @@ class UserAddController extends Controller
         try{
             // attendance_logsの更新
             $attendancelog_model = new AttendanceLog();
+            $attendancelog_model->setParamAccountidAttribute($account_id);
             $attendancelog_model->setParamusercodeAttribute($details['code']);
             $attendancelog_model->setParamworkingdatefromAttribute($applyfromYmd);
             $res = $attendancelog_model->isExist();
@@ -1049,22 +1097,21 @@ class UserAddController extends Controller
      * @return boolean
      */
     private function upDECalendarsettinginformationsTable($params){
+        $login_user_code = $params['login_user_code'];
+        $account_id = $params['account_id'];
         $details = $params['details'];
         $array_update = $params['array_update'];
         $applyfrom = new Carbon($details['apply_term_from']);
         $applyfromYmd = $applyfrom->format('Ymd');
-        $user = Auth::user();
-        $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
         try{
             // acalendar_setting_informationsの更新
             $calendarsetting_model = new CalendarSettingInformation();
-            $calendarsetting_model->setParamAccountidAttribute($login_user_code_4);
+            $calendarsetting_model->setParamAccountidAttribute($account_id);
             $calendarsetting_model->setParamusercodeAttribute($details['code']);
             $calendarsetting_model->setParamfromdateAttribute($applyfromYmd);
             $res = $calendarsetting_model->isExistsCalendarSettingDate();
             if ($res) {
-                $calendarsetting_model->updateCommon($array_update);
+                $calendarsetting_model->updateCalecdarSettingCommon($array_update);
             }
         }catch(\PDOException $pe){
             throw $pe;
@@ -1082,6 +1129,8 @@ class UserAddController extends Controller
      * @return boolean
      */
     private function upDECardinformationsTable($params){
+        $login_user_code = $params['login_user_code'];
+        $account_id = $params['account_id'];
         $details = $params['details'];
         $array_update = $params['array_update'];
         // 雇用形態削除
@@ -1091,10 +1140,11 @@ class UserAddController extends Controller
         try{
             // card_informationsの更新
             $card_model = new CardInformation();
+            $card_model->setParamAccountidAttribute($account_id);
             $card_model->setParamusercodeAttribute($details['code']);
-            $res = $card_model->isExists();
+            $res = $card_model->isCardExists();
             if ($res) {
-                $card_model->updateCommon($array_update);
+                $card_model->updateCardCommon($array_update);
             }
         }catch(\PDOException $pe){
             throw $pe;
@@ -1112,6 +1162,8 @@ class UserAddController extends Controller
      * @return boolean
      */
     private function upDEWorktimelogsTable($params){
+        $login_user_code = $params['login_user_code'];
+        $account_id = $params['account_id'];
         $details = $params['details'];
         $array_update = $params['array_update'];
         $applyfrom = new Carbon($details['apply_term_from']);
@@ -1120,11 +1172,12 @@ class UserAddController extends Controller
         try{
             // work_time_logsのapplyfrom以降の出勤データを取得し開始時刻にする
             $worktimelog_model = new WorkTimeLog();
+            $worktimelog_model->setParamAccountidAttribute($account_id);
             $worktimelog_model->setParamusercodeAttribute($details['code']);
             $worktimelog_model->setParamrecordtimefromAttribute($applyfrom);
             $worktimelog_model->setParammodeAttribute(Config::get('const.C005.attendance_time'));
             $result_record_time1 = null;
-            $results = $worktimelog_model->getDetails();
+            $results = $worktimelog_model->getWorkTimelogDetails();
             foreach($results as $item) {
                 if (isset($item->record_time)) {
                     $result_record_time1 = $item->record_time;
@@ -1136,7 +1189,7 @@ class UserAddController extends Controller
             $worktimelog_model->setParamrecordtimefromAttribute($w_plus1_applyfromYmd);
             $worktimelog_model->setParammodeAttribute(null);
             $result_record_time2 = null;
-            $results = $worktimelog_model->getDetails();
+            $results = $worktimelog_model->getWorkTimelogDetails();
             foreach($results as $item) {
                 if (isset($item->record_time)) {
                     $result_record_time2 = $item->record_time;
@@ -1165,7 +1218,7 @@ class UserAddController extends Controller
                 $worktimelog_model->setParamusercodeAttribute($details['code']);
                 $worktimelog_model->setParamrecordtimefromnoneditAttribute($from_record_time);
                 $worktimelog_model->setParammodeAttribute(null);
-                $worktimelog_model->updateCommon($array_update);
+                $worktimelog_model->updateWorkTimelogCommon($array_update);
             }
         }catch(\PDOException $pe){
             throw $pe;
@@ -1183,6 +1236,8 @@ class UserAddController extends Controller
      * @return boolean
      */
     private function upDEWorktimeTable($params){
+        $login_user_code = $params['login_user_code'];
+        $account_id = $params['account_id'];
         $details = $params['details'];
         $array_update = $params['array_update'];
         // 雇用形態削除
@@ -1193,11 +1248,12 @@ class UserAddController extends Controller
         try{
             // work_timeのapplyfrom以降の出勤データを取得し開始時刻にする
             $worktime_model = new WorkTime();
+            $worktime_model->setParamAccountidAttribute($account_id);
+            $worktime_model->setParamModeAttribute(Config::get('const.C005.attendance_time'));
             $worktime_model->setParamUsercodeAttribute($details['code']);
             $worktime_model->setParamdatefromAttribute($applyfrom);
-            $worktime_model->setParamModeAttribute(Config::get('const.C005.attendance_time'));
             $result_record_time1 = null;
-            $results = $worktime_model->getDetails();
+            $results = $worktime_model->getWorkTimeDetails();
             foreach($results as $item) {
                 if (isset($item->record_time)) {
                     $result_record_time1 = $item->record_time;
@@ -1209,7 +1265,7 @@ class UserAddController extends Controller
             $worktime_model->setParamdatefromAttribute($w_plus1_applyfromYmd);
             $worktime_model->setParamModeAttribute(null);
             $result_record_time2 = null;
-            $results = $worktime_model->getDetails();
+            $results = $worktime_model->getWorkTimeDetails();
             foreach($results as $item) {
                 if (isset($item->record_time)) {
                     $result_record_time2 = $item->record_time;
@@ -1238,7 +1294,7 @@ class UserAddController extends Controller
                 $worktime_model->setParamUsercodeAttribute($details['code']);
                 $worktime_model->setParamdatefromNoneditAttribute($from_record_time);
                 $worktime_model->setParamModeAttribute(null);
-                $worktime_model->updateCommon($array_update);
+                $worktime_model->updateWorkTimeCommon($array_update);
             }
         }catch(\PDOException $pe){
             throw $pe;
@@ -1256,6 +1312,8 @@ class UserAddController extends Controller
      * @return boolean
      */
     private function upDEWorkingtimedatesTable($params){
+        $login_user_code = $params['login_user_code'];
+        $account_id = $params['account_id'];
         $details = $params['details'];
         $array_update = $params['array_update'];
         $applyfrom = new Carbon($details['apply_term_from']);
@@ -1263,11 +1321,12 @@ class UserAddController extends Controller
         try{
             // working_time_datesの更新
             $workingtimedate_model = new WorkingTimedate();
+            $workingtimedate_model->setParamAccountidAttribute($account_id);
             $workingtimedate_model->setParamusercodeAttribute($details['code']);
             $workingtimedate_model->setParamdatefromAttribute($applyfromYmd);
-            $res = $workingtimedate_model->isExist();
+            $res = $workingtimedate_model->isExistsWorkingTimeDate();
             if ($res) {
-                $workingtimedate_model->updateCommon($array_update);
+                $workingtimedate_model->updateWorkingTimeDateCommon($array_update);
             }
         }catch(\PDOException $pe){
             throw $pe;
@@ -1288,16 +1347,17 @@ class UserAddController extends Controller
         $isUpdateDepartment = $params['isUpdateDepartment'];
         $isUpdateEmployment = $params['isUpdateEmployment'];
         $isDelete = $params['isDelete'];
+        $login_user_code = $params['login_user_code'];
+        $account_id = $params['account_id'];
         $details = $params['details'];
         $applyfrom = new Carbon($details['apply_term_from']);
         $applyfromYmd = $applyfrom->format('Ymd');
         $w_minus1_applyfromYmd = date_format($applyfrom->copy()->subDay(), 'Ymd');
         $systemdate = Carbon::now();
-        $user = Auth::user();
-        $login_user_code = $user->code;
         try{
             // users情報を取得（更新削除されたあとの状態となる）
             $users = new UserModel();
+            $users->setParamAccountidAttribute($account_id);
             $users->setCodeAttribute($details['code']);
             $users->setKillvalueAttribute(false);
             $users_details = $users->getUserDetails();
@@ -1324,6 +1384,7 @@ class UserAddController extends Controller
                             'isUpdateDepartment' => $isUpdateDepartment,
                             'isUpdateEmployment' => $isUpdateEmployment,
                             'login_user_code' => $login_user_code,
+                            'account_id' => $account_id,
                             'systemdate' => $systemdate
                         );
                         // attendance_logsの更新
@@ -1368,12 +1429,14 @@ class UserAddController extends Controller
         $isUpdateDepartment = $params['isUpdateDepartment'];
         $isUpdateEmployment = $params['isUpdateEmployment'];
         $login_user_code = $params['login_user_code'];
+        $account_id = $params['account_id'];
         $systemdate = $params['systemdate'];
         try{
             // 修正前の適用日付から修正後の適用日付－１日まで更新
             // ただし削除時は以前の適用日付以降を更新
             // attendance_logsの更新
             $attendancelog_model = new AttendanceLog();
+            $attendancelog_model->setParamAccountidAttribute($account_id);
             $attendancelog_model->setParamusercodeAttribute($user_code);
             $attendancelog_model->setParamworkingdatefromAttribute($item_applyfromYmd);
             if (!$isDelete) {
@@ -1421,16 +1484,14 @@ class UserAddController extends Controller
         $isUpdateDepartment = $params['isUpdateDepartment'];
         $isUpdateEmployment = $params['isUpdateEmployment'];
         $login_user_code = $params['login_user_code'];
+        $account_id = $params['account_id'];
         $systemdate = $params['systemdate'];
-        $user = Auth::user();
-        $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
         try{
             // 修正前の適用日付から修正後の適用日付－１日まで更新
             // ただし削除時は以前の適用日付以降を更新
             // calendar_setting_informationsの更新
             $calendarsetting_model = new CalendarSettingInformation();
-            $calendarsetting_model->setParamAccountidAttribute($login_user_code_4);
+            $calendarsetting_model->setParamAccountidAttribute($account_id);
             $calendarsetting_model->setParamusercodeAttribute($user_code);
             $calendarsetting_model->setParamfromdateAttribute($item_applyfromYmd);
             if (!$isDelete) {
@@ -1449,7 +1510,7 @@ class UserAddController extends Controller
                 if (count($array_before_update) > 0) {
                     $array_before_update = array_merge($array_before_update, ['updated_user' => $login_user_code]);
                     $array_before_update = array_merge($array_before_update, ['updated_at' => $systemdate]);
-                    $calendarsetting_model->updateCommon($array_before_update);
+                    $calendarsetting_model->updateCalecdarSettingCommon($array_before_update);
                 }
             }
         }catch(\PDOException $pe){
@@ -1478,12 +1539,14 @@ class UserAddController extends Controller
         $isUpdateDepartment = $params['isUpdateDepartment'];
         $isUpdateEmployment = $params['isUpdateEmployment'];
         $login_user_code = $params['login_user_code'];
+        $account_id = $params['account_id'];
         $systemdate = $params['systemdate'];
         try{
             // card_informationsの更新
             $card_model = new CardInformation();
+            $card_model->setParamAccountidAttribute($account_id);
             $card_model->setParamusercodeAttribute($user_code);
-            $res = $card_model->isExists();
+            $res = $card_model->isCardExists();
             if ($res) {
                 $array_before_update = array();
                 if ($isUpdateDepartment) {
@@ -1493,7 +1556,7 @@ class UserAddController extends Controller
                 if (count($array_before_update) > 0) {
                     $array_before_update = array_merge($array_before_update, ['updated_user' => $login_user_code]);
                     $array_before_update = array_merge($array_before_update, ['updated_at' => $systemdate]);
-                    $card_model->updateCommon($array_before_update);
+                    $card_model->updateCardCommon($array_before_update);
                 }
             }
         }catch(\PDOException $pe){
@@ -1522,12 +1585,14 @@ class UserAddController extends Controller
         $isUpdateDepartment = $params['isUpdateDepartment'];
         $isUpdateEmployment = $params['isUpdateEmployment'];
         $login_user_code = $params['login_user_code'];
+        $account_id = $params['account_id'];
         $systemdate = $params['systemdate'];
         try{
             // 修正前の適用日付から修正後の適用日付－１日まで更新
             // ただし削除時は以前の適用日付以降を更新
             // work_time_logsの更新
             $worktimelog_model = new WorkTimeLog();
+            $worktimelog_model->setParamAccountidAttribute($account_id);
             $worktimelog_model->setParamusercodeAttribute($user_code);
             $worktimelog_model->setParamrecordtimefromAttribute($item_applyfromYmd);
             if (!$isDelete) {
@@ -1535,7 +1600,7 @@ class UserAddController extends Controller
             }
             $worktimelog_model->setParammodeAttribute(Config::get('const.C005.attendance_time'));
             $result_record_time1 = null;
-            $results = $worktimelog_model->getDetails();
+            $results = $worktimelog_model->getWorkTimelogDetails();
             foreach($results as $item) {
                 if (isset($item->record_time)) {
                     $result_record_time1 = $item->record_time;
@@ -1551,7 +1616,7 @@ class UserAddController extends Controller
                     $worktimelog_model->setParamrecordtimetoAttribute($w_minus1_applyfromYmd);
                 }
                 $worktimelog_model->setParammodeAttribute(null);
-                $results = $worktimelog_model->getDetails();
+                $results = $worktimelog_model->getWorkTimelogDetails();
                 foreach($results as $item) {
                     if (isset($item->record_time)) {
                         $result_record_time2 = $item->record_time;
@@ -1595,7 +1660,7 @@ class UserAddController extends Controller
                         $worktimelog_model->setParamrecordtimetoAttribute($w_minus1_applyfromYmd);
                     }
                     $worktimelog_model->setParammodeAttribute(null);
-                    $worktimelog_model->updateCommon($array_before_update);
+                    $worktimelog_model->updateWorkTimelogCommon($array_before_update);
                 }
             }
         }catch(\PDOException $pe){
@@ -1624,12 +1689,14 @@ class UserAddController extends Controller
         $isUpdateDepartment = $params['isUpdateDepartment'];
         $isUpdateEmployment = $params['isUpdateEmployment'];
         $login_user_code = $params['login_user_code'];
+        $account_id = $params['account_id'];
         $systemdate = $params['systemdate'];
         try{
             // 修正前の適用日付から修正後の適用日付－１日まで更新
             // ただし削除時は以前の適用日付以降を更新
             // work_timeの更新
             $worktime_model = new WorkTime();
+            $worktime_model->setParamAccountidAttribute($account_id);
             $worktime_model->setParamUsercodeAttribute($user_code);
             $worktime_model->setParamdatefromAttribute($item_applyfromYmd);
             if (!$isDelete) {
@@ -1637,7 +1704,7 @@ class UserAddController extends Controller
             }
             $worktime_model->setParamModeAttribute(Config::get('const.C005.attendance_time'));
             $result_record_time1 = null;
-            $results = $worktime_model->getDetails();
+            $results = $worktime_model->getWorkTimeDetails();
             foreach($results as $item) {
                 if (isset($item->record_time)) {
                     $result_record_time1 = $item->record_time;
@@ -1653,7 +1720,7 @@ class UserAddController extends Controller
                     $worktime_model->setParamdatetoAttribute($w_minus1_applyfromYmd);
                 }
                 $worktime_model->setParamModeAttribute(null);
-                $results = $worktime_model->getDetails();
+                $results = $worktime_model->getWorkTimeDetails();
                 foreach($results as $item) {
                     if (isset($item->record_time)) {
                         $result_record_time2 = $item->record_time;
@@ -1694,7 +1761,7 @@ class UserAddController extends Controller
                         $worktime_model->setParamdatetoAttribute($w_minus1_applyfromYmd);
                     }
                     $worktime_model->setParamModeAttribute(null);
-                    $worktime_model->updateCommon($array_before_update);
+                    $worktime_model->updateWorkTimeCommon($array_before_update);
                 }
 
             }
@@ -1724,18 +1791,20 @@ class UserAddController extends Controller
         $isUpdateDepartment = $params['isUpdateDepartment'];
         $isUpdateEmployment = $params['isUpdateEmployment'];
         $login_user_code = $params['login_user_code'];
+        $account_id = $params['account_id'];
         $systemdate = $params['systemdate'];
         try{
             // 修正前の適用日付から修正後の適用日付－１日まで更新
             // ただし削除時は以前の適用日付以降を更新
             // working_time_datesの更新
             $workingtimedate_model = new WorkingTimedate();
+            $workingtimedate_model->setParamAccountidAttribute($account_id);
             $workingtimedate_model->setParamusercodeAttribute($user_code);
             $workingtimedate_model->setParamdatefromAttribute($item_applyfromYmd);
             if (!$isDelete) {
                 $workingtimedate_model->setParamdatetoAttribute($w_minus1_applyfromYmd);
             }
-            $res = $workingtimedate_model->isExist();
+            $res = $workingtimedate_model->isExistsWorkingTimeDate();
             if ($res) {
                 $array_before_update = array();
                 if ($isUpdateDepartment) {
@@ -1748,7 +1817,7 @@ class UserAddController extends Controller
                 if (count($array_before_update) > 0) {
                     $array_before_update = array_merge($array_before_update, ['updated_user' => $login_user_code]);
                     $array_before_update = array_merge($array_before_update, ['updated_at' => $systemdate]);
-                    $workingtimedate_model->updateCommon($array_before_update);
+                    $workingtimedate_model->updateWorkingTimeDateCommon($array_before_update);
                 }
             }
         }catch(\PDOException $pe){

@@ -23,7 +23,9 @@ class ApiCardRegisterController extends Controller
      * @return void
      */
     public function index(Request $request){
+        Log::debug('ApiCardRegisterController in');
         $account_id = $request->account_id;                 // ユーザーコード
+        Log::debug('ApiCardRegisterController account_id = '.$account_id);
         $user = new User();
         $result = '';
         $response = collect();                              // 端末の戻り値
@@ -64,7 +66,7 @@ class ApiCardRegisterController extends Controller
             // 新規登録
             DB::beginTransaction();
             try{
-                $result = $this->insCardInfo($user_code,$card_id,$department_code);
+                $result = $this->insCardInfo($user_code,$card_id,$department_code, $account_id);
                 $user_datas = $user->getUserCardData($card_id, $account_id);
                 if (count($user_datas) > 0) {
                     DB::commit();
@@ -126,11 +128,12 @@ class ApiCardRegisterController extends Controller
      * @param [type] $mode
      * @return void
      */
-    private function insCardInfo($user_code,$card_id,$department_code){
+    private function insCardInfo($user_code,$card_id,$department_code, $account_id){
         $card_info = new CardInformation();
         $systemdate = Carbon::now();
         $login_user = Auth::user();
         try{
+            $card_info->setAccountidAttribute($account_id);
             $card_info->setUserCodeAttribute($user_code);
             $card_info->setDepartmentcodeAttribute($department_code);
             $card_info->setCardIdmAttribute($card_id);

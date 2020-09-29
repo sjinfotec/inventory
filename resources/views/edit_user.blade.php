@@ -41,6 +41,7 @@
 		@can('admin-higher')
 			<edit-user
 				v-bind:authusers="{{ $authusers }}"
+				v-bind:isexistdownload="{{ $isexistdownload }}"
 				v-bind:settingcompanies="{{ $settingtable['companies'] }}"
 				v-bind:settingdepartments="{{ $settingtable['departments'] }}"
 				v-bind:settingsettings="{{ $settingtable['settings'] }}"
@@ -53,6 +54,7 @@
 		@else
 		<edit-user
 				v-bind:authusers="{{ $authusers }}"
+				v-bind:isexistdownload="{{ $isexistdownload }}"
 				v-bind:settingcompanies="{{ $settingtable['companies'] }}"
 				v-bind:settingdepartments="{{ $settingtable['departments'] }}"
 				v-bind:settingsettings="{{ $settingtable['settings'] }}"

@@ -34,11 +34,12 @@ class ApiGetAttendanceResultController extends Controller
      * @return void
      */
     public function store(Request $request) { 
+        Log::debug('ApiGetAttendanceResultController store in ');
         try{
             $card_id = $request->card_id;       // カードID
             $mode = $request->mode;             // 打刻モード
             $account_id = $request->account_id; // アカウントID
-            $user = new User();
+            $user_model = new User();
             $work_time = new WorkTime();
             $systemdate = Carbon::now();
             Log::debug('store account_id = '.$account_id);
@@ -52,11 +53,12 @@ class ApiGetAttendanceResultController extends Controller
             // カード情報存在チェック
             $is_exists = DB::table('card_informations')->where('account_id', $account_id)->where('card_idm', $card_id)->exists();
             if($is_exists){
-                $user_datas = $user->getUserCardData($card_id, $account_id);
+                $user_datas = $user_model->getUserCardData($card_id, $account_id);
                 if (count($user_datas) > 0) {
                     foreach($user_datas as $user_data) {
                         // chkAttendance implement
                         $array_impl_chkAttendance = array (
+                            'account_id' => $account_id,
                             'user_data' => $user_data,
                             'mode' => $mode,
                             'systemdate' => $systemdate
@@ -151,7 +153,7 @@ class ApiGetAttendanceResultController extends Controller
     }
 
     /**
-     * ボタン打刻登録
+     * ボタン打刻登録（打刻画面から）
      *
      * @param Request $request
      * @return void
@@ -204,14 +206,14 @@ class ApiGetAttendanceResultController extends Controller
                 $dt = new Carbon();
             }
             $mode = $request->mode;
-            $account_id = $request->account_id;
+            $account_id = $company;
             Log::debug('buttonAttendance  company = '.$company);
             Log::debug('buttonAttendance  usercode = '.$usercode);
             Log::debug('buttonAttendance  departmentcode = '.$departmentcode);
             Log::debug('buttonAttendance  target_date = '.$target_date);
             Log::debug('buttonAttendance  mode = '.$mode);
             $target_date = $dt->format('Ymd');
-            $user = new User();
+            $user_model = new User();
             $work_time = new WorkTime();
             $systemdate = Carbon::now();
             Log::debug('store systemdate = '.$systemdate);
@@ -222,11 +224,12 @@ class ApiGetAttendanceResultController extends Controller
                     , Config::get('const.RESULT_CODE.normal')
                     , Config::get('const.RESULT_CODE.normal')
                     , null);
-            $user_datas = $user->getUserData($usercode, $account_id);
+            $user_datas = $user_model->getUserData($usercode, $account_id);
             if (count($user_datas) > 0) {
                 foreach($user_datas as $user_data) {
                     // chkAttendance implement
                     $array_impl_chkAttendance = array (
+                        'account_id' => $account_id,
                         'user_data' => $user_data,
                         'mode' => $mode,
                         'systemdate' => $systemdate
@@ -346,12 +349,15 @@ class ApiGetAttendanceResultController extends Controller
      */
     private function chkAttendance($params){
         // パラメータ
+        $account_id = $params['account_id'];
         $user_data = $params['user_data'];
         $mode = $params['mode'];
         $systemdate = $params['systemdate'];
 
         $apicommon = new ApiCommonController();
         $work_time_model = new WorkTime();
+        $work_time_model->setParamAccountidAttribute($account_id);
+        $work_time_model->setParamAccountidAttribute($user_data->department_code);
         $work_time_model->setParamDepartmentcodeAttribute($user_data->department_code);
         $work_time_model->setParamUsercodeAttribute($user_data->code);
         $work_time_model->setParamdatefromNoneditAttribute($systemdate->format('Ymd His'));
@@ -366,6 +372,7 @@ class ApiGetAttendanceResultController extends Controller
         $use_free_item_chk = "";
         // getUsefreeitem implement
         $array_impl_getUsefreeitem = array (
+            'account_id' => $account_id,
             'department_code' => $user_data->department_code,
             'user_code' => $user_data->code,
             'systemdate' => $systemdate
@@ -502,12 +509,15 @@ class ApiGetAttendanceResultController extends Controller
      */
     private function getUsefreeitem($params){
         // パラメータ
+        $account_id = $params['account_id'];
         $department_code = $params['department_code'];
         $user_code = $params['user_code'];
         $systemdate = $params['systemdate'];
 
         $use_free_item = null;
         $calendar_setting_model = new CalendarSettingInformation();
+        
+        $calendar_setting_model->setParamAccountidAttribute($account_id);
         $calendar_setting_model->setParamfromdateAttribute($systemdate->format('Ymd'));
         $calendar_setting_model->setParamdepartmentcodeAttribute($department_code);
         $calendar_setting_model->setParamusercodeAttribute($user_code);

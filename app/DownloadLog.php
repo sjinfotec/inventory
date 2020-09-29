@@ -150,7 +150,7 @@ class DownloadLog extends Model
 
     
     private $param_account_id;              // アカウントID
-    private $param_downloadfile_no;         // ダウンロードファイル番号
+    private $param_array_downloadfile_no;   // ダウンロードファイル番号配列
     private $param_downloadfile_date;       // 最新ダウンロード日付
     private $param_downloadfile_time;       // 最新ダウンロード時刻
     private $param_downloadfile_cnt;        // ダウンロード回数
@@ -167,15 +167,15 @@ class DownloadLog extends Model
         $this->param_account_id = $value;
     }
     
-    // ダウンロードファイル番号
+    // ダウンロードファイル番号配列
     public function getParamDownlodfilenoAttribute()
     {
-        return $this->param_downloadfile_no;
+        return $this->param_array_downloadfile_no;
     }
 
     public function setParamDownlodfilenoAttribute($value)
     {
-        $this->param_downloadfile_no = $value;
+        $this->param_array_downloadfile_no = $value;
     }
     
     // 最新ダウンロード日付
@@ -264,8 +264,8 @@ class DownloadLog extends Model
             if (!empty($this->param_account_id)) {
                 $mainquery->where('account_id',$this->param_account_id);
             }
-            if ($this->param_downloadfile_no != null && $this->param_downloadfile_no != "" && $this->param_downloadfile_no > 0) {
-                $mainquery->where('downloadfile_no',$this->param_downloadfile_no);
+            if ($this->param_array_downloadfile_no != null && $this->param_array_downloadfile_no != "" && count($this->param_array_downloadfile_no) > 0) {
+                $mainquery->whereIn('downloadfile_no',$this->param_array_downloadfile_no);
             }
             if (!empty($this->param_downloadfile_date)) {
                 $mainquery->where('downloadfile_date',$this->param_downloadfile_date);
@@ -301,8 +301,8 @@ class DownloadLog extends Model
             if (!empty($this->param_account_id)) {
                 $mainquery->where('account_id',$this->param_account_id);
             }
-            if ($this->param_downloadfile_no != null && $this->param_downloadfile_no != "" && $this->param_downloadfile_no > 0) {
-                $mainquery->where('downloadfile_no',$this->param_downloadfile_no);
+            if ($this->param_array_downloadfile_no != null && $this->param_array_downloadfile_no != "" && count($this->param_array_downloadfile_no) > 0) {
+                $mainquery->whereIn('downloadfile_no',$this->param_array_downloadfile_no);
             }
             if (!empty($this->param_downloadfile_date)) {
                 $mainquery->where('downloadfile_date',$this->param_downloadfile_date);
@@ -349,8 +349,8 @@ class DownloadLog extends Model
             if (!empty($this->param_account_id)) {
                 $data->where('account_id',$this->param_account_id);
             }
-            if ($this->param_downloadfile_no != null && $this->param_downloadfile_no != "" && $this->param_downloadfile_no > 0) {
-                $data->where('downloadfile_no',$this->param_downloadfile_no);
+            if ($this->param_array_downloadfile_no != null && $this->param_array_downloadfile_no != "" && count($this->param_array_downloadfile_no) > 0) {
+                $data->whereIn('downloadfile_no',$this->param_array_downloadfile_no);
             }
             if (!empty($this->param_downloadfile_date)) {
                 $data->where('downloadfile_date',$this->param_downloadfile_date);
@@ -387,8 +387,8 @@ class DownloadLog extends Model
             if (!empty($this->param_account_id)) {
                 $mainQuery->where('account_id', $this->param_account_id);
             }
-            if ($this->param_downloadfile_no != null && $this->param_downloadfile_no != "") {
-                $mainQuery->where('downloadfile_no',$this->param_downloadfile_no);
+            if ($this->param_array_downloadfile_no != null && $this->param_array_downloadfile_no != "" && count($this->param_array_downloadfile_no) > 0) {
+                $mainQuery->whereIn('downloadfile_no',$this->param_array_downloadfile_no);
             }
             if (!empty($this->param_downloadfile_date)) {
                 $mainQuery->where('downloadfile_date',$this->param_downloadfile_date);

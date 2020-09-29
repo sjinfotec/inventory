@@ -1645,6 +1645,10 @@ export default {
       type: Array,
       default: []
     },
+    isexistdownload: {
+      type: String,
+      default: ""
+    },
     settingcompanies: {
       type: String,
       default: ""
@@ -2888,6 +2892,7 @@ export default {
     },
     // 氏名登録処理
     storeData() {
+      console.log('storeData password = ' + this.form.password);
       var arrayParams = { details: this.form };
       this.postRequest("/edit_user/store", arrayParams)
         .then(response => {
@@ -3315,9 +3320,11 @@ export default {
     
     // 設定要否取得処理
     getNotSetting() {
-      if (this.infoMsgcnt > 0) { return; }
+      if (this.infoMsgcnt > 1) { return; }
       if (this.settingcalendarsettinginformations == 0) {
         this.getThenCalendarSettingInfos();
+      } else if (this.isexistdownload == 0) {
+        this.getThenDownload();
       }
       this.infoMsgcnt++;
     },

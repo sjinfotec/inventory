@@ -1,5 +1,4 @@
 <template>
-  <div >
     <div class="card-body mb-3 p-0 border-top">
       <!-- panel contents -->
       <!-- .row -->
@@ -400,7 +399,6 @@
       </div>
       <!-- /.row -->
     </div>
-  </div>
 </template>
 <script>
 

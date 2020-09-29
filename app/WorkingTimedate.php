@@ -1390,9 +1390,9 @@ class WorkingTimedate extends Model
         for ($i=0;$i<12;$i++) {
             $this->array_param_date_from[$i] = null;
         }
-        $user = Auth::user();
-        $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $authuser = Auth::user();
+        $login_user_code = $authuser->code;
+        $login_account_id = $authuser->account_id;
         $set_from_date_flg = false;
         if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing') ||
             $search_kbn == Config::get('const.C022.monthly_alert_begining_month_first') ||
@@ -1401,7 +1401,7 @@ class WorkingTimedate extends Model
             $dt_first = null;
             $setting_model = new Setting();
             $setting_model->setParamYearAttribute(date_format($dt, 'Y'));
-            $setting_model->setParamAccountidAttribute($login_user_code_4);
+            $setting_model->setParamAccountidAttribute($login_account_id);
             if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing') ||
                 $search_kbn == Config::get('const.C022.monthly_alert_begining_month_first')) {
                 $settings = $setting_model->getSettingDatasYearOrderBy(1);
@@ -1666,6 +1666,7 @@ class WorkingTimedate extends Model
         try{
             $mainquery = DB::table($this->table)
                 ->select(
+                    $this->table.'.account_id',
                     $this->table.'.working_date',
                     $this->table.'.employment_status',
                     $this->table.'.department_code',
@@ -1996,6 +1997,7 @@ class WorkingTimedate extends Model
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_7) as x_public_going_out_return_time_positions_7')
                 ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_7) as y_public_going_out_return_time_positions_7');
 
+            $mainquery->where($this->table.'.account_id', $this->param_account_id);                     //account_id指定
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
                 $date = date_create($this->param_date_from);
                 $this->param_date_from = $date->format('Ymd');
@@ -2521,7 +2523,7 @@ class WorkingTimedate extends Model
                 ->leftJoin($this->table_calendar_setting_informations, function ($join) { 
                     // $join->on($this->table_calendar_setting_informations.'.department_code', '=', $this->table_users.'.department_code');
                     // $join->on($this->table_calendar_setting_informations.'.employment_status', '=', $this->table_users.'.employment_status');
-                    $join->on($this->table_calendar_setting_informations.'.account_id', '=', $this->table_users.'.account_id')
+                    $join->on($this->table_calendar_setting_informations.'.account_id', '=', $this->table_users.'.account_id');
                     $join->on($this->table_calendar_setting_informations.'.user_code', '=', $this->table_users.'.code')
                     ->where($this->table_users.'.account_id', '=', $this->param_account_id)       // $this->table
                     ->where($this->table_users.'.is_deleted', '=', 0)       // $this->table
@@ -2549,7 +2551,7 @@ class WorkingTimedate extends Model
                     $join->on($this->table.'.account_id', '=', $this->table_users.'.account_id');
                     $join->on($this->table.'.user_code', '=', $this->table_users.'.code');
                     $join->on($this->table.'.working_date', '=', $this->table_calendar_setting_informations.'.date')
-                    ->where($this->table.'.account_id', '=', $this->param_account_id);
+                    ->where($this->table.'.account_id', '=', $this->param_account_id)
                     ->where($this->table.'.is_deleted', '=', 0);
                 })
                 // ->leftJoin($this->table_user_holiday_kubuns, function ($join) { 
@@ -2952,6 +2954,8 @@ class WorkingTimedate extends Model
             $array_setBindingsStr[] = array($cnt=>Config::get('const.C013.value'));
             $cnt += 1;
             $array_setBindingsStr[] = array($cnt=>0);
+            $cnt += 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
                 $cnt += 1;
                 $array_setBindingsStr[] = array($cnt=>$this->param_date_from);
@@ -3066,7 +3070,7 @@ class WorkingTimedate extends Model
 
             $mainquery
                 ->leftJoinSub($subquery2, 't21', function ($join) { 
-                    $join->on('t21.account_id', '=', 't1.account_id')
+                    $join->on('t21.account_id', '=', 't1.account_id');
                     $join->on('t21.code', '=', 't1.department_code')
                     ->where('t21.account_id', '=', $this->param_account_id)
                     ->where('t1.is_deleted', '=', 0);
@@ -3080,10 +3084,10 @@ class WorkingTimedate extends Model
     
             $mainquery
                 ->JoinSub($subquery1, 't23', function ($join) { 
-                    $join->on('t23.account_id', '=', 't1.account_id')
+                    $join->on('t23.account_id', '=', 't1.account_id');
                     $join->on('t23.code', '=', 't1.code');
                     $join->on('t23.max_apply_term_from', '=', 't1.apply_term_from')
-                    ->where('t23.account_id', '=', $this->param_account_id)
+                    ->where('t23.account_id', '=', $this->param_account_id);
                 });
 
             if(!empty($this->param_employment_status)){
@@ -3130,11 +3134,13 @@ class WorkingTimedate extends Model
             $item_data = '';
             $temp_array = array();
             foreach($temp_working_time_dates as $working_time_date) {
-                // ('insertWorkingTimeDateFromTemp working_date = '.$working_time_date->working_date);
-                // ('insertWorkingTimeDateFromTemp department_code = '.$working_time_date->department_code);
-                // ('insertWorkingTimeDateFromTemp department_name = '.$working_time_date->department_name);
-                // ('insertWorkingTimeDateFromTemp user_code = '.$working_time_date->user_code);
-                // ('insertWorkingTimeDateFromTemp user_name = '.$working_time_date->user_name);
+                Log::debug('insertWorkingTimeDateFromTemp working_date = '.$working_time_date->working_date);
+                Log::debug('insertWorkingTimeDateFromTemp department_code = '.$working_time_date->department_code);
+                Log::debug('insertWorkingTimeDateFromTemp department_name = '.$working_time_date->department_name);
+                Log::debug('insertWorkingTimeDateFromTemp user_code = '.$working_time_date->user_code);
+                Log::debug('insertWorkingTimeDateFromTemp user_name = '.$working_time_date->user_name);
+                Log::debug('account_id = '.$working_time_date->account_id);
+                Log::debug('working_timetable_no = '.$working_time_date->working_timetable_no);
                 $temp_collect = collect($working_time_date);
                 for ($i=1;$i<=5;$i++) {
                     if (isset($temp_collect['attendance_time_positions_'.$i]) && $temp_collect['attendance_time_positions_'.$i] != "") {
@@ -3265,6 +3271,7 @@ class WorkingTimedate extends Model
     public function setWhereSql($query){
         try{
 
+            $query->where($this->table.'.account_id', $this->param_account_id);                     //account_id指定
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
                 $date = date_create($this->param_date_from);
                 $this->param_date_from = $date->format('Ymd');
@@ -3272,6 +3279,10 @@ class WorkingTimedate extends Model
                 $this->param_date_to = $date->format('Ymd');
                 $query->where($this->table.'.working_date', '>=', $this->param_date_from);          // 日付範囲指定
                 $query->where($this->table.'.working_date', '<=', $this->param_date_to);            // 日付範囲指定
+            } else {
+                if(!empty($this->param_date_from)){
+                    $query->where('working_date', '>=', $this->param_date_from);                    // 日付範囲指定
+                }
             }
             
             if(!empty($this->param_employment_status)){
@@ -3305,6 +3316,7 @@ class WorkingTimedate extends Model
     public function setWhereSqlUsers($query){
         try{
 
+            $query->where($this->table.'.account_id', $this->param_account_id);                         //account_id指定
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
                 $date = date_create($this->param_date_from);
                 $this->param_date_from = $date->format('Ymd');
@@ -3383,9 +3395,10 @@ class WorkingTimedate extends Model
      *
      * @return boolean
      */
-    public function updateCommon($array_update){
+    public function updateWorkingTimeDateCommon($array_update){
         try {
             $mainquery = DB::table($this->table);
+            $mainquery->where($this->table.'.account_id', $this->param_account_id);         //account_id指定
             if (!empty($this->param_department_code)) {
                 $mainquery
                     ->where('department_code', '=', $this->param_department_code);

@@ -29,15 +29,19 @@ class HomeController extends Controller
     {
         $authusers = Auth::user();
         $login_user_code = $authusers->code;
-        $accountid = substr($login_user_code, 0 ,4);
+        $accountid = $authusers->account_id;
         $edition = Config::get('const.EDITION.EDITION');
+        // 設定項目要否判定
         $apicommon = new ApiCommonController();
+        $settingtable = $apicommon->getNotSetting();
         // 打刻端末インストールダウンロード情報
-        $downloadfile_no = Config::get('const.FILE_DOWNLOAD_NO.file5');
+        $array_downloadfile_no = array();
+        $array_downloadfile_no[] = Config::get('const.FILE_DOWNLOAD_NO.file5');
+        $array_downloadfile_no[] = Config::get('const.FILE_DOWNLOAD_NO.file6');
         $downloadfile_cnt = 0;
         $array_impl_isExistDownloadLog = array (
             'account_id' => $accountid,
-            'downloadfile_no' => $downloadfile_no,
+            'array_downloadfile_no' => $array_downloadfile_no,
             'downloadfile_date' => null,
             'downloadfile_time' => null,
             'downloadfile_name' => null,
@@ -48,9 +52,7 @@ class HomeController extends Controller
         if ($isExistDownloadLogs) {
             $isexistdownload = "1";
         }
-        // 設定項目要否判定
-        $settingtable = $apicommon->getNotSetting();
-        // 'authusers',
+
         return view('home',
             compact(
                 'authusers',

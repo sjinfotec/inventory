@@ -42,7 +42,7 @@ class ConfirmController extends Controller
         $result = true;
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         try {
             // パラメータチェック
             $params = array();
@@ -66,7 +66,7 @@ class ConfirmController extends Controller
             $main_sub = $params['main_sub'];
             $confirm_model = new Confirm();
             // パラメータ設定
-            $confirm_model->setParamAccountidAttribute($login_user_code_4);
+            $confirm_model->setParamAccountidAttribute($login_account_id);
             $confirm_model->setParamConfirmnoAttribute($confirm_no);
             $confirm_model->setParamUserepartmentcodeAttribute($user_department_code);
             $confirm_model->setParamConfirmdepartmentcodeAttribute($confirm_department_code);
@@ -189,7 +189,7 @@ class ConfirmController extends Controller
         $result = true;
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         try {
             // パラメータチェック
             $params = array();
@@ -207,7 +207,7 @@ class ConfirmController extends Controller
             $departmentcode = $params['departmentcode'];
             $confirm_model = new Confirm();
                 // パラメータ設定
-            $confirm_model->setParamAccountidAttribute($login_user_code_4);
+            $confirm_model->setParamAccountidAttribute($login_account_id);
             $confirm_model->setParamDepartmentcodeAttribute($departmentcode);
             $confirm_model->setParamSeqAttribute(Config::get('const.CONFIRM_SEQ.not_final_confirm'));
             $array_confirm = $confirm_model->selectConfirm();

@@ -29,7 +29,7 @@
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
-                  <a href="/file_download?filekbn=6">・打刻端末インストール説明書（EXCEL 最新版） -- ファイル名：OneDawnSetupForWin64.xlsx</a>
+                  <a href="/file_download?filekbn=6">・打刻端末インストール（64bit 7z 最新版） -- ファイル名：OneDawnSetupForWin64.7z</a>
                 </div>
               </div>
               <!-- /.col -->
@@ -40,7 +40,18 @@
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
-                  <a href="/file_download?filekbn=6">・打刻端末インストール説明書（pdf 最新版） -- ファイル名：OneDawnSetupForWin64.pdf</a>
+                  <a href="/file_download?filekbn=7">・打刻端末インストール説明書（EXCEL 最新版） -- ファイル名：OneDawnSetupForWin64.xlsx</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=8">・打刻端末インストール説明書（pdf 最新版） -- ファイル名：OneDawnSetupForWin64.pdf</a>
                 </div>
               </div>
               <!-- /.col -->
@@ -62,7 +73,7 @@
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
-                  <a href="/file_download?filekbn=1">・カード打刻インストール（64bitトライアル版 最新版）</a>
+                  <a href="/file_download?filekbn=1">・カードで打刻インストール（64bitトライアル版 最新版）</a>
                 </div>
               </div>
               <!-- /.col -->
@@ -232,7 +243,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between" v-if="isexistdownload === 1">
+            <div class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -243,7 +254,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between" v-if="isexistdownload === 1">
+            <div class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">

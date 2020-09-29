@@ -287,6 +287,7 @@ class WorkTime extends Model
     private $array_record_time;                 // 日付範囲配列
     private $massegedata;                       // メッセージ
 
+    private $param_record_time;                 // 打刻時刻
     private $param_start_date;                  // 開始
     private $param_end_date;                    // 終了
 
@@ -406,6 +407,17 @@ class WorkTime extends Model
         $this->massegedata = $value;
     }
 
+    // 打刻時刻
+    public function getParamRecordtimeAttribute()
+    {
+        return $this->param_record_time;
+    }
+
+    public function setParamRecordtimeAttribute($value)
+    {
+        $this->param_record_time = $value;
+    }
+
     // 開始日付
     public function getParamStartDateAttribute()
     {
@@ -499,29 +511,29 @@ class WorkTime extends Model
      *
      * @return void
      */
-    public function getDailyData(){
-        try {
-            $tasks = DB::table($this->table)
-                ->join('users', 'work_times.user_code', '=', 'users.code')
-                ->select(
-                        'work_times.user_code',
-                        'work_times.',
-                        'work_times.end_date'
-                        )
-                ->limit(1)
-                ->get();
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
+    // public function getDailyData(){
+    //     try {
+    //         $tasks = DB::table($this->table)
+    //             ->join('users', 'work_times.user_code', '=', 'users.code')
+    //             ->select(
+    //                     'work_times.user_code',
+    //                     'work_times.',
+    //                     'work_times.end_date'
+    //                     )
+    //             ->limit(1)
+    //             ->get();
+    //     }catch(\PDOException $pe){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+    //         Log::error($pe->getMessage());
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
 
-        return $tasks;
-    }
+    //     return $tasks;
+    // }
 
     /**
      * 打刻モードデータ取得
@@ -549,6 +561,7 @@ class WorkTime extends Model
                 if(!empty($this->param_mode)){
                     $mainquery->where('t1.mode', $this->param_mode);                            //mode指定
                 }
+                $mainquery->where('t1.account_id', $this->param_account_id);                    //account_id
                 $result = $mainquery
                     ->where('t1.is_deleted', '=', 0)
                     ->get();
@@ -635,6 +648,7 @@ class WorkTime extends Model
             // subquery1    work_times
             $subquery1 = DB::table($this->table)
                 ->select(
+                    $this->table.'.account_id as account_id',
                     $this->table.'.id as record_datetime_id',
                     $this->table.'.user_code as user_code',
                     $this->table.'.department_code as department_code',
@@ -647,7 +661,9 @@ class WorkTime extends Model
                     $this->table.'.is_editor as is_editor',
                     $this->table.'.editor_department_code as editor_department_code',
                     $this->table.'.editor_user_code as editor_user_code',
-                    $this->table.'.is_deleted as is_deleted'
+                    $this->table.'.is_deleted as is_deleted',
+                    $this->table.'.created_at as created_at',
+                    $this->table.'.updated_at as updated_at'
                 )
                 ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%Y') as record_year")
                 ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%m') as record_month")
@@ -705,6 +721,7 @@ class WorkTime extends Model
                     't20.business_kubun as business_kubun',
                     't12.code_name as business_name',
                     't9.holiday_kubun as holiday_kubun',
+                    't20.holiday_kubun as holiday_holiday_kubun',
                     't13.use_free_item as use_free_item',
                     't13.code_name as holiday_name',
                     't4.closing as closing',
@@ -726,11 +743,13 @@ class WorkTime extends Model
                     't2.editor_department_code as editor_department_code',
                     't2.editor_user_code as editor_user_code',
                     't16.name as editor_department_name',
-                    't17.name as editor_user_code_name'
+                    't17.name as editor_user_code_name',
+                    't2.created_at as created_at',
+                    't2.updated_at as updated_at'
                 );
             $mainquery
                 ->selectRaw('ifnull(t9.holiday_kubun, 0) as user_holiday_kubun ')
-                ->selectRaw('ifnull(t9.working_timetable_no, 0) as working_timetable_no ')
+                ->selectRaw('ifnull(t9.working_timetable_no, ifnull(t20.working_timetable_no, 0)) as working_timetable_no ')
                 ->selectRaw("ifnull(t10.name, '') as working_timetable_name ")
                 ->selectRaw("ifnull(t10.from_time, '') as working_timetable_from_time ")
                 ->selectRaw("ifnull(t10.to_time, '') as working_timetable_to_time ")
@@ -747,13 +766,11 @@ class WorkTime extends Model
                     ->where('t2.is_deleted', '=', 0)
                     ->where('t1.is_deleted', '=', 0);
                 })
-                ->leftJoin($this->table_calendar_setting_informations.' as t9', function ($join) use ($targetdatefrom) {    // 20200817001 use add
-                    // $join->on('t9.date', '=', 't2.record_date');     // 20200817001 del
+                ->leftJoin($this->table_calendar_setting_informations.' as t9', function ($join) {
                     $join->on('t9.account_id', '=', 't1.account_id');
+                    $join->on('t9.date', '=', 't2.record_date');
                     $join->on('t9.department_code', '=', 't1.department_code');
                     $join->on('t9.user_code', '=', 't1.code')
-                    ->where('t9.date', '=', $targetdatefrom)            // 20200817001 add
-                    ->where('t9.account_id', '=', $this->param_account_id)
                     ->where('t9.is_deleted', '=', 0)
                     ->where('t1.is_deleted', '=', 0);
                 })
@@ -829,13 +846,13 @@ class WorkTime extends Model
                     ->where('t17.is_deleted', '=', 0);
                 })
                 ->leftJoinSub($subquery3, 't18', function ($join) { 
-                    $join->on('t18.account_id', '=', 't2.account_id');
+                    $join->on('t18.account_id', '=', 't17.account_id');
                     $join->on('t18.code', '=', 't17.code');
                     $join->on('t18.max_apply_term_from', '=', 't17.apply_term_from')
                     ->where('t18.account_id', '=', $this->param_account_id);
                 })
                 ->JoinSub($subquery3, 't19', function ($join) { 
-                    $join->on('t19.account_id', '=', 't2.account_id');
+                    $join->on('t19.account_id', '=', 't1.account_id');
                     $join->on('t19.code', '=', 't1.code');
                     $join->on('t19.max_apply_term_from', '=', 't1.apply_term_from')
                     ->where('t19.account_id', '=', $this->param_account_id);
@@ -1405,10 +1422,12 @@ class WorkTime extends Model
         try{
             $subquery1 = DB::table($this->table)
                 ->select(
+                    $this->table.'.account_id',
                     $this->table.'.user_code',
                     $this->table.'.department_code',
                     $this->table.'.record_time')
                 ->selectRaw('DATE_FORMAT('.$this->table.".record_time, '%Y%m%d') as record_date")
+                ->where($this->table.'.account_id', '=', $this->param_account_id)
                 ->where($this->table.'.is_deleted', '=', 0);
                 
             // $subquery2 = DB::table($this->table_user_holiday_kubuns)
@@ -1420,22 +1439,26 @@ class WorkTime extends Model
             //     ->where($this->table_user_holiday_kubuns.'.is_deleted', '=', 0);
             $subquery2 = DB::table($this->table_calendar_setting_informations)
                 ->select(
+                    $this->table_calendar_setting_informations.'.account_id',
                     $this->table_calendar_setting_informations.'.date',
                     $this->table_calendar_setting_informations.'.user_code',
                     $this->table_calendar_setting_informations.'.department_code')
                 ->selectRaw('ifnull('.$this->table_calendar_setting_informations.'.holiday_kubun, 0) as holiday_kubun')
+                ->where($this->table_calendar_setting_informations.'.account_id', '=', $this->param_account_id)
                 ->where($this->table_calendar_setting_informations.'.is_deleted', '=', 0);
 
             $subquery11 = $subquery1->toSql();
 
             $subquery12 = DB::table(DB::raw('('.$subquery11.') AS t1'))
                 ->select(
+                    't1.account_id',
                     't1.user_code',
                     't1.department_code',
                     't1.record_date',
                     't1.record_time',
                     't2.date')
                 ->leftJoinSub($subquery2, 't2', function ($join) { 
+                    $join->on('t2.account_id', '=', 't1.account_id');
                     $join->on('t2.date', '=', 't1.record_date');
                     $join->on('t2.user_code', '=', 't1.user_code');
                     $join->on('t2.department_code', '=', 't1.department_code')
@@ -1447,35 +1470,44 @@ class WorkTime extends Model
 
             $subquery_max = DB::table(DB::raw('('.$subquery.') AS t3'))
                 ->select(
+                    't3.account_id',
                     't3.user_code',
                     't3.department_code')
                 ->selectRaw('max(t3.record_time) as max_record_datetime')
+                ->where('t3.account_id', '=', $this->param_account_id)
                 ->where('t3.user_code', '=', $this->param_user_code)
                 ->where('t3.department_code', '=', $this->param_department_code)
                 ->where('t3.record_time', '<', $this->param_start_date)
-                ->groupBy('t3.user_code', 't3.department_code');
+                ->groupBy('t3.account_id', 't3.user_code', 't3.department_code');
 
             $subquery_max->setBindings([
+                $this->param_account_id,
+                0,
+                $this->param_account_id,
                 0,
                 0,
-                0,
+                $this->param_account_id,
                 $this->param_user_code,
                 $this->param_department_code,
                 $this->param_start_date]);
     
             $mainquery  = DB::table($this->table)
                 ->select(
+                    $this->table.'.account_id as account_id',
                     $this->table.'.mode as mode',
                     $this->table.'.user_holiday_kubuns_id as user_holiday_kubuns_id',
                     $this->table.'.record_time as record_datetime')
                 ->JoinSub($subquery_max, 't3', function ($join) { 
+                    $join->on('t3.account_id', '=', $this->table.'.account_id');
                     $join->on('t3.user_code', '=', $this->table.'.user_code');
                     $join->on('t3.department_code', '=', $this->table.'.department_code');
                     $join->on('t3.max_record_datetime', '=', $this->table.'.record_time');
                 })
+                ->where($this->table.'.account_id', '=', $this->param_account_id)
                 ->where($this->table.'.is_deleted', '=', 0);
 
             $mainquery->setBindings([
+                $this->param_account_id,
                 0]);
 
             $result = $mainquery->get();
@@ -1505,10 +1537,12 @@ class WorkTime extends Model
         try{
             $subquery1 = DB::table($this->table)
                 ->select(
+                    $this->table.'.account_id',
                     $this->table.'.user_code',
                     $this->table.'.department_code',
                     $this->table.'.record_time')
                 ->selectRaw('DATE_FORMAT('.$this->table.".record_time, '%Y%m%d') as record_date")
+                ->where($this->table.'.account_id', '=', $this->param_account_id)
                 ->where($this->table.'.is_deleted', '=', 0);
 
             // $subquery2 = DB::table($this->table_user_holiday_kubuns)
@@ -1520,22 +1554,26 @@ class WorkTime extends Model
             //     ->where($this->table_user_holiday_kubuns.'.is_deleted', '=', 0);
             $subquery2 = DB::table($this->table_calendar_setting_informations)
                 ->select(
+                    $this->table_calendar_setting_informations.'.account_id',
                     $this->table_calendar_setting_informations.'.date',
                     $this->table_calendar_setting_informations.'.user_code',
                     $this->table_calendar_setting_informations.'.department_code')
                 ->selectRaw('ifnull('.$this->table_calendar_setting_informations.'.holiday_kubun, 0) as holiday_kubun')
+                ->where($this->table_calendar_setting_informations.'.account_id', '=', $this->param_account_id)
                 ->where($this->table_calendar_setting_informations.'.is_deleted', '=', 0);
 
             $subquery11 = $subquery1->toSql();
 
             $subquery12 = DB::table(DB::raw('('.$subquery11.') AS t1'))
                 ->select(
+                    't1.account_id',
                     't1.user_code',
                     't1.department_code',
                     't1.record_date',
                     't1.record_time',
                     't2.date')
                 ->leftJoinSub($subquery2, 't2', function ($join) { 
+                    $join->on('t2.account_id', '=', 't1.account_id');
                     $join->on('t2.date', '=', 't1.record_date');
                     $join->on('t2.user_code', '=', 't1.user_code');
                     $join->on('t2.department_code', '=', 't1.department_code')
@@ -1547,36 +1585,46 @@ class WorkTime extends Model
 
             $subquery_max = DB::table(DB::raw('('.$subquery.') AS t3'))
                 ->select(
+                    't3.account_id',
                     't3.user_code',
                     't3.department_code')
                 ->selectRaw('min(t3.record_time) as min_record_datetime')
+                ->where('t3.account_id', '=', $this->param_account_id)
                 ->where('t3.user_code', '=', $this->param_user_code)
                 ->where('t3.department_code', '=', $this->param_department_code)
                 ->where('t3.record_time', '>', $this->param_start_date)
-                ->groupBy('t3.user_code', 't3.department_code');
+                ->groupBy('t3.account_id', 't3.user_code', 't3.department_code');
 
             $subquery_max->setBindings([
+                $this->param_account_id,
+                0,
+                $this->param_account_id,
                 0,
                 0,
-                0,
+                $this->param_account_id,
                 $this->param_user_code,
                 $this->param_department_code,
                 $this->param_start_date]);
     
             $mainquery  = DB::table($this->table)
                 ->select(
+                    $this->table.'.account_id as account_id',
                     $this->table.'.mode as mode',
                     $this->table.'.user_holiday_kubuns_id as user_holiday_kubuns_id',
                     $this->table.'.record_time as record_datetime')
                 ->JoinSub($subquery_max, 't3', function ($join) { 
+                    $join->on('t3.account_id', '=', $this->table.'.account_id');
                     $join->on('t3.user_code', '=', $this->table.'.user_code');
                     $join->on('t3.department_code', '=', $this->table.'.department_code');
                     $join->on('t3.min_record_datetime', '=', $this->table.'.record_time');
                 })
+                ->where($this->table.'.account_id', '=', $this->param_account_id)
                 ->where($this->table.'.is_deleted', '=', 0);
 
-            $mainquery->setBindings([0]);
-
+            $mainquery->setBindings([
+                $this->param_account_id,
+                0]);
+    
             $result = $mainquery->get();
                 
         }catch(\PDOException $pe){
@@ -1605,11 +1653,13 @@ class WorkTime extends Model
             // sunquery1    work_times
             $sunquery1 = DB::table($this->table)
                 ->select(
+                    $this->table.'.account_id',
                     $this->table.'.user_code',
                     $this->table.'.department_code',
                     $this->table.'.is_deleted',
                     DB::raw('MAX('.$this->table.'.record_time) as max_record_time')
                     )
+                ->where($this->table.'.account_id', '=', $this->param_account_id)
                 ->where($this->table.'.user_code', '=', $this->param_user_code)
                 ->where($this->table.'.department_code', '=', $this->param_department_code)
                 ->where($this->table.'.record_time', '<', $this->param_date_from);
@@ -1618,13 +1668,14 @@ class WorkTime extends Model
                     ->where($this->table.'.mode', '=', $this->param_mode);
             }
             $sunquery1
-                ->groupBy($this->table.'.user_code', $this->table.'.department_code', $this->table.'.is_deleted');
+                ->groupBy($this->table.'.account_id', $this->table.'.user_code', $this->table.'.department_code', $this->table.'.is_deleted');
 
             // mainqueryにsunqueryを組み込む
             // sunquery1    t1:work_times
             $mainquery = DB::table($this->table.' AS t1')
                 ->select(
                     't1.id as id',
+                    't1.account_id as account_id',
                     't1.mode as mode',
                     't1.user_holiday_kubuns_id as user_holiday_kubuns_id',
                     't1.record_time as record_datetime',
@@ -1634,11 +1685,13 @@ class WorkTime extends Model
                 ->selectRaw("DATE_FORMAT(t1.record_time,'%Y%m%d') as record_ymd");
             $mainquery                
                 ->JoinSub($sunquery1, 't2', function ($join) { 
+                    $join->on('t2.account_id', '=', 't1.account_id');
                     $join->on('t2.user_code', '=', 't1.user_code');
                     $join->on('t2.department_code', '=', 't1.department_code');
                     $join->on('t2.max_record_time', '=', 't1.record_time')
                     ->where('t2.is_deleted', '=', 0);
                 })
+                ->where('t1.account_id', '=', $this->param_account_id)
                 ->where('t1.is_deleted', '=', 0);
             $result = $mainquery->get();
         }catch(\PDOException $pe){
@@ -1660,7 +1713,7 @@ class WorkTime extends Model
      *
      * @return $data
      */
-    public function getUserDetails(){
+    public function getWorkTimUserDetails(){
         try {
             $apicommon = new ApiCommonController();
             $sqlString = "";
@@ -1689,6 +1742,7 @@ class WorkTime extends Model
             $sqlString .= "from ( ";
             $sqlString .= "  select ";
             $sqlString .= "    t10.id as id ";
+            $sqlString .= "    , t10.account_id as account_id ";
             $sqlString .= "    , t10.user_code as user_code ";
             $sqlString .= "    , t10.department_code as department_code ";
             $sqlString .= "    , t10.record_time as record_time ";
@@ -1708,20 +1762,23 @@ class WorkTime extends Model
             $sqlString .= "  ".$this->table." as t10 ";
             $sqlString .= "    left join ".$this->table_users." as t11 ";
             $sqlString .= "    on ";
-            $sqlString .= "      t11.code = t10.user_code ";
+            $sqlString .= "      t11.account_id = t10.account_id ";
+            $sqlString .= "      and t11.code = t10.user_code ";
             $sqlString .= "      and t11.department_code = t10.department_code ";
             $sqlString .= "      and t11.is_deleted = ? ";
             $sqlString .= "    inner join ( ";
             $sqlString .= "      ".$apicommon->makeUserApplyTermSql($this->param_start_date, Config::get('const.C025.admin_user'))." ";
             $sqlString .= "    ) as t14 ";
             $sqlString .= "    on ";
-            $sqlString .= "      t14.code = t11.code ";
+            $sqlString .= "      t14.account_id = t11.account_id ";
+            $sqlString .= "      and t14.code = t11.code ";
             $sqlString .= "      and t14.max_apply_term_from = t11.apply_term_from ";
             $sqlString .= "    inner join ( ";
             $sqlString .= "      ".$apicommon->makeDepartmentApplyTermSql($this->param_start_date, $this->param_start_date)." ";
             $sqlString .= "    ) as t12 ";
             $sqlString .= "    on ";
-            $sqlString .= "      t12.code = t11.department_code ";
+            $sqlString .= "      t12.account_id = t11.account_id ";
+            $sqlString .= "      and t12.code = t11.department_code ";
             $sqlString .= "    left join ".$this->table_generalcodes." as t13 ";
             $sqlString .= "    on ";
             $sqlString .= "      t13.code = t10.mode ";
@@ -1729,6 +1786,7 @@ class WorkTime extends Model
             $sqlString .= "      and t13.is_deleted = ? ";
             $sqlString .= "  where ";
             $sqlString .= "    ? = ? ";
+            $sqlString .= "    and t10.account_id = ? ";
             if (!empty($this->param_user_code)) {
                 $sqlString .= "    and t10.user_code = ? ";
             }
@@ -1741,7 +1799,8 @@ class WorkTime extends Model
             $sqlString .= "  inner join ";
             $sqlString .= "    ".$this->table_calendar_setting_informations." as t2 ";
             $sqlString .= "    on ";
-            $sqlString .= "      t2.date = t1.record_ymd ";
+            $sqlString .= "      t2.account_id = t1.account_id ";
+            $sqlString .= "      and t2.date = t1.record_ymd ";
             $sqlString .= "      and t2.department_code = t1.department_code ";
             $sqlString .= "      and t2.user_code = t1.user_code ";
             $sqlString .= "      and t2.is_deleted = ? ";
@@ -1789,6 +1848,7 @@ class WorkTime extends Model
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             if (!empty($this->param_user_code)) {
                 $array_setBindingsStr[] = $this->param_user_code;
             }
@@ -1979,6 +2039,32 @@ class WorkTime extends Model
     }
 
     /**
+     * 論理削除
+     *
+     * @return void
+     */
+    public function delWorkTimeByHolidayCancel(){
+        try {
+        DB::table($this->table)
+            ->where('account_id', $this->param_account_id)
+            ->where('user_code', $this->param_user_code)
+            ->where('record_time', $this->param_record_time)
+            ->where('is_deleted', 0)
+            ->update([
+                'is_deleted' => 1
+                ]);
+    }catch(\PDOException $pe){
+        Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
+        Log::error($pe->getMessage());
+        throw $pe;
+    }catch(\Exception $e){
+        Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
+        Log::error($e->getMessage());
+        throw $e;
+    }
+}
+
+    /**
      * モード回数取得
      *
      * @return void
@@ -1991,7 +2077,7 @@ class WorkTime extends Model
                 ->where($this->table.'.record_time', '<=', $this->param_date_from)
                 ->where($this->table.'.mode', '=', $this->param_mode)
                 ->where('is_deleted', 0)
-                ->limit(5)
+                ->limit(10)
                 ->count();
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_count_error')).'$pe');
@@ -2023,6 +2109,7 @@ class WorkTime extends Model
                 ->selectRaw(
                     'DATE_FORMAT('.$this->table.".record_time, '%Y%m%d') as record_date ");
             $subquery1
+                ->addselect($this->table.'.account_id as account_id')
                 ->addselect($this->table.'.user_code as user_code')
                 ->addselect($this->table.'.department_code as department_code')
                 ->addselect($this->table.'.record_time as record_time')
@@ -2118,6 +2205,7 @@ class WorkTime extends Model
                     ->where('t8.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_working_time_dates.' as t9', function ($join) { 
+                    $join->on('t9.account_id', '=', 't2.account_id');
                     $join->on('t9.working_date', '=', 't2.record_date');
                     $join->on('t9.employment_status', '=', 't1.employment_status');
                     $join->on('t9.user_code', '=', 't1.code');
@@ -2218,7 +2306,8 @@ class WorkTime extends Model
         try {
             $sqlString = "";
             $sqlString .= "select ";
-            $sqlString .= "  t1.user_code as user_code ";
+            $sqlString .= "  t1.account_id as account_id ";
+            $sqlString .= "  , t1.user_code as user_code ";
             $sqlString .= "  , t1.user_name as user_name ";
             $sqlString .= "  , t1.user_management as user_management ";
             $sqlString .= "  , t1.employment_status as employment_status ";
@@ -2244,10 +2333,11 @@ class WorkTime extends Model
             $sqlString .= "  ( ";
             $sqlString .= "    ( ";
             $sqlString .= "      select ";
-            $sqlString .= "          t3.user_code as user_code ";
-            $sqlString .= "          , t8.name as user_name ";
-            $sqlString .= "          , t8.management as user_management ";
-            $sqlString .= "          , t8.employment_status as employment_status ";
+            $sqlString .= "         t3.account_id as account_id ";
+            $sqlString .= "         , t3.user_code as user_code ";
+            $sqlString .= "         , t8.name as user_name ";
+            $sqlString .= "         , t8.management as user_management ";
+            $sqlString .= "         , t8.employment_status as employment_status ";
             $sqlString .= "         , t10.code_name as employment_status_name ";
             $sqlString .= "         , t3.department_code as department_code ";
             $sqlString .= "         , t9.name as department_name ";
@@ -2344,7 +2434,8 @@ class WorkTime extends Model
             $sqlString .= "        ".$this->table." as t3  ";
             $sqlString .= "        left join (  ";
             $sqlString .= "          select ";
-            $sqlString .= "            t1.user_code as user_code ";
+            $sqlString .= "            t1.account_id as account_id ";
+            $sqlString .= "            , t1.user_code as user_code ";
             $sqlString .= "            , t1.department_code as department_code ";
             $sqlString .= "            , MAX(t1.record_time) as max_record_time ";
             $sqlString .= "            , t2.record_time as record_time  ";
@@ -2352,100 +2443,123 @@ class WorkTime extends Model
             $sqlString .= "            ".$this->table." as t1  ";
             $sqlString .= "            inner join (  ";
             $sqlString .= "              select ";
-            $sqlString .= "                t1.user_code as user_code ";
+            $sqlString .= "                t1.account_id as account_id ";
+            $sqlString .= "                , t1.user_code as user_code ";
             $sqlString .= "                , t1.department_code as department_code ";
             $sqlString .= "                , t1.record_time as record_time  ";
             $sqlString .= "              from ";
             $sqlString .= "                ".$this->table." as t1  ";
             $sqlString .= "              where ";
-            $sqlString .= "                t1.record_time between ? and ?  ";
+            $sqlString .= "                t1.account_id = ? ";
+            $sqlString .= "                and t1.record_time between ? and ?  ";
             $sqlString .= "                and t1.is_deleted = ? ";
             $sqlString .= "            ) as t2  ";
-            $sqlString .= "            on t2.user_code = t1.user_code  ";
+            $sqlString .= "            on t2.account_id = t1.account_id  ";
+            $sqlString .= "              and t2.user_code = t1.user_code  ";
             $sqlString .= "              and t2.department_code = t1.department_code  ";
             $sqlString .= "              and t2.record_time > t1.record_time  ";
             $sqlString .= "              and t1.is_deleted = ?  ";
             $sqlString .= "          group by ";
-            $sqlString .= "            t1.user_code ";
+            $sqlString .= "            t1.account_id ";
+            $sqlString .= "            , t1.user_code ";
             $sqlString .= "            , t1.department_code ";
             $sqlString .= "            , t2.record_time ";
             $sqlString .= "        ) as t4  ";
-            $sqlString .= "        on t4.user_code = t3.user_code  ";
+            $sqlString .= "        on t4.account_id = t3.account_id  ";
+            $sqlString .= "          and t4.user_code = t3.user_code  ";
             $sqlString .= "          and t4.department_code = t3.department_code  ";
             $sqlString .= "        inner join (  ";
             $sqlString .= "          select ";
-            $sqlString .= "            t1.user_code as user_code ";
+            $sqlString .= "            t1.account_id as account_id ";
+            $sqlString .= "            , t1.user_code as user_code ";
             $sqlString .= "            , t1.department_code as department_code ";
             $sqlString .= "            , t1.record_time as record_time ";
             $sqlString .= "            , t1.mode as mode  ";
             $sqlString .= "          from ";
             $sqlString .= "            ".$this->table." as t1  ";
             $sqlString .= "          where ";
-            $sqlString .= "            t1.record_time between ? and ?  ";
+            $sqlString .= "            t1.account_id = ? ";
+            $sqlString .= "            and t1.record_time between ? and ?  ";
             $sqlString .= "            and t1.is_deleted = ? ";
             $sqlString .= "        ) as t5  ";
-            $sqlString .= "        on t5.user_code = t4.user_code  ";
+            $sqlString .= "        on t5.account_id = t4.account_id ";
+            $sqlString .= "          and t5.user_code = t4.user_code  ";
             $sqlString .= "          and t5.department_code = t4.department_code  ";
             $sqlString .= "          and t5.record_time = t4.max_record_time  ";
             $sqlString .= "        inner join (  ";
             $sqlString .= "          select ";
-            $sqlString .= "            t1.user_code as user_code ";
+            $sqlString .= "            t1.account_id ";
+            $sqlString .= "            , t1.user_code as user_code ";
             $sqlString .= "            , t1.department_code as department_code ";
             $sqlString .= "            , t1.record_time as record_time ";
             $sqlString .= "            , t1.mode as mode  ";
             $sqlString .= "          from ";
             $sqlString .= "            ".$this->table." as t1  ";
             $sqlString .= "          where ";
-            $sqlString .= "            t1.record_time between ? and ?  ";
+            $sqlString .= "            t1.account_id = ? ";
+            $sqlString .= "            and t1.record_time between ? and ?  ";
             $sqlString .= "            and t1.is_deleted = ? ";
             $sqlString .= "        ) as t6  ";
-            $sqlString .= "        on t6.user_code = t4.user_code  ";
+            $sqlString .= "        on t6.account_id = t4.account_id  ";
+            $sqlString .= "          and t6.user_code = t4.user_code  ";
             $sqlString .= "          and t6.department_code = t4.department_code  ";
             $sqlString .= "          and t6.record_time = t4.record_time  ";
             $sqlString .= "        inner join (  ";
             $sqlString .= "          select ";
-            $sqlString .= "            code as code ";
+            $sqlString .= "            account_id as account_id ";
+            $sqlString .= "            , code as code ";
             $sqlString .= "            , MAX(apply_term_from) as max_apply_term_from  ";
             $sqlString .= "          from ";
             $sqlString .= "            ".$this->table_users."  ";
             $sqlString .= "          where ";
-            $sqlString .= "            apply_term_from <= ? ";
+            $sqlString .= "            account_id = ? ";
+            $sqlString .= "            and apply_term_from <= ? ";
             $sqlString .= "            and role < ? ";
             $sqlString .= "            and is_deleted = ? ";
             $sqlString .= "          group by ";
-            $sqlString .= "            code ";
+            $sqlString .= "            account_id ";
+            $sqlString .= "            , code ";
             $sqlString .= "        ) as t7  ";
-            $sqlString .= "        on t7.code = t3.user_code  ";
+            $sqlString .= "        on t7.account_id = t3.account_id  ";
+            $sqlString .= "          and  t7.code = t3.user_code  ";
             $sqlString .= "        inner join ".$this->table_users." as t8  ";
-            $sqlString .= "        on t8.code = t7.code  ";
+            $sqlString .= "        on t8.account_id = t7.account_id  ";
+            $sqlString .= "          and t8.code = t7.code  ";
             $sqlString .= "          and t8.apply_term_from = t7.max_apply_term_from  ";
             $sqlString .= "          and t8.kill_from_date > ? ";
             $sqlString .= "          and t8.is_deleted = ? ";
             $sqlString .= "        left join (  ";
             $sqlString .= "          select ";
-            $sqlString .= "            t1.code as code ";
+            $sqlString .= "            t1.account_id as account_id ";
+            $sqlString .= "            , t1.code as code ";
             $sqlString .= "            , t1.name as name  ";
             $sqlString .= "          from ";
             $sqlString .= "            ".$this->table_departments." as t1  ";
             $sqlString .= "            inner join (  ";
             $sqlString .= "              select ";
-            $sqlString .= "                code as code ";
+            $sqlString .= "                account_id as account_id ";
+            $sqlString .= "                , code as code ";
             $sqlString .= "                , MAX(apply_term_from) as max_apply_term_from  ";
             $sqlString .= "              from ";
             $sqlString .= "                ".$this->table_departments."  ";
             $sqlString .= "              where ";
-            $sqlString .= "                apply_term_from <= ? ";
+            $sqlString .= "                account_id = ? ";
+            $sqlString .= "                and apply_term_from <= ? ";
             $sqlString .= "                and is_deleted = ? ";
             $sqlString .= "              group by ";
-            $sqlString .= "                code ";
+            $sqlString .= "                account_id ";
+            $sqlString .= "                , code ";
             $sqlString .= "            ) as t2  ";
-            $sqlString .= "              on t1.code = t2.code  ";
+            $sqlString .= "              on t1.account_id = t2.account_id  ";
+            $sqlString .= "                and t1.code = t2.code  ";
             $sqlString .= "                and t1.apply_term_from = t2.max_apply_term_from  ";
             $sqlString .= "          where ";
-            $sqlString .= "            t1.kill_from_date > ? ";
+            $sqlString .= "            t1.account_id = ? ";
+            $sqlString .= "            and t1.kill_from_date > ? ";
             $sqlString .= "            and t1.is_deleted = ? ";
             $sqlString .= "        ) as t9  ";
-            $sqlString .= "        on t9.code = t3.department_code  ";
+            $sqlString .= "        on t9.account_id = t3.account_id  ";
+            $sqlString .= "          and t9.code = t3.department_code  ";
             $sqlString .= "        left join ".$this->table_generalcodes." as t10  ";
             $sqlString .= "        on t10.code = t8.employment_status  ";
             $sqlString .= "          and t10.identification_id = ? ";
@@ -2459,12 +2573,14 @@ class WorkTime extends Model
             $sqlString .= "          and t12.identification_id = ? ";
             $sqlString .= "          and t12.is_deleted = ?  ";
             $sqlString .= "      where ";
-            $sqlString .= "        t3.record_time between ? and ?  ";
+            $sqlString .= "        t3.account_id = ? ";
+            $sqlString .= "        and t3.record_time between ? and ?  ";
             $sqlString .= "        and t3.is_deleted = ? ";
             $sqlString .= "    )  ";
             $sqlString .= "    union (  ";
             $sqlString .= "      select ";
-            $sqlString .= "        t1.user_code as user_code ";
+            $sqlString .= "        t1.account_id as account_id ";
+            $sqlString .= "        , t1.user_code as user_code ";
             $sqlString .= "        , t1.user_name as user_name ";
             $sqlString .= "        , t1.user_management as user_management ";
             $sqlString .= "        , t1.employment_status as employment_status ";
@@ -2486,7 +2602,8 @@ class WorkTime extends Model
             $sqlString .= "      from ";
             $sqlString .= "        (  ";
             $sqlString .= "          select ";
-            $sqlString .= "            t1.code as user_code ";
+            $sqlString .= "            t1.account_id ";
+            $sqlString .= "            , t1.code as user_code ";
             $sqlString .= "            , t1.name as user_name ";
             $sqlString .= "            , t1.management as user_management ";
             $sqlString .= "            , t1.employment_status as employment_status ";
@@ -2496,75 +2613,93 @@ class WorkTime extends Model
             $sqlString .= "            ".$this->table_users." as t1  ";
             $sqlString .= "            inner join (  ";
             $sqlString .= "              select ";
-            $sqlString .= "                code as code ";
+            $sqlString .= "                account_id as account_id ";
+            $sqlString .= "                , code as code ";
             $sqlString .= "                , MAX(apply_term_from) as max_apply_term_from  ";
             $sqlString .= "              from ";
             $sqlString .= "                ".$this->table_users."  ";
             $sqlString .= "              where ";
-            $sqlString .= "                apply_term_from <= ? ";
+            $sqlString .= "                account_id = ? ";
+            $sqlString .= "                and apply_term_from <= ? ";
             $sqlString .= "                and role < ? ";
             $sqlString .= "                and is_deleted = ? ";
             $sqlString .= "              group by ";
-            $sqlString .= "                code ";
+            $sqlString .= "                account_id ";
+            $sqlString .= "                , code ";
             $sqlString .= "            ) as t3  ";
-            $sqlString .= "            on t3.code = t1.code  ";
+            $sqlString .= "            on t3.account_id = t1.account_id  ";
+            $sqlString .= "              and t3.code = t1.code  ";
             $sqlString .= "              and t3.max_apply_term_from = t1.apply_term_from  ";
             $sqlString .= "          where ";
-            $sqlString .= "            t1.kill_from_date > ? ";
+            $sqlString .= "            t1.account_id = ? ";
+            $sqlString .= "            and t1.kill_from_date > ? ";
             $sqlString .= "        ) as t1  ";
             $sqlString .= "        inner join (  ";
             $sqlString .= "          select ";
-            $sqlString .= "            t1.department_code as department_code ";
+            $sqlString .= "            t1.account_id as account_id ";
+            $sqlString .= "            , t1.department_code as department_code ";
             $sqlString .= "            , t1.user_code as user_code ";
             $sqlString .= "            , DATE_FORMAT(t1.date, '%Y%m%d') as calendars_date  ";
             $sqlString .= "          from ";
             $sqlString .= "            ".$this->table_calendar_setting_informations." as t1 ";
             $sqlString .= "          where ";
-            $sqlString .= "            t1.date between ? and ? ";
+            $sqlString .= "            t1.account_id = ? ";
+            $sqlString .= "            and  t1.date between ? and ? ";
             $sqlString .= "            and  t1.business_kubun = ? ";
-            $sqlString .= "            and  holiday_kubun = ? ";
-            $sqlString .= "            and  is_deleted = ? ";
+            $sqlString .= "            and  t1.holiday_kubun = ? ";
+            $sqlString .= "            and  t1.is_deleted = ? ";
             $sqlString .= "        ) as t2  ";
-            $sqlString .= "        on t2.department_code = t1.department_code ";
+            $sqlString .= "        on t2.account_id = t1.account_id ";
+            $sqlString .= "          and t2.department_code = t1.department_code ";
             $sqlString .= "          and t2.user_code = t1.user_code  ";
             $sqlString .= "        left join (  ";
             $sqlString .= "          select ";
-            $sqlString .= "            t1.user_code as user_code ";
+            $sqlString .= "            t1.account_id as account_id ";
+            $sqlString .= "            , t1.user_code as user_code ";
             $sqlString .= "            , t1.department_code as department_code ";
             $sqlString .= "            , DATE_FORMAT(t1.record_time, '%Y%m%d') as record_date  ";
             $sqlString .= "          from ";
             $sqlString .= "            ".$this->table." as t1 ";
             $sqlString .= "          where ";
-            $sqlString .= "            t1.record_time between ? and ? ";
+            $sqlString .= "            t1.account_id = ? ";
+            $sqlString .= "            and t1.record_time between ? and ? ";
             $sqlString .= "        ) as t3  ";
-            $sqlString .= "        on t3.user_code = t1.user_code  ";
+            $sqlString .= "        on t3.account_id = t1.account_id  ";
+            $sqlString .= "          and t3.user_code = t1.user_code  ";
             $sqlString .= "          and t3.department_code = t1.department_code  ";
             $sqlString .= "          and t3.record_date = t2.calendars_date  ";
             $sqlString .= "        left join (  ";
             $sqlString .= "          select ";
-            $sqlString .= "            t1.code as code ";
+            $sqlString .= "            t1.account_id as account_id ";
+            $sqlString .= "            , t1.code as code ";
             $sqlString .= "            , t1.name as name  ";
             $sqlString .= "          from ";
             $sqlString .= "            ".$this->table_departments." as t1  ";
             $sqlString .= "            inner join (  ";
             $sqlString .= "              select ";
-            $sqlString .= "                code as code ";
+            $sqlString .= "                account_id as account_id ";
+            $sqlString .= "                , code as code ";
             $sqlString .= "                , MAX(apply_term_from) as max_apply_term_from  ";
             $sqlString .= "              from ";
             $sqlString .= "                ".$this->table_departments."  ";
             $sqlString .= "              where ";
-            $sqlString .= "                apply_term_from <= ? ";
+            $sqlString .= "                account_id = ? ";
+            $sqlString .= "                and apply_term_from <= ? ";
             $sqlString .= "                and is_deleted = ? ";
             $sqlString .= "              group by ";
-            $sqlString .= "                code ";
+            $sqlString .= "                account_id ";
+            $sqlString .= "                , code ";
             $sqlString .= "            ) as t2  ";
-            $sqlString .= "            on t2.code = t1.code  ";
+            $sqlString .= "            on t2.account_id = t1.account_id  ";
+            $sqlString .= "              and t2.code = t1.code  ";
             $sqlString .= "              and t2.max_apply_term_from =  t1.apply_term_from ";
             $sqlString .= "          where ";
-            $sqlString .= "            t1.kill_from_date > ? ";
+            $sqlString .= "            t1.account_id = ? ";
+            $sqlString .= "            and t1.kill_from_date > ? ";
             $sqlString .= "            and t1.is_deleted = ? ";
             $sqlString .= "        ) as t9  ";
-            $sqlString .= "        on t9.code = t1.department_code  ";
+            $sqlString .= "        on t9.account_id = t1.account_id  ";
+            $sqlString .= "          and t9.code = t1.department_code  ";
             $sqlString .= "        left join ".$this->table_generalcodes." as t10  ";
             $sqlString .= "        on t10.code = t1.employment_status  ";
             $sqlString .= "          and t10.identification_id = ? ";
@@ -2575,11 +2710,13 @@ class WorkTime extends Model
             $sqlString .= "    ) ";
             $sqlString .= "  ) as t1  ";
             $sqlString .= "  inner join ".$this->table_calendar_setting_informations." as t2  ";
-            $sqlString .= "  on t2.department_code = t1.department_code  ";
+            $sqlString .= "  on t2.account_id = t1.account_id  ";
+            $sqlString .= "    and t2.department_code = t1.department_code  ";
             $sqlString .= "    and t2.user_code = t1.user_code  ";
             $sqlString .= "    and t2.date = t1.current_record_date ";
             // 条件
             $sqlString .= "where 1 = 1 ";
+            $sqlString .= "and t1.account_id = ? ";
             if(!empty($this->param_employment_status)){
                 $sqlString .= "and t1.employment_status = ? ";          // 雇用形態指定
             }
@@ -2602,7 +2739,7 @@ class WorkTime extends Model
                                 t1.current_record_date desc
                                 , t1.user_code asc
                                 , t1.department_code asc
-                                , t1.current_record_time_ asc";
+                                , t1.current_record_time asc";
             // バインド
             // インターバル時間取得
             $apicommon = new ApiCommonController();
@@ -2610,26 +2747,32 @@ class WorkTime extends Model
             $array_setBindingsStr = array();
             // 出退勤interval警告
             $array_setBindingsStr[] = (string)$interval_time;
+            $array_setBindingsStr[] = (string)$this->param_account_id;
             $array_setBindingsStr[] = (string)$this->param_date_from;
             $array_setBindingsStr[] = (string)$this->param_date_to;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = (string)$this->param_account_id;
             $array_setBindingsStr[] = (string)$this->param_date_from;
             $array_setBindingsStr[] = (string)$this->param_date_to;
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = (string)$this->param_account_id;
             $array_setBindingsStr[] = (string)$this->param_date_from;
             $array_setBindingsStr[] = (string)$this->param_date_to;
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = (string)$this->param_account_id;
             $array_setBindingsStr[] = (string)$this->param_end_date;
             $array_setBindingsStr[] = (int)Config::get('const.C017.admin_user');
             $array_setBindingsStr[] = 0;
             // 月末
-            $dt = new Carbon($this->param_end_date);
+            $dt = new Carbon($this->param_start_date);
             $lastOfMonth = date_format($dt->endOfMonth(), 'Ymd');
             $array_setBindingsStr[] = (string)$lastOfMonth;
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = (string)$this->param_account_id;
             $array_setBindingsStr[] = (string)$this->param_end_date;
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = (string)$this->param_account_id;
             $array_setBindingsStr[] = (string)$lastOfMonth;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = (string)Config::get('const.C001.value');
@@ -2638,6 +2781,7 @@ class WorkTime extends Model
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = (string)Config::get('const.C005.value');
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = (string)$this->param_account_id;
             $array_setBindingsStr[] = (string)$this->param_date_from;
             $array_setBindingsStr[] = (string)$this->param_date_to;
             $array_setBindingsStr[] = 0;
@@ -2645,25 +2789,32 @@ class WorkTime extends Model
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = (string)$this->param_account_id;
             $array_setBindingsStr[] = (string)$this->param_end_date;
-            $array_setBindingsStr[] = (int)Config::get('const.C017.admin_user');;
+            $array_setBindingsStr[] = (int)Config::get('const.C017.admin_user');
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = (string)$this->param_account_id;
             $array_setBindingsStr[] = (string)$lastOfMonth;
+            $array_setBindingsStr[] = (string)$this->param_account_id;
             $array_setBindingsStr[] = (string)$this->param_start_date;
             $array_setBindingsStr[] = (string)$this->param_end_date;
             $array_setBindingsStr[] = (int)Config::get('const.C007.basic');
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = (string)$this->param_account_id;
             $array_setBindingsStr[] = (string)$this->param_date_from;
             $array_setBindingsStr[] = (string)$this->param_date_to;
+            $array_setBindingsStr[] = (string)$this->param_account_id;
             $array_setBindingsStr[] = (string)$this->param_end_date;
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = (string)$this->param_account_id;
             $array_setBindingsStr[] = (string)$lastOfMonth;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = (string)Config::get('const.C001.value');
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = (string)$this->param_start_date;
             $array_setBindingsStr[] = (string)$this->param_end_date;
+            $array_setBindingsStr[] = (string)$this->param_account_id;
             if(!empty($this->param_employment_status)) {
                 $array_setBindingsStr[] = (int)$this->param_employment_status;
             }
@@ -4263,9 +4414,11 @@ class WorkTime extends Model
      *
      * @return boolean
      */
-    public function getDetails(){
+    public function getWorkTimeDetails(){
         try {
             $mainquery = DB::table($this->table);
+            $mainquery
+                ->where('account_id', '=', $this->param_account_id);
             if (!empty($this->param_department_code)) {
                 $mainquery
                     ->where('department_code', '=', $this->param_department_code);
@@ -4305,9 +4458,11 @@ class WorkTime extends Model
      *
      * @return boolean
      */
-    public function isExist(){
+    public function isWorkTimeExist(){
         try {
             $mainquery = DB::table($this->table);
+            $mainquery
+                ->where('account_id', '=', $this->param_account_id);
             if (!empty($this->param_department_code)) {
                 $mainquery
                     ->where('department_code', '=', $this->param_department_code);
@@ -4347,9 +4502,11 @@ class WorkTime extends Model
      *
      * @return boolean
      */
-    public function updateCommon($array_update){
+    public function updateWorkTimeCommon($array_update){
         try {
             $mainquery = DB::table($this->table);
+            $mainquery
+                ->where('account_id', '=', $this->param_account_id);
             if (!empty($this->param_department_code)) {
                 $mainquery
                     ->where('department_code', '=', $this->param_department_code);

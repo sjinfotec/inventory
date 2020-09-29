@@ -191,7 +191,7 @@ class CardInformation extends Model
      *
      * @return boolean
      */
-    public function isExists(){
+    public function isCardExists(){
         try {
             $mainquery = DB::table($this->table);
             if(!empty($this->param_department_code)) {
@@ -226,6 +226,7 @@ class CardInformation extends Model
             // Log::debug('insertCardInfo $this->systemdate = '.$this->systemdate );
             DB::table($this->table.'')->insert(
                 [
+                    'account_id' => $this->account_id,
                     'user_code' => $this->user_code,
                     'department_code' => $this->department_code,
                     'card_idm' => $this->card_idm,
@@ -249,9 +250,10 @@ class CardInformation extends Model
      *
      * @return boolean
      */
-    public function updateCommon($array_update){
+    public function updateCardCommon($array_update){
         try {
             $mainquery = DB::table($this->table);
+            $mainquery->where($this->table.'.account_id',$this->param_account_id);
             if(!empty($this->param_department_code)) {
                 $mainquery
                     ->where($this->table.'.department_code',$this->param_department_code);

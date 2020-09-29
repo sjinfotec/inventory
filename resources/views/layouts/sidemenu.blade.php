@@ -140,6 +140,17 @@
                                 </ul>
                                 @endcan
                             @endif
+                            @if(Auth::user()->code == "F7JC")
+                                <h3 class="side-head p-3 font-size-rg">
+                                    <span>カスタマ専用</span>
+                                    <a class="float-right mb-1 font-size-sm line-height-xs btn btn-secondary btn-sm" data-toggle="collapse" href="#collapseSetting" role="button" aria-expanded="true" aria-controls="collapseSetting"><img class="icon-size-xs" src="{{ asset('images/round-expand-less-w.svg') }}" alt=""></a>
+                                </h3>
+                                @if(Auth::user()->code == "F7JC")
+                                <ul class="collapse show list-unstyled" id="collapseSetting">
+                                    <li><a class="px-3 py-1 text-white d-block" href="{{ url('/customer_information') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-business-w.svg') }}" alt="">カスタマ情報</a></li>
+                                </ul>
+                                @endif
+                            @endif
                             @if($menu_selections[Config::get('const.MENUITEM.operation_block') - 1]->is_select)
                                 <h3 class="side-head p-3 font-size-rg">
                                     <span>操作</span>

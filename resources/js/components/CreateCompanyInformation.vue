@@ -250,6 +250,10 @@ export default {
       type: Array,
       default: []
     },
+    isexistdownload: {
+      type: String,
+      default: ""
+    },
     settingcompanies: {
       type: String,
       default: ""
@@ -597,6 +601,8 @@ export default {
         this.getThenUsers();
       } else if (this.settingcalendarsettinginformations == 0) {
         this.getThenCalendarSettingInfos();
+      } else if (this.isexistdownload == 0) {
+        this.getThenDownload();
       }
     },
     inputClear() {

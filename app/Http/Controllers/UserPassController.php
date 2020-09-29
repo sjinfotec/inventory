@@ -73,9 +73,11 @@ class UserPassController extends Controller
             $pass_word = bcrypt($params['pass_word']);
             $code = $params['user_id'];
             $systemdate = Carbon::now();
-            $user = Auth::user();
-            $user_code = $user->code;
+            $authuser = Auth::user();
+            $user_code = $authuser->code;
+            $user_accout_id = $authuser->accout_id;
             $users = new UserModel();
+            $users->setParamAccountidAttribute($user_accout_id);
             $users->setCodeAttribute($code);
             $users->setPasswordAttribute($pass_word);
             $users->setUpdateduserAttribute($user_code);

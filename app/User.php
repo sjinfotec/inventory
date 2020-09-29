@@ -109,6 +109,7 @@ class User extends Authenticatable
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             $subquery2 = $apicommon->getUserApplyTermSubquery(null, $account_id);
+            Log::debug('getUserApplyTermSubquery getUserApplyTermSubquery ');
             $mainquery = DB::table('users')
                 ->select(
                     'users.account_id',
@@ -119,10 +120,10 @@ class User extends Authenticatable
                     'users.code as code'
                 );
             $mainquery
-                ->JoinSub($subquery2, 't1', function ($join) { 
-                    $join->on('t1.account_id', '=', $account_id);
+                ->JoinSub($subquery2, 't1', function ($join) use ($account_id) {
                     $join->on('t1.code', '=', 'users.code');
-                    $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                    $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from')
+                    ->where('t1.account_id',$account_id);
                 });
             $mainquery
                 ->where('users.account_id',$account_id)
@@ -130,6 +131,7 @@ class User extends Authenticatable
                 ->where('users.role',"<>",10)
                 ->where('users.is_deleted',0);
             $data = $mainquery->get();
+            Log::debug('getUserApplyTermSubquery end');
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());

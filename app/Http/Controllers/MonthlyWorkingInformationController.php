@@ -119,12 +119,12 @@ class MonthlyWorkingInformationController extends Controller
                 $usercode = $params['usercode'];
             }
             // 会社名を取得
-            $user = Auth::user();
-            $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $authuser = Auth::user();
+            $login_user_code = $authuser->code;
+            $login_account_id = $authuser->account_id;
             $company_name = Config::get('const.MEMO_DATA.MEMO_DATA_015');
             $company_model = new Company();
-            $company_model->setParamAccountidAttribute($login_user_code_4);
+            $company_model->setParamAccountidAttribute($login_account_id);
             $company_model->setApplytermfromAttribute($dateto);
             $companys = $company_model->getCompanyInfoApply();
             foreach ($companys as $company_result) {
@@ -140,6 +140,7 @@ class MonthlyWorkingInformationController extends Controller
             if ($chk_result) {
                 // showCalc implement
                 $array_impl_showCalc = array (
+                    'account_id' => $login_account_id,
                     'workingtimedate_model' => $workingtimedate_model,
                     'datefrom' => $datefrom,
                     'dateto' => $dateto,
@@ -149,7 +150,7 @@ class MonthlyWorkingInformationController extends Controller
                 );
                 // 月次最新集計
                 if ($showorupdate == Config::get('const.SHOW_OR_UPDATE.update')) {
-                    $te = set_time_limit(240);
+                    $te = set_time_limit(300);
                     $dt_end = $this->showupdate($array_impl_showCalc, "show");
                     $dt_dateto = new Carbon($dateto);
                     // Log::debug('  $dt_end = '.$dt_end);
@@ -158,6 +159,7 @@ class MonthlyWorkingInformationController extends Controller
                         // 月次集計
                         // showCalc implement
                         $array_impl_showCalc = array (
+                            'account_id' => $login_account_id,
                             'workingtimedate_model' => $workingtimedate_model,
                             'datefrom' => $svdatefrom,
                             'dateto' => $dateto,
@@ -212,6 +214,7 @@ class MonthlyWorkingInformationController extends Controller
     public function showCalc($params)
     {
         // Log::debug('------------- 月次集計開始 showCalc in----------------');
+        $account_id = $params['account_id'];
         $workingtimedate_model = $params['workingtimedate_model'];
         $datefrom = $params['datefrom'];
         $dateto = $params['dateto'];
@@ -221,6 +224,7 @@ class MonthlyWorkingInformationController extends Controller
         $array_result_calcMain = array();
         try {
 
+            $workingtimedate_model->setParamAccountidAttribute($account_id);
             // 集計用日付設定
             $workingtimedate_model->setParamdatefromAttribute($datefrom);
             $workingtimedate_model->setParamdatetoAttribute($dateto);
@@ -321,7 +325,7 @@ class MonthlyWorkingInformationController extends Controller
                     'usercode' => $usercode
                 );
                 // 月次最新集計
-                $te = set_time_limit(240);
+                $te = set_time_limit(300);
                 $dt_end = $this->showupdate($array_impl_showCalc, "calc");
             } else {
                 $this->array_messagedata =  $array_messagedata->concat($workingtimedate_model->getMassegedataAttribute());
@@ -389,7 +393,7 @@ class MonthlyWorkingInformationController extends Controller
         // Log::debug(' dateto = '.$dateto);
         $dt2 = new Carbon($dateto);
         $dt3 = new Carbon($datefrom);
-        $dt_end = $dt3->addWeek(1);
+        $dt_end = $dt3->addDay(5);
         if ($kbn == "show") {
             if ($dt2 < $dt_end) {
                 $dt_end = $dt2;
@@ -400,14 +404,15 @@ class MonthlyWorkingInformationController extends Controller
         // Log::debug(' dt2 = '.$dt2);
         // Log::debug(' dt3 = '.$dt2);
         // Log::debug(' dt_end = '.$dt_end);
-        $user = Auth::user();
-        $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $authuser = Auth::user();
+        $login_user_code = $authuser->code;
+        $login_account_id = $authuser->account_id;
         DB::beginTransaction();
         try{
             // パラメータの内容でworking_time_datesを削除
             // パラメータの内容でworking_time_datesを削除
             // 日付の範囲はcalcメソッドでworkingtimedate_modelに設定済み
+            $workingtimedate_model->setParamAccountidAttribute($login_account_id);
             $workingtimedate_model->setParamEmploymentStatusAttribute($employmentstatus);
             $workingtimedate_model->setParamDepartmentcodeAttribute($departmentcode);
             $workingtimedate_model->setParamUsercodeAttribute($usercode);
@@ -416,7 +421,11 @@ class MonthlyWorkingInformationController extends Controller
             };
             //feature selection
             $feature_model = new FeatureItemSelection();
-            $feature_model->setParamaccountidAttribute($login_user_code_4);
+            if (Config::get('const.EDITION.EDITION') == Config::get('const.EDITION_VALUE.TRIAL')) {
+                $feature_model->setParamaccountidAttribute(Config::get('const.TRIALACCOUNTID.account_id'));
+            } else {
+                $feature_model->setParamaccountidAttribute($login_account_id);
+            }
             $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
             $feature_data = $feature_model->getItem();
             $feature_attendance_count = 0;          // 出勤回数
@@ -437,12 +446,12 @@ class MonthlyWorkingInformationController extends Controller
                     if ($mode_list == 2) {
                         $user = Auth::user();
                         $login_user_code = $user->code;
-                        $login_user_code_4 = substr($login_user_code, 0 ,4);
+                        $login_account_id = $user->account_id;
                         // 緊急収集のタイムテーブルを取得する
                         $time_table = new WorkingTimeTable();
                         $time_table->setNoAttribute(Config::get('const.C999_NAME.emergency_timetable_no'));
                         $time_table->setParamapplytermfromAttribute($datefrom);
-                        $time_table->setParamaccountidAttribute($login_user_code_4);
+                        $time_table->setParamaccountidAttribute($login_account_id);
                         $em_details = $time_table->getDetailTimeTable();
                     }
                 }
@@ -531,23 +540,23 @@ class MonthlyWorkingInformationController extends Controller
         $make_todate = '';
         // 表示区分
         if($displayKbn == Config::get('const.C016.display_closing')){
-            $user = Auth::user();
-            $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $authuser = Auth::user();
+            $login_user_code = $authuser->code;
+            $login_account_id = $authuser->account_id;
             // 設定マスタより締め日取得
             $setting_model = new Setting();
             $target_dateYmd = new Carbon($dateYm.'01');
             // 当月締め日
             $setting_model->setParamFiscalmonthAttribute(date_format($target_dateYmd, 'm'));
             $setting_model->setParamYearAttribute(date_format($target_dateYmd, 'Y'));
-            $setting_model->setParamAccountidAttribute($login_user_code_4);
+            $setting_model->setParamAccountidAttribute($login_account_id);
             $closing = $setting_model->getMonthClosing();
             if (isset($closing)) {
                 // 前月締め日
                 $beformonth_endOfMonth = $target_dateYmd->firstOfMonth()->addDay(-1);
                 $setting_model->setParamFiscalmonthAttribute(date_format($beformonth_endOfMonth, 'm'));
                 $setting_model->setParamYearAttribute(date_format($target_dateYmd, 'Y'));
-                $setting_model->setParamAccountidAttribute($login_user_code_4);
+                $setting_model->setParamAccountidAttribute($login_account_id);
                 $beformonth_closing = $setting_model->getMonthClosing();
                 if (isset($beformonth_closing)) {
 
@@ -611,10 +620,10 @@ class MonthlyWorkingInformationController extends Controller
         $before_user_code = null;
         $before_date = null;
         $before_result = null;
-        $user = Auth::user();
-        $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
-        $workingtimedate_model->setParamAccountidAttribute($login_user_code_4);
+        $authuser = Auth::user();
+        $login_user_code = $authuser->code;
+        $login_account_id = $authuser->account_id;
+        $workingtimedate_model->setParamAccountidAttribute($login_account_id);
         // 指定パラメータよりレコード取得パラメータはメインで設定済み
         $workingtimedates = $workingtimedate_model->getWorkingTimeDateTimeFormat(
             Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'), $workingtimedate_model->getParamdatetoAttribute(), '');

@@ -495,10 +495,10 @@ class UserModel extends Model
             }
             $subquery1
                 ->where('is_deleted', '=', 0)
-                ->groupBy('code');
+                ->groupBy('account_id', 'code');
             // ICカード
             $subquery2 = DB::table($this->table_card_infomations)
-                ->select('user_code', 'card_idm')
+                ->select('account_id', 'user_code', 'card_idm')
                 ->where('account_id', '=', $this->param_account_id)
                 ->where('is_deleted', '=', 0);
             $case_sql1 = "CASE t1.kill_from_date = ".Config::get('const.INIT_DATE.maxdate');
@@ -681,59 +681,73 @@ class UserModel extends Model
             $sqlString .= " ".$this->table." as t1 ";
             $sqlString .= " inner join (  ";
             $sqlString .= "   select ";
-            $sqlString .= "     t1.code as code ";
+            $sqlString .= "     t1.account_id as account_id ";
+            $sqlString .= "     , t1.code as code ";
             $sqlString .= "     , t1.name as name  ";
             $sqlString .= "   from ";
             $sqlString .= "     ".$this->table_departments." as t1 ";
             $sqlString .= "      inner join (  ";
             $sqlString .= "        select ";
-            $sqlString .= "          code as code ";
+            $sqlString .= "          account_id as account_id ";
+            $sqlString .= "          , code as code ";
             $sqlString .= "          , MAX(apply_term_from) as max_apply_term_from  ";
             $sqlString .= "        from ";
             $sqlString .= "          ".$this->table_departments." ";
             $sqlString .= "        where ";
             $sqlString .= "          ? = ?  ";
+            $sqlString .= "          and account_id = ? ";
             $sqlString .= "          and apply_term_from <= ? ";
             $sqlString .= "          and is_deleted = ?  ";
             $sqlString .= "        group by ";
-            $sqlString .= "          code ";
+            $sqlString .= "          account_id ";
+            $sqlString .= "          , code ";
             $sqlString .= "      ) as t2  ";
-            $sqlString .= "        on t2.code = t1.code  ";
+            $sqlString .= "        on t2.account_id = t1.account_id  ";
+            $sqlString .= "        and t2.code = t1.code  ";
             $sqlString .= "        and t2.max_apply_term_from = t1.apply_term_from  ";
             $sqlString .= "  ) as t2  ";
-            $sqlString .= "  on t2.code = t1.department_code  ";
+            $sqlString .= "  on t2.account_id = t1.account_id  ";
+            $sqlString .= "  and t2.code = t1.department_code  ";
             $sqlString .= "  left join ";
             $sqlString .= "  ".$this->table_generalcodes." t3 ";
             $sqlString .= "  on t3.identification_id = ? ";
             $sqlString .= "    and t3.code = t1.employment_status  ";
             $sqlString .= "  inner join (  ";
             $sqlString .= "    select ";
-            $sqlString .= "      t1.no as no ";
+            $sqlString .= "      t1.account_id as account_id ";
+            $sqlString .= "      , t1.no as no ";
             $sqlString .= "      , t1.name as name  ";
             $sqlString .= "      , t1.working_time_kubun ";
             $sqlString .= "    from ";
             $sqlString .= "      ".$this->table_working_timetables." as t1 ";
             $sqlString .= "      inner join (  ";
             $sqlString .= "        select ";
-            $sqlString .= "          no as no ";
+            $sqlString .= "          account_id as account_id ";
+            $sqlString .= "          , no as no ";
             $sqlString .= "          , MAX(apply_term_from) as max_apply_term_from  ";
             $sqlString .= "        from ";
             $sqlString .= "          ".$this->table_working_timetables." ";
             $sqlString .= "        where ";
             $sqlString .= "          ? = ?  ";
+            $sqlString .= "          and account_id = ? ";
             $sqlString .= "          and apply_term_from <= ? ";
             $sqlString .= "          and is_deleted = ?  ";
             $sqlString .= "        group by ";
-            $sqlString .= "          no ";
+            $sqlString .= "          account_id ";
+            $sqlString .= "          , no ";
             $sqlString .= "      ) as t2  ";
-            $sqlString .= "      on t2.no = t1.no  ";
+            $sqlString .= "      on t2.account_id = t1.account_id  ";
+            $sqlString .= "      and t2.no = t1.no  ";
             $sqlString .= "      and t2.max_apply_term_from = t1.apply_term_from ";
             $sqlString .= "    where ";
-            $sqlString .= "      t1.working_time_kubun = ? ";
+            $sqlString .= "      t1.account_id = ? ";
+            $sqlString .= "      and t1.working_time_kubun = ? ";
             $sqlString .= " ) as t4  ";
-            $sqlString .= " on t4.no = t1.working_timetable_no  ";
+            $sqlString .= " on t4.account_id = t1.account_id  ";
+            $sqlString .= " and t4.no = t1.working_timetable_no  ";
             $sqlString .= " where ";
             $sqlString .= "   ? = ?  ";
+            $sqlString .= "   and t1.account_id = ?  ";
             $sqlString .= "   and t1.is_deleted = ?  ";
             $sqlString .= " order by ";
             $sqlString .= "   t1.department_code ";
@@ -743,16 +757,20 @@ class UserModel extends Model
             $array_setBindingsStr[] = Config::get('const.INIT_DATE.maxdate');
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = Config::get('const.INIT_DATE.maxdate');
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = Config::get('const.C001.value');
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = Config::get('const.INIT_DATE.maxdate');
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = Config::get('const.C004.regular_working_time');
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id;
             $array_setBindingsStr[] = 0;
             $results = DB::select($sqlString, $array_setBindingsStr);
             return $results;
@@ -832,8 +850,8 @@ class UserModel extends Model
      */
     public function updateIsDelete(){
         try {
+            // IDで削除
             DB::table($this->table)
-                ->where('account_id', $this->param_account_id)
                 ->where('id', $this->id)
                 ->update(['is_deleted' => 1]);
         }catch(\PDOException $pe){

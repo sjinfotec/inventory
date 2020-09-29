@@ -39,7 +39,10 @@
 		<!-- /main contentns row -->
 		@endif
 		@can('admin-higher')
-		<user-add v-bind:authusers="{{ $authusers }}">
+		<user-add
+		 	v-bind:authusers="{{ $authusers }}"
+			v-bind:isexistdownload="{{ $isexistdownload }}"
+		>
 		</user-add>
 		@endcan
 		<!-- /main contentns row -->

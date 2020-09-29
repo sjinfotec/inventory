@@ -297,6 +297,7 @@ class WorkTimeLog extends Model
         try {
             DB::table($this->table)->insert(
                 [
+                    'account_id' => $this->account_id,
                     'user_code' => $this->user_code,
                     'department_code' => $this->department_code,
                     'employment_status' => $this->employment_status,
@@ -345,7 +346,8 @@ class WorkTimeLog extends Model
             $sqlString .= "  , t1.holiday_kubun_name as holiday_kubun_name ";
             $sqlString .= "  from (";
             $sqlString .= "  select";
-            $sqlString .= "    t1.code as user_code" ;
+            $sqlString .= "    t1.account_id as account_id" ;
+            $sqlString .= "    , t1.code as user_code" ;
             $sqlString .= "    , t1.name as user_name ";
             $sqlString .= "    , t1.department_code as department_code ";
             $sqlString .= "    , t5.name as department_name ";
@@ -553,9 +555,11 @@ class WorkTimeLog extends Model
      *
      * @return boolean
      */
-    public function getDetails(){
+    public function getWorkTimelogDetails(){
         try {
             $mainquery = DB::table($this->table);
+            $mainquery
+                ->where('account_id',$this->param_account_id);
             if (!empty($this->param_department_code)) {
                 $mainquery
                     ->where('department_code', '=', $this->param_department_code);
@@ -599,9 +603,11 @@ class WorkTimeLog extends Model
      *
      * @return boolean
      */
-    public function isExist(){
+    public function isWorkTimelogExist(){
         try {
             $mainquery = DB::table($this->table);
+            $mainquery
+                ->where('account_id',$this->param_account_id);
             if (!empty($this->param_department_code)) {
                 $mainquery
                     ->where('department_code', '=', $this->param_department_code);
@@ -645,9 +651,11 @@ class WorkTimeLog extends Model
      *
      * @return boolean
      */
-    public function updateCommon($array_update){
+    public function updateWorkTimelogCommon($array_update){
         try {
             $mainquery = DB::table($this->table);
+            $mainquery
+                ->where('account_id',$this->param_account_id);
             if (!empty($this->param_department_code)) {
                 $mainquery
                     ->where('department_code', '=', $this->param_department_code);

@@ -22,7 +22,7 @@ class CustomerInformationController extends Controller
      */
     public function index()
     {
-        // return view('create_company_information');
+        return view('customer_information');
     }
 
     /**
@@ -62,11 +62,9 @@ class CustomerInformationController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
-            Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
             Log::error($e->getMessage());
             throw $e;
         }
@@ -83,13 +81,13 @@ class CustomerInformationController extends Controller
         $systemdate = Carbon::now();
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         $apply_term_from = Config::get('const.INIT_DATE.initdate');
 
         DB::beginTransaction();
         try{
-            $company->setParamAccountidAttribute($login_user_code_4);
-            $company->setAccountidAttribute($login_user_code_4);
+            $company->setParamAccountidAttribute($login_account_id);
+            $company->setAccountidAttribute($login_account_id);
             $company->setApplytermfromAttribute($apply_term_from);
             $company->setNameAttribute($details['name']);
             $company->setKanaAttribute($details['kana']);
@@ -135,11 +133,11 @@ class CustomerInformationController extends Controller
         $details = new Collection();
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         $result = true;
         try {
             $customer_model = new CustomerInformation();
-            $customer_model->setAccountidAttribute($login_user_code_4);
+            $customer_model->setParamAccountidAttribute($login_account_id);
             $details =  $customer_model->getCustomerInfo();
 
             return response()->json(
@@ -147,11 +145,111 @@ class CustomerInformationController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
-            Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 会社一覧情報取得
+     *
+     * @return void
+     */
+    public function getSsjjooCustomerInfoList(Request $request){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['sel'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "sel", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            Log::debug('customerinfomationcontoroller getSsjjooCustomerInfo account_id = '.$params['sel']['account_id']);
+            Log::debug('customerinfomationcontoroller getSsjjooCustomerInfo name = '.$params['sel']['name']);
+            $account_id = $params['sel']['account_id'];
+            $name = $params['sel']['name'];
+            $customer_model = new CustomerInformation();
+            $customer_model->setParamAccountidAttribute($account_id);
+            $customer_model->setParamCompanynameAttribute($name);
+            $details =  $customer_model->getCustomerInfoList();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 会社詳細情報取得
+     *
+     * @return void
+     */
+    public function getSsjjooCustomerInfo(Request $request){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['sel'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "sel", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            Log::debug('customerinfomationcontoroller getSsjjooCustomerInfo account_id = '.$params['sel']['account_id']);
+            Log::debug('customerinfomationcontoroller getSsjjooCustomerInfo name = '.$params['sel']['name']);
+            $account_id = $params['sel']['account_id'];
+            $name = $params['sel']['name'];
+            $customer_model = new CustomerInformation();
+            $customer_model->setParamAccountidAttribute($account_id);
+            $customer_model->setParamCompanynameAttribute($name);
+            $details =  $customer_model->getCustomerInfo();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
             Log::error($e->getMessage());
             throw $e;
         }

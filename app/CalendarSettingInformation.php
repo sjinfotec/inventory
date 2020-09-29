@@ -1493,9 +1493,10 @@ class CalendarSettingInformation extends Model
      *
      * @return boolean
      */
-    public function updateCommon($array_update){
+    public function updateCalecdarSettingCommon($array_update){
         try {
             $mainquery = DB::table($this->table);
+            $mainquery->where($this->table.'.account_id', '=', $this->param_account_id);
             if(!empty($this->paramfromdate)) {
                 $mainquery
                     ->where($this->table.'.date', '>=', $this->paramfromdate);

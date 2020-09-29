@@ -61,11 +61,11 @@ class DemandController extends Controller
         $get_demandsdetail = array();
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         try {
             // パラメータ設定
             $demand_model = new Demand();
-            $demand_model->setParamAccountidAttribute($login_user_code_4);
+            $demand_model->setParamAccountidAttribute($login_account_id);
             $demand_model->setParamDoccodeAttribute($doc_code);
             $demand_model->setParamUsercodeAttribute($usercode);
             // $demand_model->setParamLimitAttribute(10);
@@ -148,7 +148,6 @@ class DemandController extends Controller
             }
             $list_result = true;
         }catch(\PDOException $pe){
-            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_access_error'));
             Log::error($pe->getMessage());
         }catch(\Exception $e){
             $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_access_error'));
@@ -199,7 +198,7 @@ class DemandController extends Controller
         $demand_model = new Demand();
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         try {
             if (isset($demandedit["demandno"])) {
                 if ($demandedit["demandno"] != "") {
@@ -269,7 +268,6 @@ class DemandController extends Controller
             // メールアドレス取得
             $confirm_email = $apicommon->getUserMailAddress($confirm_user_code, $target_date);
         }catch(\PDOException $pe){
-            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_select_error'));
             $store_result = false;
             Log::error($pe->getMessage());
         }catch(\Exception $e){
@@ -369,10 +367,10 @@ class DemandController extends Controller
             $demand_model->setNmailUserCodeAttribute($confirm_user_code);
             // 承認者の承認順番を取得
             $confirm_model = new Confirm();
-            $confirm_model->setParamAccountidAttribute($login_user_code_4 );
+            $confirm_model->setParamAccountidAttribute($login_account_id );
             $confirm_model->setParamConfirmdepartmentcodeAttribute($confirm_departmentcode);
             $confirm_model->setParamUsercodeAttribute($confirm_user_code);
-            Log::debug('    $login_user_code_4 = '.$login_user_code_4);
+            Log::debug('    $login_account_id = '.$login_account_id);
             Log::debug('    $confirm_departmentcode = '.$confirm_departmentcode);
             Log::debug('    $confirm_user_code = '.$confirm_user_code);
             $confirms = $confirm_model->selectConfirm();
@@ -452,7 +450,6 @@ class DemandController extends Controller
             $store_result = true;
         }catch(\PDOException $pe){
             DB::rollBack();
-            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_access_error'));
             $store_result = false;
             Log::error($pe->getMessage());
         }catch(\Exception $e){

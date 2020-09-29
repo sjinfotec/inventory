@@ -872,6 +872,7 @@ class TempCalcWorkingTime extends Model
             // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
             $mainquery = DB::table($this->table.' AS t1')
             ->select(
+                't1.account_id as account_id',
                 't1.working_date as working_date',
                 't1.employment_status as employment_status',
                 't1.department_code as department_code',
@@ -940,6 +941,7 @@ class TempCalcWorkingTime extends Model
                     ->where('t2.is_deleted', '=', 0);
                 });
 
+            $mainquery->where('t1.account_id', $this->param_account_id);
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
                 $date = date_create($this->param_date_from);
                 $this->param_date_from = $date->format('Ymd');
@@ -990,6 +992,7 @@ class TempCalcWorkingTime extends Model
             if (isset($this->positions)) {
                 DB::table($this->table)->insert(
                     [
+                        'account_id' => $this->account_id,
                         'working_date' => $this->working_date,
                         'employment_status' => $this->employment_status,
                         'department_code' => $this->department_code,
@@ -1051,6 +1054,7 @@ class TempCalcWorkingTime extends Model
             } else {
                 DB::table($this->table)->insert(
                     [
+                        'account_id' => $this->account_id,
                         'working_date' => $this->working_date,
                         'employment_status' => $this->employment_status,
                         'department_code' => $this->department_code,
@@ -1128,7 +1132,8 @@ class TempCalcWorkingTime extends Model
      */
     public function delTempCalcWorkingtime(){
         try{
-            $mainquery = DB::table($this->table)->truncate();
+            $mainquery = DB::table($this->table)->where('account_id', '=', $this->param_account_id)->delete();
+            // $mainquery = DB::table($this->table)->truncate();
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$pe');
             Log::error($pe->getMessage());
