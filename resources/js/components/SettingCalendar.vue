@@ -824,6 +824,10 @@ export default {
       type: Array,
       default: []
     },
+    isexistdownload: {
+      type: String,
+      default: ""
+    },
     settingcompanies: {
       type: String,
       default: ""
@@ -2029,6 +2033,7 @@ export default {
       var res = response.data;
       if (res.result) {
         this.$toasted.show("カレンダーを" + eventtext + "しました");
+        this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false)
@@ -2043,6 +2048,7 @@ export default {
       var res = response.data;
       if (res.result) {
         this.$toasted.show("カレンダーを" + eventtext + "しました");
+        this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false)
@@ -2067,6 +2073,12 @@ export default {
       this.selectMode = 'DSP';
       this.isinitbutton = false;
       this.getItem();
+    },
+    // 設定要否取得処理
+    getNotSetting() {
+      if (this.isexistdownload == 0) {
+        this.getThenDownload();
+      }
     },
     // 異常処理
     serverCatch(kbn, eventtext) {

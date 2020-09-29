@@ -24,12 +24,35 @@ class SettingCalcController extends Controller
     public function index()
     {
         $authusers = Auth::user();
-        $apicommon = new ApiCommonController();
+        $login_user_code = $authusers->code;
+        $accountid = $authusers->account_id;
+        $edition = Config::get('const.EDITION.EDITION');
         // 設定項目要否判定
+        $apicommon = new ApiCommonController();
         $settingtable = $apicommon->getNotSetting();
+        // 打刻端末インストールダウンロード情報
+        $array_downloadfile_no = array();
+        $array_downloadfile_no[] = Config::get('const.FILE_DOWNLOAD_NO.file5');
+        $array_downloadfile_no[] = Config::get('const.FILE_DOWNLOAD_NO.file6');
+        $downloadfile_cnt = 0;
+        $array_impl_isExistDownloadLog = array (
+            'account_id' => $accountid,
+            'array_downloadfile_no' => $array_downloadfile_no,
+            'downloadfile_date' => null,
+            'downloadfile_time' => null,
+            'downloadfile_name' => null,
+            'downloadfile_cnt' => $downloadfile_cnt
+        );
+        $isExistDownloadLogs = $apicommon->isExistDownloadLog($array_impl_isExistDownloadLog);
+        $isexistdownload = "0";
+        if ($isExistDownloadLogs) {
+            $isexistdownload = "1";
+        }
+
         return view('setting_calc',
             compact(
                 'authusers',
+                'isexistdownload',
                 'settingtable'
             ));
     }
@@ -46,7 +69,7 @@ class SettingCalcController extends Controller
         $result = true;
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         try{
             // パラメータチェック
             $params = array();
@@ -88,14 +111,14 @@ class SettingCalcController extends Controller
      */
     public function getDetailFunc($params){
         $target_year = $params['year'];
-        $user = Auth::user();
-        $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $authuser = Auth::user();
+        $login_user_code = $authuser->code;
+        $login_account_id = $authuser->account_id;
         try{
             $setting_model = new Setting();
-            $setting_model->setParamAccountidAttribute($login_user_code_4);
+            $setting_model->setParamAccountidAttribute($login_account_id);
             $setting_model->setFiscalyearAttribute($target_year);
-            $details = $setting_model->getDetails();
+            $details = $setting_model->getSettingDetails();
             return $details;
         }catch(\PDOException $pe){
             throw $pe;
@@ -220,20 +243,20 @@ class SettingCalcController extends Controller
     ){
         $setting = new Setting();
         $systemdate = Carbon::now();
-        $user = Auth::user();
-        $user_code = $user->code;
-        $login_user_code_4 = substr($user_code, 0 ,4);
+        $authuser = Auth::user();
+        $user_code = $authuser->code;
+        $login_account_id = $authuser->account_id;
 
         DB::beginTransaction();
         try{
-            $setting->setParamAccountidAttribute($login_user_code_4);
+            $setting->setParamAccountidAttribute($login_account_id);
             $setting->setFiscalyearAttribute($fiscal_year);
             // 既に存在した場合削除新規する
             $is_exists = $setting->isExistsSetting();    
             if($is_exists){
                 $setting->delSetting();
             }
-            $setting->setAccountidAttribute($login_user_code_4);
+            $setting->setAccountidAttribute($login_account_id);
             $setting->setCalcautotimeAttribute($calc_auto_time);
             $setting->setMax1MonthtotalAttribute($oneMonthTotal);
             $setting->setMax2MonthtotalAttribute($twoMonthTotal);

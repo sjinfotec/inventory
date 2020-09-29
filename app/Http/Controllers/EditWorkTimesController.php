@@ -29,7 +29,7 @@ class EditWorkTimesController extends Controller
     {
         $authusers = Auth::user();
         $login_user_code = $authusers->code;
-        $accountid = substr($login_user_code, 0 ,4);
+        $accountid = $authusers->account_id;
         $edition = Config::get('const.EDITION.EDITION');
         return view('edit_work_times',
             compact(
@@ -93,14 +93,14 @@ class EditWorkTimesController extends Controller
     
             $user = Auth::user();
             $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $login_account_id = $user->account_id;
             $work_times = new WorkTime();
-            $work_times->setParamAccountidAttribute($login_user_code_4);
+            $work_times->setParamAccountidAttribute($login_account_id);
             $work_times->setParamUsercodeAttribute($code);
             $work_times->setParamStartDateAttribute($ymd_start);
             $work_times->setParamEndDateAttribute($ymd_end);
     
-            $details = $work_times->getUserDetails();
+            $details = $work_times->getWorkTimUserDetails();
             // $count = 0;
             // $before_date = "";
             // $apicommon_model = new ApiCommonController();

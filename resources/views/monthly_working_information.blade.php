@@ -22,7 +22,7 @@
 		<!-- /main contentns row -->
 		@if (session('status'))
 			<!-- main contentns row -->
-			<div class="row justify-content-between">
+			<div class="row justify-content-between print-none">
 				<!-- .panel -->
 				<div class="col-md pt-3">
 					<div class="card shadow-pl">

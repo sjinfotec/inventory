@@ -306,7 +306,7 @@ class WorkingTimeTable extends Model
      *
      * @return void
      */
-    public function getMaxNo(){
+    public function getTimeTableMaxNo(){
         try {
             $max_no = 0;
             $max_result = DB::select($this->maxNoSql());
@@ -612,7 +612,8 @@ class WorkingTimeTable extends Model
             $sqlString .= $this->table." as t1 ";
             $sqlString .= "  inner join ( ";
             $sqlString .= "    select ";
-            $sqlString .= "      no as no ";
+            $sqlString .= "      account_id as account_id ";
+            $sqlString .= "      , no as no ";
             $sqlString .= "      , MAX(apply_term_from) as max_apply_term_from ";
             $sqlString .= "    from ";
             $sqlString .= $this->table;
@@ -622,9 +623,10 @@ class WorkingTimeTable extends Model
             $sqlString .= "      and apply_term_from <= ? ";
             $sqlString .= "      and is_deleted = ? ";
             $sqlString .= "    group by ";
-            $sqlString .= "      no ";
+            $sqlString .= "      account_id, no ";
             $sqlString .= "   ) as t2 ";
-            $sqlString .= " on t2.no = t1.no ";
+            $sqlString .= " on t2.account_id = t1.account_id ";
+            $sqlString .= " and t2.no = t1.no ";
             $sqlString .= " and t2.max_apply_term_from = t1.apply_term_from ";
             $sqlString .= "where ";
             $sqlString .= "  ? = ? ";
@@ -720,12 +722,14 @@ class WorkingTimeTable extends Model
                 if(!empty($this->param_user_code)){
                     $subquery1->where($this->table_temp_calc_workingtimes.'.user_code', $this->param_user_code);                      // user_code指定
                 }
-                $subquery1->groupBy($this->table_temp_calc_workingtimes.'.working_timetable_no');
+                $subquery1
+                    ->groupBy($this->table_temp_calc_workingtimes.'.account_id',
+                        $this->table_temp_calc_workingtimes.'.working_timetable_no');
             $subquery11 = $subquery1->toSql();
 
             // working_timetablesの最大適用開始日付subquery
             $apicommon = new ApiCommonController();
-            $subquery5 = $apicommon->getTimetableApplyTermSubquery($this->param_date_to, $this->param_account_id);
+            $subquery5 = $apicommon->getTimetableApplyTermSubquery($this->param_date_from, $this->param_account_id);
             $subquery51 = $subquery5->toSql();
             // ---------------- mainquery ----------------------------
             $mainquery = DB::table(DB::raw('('.$subquery51.') as t1'))
@@ -750,9 +754,13 @@ class WorkingTimeTable extends Model
             $array_setBindingsStr = array();
             $cnt = 0;
             $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>$this->param_date_to);
+            $array_setBindingsStr[] = array($cnt=>$this->param_account_id);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>$this->param_date_from);
             $cnt += 1;
             $array_setBindingsStr[] = array($cnt=>0);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>$this->param_account_id);
             $cnt += 1;
             $array_setBindingsStr[] = array($cnt=>0);
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
@@ -796,7 +804,7 @@ class WorkingTimeTable extends Model
      *
      * @return boolean
      */
-    public function isExistsName(){
+    public function isExistsTimeTableName(){
         try {
             $is_exists = DB::table($this->table)
                 ->where('account_id', '=', $this->param_account_id)
@@ -894,7 +902,7 @@ class WorkingTimeTable extends Model
             $sqlString .= "   and t1.kill_from_date >= ? ";
             $sqlString .= "   and t1.department_code = ? ";
             $sqlString .= "   and t1.code = ? ";
-            $sqlString .= "   and t1.is_deleted = ? ";
+            $sqlString .= "   and t1.is_deleted_ = ? ";
         
             // バインド
             $array_setBindingsStr = array();

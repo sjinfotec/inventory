@@ -191,7 +191,7 @@
       <!-- /.panel -->
     </div>
     <!-- main contentns row -->
-    <div class="row justify-content-between">
+    <div class="row justify-content-between print-none">
       <!-- .panel -->
       <div class="col-md-12 pt-3 align-self-stretch print-none" v-if="selectmode === 'DSP'">
         <div class="card shadow-pl">
@@ -282,7 +282,7 @@
         </div>
       </div>
       <!-- /.panel -->
-      <div class="col-md pt-3 align-self-stretch print-none" v-if="selectmode === 'DSP'">
+      <div class="col-md pt-3 align-self-stretch" v-if="selectmode === 'DSP'">
         <div class="card shadow-pl" v-if="sumresults.length">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -311,8 +311,11 @@
         </div>
       </div>
       <!-- /.panel -->
+    </div>
+    <div class="row justify-content-between print-only printdailypages" v-if="selectmode === 'DSP'">
+      <!-- 以下印刷のみ print-only -->
       <!-- .panel -->
-      <div class="col-md pt-3 align-self-stretch print-only print-daily-zoom" v-if="selectmode === 'DSP'">
+      <div class="col-md pt-3 align-self-stretch">
         <div class="card shadow-pl">
           <!-- panel header -->
           <div class="card-header bg-transparent pb-2 border-0">
@@ -382,35 +385,35 @@
         </div>
       </div>
       <!-- /.panel -->
-      <div class="col-md pt-3 align-self-stretch print-only print-daily-zoom" v-if="selectmode === 'DSP'">
-        <div class="card shadow-pl" v-if="sumresults.length">
+      <!-- .panel -->
+      <div class="col-md pt-3 align-self-stretch">
+        <div class="card shadow-pl">
           <!-- panel header -->
-            <!-- ----------- 日次集計テーブル END ---------------- -->
-            <div class="card shadow-pl" v-if="sumresults.length">
-              <!-- panel header -->
-              <div class="card-header bg-transparent pb-2 border-0">
-                <h1 class="float-sm-left font-size-rg mb-0">合  計</h1>
-              </div>
-              <!-- /.panel header -->
-              <!-- panel body -->
-              <div class="card-body pt-2">
-                <!-- panel contents -->
-                <!-- .row -->
-                <daily-working-info-sum-table
-                  v-bind:detail-or-total="'total'"
-                  v-bind:calc-lists="sumresults"
-                  v-bind:predeter-time-name="predetertimename"
-                  v-bind:predeter-night-time-name="predeternighttimename"
-                  v-bind:predeter-time-secondname="predetertimesecondname"
-                  v-bind:predeter-night-time-secondname="predeternighttimesecondname"
-                  v-bind:btn-mode="btnmodeswitch"
-                ></daily-working-info-sum-table>
-                <!-- /.row -->
-                <!-- /panel contents -->
-              </div>
-            </div>
+          <div class="card-header bg-transparent pb-2 border-0">
+              <h1 class="float-sm-left font-size-rg line-height-0-5 mb-0">合  計</h1>
           </div>
-          <!-- /panel body -->
+          <!-- /.panel header -->
+          <div class="card shadow-pl" v-if="sumresults.length">
+            <!-- panel body -->
+            <div class="card-body mb-3 border-top">
+              <!-- panel contents -->
+              <!-- .row -->
+              <!-- ----------- 日次集計合計テーブル START ---------------- -->
+              <daily-working-info-sum-table
+                v-bind:detail-or-total="'total'"
+                v-bind:calc-lists="sumresults"
+                v-bind:predeter-time-name="predetertimename"
+                v-bind:predeter-night-time-name="predeternighttimename"
+                v-bind:predeter-time-secondname="predetertimesecondname"
+                v-bind:predeter-night-time-secondname="predeternighttimesecondname"
+                v-bind:btn-mode="btnmodeswitch"
+              ></daily-working-info-sum-table>
+              <!-- ----------- 日次集計合計テーブル END ---------------- -->
+              <!-- /.row -->
+              <!-- /panel contents -->
+            </div>
+            <!-- /panel body -->
+          </div>
         </div>
       </div>
       <!-- /.panel -->
@@ -948,12 +951,18 @@ export default {
 </script>
 <style scoped>
 @page {
-  size : 297mm 210mm;
+  size: auto;
 }
 
 @media print {
-  .print-daily-zoom {
-    zoom: 90%;
+  .printdailypages{
+      /* page : pageauto; */
+      page-break-after: always;
+      /* zoom: 85% !important; */
+  }
+  /*最後のページは改ページを入れない*/
+  .printdailypages:last-child{
+      page-break-after: auto;
   }
 }
 /* .print_pages{ */

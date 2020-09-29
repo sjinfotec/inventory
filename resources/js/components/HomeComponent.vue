@@ -44,7 +44,7 @@
       <!-- 勤怠編集 -->
       <div
         class="p-4"
-        v-if="get_isMenuselection(get_c038[11]['code']) && login_user_role <= get_c025[2]['code']">
+        v-if="get_isMenuselection(get_c038[11]['code']) && login_user_role <= get_c025[2]['code']"
       >
         <a class href="/edit_work_times">
           <img width="90" height="90" class src="/images/icon09.svg" alt />
@@ -214,7 +214,7 @@
           v-bind:target-date="''"
           v-bind:login-user="authusers['code']"
           v-bind:login-role="authusers['role']"
-          v-bind:account-data="get_accountid"
+          v-bind:account-data="accountid"
           v-bind:menu-data="menudatas"
         ></table-working-status>
       </div>
@@ -407,12 +407,6 @@ export default {
         });
         return isItem;
       }
-    },
-    get_isexistdownload: function() {
-      return this.isexistdownload;
-    },
-    get_accountid: function() {
-      return this.accountid;
     }
   },
   // マウント時
@@ -421,19 +415,10 @@ export default {
     this.login_user_role = this.authusers["role"];
     this.getDayAlert();
     this.getPostInformations();
-    if (this.get_isexistdownload == "0") {
-      this.installdownload();
-    } else {
-      this.getNotSetting();
-    }
+    this.getNotSetting();
   },
   methods: {
     // ------------------------ サーバー処理 ----------------------------
-    // インストール情報処理
-    installdownload() {
-      this.getThenDownload();
-    },
-    
     // 設定要否取得処理
     getNotSetting() {
       if (this.settingcompanies == 0) {
@@ -448,6 +433,8 @@ export default {
         this.getThenUsers();
       } else if (this.settingcalendarsettinginformations == 0) {
         this.getThenCalendarSettingInfos();
+      } else if (this.isexistdownload == 0) {
+        this.getThenDownload();
       }
     },
     // 日次警告取得処理

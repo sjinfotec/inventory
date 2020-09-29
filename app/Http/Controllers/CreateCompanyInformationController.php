@@ -24,12 +24,35 @@ class CreateCompanyInformationController extends Controller
     public function index()
     {
         $authusers = Auth::user();
-        $apicommon = new ApiCommonController();
+        $login_user_code = $authusers->code;
+        $accountid = $authusers->account_id;
+        $edition = Config::get('const.EDITION.EDITION');
         // 設定項目要否判定
+        $apicommon = new ApiCommonController();
         $settingtable = $apicommon->getNotSetting();
+        // 打刻端末インストールダウンロード情報
+        $array_downloadfile_no = array();
+        $array_downloadfile_no[] = Config::get('const.FILE_DOWNLOAD_NO.file5');
+        $array_downloadfile_no[] = Config::get('const.FILE_DOWNLOAD_NO.file6');
+        $downloadfile_cnt = 0;
+        $array_impl_isExistDownloadLog = array (
+            'account_id' => $accountid,
+            'array_downloadfile_no' => $array_downloadfile_no,
+            'downloadfile_date' => null,
+            'downloadfile_time' => null,
+            'downloadfile_name' => null,
+            'downloadfile_cnt' => $downloadfile_cnt
+        );
+        $isExistDownloadLogs = $apicommon->isExistDownloadLog($array_impl_isExistDownloadLog);
+        $isexistdownload = "0";
+        if ($isExistDownloadLogs) {
+            $isexistdownload = "1";
+        }
+
         return view('create_company_information',
             compact(
                 'authusers',
+                'isexistdownload',
                 'settingtable'
             ));
     }
@@ -71,11 +94,9 @@ class CreateCompanyInformationController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
-            Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
             Log::error($e->getMessage());
             throw $e;
         }
@@ -92,13 +113,13 @@ class CreateCompanyInformationController extends Controller
         $systemdate = Carbon::now();
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         $apply_term_from = Config::get('const.INIT_DATE.initdate');
 
         DB::beginTransaction();
         try{
-            $company->setParamAccountidAttribute($login_user_code_4);
-            $company->setAccountidAttribute($login_user_code_4);
+            $company->setParamAccountidAttribute($login_account_id);
+            $company->setAccountidAttribute($login_account_id);
             $company->setApplytermfromAttribute($apply_term_from);
             $company->setNameAttribute($details['name']);
             $company->setKanaAttribute($details['kana']);
@@ -148,11 +169,9 @@ class CreateCompanyInformationController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
-            Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
             Log::error($e->getMessage());
             throw $e;
         }
@@ -168,20 +187,18 @@ class CreateCompanyInformationController extends Controller
         $details = new Collection();
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         $result = true;
         try {
             $company = new Company();
-            $company->setParamAccountidAttribute($login_user_code_4);
+            $company->setParamAccountidAttribute($login_account_id);
             $details =  $company->getCompanyInfo();
 
             return $details;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
-            Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
             Log::error($e->getMessage());
             throw $e;
         }

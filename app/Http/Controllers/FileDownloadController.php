@@ -27,16 +27,20 @@ class FileDownloadController extends Controller
             return $this->getfileDownload($request);
         } else {
             $authusers = Auth::user();
-            // 打刻端末インストールダウンロード情報
             $login_user_code = $authusers->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
-            $account_id = $login_user_code_4;
+            $account_id = $authusers->account_id;
+            $edition = Config::get('const.EDITION.EDITION');
+            // 設定項目要否判定
             $apicommon = new ApiCommonController();
-            $downloadfile_no = Config::get('const.FILE_DOWNLOAD_NO.file5');
+            $settingtable = $apicommon->getNotSetting();
+            // 打刻端末インストールダウンロード情報
+            $array_downloadfile_no = array();
+            $array_downloadfile_no[] = Config::get('const.FILE_DOWNLOAD_NO.file5');
+            $array_downloadfile_no[] = Config::get('const.FILE_DOWNLOAD_NO.file6');
             $downloadfile_cnt = 0;
             $array_impl_isExistDownloadLog = array (
                 'account_id' => $account_id,
-                'downloadfile_no' => $downloadfile_no,
+                'array_downloadfile_no' => $array_downloadfile_no,
                 'downloadfile_date' => null,
                 'downloadfile_time' => null,
                 'downloadfile_name' => null,
@@ -48,10 +52,10 @@ class FileDownloadController extends Controller
                 $isexistdownload = "1";
             }
             return view('file_download',
-                compact(
-                    'authusers',
-                    'isexistdownload'
-                ));
+            compact(
+                'authusers',
+                'isexistdownload'
+            ));
         }
     }
 
@@ -120,14 +124,15 @@ class FileDownloadController extends Controller
                 $authusers = Auth::user();
                 // 打刻端末インストールダウンロード情報
                 $login_user_code = $authusers->code;
-                $login_user_code_4 = substr($login_user_code, 0 ,4);
+                $login_account_id = $authusers->account_id;
                 $apicommon = new ApiCommonController();
-                $account_id = $login_user_code_4;
-                $downloadfile_no = $filekbn;
+                $account_id = $login_account_id;
+                $array_downloadfile_no = array();
+                $array_downloadfile_no[] = $filekbn;
                 $downloadfile_cnt = 0;
                 $array_impl_getDownloadLog = array (
-                    'account_id' => $account_id,
-                    'downloadfile_no' => $downloadfile_no,
+                    'account_id' => $login_account_id,
+                    'array_downloadfile_no' => $array_downloadfile_no,
                     'downloadfile_date' => null,
                     'downloadfile_time' => null,
                     'downloadfile_name' => null,
@@ -147,8 +152,8 @@ class FileDownloadController extends Controller
                 $downloadfile_cnt++;
                 $downloadlog_model = new DownloadLog();
                 if ($r_cnt == 0) {
-                    $downloadlog_model->setAccountidAttribute($login_user_code_4);
-                    $downloadlog_model->setDownloadfilenoAttribute($downloadfile_no);
+                    $downloadlog_model->setAccountidAttribute($login_account_id);
+                    $downloadlog_model->setDownloadfilenoAttribute($filekbn);
                     $downloadlog_model->setDownloadfiledateAttribute($target_ymd);
                     $downloadlog_model->setDownloadfiletimeAttribute($target_his);
                     $downloadlog_model->setDownloadfilenameAttribute($fileName);
@@ -158,8 +163,8 @@ class FileDownloadController extends Controller
                     $downloadlog_model->setCreatedatAttribute($systemdate);
                     $downloadlog_model->insertDownloadlog();
                 } else {
-                    $downloadlog_model->setParamAccountidAttribute($login_user_code_4);
-                    $downloadlog_model->setParamDownlodfilenoAttribute($downloadfile_no);
+                    $downloadlog_model->setParamAccountidAttribute($login_account_id);
+                    $downloadlog_model->setParamDownlodfilenoAttribute($array_downloadfile_no);
                     $array_update = [
                         'downloadfile_date' => $target_ymd,
                         'downloadfile_time' => $target_his,

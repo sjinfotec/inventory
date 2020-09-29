@@ -1,9 +1,16 @@
+// CONST
+// const C_ROOT_URL = "http://onefr.onedawn.net/";
+const C_ROOT_URL = "http://192.168.0.47/";
+
 export const dialogable = {
+
     data() {
         return {
             messagedata: ""
         };
     },
+
+
     methods: {
         // -------------------------- public メソッド ------------------------
         // メッセージ表示
@@ -148,7 +155,7 @@ export const dialogable = {
             "info",
             false,
             true,
-            '<a href="http://onefr.onedawn.net/file_download">インストールする</a>')
+            '<a href=' + C_ROOT_URL + 'file_download' + ">インストールする</a>")
         },
         // 取得正常処理（会社情報処理）
         getThenCompany: function(
@@ -167,7 +174,7 @@ export const dialogable = {
             "info",
             false,
             true,
-            '<a href="http://onefr.onedawn.net/create_company_information">会社を設定する</a>')
+            '<a href=' + C_ROOT_URL + 'create_company_information' + ">会社を設定する</a>")
             .then(result  => {
                 if (!result) {
                     if (settingdepartments == 0) {
@@ -200,7 +207,7 @@ export const dialogable = {
             "info",
             false,
             true,
-            '<a href="http://onefr.onedawn.net/create_department">部署を設定する</a>')
+            '<a href=' + C_ROOT_URL + 'create_department' + ">部署を設定する</a>")
             .then(result  => {
                 if (!result) {
                     if (settingsettings == 0) {
@@ -230,7 +237,7 @@ export const dialogable = {
             "info",
             false,
             true,
-            '<a href="http://onefr.onedawn.net/setting_calc">労働時間基本を設定する</a>')
+            '<a href=' + C_ROOT_URL + 'setting_calc' + ">労働時間基本を設定する</a>")
             .then(result  => {
                 if (!result) {
                     if (settingworkingtimetables == 0) {
@@ -257,7 +264,7 @@ export const dialogable = {
             "info",
             false,
             true,
-            '<a href="http://onefr.onedawn.net/create_time_table">勤務帯時間を設定する</a>')
+            '<a href=' + C_ROOT_URL + 'create_time_table' + ">勤務帯時間を設定する</a>")
             .then(result  => {
                 if (!result) {
                     if (settingusers == 0) {
@@ -281,7 +288,7 @@ export const dialogable = {
             "info",
             false,
             true,
-            '<a href="http://onefr.onedawn.net/edit_user">ユーザー情報を設定する</a>')
+            '<a href=' + C_ROOT_URL + 'edit_user' + ">ユーザー情報を設定する</a>")
             .then(result  => {
                 if (!result) {
                     if (settingcalendarsettinginformations == 0) {
@@ -302,7 +309,7 @@ export const dialogable = {
             "info",
             false,
             true,
-            '<a href="http://onefr.onedawn.net/setting_calendar">カレンダー情報を設定する</a>')
+            '<a href=' + C_ROOT_URL + 'setting_calendar' + ">カレンダー情報を設定する</a>")
             ;
         },
         // -------------------------- private メソッド ------------------------

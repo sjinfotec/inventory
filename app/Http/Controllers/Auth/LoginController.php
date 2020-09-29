@@ -51,7 +51,7 @@ class LoginController extends Controller
     protected function credentials(Request $request)
     {
         $temporary = $request->only($this->username(), 'password');
-        // $temporary['account_id'] = $request->account_id;
+        $temporary['account_id'] = $request->account_id;
         $temporary['is_deleted'] = 0;
     
         return $temporary;

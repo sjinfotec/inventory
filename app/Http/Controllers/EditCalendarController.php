@@ -31,12 +31,35 @@ class EditCalendarController extends Controller
     public function index()
     {
         $authusers = Auth::user();
-        $apicommon = new ApiCommonController();
+        $login_user_code = $authusers->code;
+        $accountid = $authusers->account_id;
+        $edition = Config::get('const.EDITION.EDITION');
         // 設定項目要否判定
+        $apicommon = new ApiCommonController();
         $settingtable = $apicommon->getNotSetting();
+        // 打刻端末インストールダウンロード情報
+        $array_downloadfile_no = array();
+        $array_downloadfile_no[] = Config::get('const.FILE_DOWNLOAD_NO.file5');
+        $array_downloadfile_no[] = Config::get('const.FILE_DOWNLOAD_NO.file6');
+        $downloadfile_cnt = 0;
+        $array_impl_isExistDownloadLog = array (
+            'account_id' => $accountid,
+            'array_downloadfile_no' => $array_downloadfile_no,
+            'downloadfile_date' => null,
+            'downloadfile_time' => null,
+            'downloadfile_name' => null,
+            'downloadfile_cnt' => $downloadfile_cnt
+        );
+        $isExistDownloadLogs = $apicommon->isExistDownloadLog($array_impl_isExistDownloadLog);
+        $isexistdownload = "0";
+        if ($isExistDownloadLogs) {
+            $isexistdownload = "1";
+        }
+
         return view('setting_calendar',
             compact(
                 'authusers',
+                'isexistdownload',
                 'settingtable'
             ));
     }
@@ -105,12 +128,42 @@ class EditCalendarController extends Controller
             }
             $year = $params['dateyear'];
             $month = $params['datemonth'];
-            // 検索日付期間設定
-            $search_y_m = $year."".$month;
-            $dt1 = new Carbon($search_y_m.'15');
-            $fromdate = $dt1->startOfMonth();
-            $dt2 = new Carbon($search_y_m.'15');
-            $todate = $dt2->endOfMonth();
+            // getDetailsFunc implement
+            $array_impl_getDetailsItem = array (
+                'departmentcode' => $departmentcode,
+                'employmentstatus' => $employmentstatus,
+                'usercode' => $usercode,
+                'year' => $year,
+                'month' => $month
+            );
+            $results = $this->getDetailsItem($array_impl_getDetailsItem);
+            return $results;
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            throw $e;
+        }
+    }
+
+    /**
+     * タイムテーブル取得
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function getDetailsItem($params){
+        $departmentcode =  $params['departmentcode'];
+        $employmentstatus =  $params['employmentstatus'];
+        $usercode =  $params['usercode'];
+        $year =  $params['year'];
+        $month =  $params['month'];
+        // 検索日付期間設定
+        $search_y_m = $year."".$month;
+        $dt1 = new Carbon($search_y_m.'15');
+        $fromdate = $dt1->startOfMonth();
+        $dt2 = new Carbon($search_y_m.'15');
+        $todate = $dt2->endOfMonth();
+        try {
             $apicommon_model = new ApiCommonController();
             // addDailyCalc implement
             $array_impl_getCalendarInformations = array (
@@ -125,6 +178,50 @@ class EditCalendarController extends Controller
         }catch(\PDOException $pe){
             throw $pe;
         }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * タイムテーブル取得
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function getDetailsFunc($params){
+        $departmentcode =  $params['departmentcode'];
+        $employmentstatus =  $params['employmentstatus'];
+        $usercode =  $params['usercode'];
+        $year =  $params['year'];
+        $month =  $params['month'];
+        // 検索日付期間設定
+        $search_y_m = $year."".$month;
+        $dt1 = new Carbon($search_y_m.'15');
+        $fromdate = $dt1->startOfMonth();
+        $dt2 = new Carbon($search_y_m.'15');
+        $todate = $dt2->endOfMonth();
+        $result = true;
+
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_account_id = $user->account_id;
+        try {
+            $calendar_setting_model = new CalendarSettingInformation();
+            $calendar_setting_model->setParamAccountidAttribute($login_account_id);
+            $calendar_setting_model->setParamdepartmentcodeAttribute($departmentcode);
+            $calendar_setting_model->setParamemploymentstatusAttribute($employmentstatus);
+            $calendar_setting_model->setParamusercodeAttribute($usercode);
+            $calendar_setting_model->setParamfromdateAttribute($dt1->format('Ymd'));
+            $calendar_setting_model->setParamtodateAttribute($dt2->format('Ymd'));
+            $results = $calendar_setting_model->getShiftDetail();
+            return $results;
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
             throw $e;
         }
     }
@@ -390,7 +487,7 @@ class EditCalendarController extends Controller
         $user = Auth::user();
         $login_department_code = $user->department_code;
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         $calendar_setting_model = new CalendarSettingInformation();
         $apicommon_model = new ApiCommonController();
         $work_time_model =  new WorkTime();
@@ -405,7 +502,7 @@ class EditCalendarController extends Controller
                     $isupdate = true;
                     // 一括更新の場合は、元データがあった場合休日であれば更新しない
                     if ($isbatch && $initptn == Config::get('const.C040.holiday_noupdate')) {
-                        $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
+                        $calendar_setting_model->setParamAccountidAttribute($login_account_id);
                         $calendar_setting_model->setParamdepartmentcodeAttribute($usersitem->department_code);
                         $calendar_setting_model->setParamemploymentstatusAttribute($usersitem->employment_status);
                         $calendar_setting_model->setParamusercodeAttribute($usersitem->code);
@@ -422,7 +519,7 @@ class EditCalendarController extends Controller
                     }
                     if ($isupdate) {
                         // カレンダー更新
-                        $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
+                        $calendar_setting_model->setParamAccountidAttribute($login_account_id);
                         $calendar_setting_model->setParamdepartmentcodeAttribute($usersitem->department_code);
                         $calendar_setting_model->setParamemploymentstatusAttribute($usersitem->employment_status);
                         $calendar_setting_model->setParamusercodeAttribute($usersitem->code);
@@ -457,9 +554,9 @@ class EditCalendarController extends Controller
                                     $target_ymd_date = $target_ymd->format('Y-m-d');
                                     $record_time = $target_ymd_date." 00:00:01";
                                     // Log::debug("$record_time = ".$record_time);
-                                    $work_time_model->setParamAccountidAttribute($login_user_code_4);
-                                    $work_time_model->setAccountidAttribute($login_user_code_4);
-                                    Log::debug('fixData login_user_code_4 = '.$login_user_code_4);
+                                    $work_time_model->setParamAccountidAttribute($login_account_id);
+                                    $work_time_model->setAccountidAttribute($login_account_id);
+                                    Log::debug('fixData login_account_id = '.$login_account_id);
                                     $work_time_model->setUsercodeAttribute($usersitem->code);
                                     $work_time_model->setDepartmentcodeAttribute($usersitem->department_code);
                                     $work_time_model->setRecordtimeAttribute($record_time);
@@ -1054,9 +1151,9 @@ class EditCalendarController extends Controller
         $formdata = $params['formdata'];
         $fromdate = "";
         $todate = "";
-        $user = Auth::user();
-        $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $authuser = Auth::user();
+        $login_user_code = $authuser->code;
+        $login_account_id = $authuser->account_id;
         DB::beginTransaction();
         try{
             $calendar_setting_model = new CalendarSettingInformation();
@@ -1073,7 +1170,7 @@ class EditCalendarController extends Controller
                     // 期首月取得
                     $setting_model = new Setting();
                     $setting_model->setParamYearAttribute($dateyear);
-                    $setting_model->setParamAccountidAttribute($login_user_code_4);
+                    $setting_model->setParamAccountidAttribute($login_account_id);
                     $begining = $setting_model->getBeginingMonth();
                     if (isset($begining)) {
                         $fromdate = new Carbon($dateyear.str_pad($begining, 2, "0", STR_PAD_LEFT).'01');
@@ -1102,10 +1199,10 @@ class EditCalendarController extends Controller
             $dt = $fromdate->copy()->subDay();
             $user = Auth::user();
             $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $login_account_id = $user->account_id;
             $calendar_setting_model->setCreateduserAttribute($login_user_code);
-            $calendar_setting_model->setAccountidAttribute($login_user_code_4);
-            $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
+            $calendar_setting_model->setAccountidAttribute($login_account_id);
+            $calendar_setting_model->setParamAccountidAttribute($login_account_id);
             foreach($users_datas as $users_data) {
                 $isins = true;
                 if (isset($employmentstatus)) {
@@ -1123,9 +1220,9 @@ class EditCalendarController extends Controller
                         $isins = false;
                     }
                 }
-                $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
+                $calendar_setting_model->setParamAccountidAttribute($login_account_id);
                 if ($isins) {
-                    $calendar_setting_model->setAccountidAttribute($login_user_code_4);
+                    $calendar_setting_model->setAccountidAttribute($login_account_id);
                     $calendar_setting_model->getParamemploymentstatusAttribute($users_data->employment_status);
                     $calendar_setting_model->getParamdepartmentcodeAttribute($users_data->department_code);
                     $calendar_setting_model->setParamusercodeAttribute($users_data->code);
@@ -1394,7 +1491,7 @@ class EditCalendarController extends Controller
         $todate = "";
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         DB::beginTransaction();
         try{
             $calendar_setting_model = new CalendarSettingInformation();
@@ -1410,7 +1507,7 @@ class EditCalendarController extends Controller
             if ($employmentstatus == "") { $employmentstatus = null; }
             if ($departmentcode == "") { $departmentcode = null; }
             if ($usercode == "") { $usercode = null; }
-            $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
+            $calendar_setting_model->setParamAccountidAttribute($login_account_id);
             $calendar_setting_model->getParamdepartmentcodeAttribute($employmentstatus);
             $calendar_setting_model->getParamemploymentstatusAttribute($departmentcode);
             $calendar_setting_model->setParamusercodeAttribute($usercode);
@@ -1425,7 +1522,7 @@ class EditCalendarController extends Controller
             $calendar_setting_model->setParamfromdateAttribute(date_format($dt, 'Ymd'));
             $calendar_setting_model->setParamtodateAttribute(date_format($todate, 'Ymd'));
             $calendar_setting_model->setCreateduserAttribute($login_user_code);
-            $calendar_setting_model->setAccountidAttribute($login_user_code_4);
+            $calendar_setting_model->setAccountidAttribute($login_account_id);
             foreach($users_datas as $users_data) {
                 $calendar_setting_model->setDepartmentcodeAttribute($users_data->department_code);
                 $calendar_setting_model->setEmploymentstatusAttribute($users_data->employment_status);

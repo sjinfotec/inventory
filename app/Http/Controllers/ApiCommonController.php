@@ -29,6 +29,7 @@ use App\Http\Controllers\CreateCompanyInformationController;
 use App\Http\Controllers\CreateDepartmentController;
 use App\Http\Controllers\SettingCalcController;
 use App\Http\Controllers\CreateTimeTableController;
+use App\Http\Controllers\EditCalendarController;
 
 
 /**
@@ -134,6 +135,7 @@ class ApiCommonController extends Controller
      * @return string サブクエリー
      */
     public function getUserApplyTermSubquery($targetdate, $account_id){
+        Log::debug('getUserApplyTermSubquery account_id = '.$account_id);
         try {
             // 適用期間日付の取得
             $dt = null;
@@ -219,7 +221,10 @@ class ApiCommonController extends Controller
                 ->where('is_deleted', '=', 0)
                 ->groupBy('account_id', 'code');
             $mainquery = DB::table($this->table_departments.' as t1')
-                ->select('t1.code as code', 't1.name as name')
+                ->select(
+                    't1.account_id as account_id',
+                    't1.code as code',
+                    't1.name as name')
                 ->JoinSub($subquery1, 't2', function ($join) { 
                     $join->on('t1.account_id', '=', 't2.account_id');
                     $join->on('t1.code', '=', 't2.code');
@@ -446,8 +451,9 @@ class ApiCommonController extends Controller
                 $arrayrole =  $params['roles'];
             }
             // ログインユーザの権限取得
-            $login_user_code = Auth::user()->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
             $role = $this->getUserRole($login_user_code, $target_date);
             if(!isset($role)) {
                 // エラー追加 20200121
@@ -461,7 +467,7 @@ class ApiCommonController extends Controller
             $subquery1 = DB::table($this->table_users)
                 ->select('account_id as account_id', 'code as code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->where('account_id', '=', $login_user_code_4)
+                ->where('account_id', '=', $login_account_id)
                 ->where('apply_term_from', '<=',$targetdate)
                 ->where('is_deleted', '=', 0)
                 ->groupBy('account_id', 'code');
@@ -483,6 +489,7 @@ class ApiCommonController extends Controller
                     if(isset($params['roles'])){
                         $mainQuery->whereIn($this->table_users.'.role', $arrayrole);
                     }
+                    $mainQuery->where($this->table_users.'.account_id', $login_account_id);
                     if (!$killvalue) {
                         $details = $mainQuery
                             ->where($this->table_users.'.kill_from_date', '>',$target_date)
@@ -512,6 +519,7 @@ class ApiCommonController extends Controller
                     if(isset($params['roles'])){
                         $mainQuery->whereIn($this->table_users.'.role', $arrayrole);
                     }
+                    $mainQuery->where($this->table_users.'.account_id', $login_account_id);
                     if (!$killvalue) {
                         $details = $mainQuery
                             ->where($this->table_users.'.kill_from_date', '>',$target_date)
@@ -531,6 +539,7 @@ class ApiCommonController extends Controller
                 if (isset($employmentcode)) {
                     $mainQuery = DB::table($this->table_users)
                         ->JoinSub($subquery1, 't1', function ($join) { 
+                            $join->on('t1.account_id', '=', $this->table_users.'.account_id');
                             $join->on('t1.code', '=', $this->table_users.'.code');
                             $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                         })
@@ -543,6 +552,7 @@ class ApiCommonController extends Controller
                     if(isset($params['roles'])){
                         $mainQuery->whereIn($this->table_users.'.role', $arrayrole);
                     }
+                    $mainQuery->where($this->table_users.'.account_id', $login_account_id);
                     if (!$killvalue) {
                         $details = $mainQuery
                             ->where($this->table_users.'.kill_from_date', '>',$target_date)
@@ -571,6 +581,7 @@ class ApiCommonController extends Controller
                     if(isset($params['roles'])){
                         $mainQuery->whereIn($this->table_users.'.role', $arrayrole);
                     }
+                    $mainQuery->where($this->table_users.'.account_id', $login_account_id);
                     if (!$killvalue) {
                         $details = $mainQuery
                             ->where($this->table_users.'.kill_from_date', '>',$target_date)
@@ -655,7 +666,11 @@ class ApiCommonController extends Controller
                 $killvalue =  $params['killvalue'];
             }
             /// users->getFullUserDetails呼び出し
+            $authuser = Auth::user();
+            $login_user_code = $authuser->code;
+            $login_account_id = $authuser->account_id;
             $users_model = new UserModel();
+            $users_model->setParamAccountidAttribute($login_account_id);
             $details = $users_model->getUserDetailsCsv();
             $result_details = Collect($details);
             return response()->json(
@@ -704,10 +719,11 @@ class ApiCommonController extends Controller
             $target_date = $dt->format('Ymd');
 
             // ログインユーザの権限取得
-            $login_user_code = Auth::user()->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
             Log::debug('getDepartmentList login_user_code = '.$login_user_code);
-            Log::debug('getDepartmentList login_user_code_4 = '.$login_user_code_4);
+            Log::debug('getDepartmentList login_account_id = '.$login_account_id);
             $role = $this->getUserRole($login_user_code, $target_date);
             Log::debug('getDepartmentList role = '.$role);
             if(!isset($role)) {
@@ -722,7 +738,7 @@ class ApiCommonController extends Controller
             $subquery1 = DB::table($this->table_departments)
                 ->select('account_id as account_id', 'code as code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->where('account_id', '=', $login_user_code_4)
+                ->where('account_id', '=', $login_account_id)
                 ->where('apply_term_from', '<=',$target_date)
                 ->where('is_deleted', '=', 0)
                 ->groupBy('account_id', 'code');
@@ -730,7 +746,11 @@ class ApiCommonController extends Controller
             // 日次月次集計選択リスト取得
             //feature selection
             $feature_model = new FeatureItemSelection();
-            $feature_model->setParamaccountidAttribute($login_user_code_4);
+            if (Config::get('const.EDITION.EDITION') == Config::get('const.EDITION_VALUE.TRIAL')) {
+                $feature_model->setParamaccountidAttribute(Config::get('const.TRIALACCOUNTID.account_id'));
+            } else {
+                $feature_model->setParamaccountidAttribute($login_account_id);
+            }
             $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
             Log::debug('getDepartmentList calc_list_allselect = '.Config::get('const.FEATUREITEM.calc_list_allselect'));
             $feature_model->setParamitemcodeAttribute(Config::get('const.FEATUREITEM.calc_list_allselect'));
@@ -765,7 +785,8 @@ class ApiCommonController extends Controller
                         ->where($this->table_users.'.is_deleted', '=', 0);
                     })
                     ->select($this->table_departments.'.code',$this->table_departments.'.name')
-                    ->where($this->table_users.'.account_id','=',$login_user_code_4)
+                    ->where($this->table_departments.'.account_id','=',$login_account_id)
+                    ->where($this->table_users.'.account_id','=',$login_account_id)
                     ->where($this->table_users.'.code','=',$login_user_code);
                 if (!$killvalue) {
                     $mainQuery
@@ -788,11 +809,13 @@ class ApiCommonController extends Controller
                     });
                 if (!$killvalue) {
                     $mainQuery
+                        ->where($this->table_departments.'.account_id','=',$login_account_id)
                         ->where($this->table_departments.'.kill_from_date', '>',$target_date)
                         ->where($this->table_departments.'.is_deleted', 0)
                         ->orderby($this->table_departments.'.code','asc');
                 } else {
                     $mainQuery
+                        ->where($this->table_departments.'.account_id','=',$login_account_id)
                         ->where($this->table_departments.'.is_deleted', 0)
                         ->orderby($this->table_departments.'.code','asc');
                 }
@@ -848,10 +871,10 @@ class ApiCommonController extends Controller
             }
             $user = Auth::user();
             $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $login_account_id = $user->account_id;
             $time_tables = new WorkingTimeTable();
             $time_tables->setParamdatefromAttribute($dt);
-            $time_tables->setParamaccountidAttribute($login_user_code_4);
+            $time_tables->setParamaccountidAttribute($login_account_id);
             $details = $time_tables->getTimeTables();
 
             return response()->json(
@@ -1030,10 +1053,14 @@ class ApiCommonController extends Controller
         $result = true;
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         try {
             $feature_model = new FeatureItemSelection();
-            $feature_model->setParamaccountidAttribute($login_user_code_4);
+            if (Config::get('const.EDITION.EDITION') == Config::get('const.EDITION_VALUE.TRIAL')) {
+                $feature_model->setParamaccountidAttribute(Config::get('const.TRIALACCOUNTID.account_id'));
+            } else {
+                $feature_model->setParamaccountidAttribute($login_account_id);
+            }
             $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
             Log::debug('getModeList mode_list = '.Config::get('const.C042.mode_list'));
             $feature_model->setParamitemcodeAttribute(Config::get('const.C042.mode_list'));
@@ -1149,7 +1176,7 @@ class ApiCommonController extends Controller
         $codeList = new Collection();
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         try {
             // パラメータチェック
             if (isset($request->getdo)) {
@@ -1177,7 +1204,7 @@ class ApiCommonController extends Controller
                 $mainorsub = "";
             }
             $confirm_model = new Confirm();
-            $confirm_model->setParamAccountidAttribute($login_user_code_4);
+            $confirm_model->setParamAccountidAttribute($login_account_id);
             $confirm_model->setParamSeqAttribute($orFinal);
             $confirm_model->setParamMainsubAttribute($mainorsub);
             $codeList = $confirm_model->selectConfirmList($target_date);
@@ -1211,22 +1238,25 @@ class ApiCommonController extends Controller
             $target_date = $dt->format('Ymd');
             $user = Auth::user();
             $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $login_account_id = $user->account_id;
                 // usersの最大適用開始日付subquery
-            $subquery3 = $this->getUserApplyTermSubquery($target_date, $login_user_code_4);
+            $subquery3 = $this->getUserApplyTermSubquery($target_date, $login_account_id);
             // departmentsの最大適用開始日付subquery
-            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date, $login_user_code_4);
+            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date, $login_account_id);
             $mainquery = DB::table($this->table_users)
                 ->select(
+                    $this->table_users.'.account_id as account_id',
                     $this->table_users.'.code as code',
                     $this->table_users.'.name as name',
                     $this->table_users.'.department_code as department_code',
                     $this->table_users.'.employment_status as employment_status')
                 ->JoinSub($subquery3, 't1', function ($join) { 
+                    $join->on('t1.account_id', '=', $this->table_users.'.account_id');
                     $join->on('t1.code', '=', $this->table_users.'.code');
                     $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                 })
                 ->JoinSub($subquery4, 't2', function ($join) { 
+                    $join->on('t2.account_id', '=', $this->table_users.'.account_id');
                     $join->on('t2.code', '=', $this->table_users.'.department_code');
                 });
             if (isset($code)) {
@@ -1242,6 +1272,7 @@ class ApiCommonController extends Controller
                     ->where($this->table_users.'.employment_status', $employment_status);
             }
             $data = $mainquery    
+                ->where($this->table_users.'.account_id', "=", $login_account_id)
                 ->where($this->table_users.'.kill_from_date', ">=", $target_date)
                 ->where($this->table_users.'.is_deleted', 0)
                 ->get();
@@ -1259,7 +1290,7 @@ class ApiCommonController extends Controller
     }
 
     /**
-     *  ユーザ情報取得（画面）
+     *  ユーザ情報取得（打刻画面から）
      *
      * @return list departments
      */
@@ -1309,22 +1340,25 @@ class ApiCommonController extends Controller
             $target_date = $dt->format('Ymd');
             // usersの最大適用開始日付subquery
             $user = Auth::user();
-            $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
-            $subquery3 = $this->getUserApplyTermSubquery($target_date, $login_user_code_4);
+            $login_user_code = $usercode;
+            $login_account_id = $company;
+            $subquery3 = $this->getUserApplyTermSubquery($target_date, $login_account_id);
             // departmentsの最大適用開始日付subquery
-            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date, $login_user_code_4);
+            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date, $login_account_id);
             $mainquery = DB::table($this->table_users)
                 ->select(
+                    $this->table_users.'.account_id as account_id',
                     $this->table_users.'.code as code',
                     $this->table_users.'.name as name',
                     $this->table_users.'.department_code as department_code',
                     $this->table_users.'.employment_status as employment_status')
                 ->JoinSub($subquery3, 't1', function ($join) { 
+                    $join->on('t1.account_id', '=', $this->table_users.'.account_id');
                     $join->on('t1.code', '=', $this->table_users.'.code');
                     $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                 })
                 ->JoinSub($subquery4, 't2', function ($join) { 
+                    $join->on('t2.account_id', '=', $this->table_users.'.account_id');
                     $join->on('t2.code', '=', $this->table_users.'.department_code');
                 });
             if (isset($usercode)) {
@@ -1340,6 +1374,7 @@ class ApiCommonController extends Controller
                     ->where($this->table_users.'.employment_status', $employment_status);
             }
             $data = $mainquery    
+                ->where($this->table_users.'.account_id', "=", $login_account_id)
                 ->where($this->table_users.'.kill_from_date', ">=", $target_date)
                 ->where($this->table_users.'.is_deleted', 0)
                 ->get();
@@ -1382,12 +1417,12 @@ class ApiCommonController extends Controller
         $result = true;
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         try {
             $dt1 = new Carbon($fromdate);
             $dt2 = new Carbon($todate);
             $calendar_setting_model = new CalendarSettingInformation();
-            $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
+            $calendar_setting_model->setParamAccountidAttribute($login_account_id);
             $calendar_setting_model->setParamdepartmentcodeAttribute($departmentcode);
             $calendar_setting_model->setParamemploymentstatusAttribute($employmentstatus);
             $calendar_setting_model->setParamusercodeAttribute($usercode);
@@ -1397,8 +1432,11 @@ class ApiCommonController extends Controller
             // csvitemの取得
             $selection_code = Config::get('const.C037.csvshift');
             $csvitem_model = new CsvItemSelection();
-            $csvitem_model->setParamaccountidAttribute(
-                array($login_user_code_4));
+            if (Config::get('const.EDITION.EDITION') == Config::get('const.EDITION_VALUE.TRIAL')) {
+                $csvitem_model->setParamaccountidAttribute(Config::get('const.TRIALACCOUNTID.account_id'));
+            } else {
+                $csvitem_model->setParamaccountidAttribute($login_account_id);
+            }
             $csvitem_model->setParamselectioncodeAttribute($selection_code);
             $csvitem_details = $csvitem_model->getCsvItem();
             $collect_csvitem_details = collect($csvitem_details);
@@ -1966,13 +2004,16 @@ class ApiCommonController extends Controller
             } else {
                 $dt = new Carbon();
             }
-            $login_user_code_4 = substr($user_id, 0 ,4);
+            // ログインユーザの権限取得
+            $user = Auth::user();
+            $login_code = $user->code;
+            $login_account_id = $user->account_id;
             $target_date = $dt->format('Ymd');
             $subquery1 = DB::table($this->table_users)
                 ->select('account_id as account_id', 'code as code')
                 ->selectRaw('department_code as department_code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->where('account_id', '=',$login_user_code_4)
+                ->where('account_id', '=',$login_account_id)
                 ->where('apply_term_from', '<=',$target_date)
                 ->where('is_deleted', '=', 0)
                 ->groupBy('account_id', 'code', 'department_code');
@@ -1982,6 +2023,7 @@ class ApiCommonController extends Controller
                     $join->on('t1.department_code', '=', $this->table_users.'.department_code');
                     $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                 })
+                ->where($this->table_users.'.account_id', $login_account_id)
                 ->where($this->table_users.'.code', $user_id)
                 ->where($this->table_users.'.is_deleted', 0)
                 ->value('role');
@@ -2014,26 +2056,31 @@ class ApiCommonController extends Controller
             $target_date = $dt->format('Ymd');
             // usersの最大適用開始日付subquery
             $user = Auth::user();
+            Log::debug('getUserDepartment user = '.$user);
             $login_user_code = $user->code;
-            $login_user_code_4 = substr($user_id, 0 ,4);
-            Log::debug('getUserDepartment login_user_code_4 = '.$login_user_code_4);
-            $subquery3 = $this->getUserApplyTermSubquery($target_date, $login_user_code_4);
+            $login_account_id = $user->account_id;
+            Log::debug('getUserDepartment login_account_id = '.$login_account_id);
+            $subquery3 = $this->getUserApplyTermSubquery($target_date, $login_account_id);
             // departmentsの最大適用開始日付subquery
-            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date, $login_user_code_4);
+            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date, $login_account_id);
             $mainquery = DB::table($this->table_users)
                 ->select(
+                    $this->table_users.'.account_id as account_id',
                     $this->table_users.'.code as code',
                     $this->table_users.'.name as name',
                     $this->table_users.'.department_code as department_code',
                     't2.name as department_name',
                     $this->table_users.'.role as role')
                 ->JoinSub($subquery3, 't1', function ($join) { 
+                    $join->on('t1.account_id', '=', $this->table_users.'.account_id');
                     $join->on('t1.code', '=', $this->table_users.'.code');
                     $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                 })
                 ->JoinSub($subquery4, 't2', function ($join) { 
+                    $join->on('t2.account_id', '=', $this->table_users.'.account_id');
                     $join->on('t2.code', '=', $this->table_users.'.department_code');
                 })
+                ->where($this->table_users.'.account_id', $login_account_id)
                 ->where($this->table_users.'.code', $user_id)
                 ->where($this->table_users.'.is_deleted', 0)
                 ->get();
@@ -2066,12 +2113,13 @@ class ApiCommonController extends Controller
             // usersの最大適用開始日付subquery
             $user = Auth::user();
             $login_user_code = $user->code;
-            $login_user_code_4 = substr($user_id, 0 ,4);
-            $subquery3 = $this->getUserApplyTermSubquery($target_date, $login_user_code_4);
+            $login_account_id = $user->account_id;
+            $subquery3 = $this->getUserApplyTermSubquery($target_date, $login_account_id);
             // departmentsの最大適用開始日付subquery
-            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date, $login_user_code_4);
+            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date, $login_account_id);
             $mainquery = DB::table($this->table_users)
                 ->select(
+                    $this->table_users.'.account_id as account_id',
                     $this->table_users.'.code as code',
                     $this->table_users.'.name as name',
                     $this->table_users.'.department_code as department_code',
@@ -2081,10 +2129,12 @@ class ApiCommonController extends Controller
                     $this->table_users.'.working_timetable_no as working_timetable_no',
                     $this->table_users.'.role as role')
                 ->JoinSub($subquery3, 't1', function ($join) { 
+                    $join->on('t1.account_id', '=', $this->table_users.'.account_id');
                     $join->on('t1.code', '=', $this->table_users.'.code');
                     $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                 })
                 ->JoinSub($subquery4, 't2', function ($join) { 
+                    $join->on('t2.account_id', '=', $this->table_users.'.account_id');
                     $join->on('t2.code', '=', $this->table_users.'.department_code');
                 })
                 ->leftJoin($this->table_generalcodes.' as t3', function ($join) { 
@@ -2097,6 +2147,7 @@ class ApiCommonController extends Controller
                     ->where($this->table_users.'.code', $user_id);
             }
             $data = $mainquery    
+                ->where($this->table_users.'.account_id', $login_account_id)
                 ->where($this->table_users.'.is_deleted', 0)
                 ->get();
             return $data;
@@ -2128,22 +2179,24 @@ class ApiCommonController extends Controller
             }
             $user = Auth::user();
             $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $login_account_id = $user->account_id;
             $target_date = $dt->format('Ymd');
             $subquery1 = DB::table($this->table_users)
                 ->select('account_id as account_id', 'code as code')
                 ->selectRaw('department_code as department_code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->where('account_id', '=',$login_user_code_4)
+                ->where('account_id', '=',$login_account_id)
                 ->where('apply_term_from', '<=',$target_date)
                 ->where('is_deleted', '=', 0)
                 ->groupBy('account_id', 'code', 'department_code');
             $useremail = DB::table($this->table_users)
                 ->JoinSub($subquery1, 't1', function ($join) { 
+                    $join->on('t1.account_id', '=', $this->table_users.'.account_id');
                     $join->on('t1.code', '=', $this->table_users.'.code');
                     $join->on('t1.department_code', '=', $this->table_users.'.department_code');
                     $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                 })
+                ->where($this->table_users.'.account_id', $login_account_id)
                 ->where($this->table_users.'.code', $user_id)
                 ->where($this->table_users.'.is_deleted', 0)
                 ->value($this->table_users.'.email');
@@ -2171,11 +2224,11 @@ class ApiCommonController extends Controller
         $holiday_kbn = null;
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         try {
             // ユーザー休暇区分取得
             $calendar_setting_model = new CalendarSettingInformation();
-            $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
+            $calendar_setting_model->setParamAccountidAttribute($login_account_id);
             $calendar_setting_model->setParamusercodeAttribute($user_id);
             $calendar_setting_model->setParamfromdateAttribute($target_date);
             $results = $calendar_setting_model->getCalenderInfo();
@@ -2284,14 +2337,14 @@ class ApiCommonController extends Controller
             // usersのworking_timetables_noまたはshift_informationsのworking_timetables_noより取得
             $user = Auth::user();
             $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $login_account_id = $user->account_id;
             $time_tables = new WorkingTimeTable();
             $target_dateYmd = date_format(new Carbon($target_date), 'Ymd');
             $time_tables->setParamdatefromAttribute($target_dateYmd);
             $time_tables->setParamdatetoAttribute($target_dateYmd);
             $time_tables->setParamDepartmentcodeAttribute($department_code);
             $time_tables->setParamUsercodeAttribute($user_code);
-            $time_tables->setParamaccountidAttribute($login_user_code_4);
+            $time_tables->setParamaccountidAttribute($login_account_id);
             $workingHours = $time_tables->getWorkingTimeTable();
             $regular_start_time = null;
             $regular_start_recordtime = null;
@@ -2446,15 +2499,15 @@ class ApiCommonController extends Controller
             $record_datetime_date = date_format(new Carbon($target_date), 'Y-m-d')." ".date_format(new Carbon($record_datetime), 'H:i:s');
             Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
             // usersのカレンダーからタイムテーブルの所定時刻を取得する
-            $user = Auth::user();
-            $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $authuser = Auth::user();
+            $login_user_code = $authuser->code;
+            $login_account_id = $authuser->account_id;
             $time_tables = new WorkingTimeTable();
             $target_dateYmd = date_format(new Carbon($target_date), 'Ymd');
             $time_tables->setParamdatefromAttribute($target_dateYmd);
             $time_tables->setParamdatetoAttribute($target_dateYmd);
             $time_tables->setParamDepartmentcodeAttribute($department_code);
-            $time_tables->setParamaccountidAttribute($login_user_code_4);
+            $time_tables->setParamaccountidAttribute($login_account_id);
             $time_tables->setParamUsercodeAttribute($user_code);
             Log::debug('         apicommon getWorkingHoursByStamp $target_dateYmd = '.$target_dateYmd);
             Log::debug('         apicommon getWorkingHoursByStamp $department_code = '.$department_code);
@@ -2534,9 +2587,13 @@ class ApiCommonController extends Controller
             $department_code = $params['department_code'];
             $user_code = $params['user_code'];
             $mode = $params['mode'];
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
 
             $work_time_model = new WorkTime();
             $target_dateYmd = date_format(new Carbon($target_date), 'Ymd');
+            $work_time_model->setParamAccountidAttribute($login_account_id);
             $work_time_model->setParamdatefromAttribute($target_dateYmd);
             $work_time_model->setParamdatetoAttribute($target_dateYmd);
             $work_time_model->setParamDepartmentcodeAttribute($department_code);
@@ -2583,12 +2640,12 @@ class ApiCommonController extends Controller
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
-        $user = Auth::user();
-        $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $authuser = Auth::user();
+        $login_user_code = $authuser->code;
+        $login_account_id = $authuser->account_id;
         try {
             $company_model = new Company();
-            $company_model->setParamAccountidAttribute($login_user_code_4);
+            $company_model->setParamAccountidAttribute($login_account_id);
             $details = $company_model->getCompanyInfoApply();
 
             return response()->json(
@@ -2638,15 +2695,15 @@ class ApiCommonController extends Controller
             }
             $target_date = $params['target_date'];
             // 設定マスタより締め日取得
-            $user = Auth::user();
-            $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $authuser = Auth::user();
+            $login_user_code = $authuser->code;
+            $login_account_id = $authuser->account_id;
             $target_date = $this->setRequestQeury($params['target_date']);
             $setting_model = new Setting();
             $target_dateYmd = new Carbon($target_date.'15');
             $setting_model->setParamFiscalmonthAttribute(date_format($target_dateYmd, 'm'));
             $setting_model->setParamYearAttribute(date_format($target_dateYmd, 'Y'));
-            $setting_model->setParamAccountidAttribute($login_user_code_4);
+            $setting_model->setParamAccountidAttribute($login_account_id);
             $closing = $setting_model->getMonthClosing();
             return response()->json(
                 ['result' => true, 'closing' => $closing,
@@ -2671,16 +2728,16 @@ class ApiCommonController extends Controller
      */
     public function getCommonClosingDay($target_ym){
         $closing = null;
-        $user = Auth::user();
-        $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $authuser = Auth::user();
+        $login_user_code = $authuser->code;
+        $login_account_id = $authuser->account_id;
         try {
             // 設定マスタより締め日取得
             $target_dateYmd = new Carbon($target_ym.'15');
             $setting_model = new Setting();
             $setting_model->setParamFiscalmonthAttribute(date_format($target_dateYmd, 'm'));
             $setting_model->setParamYearAttribute(date_format($target_dateYmd, 'Y'));
-            $setting_model->setParamAccountidAttribute($login_user_code_4);
+            $setting_model->setParamAccountidAttribute($login_account_id);
             $closing = $setting_model->getMonthClosing();
             return $closing;
         }catch(\PDOException $pe){
@@ -2803,7 +2860,7 @@ class ApiCommonController extends Controller
         $details = array();
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         try {
             $worktimelog_model = new WorkTimeLog();
             // パラメータチェック
@@ -2827,7 +2884,7 @@ class ApiCommonController extends Controller
             }
             // $params['target_date'] = "2020-04-08 08:00:00";
             $target_date = $params['target_date'];
-            $details = $worktimelog_model->setParamAccountidAttribute($login_user_code_4);
+            $details = $worktimelog_model->setParamAccountidAttribute($login_account_id);
             $details = $worktimelog_model->getWorkinTimeLog(date_format(new Carbon($target_date), 'Ymd'));
             $result_details = Collect($details);
             $ondetails = $result_details->whereIn('mode', [
@@ -2868,7 +2925,7 @@ class ApiCommonController extends Controller
         $details = array();
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         try {
             // パラメータチェック
             $params = array();
@@ -2895,8 +2952,11 @@ class ApiCommonController extends Controller
                 $is_select = $params['is_select'];
             }
             $csvitem_model = new CsvItemSelection();
-            $csvitem_model->setParamaccountidAttribute(
-                array($login_user_code_4));
+            if (Config::get('const.EDITION.EDITION') == Config::get('const.EDITION_VALUE.TRIAL')) {
+                $csvitem_model->setParamaccountidAttribute(Config::get('const.TRIALACCOUNTID.account_id'));
+            } else {
+                $csvitem_model->setParamaccountidAttribute($login_account_id);
+            }
             $csvitem_model->setParamselectioncodeAttribute($selection_code);
             $csvitem_model->setParamisselectAttribute($is_select);
             $details = $csvitem_model->getCsvItem();
@@ -2992,11 +3052,10 @@ class ApiCommonController extends Controller
             // 5.ユーザー情報設定
             $user = Auth::user();
             $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $login_account_id = $user->account_id;
             $users_model = new UserModel();
-            $users_model->setParamaccountidAttribute($login_user_code_4);
+            $users_model->setParamaccountidAttribute($login_account_id);
             $details = $users_model->getUserDetailsFunc();
-            // joinしてるのでカウントで判断しない
             $r_cnt = 0;
             foreach($details as $item) {
                 if (isset($item->user_code)) {
@@ -3008,16 +3067,22 @@ class ApiCommonController extends Controller
             // 6.カレンダー設定
             $dt = new Carbon();
             $target_year = $dt->format('Y');
-            $timetable_controller = new CreateTimeTableController();
-            $array_impl_getDetailFuncTimetable = array (
-                'no' => null,
-                'killvalue' => null
+            // 翌月でチェック
+            $target_month = $dt->addMonth()->format('m');
+            Log::debug('apicommon getNotSetting $target_year = '.$target_year);
+            Log::debug('apicommon getNotSetting $target_month = '.$target_month);
+            $Calendar_controller = new EditCalendarController();
+            $array_impl_getDetailFuncCalendar = array (
+                'departmentcode' => null,
+                'employmentstatus' => null,
+                'usercode' => null,
+                'year' => $target_year,
+                'month' => $target_month
             );
-            $details = $timetable_controller->getDetailsFunc($array_impl_getDetailFuncTimetable);
-            // joinしてるのでカウントで判断しない
+            $details = $Calendar_controller->getDetailsFunc($array_impl_getDetailFuncCalendar);
             $r_cnt = 0;
             foreach($details as $item) {
-                if (isset($item->no)) {
+                if (isset($item->date)) {
                     $r_cnt++;
                 }
                 break;
@@ -3045,7 +3110,7 @@ class ApiCommonController extends Controller
      */
     public function getDownloadLog($params){
         $account_id = $params['account_id'];
-        $downloadfile_no = $params['downloadfile_no'];
+        $array_downloadfile_no = $params['array_downloadfile_no'];
         $downloadfile_date = $params['downloadfile_date'];
         $downloadfile_time = $params['downloadfile_time'];
         $downloadfile_name = $params['downloadfile_name'];
@@ -3053,7 +3118,7 @@ class ApiCommonController extends Controller
             // ダウンロード履歴項目取得
             $downloadlog_model = new DownloadLog();
             $downloadlog_model->setParamAccountidAttribute($account_id);
-            $downloadlog_model->setParamDownlodfilenoAttribute($downloadfile_no);
+            $downloadlog_model->setParamDownlodfilenoAttribute($array_downloadfile_no);
             $downloadlog_model->setParamDownlodfiledateAttribute($downloadfile_date);
             $downloadlog_model->setParamDownlodfiletimeAttribute($downloadfile_time);
             $downloadlog_model->setParamDownlodfilenameAttribute($downloadfile_name);
@@ -4571,16 +4636,16 @@ class ApiCommonController extends Controller
         $datefrom = $params['datefrom'];
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         // 指定日が休日かどうか
-        $calender_setting_model = new CalendarSettingInformation();
-        $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
-        $calender_setting_model->setParamdepartmentcodeAttribute($departmentcode);
-        $calender_setting_model->setParamemploymentstatusAttribute($employmentstatus);
-        $calender_setting_model->setParamusercodeAttribute($usercode);
-        $calender_setting_model->setParamfromdateAttribute($datefrom);
-        $calender_setting_model->setParamlimitAttribute(1);
-        $calendars = $calender_setting_model->getCalenderInfo();
+        $calendar_setting_model = new CalendarSettingInformation();
+        $calendar_setting_model->setParamAccountidAttribute($login_account_id);
+        $calendar_setting_model->setParamdepartmentcodeAttribute($departmentcode);
+        $calendar_setting_model->setParamemploymentstatusAttribute($employmentstatus);
+        $calendar_setting_model->setParamusercodeAttribute($usercode);
+        $calendar_setting_model->setParamfromdateAttribute($datefrom);
+        $calendar_setting_model->setParamlimitAttribute(1);
+        $calendars = $calendar_setting_model->getCalenderInfo();
         $business_kubun = null;
         foreach ($calendars as $result) {
             if (isset($result->business_kubun)) {
@@ -4657,14 +4722,14 @@ class ApiCommonController extends Controller
      */
     public function chkInteval($target_datetime, $before_datetime){
         // 設定項目よりインターバル時間を取得
-        $user = Auth::user();
-        $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $authuser = Auth::user();
+        $login_user_code = $authuser->code;
+        $login_account_id = $authuser->account_id;
         $setting_model = new Setting();
         $dt = new Carbon($target_datetime);
         $setting_model->setParamYearAttribute(date_format($dt, 'Y'));
         $setting_model->setParamFiscalmonthAttribute(date_format($dt, 'm'));
-        $setting_model->setParamAccountidAttribute($login_user_code_4);
+        $setting_model->setParamAccountidAttribute($login_account_id);
         $settings = $setting_model->getSettingDatas();
         $interval = 0;
         foreach($settings as $setting) {
@@ -4787,7 +4852,7 @@ class ApiCommonController extends Controller
     public function isExistDownloadLog($params)
     {
         $account_id = $params['account_id'];
-        $downloadfile_no = $params['downloadfile_no'];
+        $array_downloadfile_no = $params['array_downloadfile_no'];
         $downloadfile_date = $params['downloadfile_date'];
         $downloadfile_time = $params['downloadfile_time'];
         $downloadfile_name = $params['downloadfile_name'];
@@ -4796,7 +4861,7 @@ class ApiCommonController extends Controller
             // ダウンロード履歴項目取得
             $downloadlog_model = new DownloadLog();
             $downloadlog_model->setParamAccountidAttribute($account_id);
-            $downloadlog_model->setParamDownlodfilenoAttribute($downloadfile_no);
+            $downloadlog_model->setParamDownlodfilenoAttribute($array_downloadfile_no);
             $downloadlog_model->setParamDownlodfiledateAttribute($downloadfile_date);
             $downloadlog_model->setParamDownlodfiletimeAttribute($downloadfile_time);
             $downloadlog_model->setParamDownlodfilenameAttribute($downloadfile_name);
@@ -4957,14 +5022,14 @@ class ApiCommonController extends Controller
      */
     public function getIntevalMinute($target_date){
         // 設定項目よりインターバル時間を取得
-        $user = Auth::user();
-        $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $authuser = Auth::user();
+        $login_user_code = $authuser->code;
+        $login_account_id = $authuser->account_id;
         $setting_model = new Setting();
         $dt = new Carbon($target_date);
         $setting_model->setParamYearAttribute(date_format($dt, 'Y'));
         $setting_model->setParamFiscalmonthAttribute(date_format($dt, 'm'));
-        $setting_model->setParamAccountidAttribute($login_user_code_4);
+        $setting_model->setParamAccountidAttribute($login_account_id);
         $settings = $setting_model->getSettingDatas();
         $interval = 0;
         foreach($settings as $setting) {
@@ -5171,13 +5236,13 @@ class ApiCommonController extends Controller
     public function setWorkingStartEndTimeTable($target_date){
         try {
             // タイムテーブル取得（所定時間と休憩時間）
-            $user = Auth::user();
-            $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $authuser = Auth::user();
+            $login_user_code = $authuser->code;
+            $login_account_id = $authuser->account_id;
             $timetable_model = new WorkingTimeTable();
             $dt = new Carbon($target_date);
             $timetable_model->setParamdatefromAttribute(date_format($dt, 'Ymd'));
-            $time_table->setParamaccountidAttribute($login_user_code_4);
+            $timetable_model->setParamaccountidAttribute($login_account_id);
             // タイムテーブル取得(丸め）
             $results = $timetable_model->getWorkingTimeTableRound();
             $current_no = null;
@@ -5327,12 +5392,12 @@ class ApiCommonController extends Controller
         $this->array_messagedata = array();
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
 
         DB::beginTransaction();
         try{
             Log::debug('addAttendanceWork login_user_code = '.$login_user_code);
-            Log::debug('addAttendanceWork login_user_code_4 = '.$login_user_code_4);
+            Log::debug('addAttendanceWork login_account_id = '.$login_account_id);
             $login_department_code = null;
             $dt = new Carbon($target_date);
             $target_date = $dt->format('Ymd');
@@ -5367,7 +5432,7 @@ class ApiCommonController extends Controller
             //     $user_holiday->delKbn();
             // }
             $calendar_setting_model = new CalendarSettingInformation();
-            $calendar_setting_model->setParamAccountidAttribute($login_user_code_4);
+            $calendar_setting_model->setParamAccountidAttribute($login_account_id);
             $calendar_setting_model->setParamUsercodeAttribute($user_code);
             $calendar_setting_model->setParamDepartmentcodeAttribute($department_code);
             $calendar_setting_model->setParamfromdateAttribute($working_date);
@@ -5407,9 +5472,9 @@ class ApiCommonController extends Controller
             }
             // 勤怠時刻登録
             // beforeidsが存在した場合は論理削除する
-            $work_time_model->setParamAccountidAttribute($login_user_code_4);
-            $work_time_model->setAccountidAttribute($login_user_code_4);
-            Log::debug('addAttendanceWork setAccountidAttribute login_user_code_4 = '.$login_user_code_4);
+            $work_time_model->setParamAccountidAttribute($login_account_id);
+            $work_time_model->setAccountidAttribute($login_account_id);
+            Log::debug('addAttendanceWork setAccountidAttribute login_account_id = '.$login_account_id);
             for($i=0;$i<count($beforeids);$i++) {
                 $work_time_model->setIdAttribute($beforeids[$i]);
                 $work_time_model->setEditordepartmentcodeAttribute($login_department_code);

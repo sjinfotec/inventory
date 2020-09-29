@@ -297,8 +297,8 @@
                 <div class="row">
                   <!-- col -->
                   <div class="col-md-12 pb-2">
-                    <h1 class="float-md-left font-size-rg">{{ company_name }}</h1>
-                    <span class="float-md-right font-size-sm">{{ datejaFormat }}</span>
+                    <h1 class="float-md-left font-size-rg ml-3">{{ company_name }}</h1>
+                    <span class="float-md-right font-size-sm ml-3">{{ datejaFormat }}</span>
                   </div>
                   <!-- /.col -->
                 </div>
@@ -319,14 +319,14 @@
                 >
                   <img class="icon-size-rg" src="/images/round-search-w.svg" alt />
                 </a>
-                <h1 class="font-size-sm m-0 mb-1">氏名</h1>
-                <p class="font-size-rg font-weight-bold m-0">{{ calclist.user_name }}</p>
+                <h1 class="font-size-sm ml-3 mb-1">氏名</h1>
+                <p class="font-size-rg font-weight-bold ml-3">{{ calclist.user_name }}</p>
               </div>
               <!-- /.col -->
               <!-- col -->
               <div class="col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch">
-                <h1 class="font-size-sm m-0 mb-1 text-sm-right">所属部署</h1>
-                <p class="font-size-rg m-0 text-sm-right">{{ calclist.department }}</p>
+                <h1 class="font-size-sm mr-3 mb-1 text-sm-right">所属部署</h1>
+                <p class="font-size-rg mr-3 text-sm-right">{{ calclist.department }}</p>
               </div>
               <!-- /.col -->
             </div>
@@ -1115,23 +1115,36 @@ export default {
 };
 </script>
 <style scoped>
-/* @page {
-    size : landscape;
-} */
 
-.print_pages{
-/*A4縦*/
-  width: 172mm;
-  height: 251mm;
-  page-break-after: always;
+@page {
+  size: auto;
 }
+
+@media print {
+  .printmonthlyportpages{
+    /* size : portrait; */
+    width: 270mm !important;
+    height: auto !important;
+    /* page-break-after: always; */
+  }
   /*最後のページは改ページを入れない*/
-.print_pages:last-child{
-    page-break-after: auto;
+  .printmonthlyportpages:last-child{
+      page-break-after: auto;
+  }
+  .printmonthlylandpages{
+    size : landscape;
+    width: 240mm !important;
+    /* height: 210mm !important; */
+    /* page-break-after: always; */
+  }
+  /*最後のページは改ページを入れない*/
+  .printmonthlylandpages:last-child{
+      page-break-after: auto;
+  }
 }
 
 .table th, .table td {
-    padding: 0.4rem !important;
+  padding: 0.4rem !important;
 }
 
 .mw-rem-3 {

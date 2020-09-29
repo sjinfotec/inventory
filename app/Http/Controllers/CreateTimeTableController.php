@@ -28,12 +28,35 @@ class CreateTimeTableController extends Controller
     public function index()
     {
         $authusers = Auth::user();
-        $apicommon = new ApiCommonController();
+        $login_user_code = $authusers->code;
+        $accountid = $authusers->account_id;
+        $edition = Config::get('const.EDITION.EDITION');
         // 設定項目要否判定
+        $apicommon = new ApiCommonController();
         $settingtable = $apicommon->getNotSetting();
+        // 打刻端末インストールダウンロード情報
+        $array_downloadfile_no = array();
+        $array_downloadfile_no[] = Config::get('const.FILE_DOWNLOAD_NO.file5');
+        $array_downloadfile_no[] = Config::get('const.FILE_DOWNLOAD_NO.file6');
+        $downloadfile_cnt = 0;
+        $array_impl_isExistDownloadLog = array (
+            'account_id' => $accountid,
+            'array_downloadfile_no' => $array_downloadfile_no,
+            'downloadfile_date' => null,
+            'downloadfile_time' => null,
+            'downloadfile_name' => null,
+            'downloadfile_cnt' => $downloadfile_cnt
+        );
+        $isExistDownloadLogs = $apicommon->isExistDownloadLog($array_impl_isExistDownloadLog);
+        $isexistdownload = "0";
+        if ($isExistDownloadLogs) {
+            $isexistdownload = "1";
+        }
+
         return view('create_time_table',
             compact(
                 'authusers',
+                'isexistdownload',
                 'settingtable'
             ));
     }
@@ -97,10 +120,10 @@ class CreateTimeTableController extends Controller
         $this->array_messagedata = array();
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         try {
             $time_table = new WorkingTimeTable();
-            $time_table->setParamaccountidAttribute($login_user_code_4);
+            $time_table->setParamaccountidAttribute($login_account_id);
             $time_table->setNoAttribute($no);
             $details = $time_table->getDetailTimeTable();
             return $details;
@@ -162,14 +185,14 @@ class CreateTimeTableController extends Controller
             }
             $name = $params['name'];
             // タイムテーブル名チェック
+            $authuser = Auth::user();
+            $login_user_code = $authuser->code;
+            $login_account_id = $authuser->account_id;
             if ($name != "") {
-                $user = Auth::user();
-                $login_user_code = $user->code;
-                $login_user_code_4 = substr($login_user_code, 0 ,4);
                 $WorkingTimeTable_model = new WorkingTimeTable();
                 $WorkingTimeTable_model->setNameAttribute($name);
-                $WorkingTimeTable_model->setParamaccountidAttribute($login_user_code_4);
-                $isExists = $WorkingTimeTable_model->isExistsName();
+                $WorkingTimeTable_model->setParamaccountidAttribute($login_account_id);
+                $isExists = $WorkingTimeTable_model->isExistsTimeTableName();
                 if ($isExists) {
                     $this->array_messagedata[] = str_replace('{0}', "タイムテーブル", Config::get('const.MSG_ERROR.already_name'));
                     $result = false;
@@ -180,11 +203,12 @@ class CreateTimeTableController extends Controller
                 }
             }
             //feature selection
-            $user = Auth::user();
-            $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
             $feature_model = new FeatureItemSelection();
-            $feature_model->setParamaccountidAttribute($login_user_code_4);
+            if (Config::get('const.EDITION.EDITION') == Config::get('const.EDITION_VALUE.TRIAL')) {
+                $feature_model->setParamaccountidAttribute(Config::get('const.TRIALACCOUNTID.account_id'));
+            } else {
+                $feature_model->setParamaccountidAttribute($login_account_id);
+            }
             $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
             $feature_data = $feature_model->getItem();
             $attendance_count = 0;
@@ -259,20 +283,20 @@ class CreateTimeTableController extends Controller
     private function insert($data, $no, $name){
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         DB::beginTransaction();
         try{
             $systemdate = Carbon::now();
             $time_table = new WorkingTimeTable();
             $term_from = Config::get('const.INIT_DATE.initdate');
-            $time_table->setParamaccountidAttribute($login_user_code_4);
-            $maxno = $time_table->getMaxNo();
+            $time_table->setParamaccountidAttribute($login_account_id);
+            $maxno = $time_table->getTimeTableMaxNo();
             if (isset($maxno)) {
                 $maxno = $maxno + 1;
             } else {
                 $maxno = 1;
             }
-            $time_table->setAccountidAttribute($login_user_code_4);
+            $time_table->setAccountidAttribute($login_account_id);
             $time_table->setNoAttribute($maxno);
             $time_table->setApplytermfromAttribute($term_from);
             $time_table->setNameAttribute($name);
@@ -361,14 +385,18 @@ class CreateTimeTableController extends Controller
         $time_table = new WorkingTimeTable();
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         $no = 0;
         $name = "";
         DB::beginTransaction();
         try{
             //feature selection
             $feature_model = new FeatureItemSelection();
-            $feature_model->setParamaccountidAttribute($login_user_code_4);
+            if (Config::get('const.EDITION.EDITION') == Config::get('const.EDITION_VALUE.TRIAL')) {
+                $feature_model->setParamaccountidAttribute(Config::get('const.TRIALACCOUNTID.account_id'));
+            } else {
+                $feature_model->setParamaccountidAttribute($login_account_id);
+            }
             $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
             $feature_data = $feature_model->getItem();
             $attendance_count = 0;
@@ -414,7 +442,7 @@ class CreateTimeTableController extends Controller
                 // Log::debug('$details[from_time] = '.$details[$i]['from_time']);
                 // Log::debug('$details[to_time] = '.$details[$i]['to_time']);
                 if ($details[$i]['id'] == "" || $details[$i]['id'] == null) {
-                    $time_table->setAccountidAttribute($login_user_code_4);
+                    $time_table->setAccountidAttribute($login_account_id);
                     $time_table->setCreateduserAttribute($login_user_code);
                     $time_table->setCreatedatAttribute($systemdate);
                     $time_table->insertTimeTable();
@@ -422,7 +450,7 @@ class CreateTimeTableController extends Controller
                     $time_table->setIdAttribute($details[$i]['id']);   
                     $time_table->setUpdateduserAttribute($login_user_code);
                     $time_table->setUpdatedatAttribute($systemdate);
-                    $time_table->setParamaccountidAttribute($login_user_code_4);
+                    $time_table->setParamaccountidAttribute($login_account_id);
                     $time_table->updateDetail();
                 }
             }
@@ -504,12 +532,16 @@ class CreateTimeTableController extends Controller
         $time_table = new WorkingTimeTable();
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         DB::beginTransaction();
         try{
             //feature selection
             $feature_model = new FeatureItemSelection();
-            $feature_model->setParamaccountidAttribute($login_user_code_4);
+            if (Config::get('const.EDITION.EDITION') == Config::get('const.EDITION_VALUE.TRIAL')) {
+                $feature_model->setParamaccountidAttribute(Config::get('const.TRIALACCOUNTID.account_id'));
+            } else {
+                $feature_model->setParamaccountidAttribute($login_account_id);
+            }
             $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
             $feature_data = $feature_model->getItem();
             $attendance_count = 0;
@@ -535,7 +567,7 @@ class CreateTimeTableController extends Controller
                 $time_table->setIdAttribute($details[$i]['id']);   
                 $time_table->setUpdateduserAttribute($login_user_code);
                 $time_table->setUpdatedatAttribute($systemdate);
-                $time_table->setParamaccountidAttribute($login_user_code_4);
+                $time_table->setParamaccountidAttribute($login_account_id);
                 $time_table->updateIsDeleteTimeTable();
             }
             DB::commit();

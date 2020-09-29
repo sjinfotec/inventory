@@ -26,12 +26,35 @@ class CreateDepartmentController extends Controller
     public function index()
     {
         $authusers = Auth::user();
-        $apicommon = new ApiCommonController();
+        $login_user_code = $authusers->code;
+        $accountid = $authusers->account_id;
+        $edition = Config::get('const.EDITION.EDITION');
         // 設定項目要否判定
+        $apicommon = new ApiCommonController();
         $settingtable = $apicommon->getNotSetting();
+        // 打刻端末インストールダウンロード情報
+        $array_downloadfile_no = array();
+        $array_downloadfile_no[] = Config::get('const.FILE_DOWNLOAD_NO.file5');
+        $array_downloadfile_no[] = Config::get('const.FILE_DOWNLOAD_NO.file6');
+        $downloadfile_cnt = 0;
+        $array_impl_isExistDownloadLog = array (
+            'account_id' => $accountid,
+            'array_downloadfile_no' => $array_downloadfile_no,
+            'downloadfile_date' => null,
+            'downloadfile_time' => null,
+            'downloadfile_name' => null,
+            'downloadfile_cnt' => $downloadfile_cnt
+        );
+        $isExistDownloadLogs = $apicommon->isExistDownloadLog($array_impl_isExistDownloadLog);
+        $isexistdownload = "0";
+        if ($isExistDownloadLogs) {
+            $isexistdownload = "1";
+        }
+
         return view('create_department',
             compact(
                 'authusers',
+                'isexistdownload',
                 'settingtable'
             ));
     }
@@ -103,14 +126,14 @@ class CreateDepartmentController extends Controller
         $result = true;
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         try {
             $department_model = new Department();
             $dt = new Carbon();
             $from = $dt->copy()->format('Ymd');
             $department_model->setParamapplytermfromAttribute($from);
             $department_model->setParamcodeAttribute($code);
-            $department_model->setParamAccountidAttribute($login_user_code_4);
+            $department_model->setParamAccountidAttribute($login_account_id);
             $department_model->setKillvalueAttribute($killvalue);
             $details = $department_model->getDetails();
             return $details;
@@ -135,7 +158,7 @@ class CreateDepartmentController extends Controller
         $result = true;
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         try {
             // パラメータチェック
             $params = array();
@@ -169,7 +192,7 @@ class CreateDepartmentController extends Controller
             if ($name != "") {
                 $department_model = new Department();
                 $department_model->setNameAttribute($name);
-                $department_model->setParamAccountidAttribute($login_user_code_4);
+                $department_model->setParamAccountidAttribute($login_account_id);
                 $isExists = $department_model->isExistsName();
                 if ($isExists) {
                     $this->array_messagedata[] = str_replace('{0}', "部署", Config::get('const.MSG_ERROR.already_name'));
@@ -254,11 +277,11 @@ class CreateDepartmentController extends Controller
             $systemdate = Carbon::now();
             $user = Auth::user();
             $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $login_account_id = $user->account_id;
             $department = new Department();
             $from = Config::get('const.INIT_DATE.initdate');
             $maxdate = Config::get('const.INIT_DATE.maxdate');
-            $department->setParamAccountidAttribute($login_user_code_4);
+            $department->setParamAccountidAttribute($login_account_id);
             $max_code = $department->getMaxCode();          // code 自動採番
             if (isset($max_code)) {
                 $code = $max_code + 1;
@@ -266,7 +289,7 @@ class CreateDepartmentController extends Controller
                 $code = 1;
             }
             $department->setApplytermfromAttribute($from);
-            $department->setAccountidAttribute($login_user_code_4);
+            $department->setAccountidAttribute($login_account_id);
             $department->setCodeAttribute($code);
             $department->setNameAttribute($name);
             $department->setKillfromdateAttribute($maxdate);
@@ -299,7 +322,7 @@ class CreateDepartmentController extends Controller
         $department_model = new Department();
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
 
         DB::beginTransaction();
         try{
@@ -318,10 +341,10 @@ class CreateDepartmentController extends Controller
             $department_model->setUpdatedatAttribute($systemdate);   
             $department_model->setUpdateduserAttribute($login_user_code);   
             if ($details['id'] == "" || $details['id'] == null) {
-                $department_model->setAccountidAttribute($login_user_code_4);
+                $department_model->setAccountidAttribute($login_account_id);
                 $department_model->insertDepartment();
             } else {
-                $department_model->setParamAccountidAttribute($login_user_code_4);
+                $department_model->setParamAccountidAttribute($login_account_id);
                 $department_model->setIdAttribute($details['id']);   
                 $department_model->updateDepartment();
             }
@@ -394,11 +417,11 @@ class CreateDepartmentController extends Controller
     public function updateIsDelete($id){
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         DB::beginTransaction();
         try{
             DB::table('departments')
-            ->where('code', 'like', $login_user_code_4."%")
+            ->where('code', 'like', $login_account_id."%")
             ->where('id', $id)
             ->update(['is_deleted' => 1]);
             DB::commit();
@@ -420,11 +443,11 @@ class CreateDepartmentController extends Controller
         $systemdate = Carbon::now();
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         DB::beginTransaction();
         try{
             DB::table('departments')
-            ->where('code', 'like', $login_user_code_4."%")
+            ->where('code', 'like', $login_account_id."%")
             ->where('id', $id)
             ->where('is_deleted', 0)
             ->update(['name' => $name,'updated_at' => $systemdate]);

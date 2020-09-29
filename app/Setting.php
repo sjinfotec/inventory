@@ -683,7 +683,7 @@ class Setting extends Model
      *
      * @return void
      */
-    public function getDetails(){
+    public function getSettingDetails(){
         try {
             $details = DB::table($this->table)
                 ->where($this->table.'.account_id', '=', $this->param_account_id)

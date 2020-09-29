@@ -474,6 +474,13 @@ return [
         'emergency_return' => 32
     ],
  
+    'C044' => [
+        'value' => 'C044',
+        'entry_type_free' => 1,
+        'entry_type_estimate' => 2,
+        'entry_type_entry' => 3
+    ],
+ 
     'C999' => [
         'value' => 'C999',
         'main' => 1,
@@ -746,9 +753,9 @@ return [
         'file3' => 'TeamViewer_Setup.exe',
         'file4' => 'users_template_org.xlsx',
         'file5' => 'OneDawnSetupForWin64.zip',
-        'file6' => 'OneDawnSetupForWin64.xlsx',
-        'file7' => 'OneDawnSetupForWin64.pdf',
-        'file8' => '',
+        'file6' => 'OneDawnSetupForWin64.7z',
+        'file7' => 'OneDawnSetupForWin64.xlsx',
+        'file8' => 'OneDawnSetupForWin64.pdf',
         'file9' => '',
         'file10' => '',
         'file11' => 'csd1000l_admin.xlsx',

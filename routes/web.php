@@ -209,4 +209,9 @@ Route::post('/get_working_status/get', 'ApiCommonController@getWorgingStatusInfo
 Route::post('/get_csv_item', 'ApiCommonController@getCsvItem')->middleware('auth');
 
 
+// --------- カスタマ専用 --------------------
+// カスタマ専用
+Route::get('/customer_information', 'CustomerInformationController@index')->middleware('auth');
+Route::post('/customer_information/getList', 'CustomerInformationController@getSsjjooCustomerInfoList')->middleware('auth');
+Route::post('/customer_information/getDetail', 'CustomerInformationController@getSsjjooCustomerInfo')->middleware('auth');
 

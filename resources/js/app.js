@@ -477,6 +477,13 @@ Vue.component(
     require("./components/ShowMapDialog.vue").default
 );
 
+// -------------------------- カスタマ専用 ----------------------------------------------
+// カスタマ専用
+Vue.component(
+    "customer_information",
+    require("./components/CustomerInformation.vue").default
+);
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application

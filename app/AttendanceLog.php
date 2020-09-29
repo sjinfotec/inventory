@@ -353,7 +353,7 @@ class AttendanceLog extends Model
                     $join->on('t2.user_code', '=', 't1.code');
                     $join->on('t2.department_code', '=', 't1.department_code')
                     ->where('t2.account_id', '=', $this->param_account_id)
-                    ->where('t1.is_deleted', '=', 0);
+                    ->where('t1.is_deleted', '=', 0)
                     ->where('t2.is_deleted', '=', 0);
                 });
             $unionquery1

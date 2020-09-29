@@ -287,6 +287,10 @@ export default {
       type: Array,
       default: []
     },
+    isexistdownload: {
+      type: String,
+      default: ""
+    },
     settingcompanies: {
       type: String,
       default: ""
@@ -615,7 +619,7 @@ export default {
     
     // 設定要否取得処理
     getNotSetting() {
-      if (this.infoMsgcnt > 0) { return; }
+      if (this.infoMsgcnt > 1) { return; }
       if (this.settingsettings == 0) {
         this.getThenSetting();
       } else if (this.settingworkingtimetables == 0) {
@@ -624,6 +628,8 @@ export default {
         this.getThenUsers();
       } else if (this.settingcalendarsettinginformations == 0) {
         this.getThenCalendarSettingInfos();
+      } else if (this.isexistdownload == 0) {
+        this.getThenDownload();
       }
       this.infoMsgcnt++;
     },

@@ -11,6 +11,7 @@ use Carbon\Carbon;
 class CustomerInformation extends Model
 {
     protected $table = 'customer_informations';
+    protected $table_generalcodes = 'generalcodes';
 
     private $account_id;                        // アカウントID
     private $entry_type;                        // 問い合わせ種類
@@ -235,6 +236,7 @@ class CustomerInformation extends Model
     // ------------- implements --------------
 
     private $param_account_id;                  // ログインユーザーのアカウント
+    private $param_company_name;                // 会社名
 
     // ログインユーザーのアカウント
     public function getParamAccountidAttribute()
@@ -245,6 +247,17 @@ class CustomerInformation extends Model
     public function setParamAccountidAttribute($value)
     {
         $this->param_account_id = $value;
+    }
+
+    // 会社名
+    public function getParamCompanynameAttribute()
+    {
+        return $this->param_company_name;
+    }
+
+    public function setParamCompanynameAttribute($value)
+    {
+        $this->param_company_name = $value;
     }
 
     // ------------- メソッド --------------
@@ -291,12 +304,47 @@ class CustomerInformation extends Model
      *
      * @return void
      */
+    public function getCustomerInfoList(){
+        try {
+            $mainQuery = DB::table($this->table)
+            ->selectRaw('company_name')
+            ->selectRaw("max(account_id) as max_account_id");
+            if (!empty($this->param_account_id)) {
+                Log::debug('account_id = '.$this->param_account_id);
+                $mainQuery->where($this->table.'.account_id',$this->param_account_id);
+            }
+            if (!empty($this->param_company_name)) {
+                $mainQuery->where($this->table.'.company_name', 'like', '%'.$this->param_company_name.'%');
+            }
+            $result = $mainQuery->where($this->table.'.is_deleted',0)
+                ->groupBy($this->table.'.company_name')
+                ->orderBy('max_account_id', 'asc')
+                ->get();
+            return $result;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+    }
+
+    /**
+     * 会社情報取得
+     *
+     * @return void
+     */
     public function getCustomerInfo(){
         try {
-            $data = DB::table($this->table)
+            $mainQuery = DB::table($this->table)
             ->select(
                     'account_id',
                     'entry_type',
+                    't2.code_name as entry_type_name',
                     'entry_date',
                     'entry_time',
                     'effective_from_date',
@@ -309,11 +357,25 @@ class CustomerInformation extends Model
                     'address_value',
                     'entry_contents'
             );
-            if (!empty($this->account_id)) {
-                $data->where('account_id',$this->account_id);
+            $mainQuery 
+                ->leftJoin($this->table_generalcodes.' as t2', function ($join) { 
+                    $join->on('t2.code', '=', $this->table.'.entry_type')
+                    ->where('t2.identification_id', '=', Config::get('const.C044.value'))
+                    ->where($this->table.'.is_deleted', '=', 0)
+                    ->where('t2.is_deleted', '=', 0);
+                });
+            if (!empty($this->param_account_id)) {
+                Log::debug('account_id = '.$this->param_account_id);
+                $mainQuery->where($this->table.'.account_id',$this->param_account_id);
             }
-            $result = $data->where('is_deleted',0)
-            ->get();
+            if (!empty($this->param_company_name)) {
+                $mainQuery->where($this->table.'.company_name', 'like', '%'.$this->param_company_name.'%');
+            }
+            $result = $mainQuery->where($this->table.'.is_deleted',0)
+                ->orderBy($this->table.'.account_id', 'asc')
+                ->orderBy($this->table.'.entry_date', 'desc')
+                ->orderBy($this->table.'.entry_time', 'desc')
+                ->get();
             return $result;
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');

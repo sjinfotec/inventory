@@ -69,14 +69,14 @@ class MonthlyWorkingAlertController extends Controller
         $array_alert_date = $workingtimedate_model->getArrayParamdatetoAttribute();
         $alert_from_ym = date_format(new Carbon($array_alert_date[0]), 'Ym');
         // setting
-        $user = Auth::user();
-        $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $authuser = Auth::user();
+        $login_user_code = $authuser->code;
+        $login_account_id = $authuser->account_id;
         $target_year = date_format(new Carbon($array_alert_date[0]), 'Y');
         $target_month = date_format(new Carbon($array_alert_date[0]), 'm');
         $setting = new Setting();
         $setting->setYearAttribute($target_year);
-        $setting->setParamAccountidAttribute($login_user_code_4);
+        $setting->setParamAccountidAttribute($login_account_id);
         $setting_details = $setting->getSettingDatas();
 
         $sp_chk = false;
@@ -144,7 +144,7 @@ class MonthlyWorkingAlertController extends Controller
         $working_date_12 = date_format($w_date->addMonthNoOverflow(),'Y年m月');
 
         // 累計時間取得
-        $array_alert_date = $workingtimedate_model->setParamAccountidAttribute($login_user_code_4);
+        $array_alert_date = $workingtimedate_model->setParamAccountidAttribute($login_account_id);
         $array_alert_date = $workingtimedate_model->setParamEmploymentStatusAttribute($employmentstatus);
         $array_alert_date = $workingtimedate_model->setParamDepartmentcodeAttribute($departmentcode);
         $array_alert_date = $workingtimedate_model->setParamUsercodeAttribute($usercode);

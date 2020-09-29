@@ -64,10 +64,10 @@ class CreateApprovalRouteNoController extends Controller
             }
             $user = Auth::user();
             $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $login_account_id = $user->account_id;
             $time_table = new WorkingTimeTable();
             $time_table->setNoAttribute($no);
-            $time_table->setParamaccountidAttribute($login_user_code_4);
+            $time_table->setParamaccountidAttribute($login_account_id);
 
             $details = $time_table->getDetailTimeTable();
             return response()->json(
@@ -132,13 +132,13 @@ class CreateApprovalRouteNoController extends Controller
             $name = $params['name'];
             // タイムテーブル名チェック
             if ($name != "") {
-                $user = Auth::user();
-                $login_user_code = $user->code;
-                $login_user_code_4 = substr($login_user_code, 0 ,4);
+                $authuser = Auth::user();
+                $login_user_code = $authuser->code;
+                $login_account_id = $authuser->account_id;
                 $WorkingTimeTable_model = new WorkingTimeTable();
                 $WorkingTimeTable_model->setNameAttribute($name);
-                $time_table->setParamaccountidAttribute($login_user_code_4);
-                $isExists = $WorkingTimeTable_model->isExistsName();
+                $WorkingTimeTable_model->setParamaccountidAttribute($login_account_id);
+                $isExists = $WorkingTimeTable_model->isExistsTimeTableName();
                 if ($isExists) {
                     $this->array_messagedata[] = str_replace('{0}', "タイムテーブル", Config::get('const.MSG_ERROR.already_name'));
                     $result = false;
@@ -199,16 +199,16 @@ class CreateApprovalRouteNoController extends Controller
             $time_table = new WorkingTimeTable();
             $user = Auth::user();
             $login_user_code = $user->code;
-            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $login_account_id = $user->account_id;
             $term_from = Config::get('const.INIT_DATE.initdate');
-            $time_table->setParamaccountidAttribute($login_user_code_4);
-            $maxno = $time_table->getMaxNo();
+            $time_table->setParamaccountidAttribute($login_account_id);
+            $maxno = $time_table->getTimeTableMaxNo();
             if (isset($maxno)) {
                 $maxno = $maxno + 1;
             } else {
                 $maxno = 1;
             }
-            $time_table->setNoAttribute($login_user_code_4.$maxno);
+            $time_table->setNoAttribute($login_account_id.$maxno);
             $time_table->setApplytermfromAttribute($term_from);
             $time_table->setNameAttribute($name);
             $time_table->setCreateduserAttribute($login_user_code);
@@ -415,14 +415,14 @@ class CreateApprovalRouteNoController extends Controller
         $time_table = new WorkingTimeTable();
         $user = Auth::user();
         $login_user_code = $user->code;
-        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        $login_account_id = $user->account_id;
         DB::beginTransaction();
         try{
             $start_index = ($index - 1) * 7;
             $end_index = $start_index + 6;
             for ($i=$start_index; $i <= $end_index; $i++) {
                 // Log::debug('$details[$i] = '.$details[$i]['id']);
-                $time_table->setParamAccountidAttribute($login_user_code_4);   
+                $time_table->setParamAccountidAttribute($login_account_id);   
                 $time_table->setIdAttribute($details[$i]['id']);   
                 $time_table->setUpdateduserAttribute($login_user_code);
                 $time_table->setUpdatedatAttribute($systemdate);

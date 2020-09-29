@@ -65,8 +65,9 @@ class EditAttendanceLogController extends Controller
             }
     
                 // ログインユーザ
-            $login_user_id = Auth::user()->code;
-            $login_user_code_4 = substr($login_user_id, 0 ,4);
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
             $user_code = $params['user_code'];
             $employment_status = null;
             if (isset($params['employment_status'])) {
@@ -86,7 +87,7 @@ class EditAttendanceLogController extends Controller
             }
             // 勤怠ログデータ取得
             $attendance_model = new AttendanceLog();
-            $attendance_model->setParamAccountidAttribute($login_user_code_4);
+            $attendance_model->setParamAccountidAttribute($login_account_id);
             $attendance_model->setParamemploymentstatusAttribute($employment_status);
             $attendance_model->setParamdepartmentcodeAttribute($department_code);
             $attendance_model->setParamusercodeAttribute($user_code);
@@ -698,7 +699,6 @@ class EditAttendanceLogController extends Controller
             DB::commit();
         }catch(\PDOException $pe){
             DB::rollBack();
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.data_insert_error'));
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
@@ -762,7 +762,7 @@ class EditAttendanceLogController extends Controller
      */
     private function fixData($details){
         $systemdate = Carbon::now();
-        $login_user_id = Auth::user()->code;
+        $login_user_code = Auth::user()->code;
 
         $attendance_model = new AttendanceLog();
         DB::beginTransaction();
@@ -773,7 +773,7 @@ class EditAttendanceLogController extends Controller
                         // 差異理由UPDATE
                         $attendance_model->setParamidAttribute($date['attendance_id']);
                         $attendance_model->setDifferencereasonAttribute($date['difference_reason']);
-                        $attendance_model->setUpdateduserAttribute($login_user_id);
+                        $attendance_model->setUpdateduserAttribute($login_user_code);
                         $attendance_model->setUpdatedatAttribute($systemdate);
                         $attendance_model->updReasonFromID();
                     }
@@ -781,7 +781,7 @@ class EditAttendanceLogController extends Controller
                         // 差異理由UPDATE
                         $attendance_model->setParamidAttribute($date['leaving_id']);
                         $attendance_model->setDifferencereasonAttribute($date['difference_reason']);
-                        $attendance_model->setUpdateduserAttribute($login_user_id);
+                        $attendance_model->setUpdateduserAttribute($login_user_code);
                         $attendance_model->setUpdatedatAttribute($systemdate);
                         $attendance_model->updReasonFromID();
                     }
@@ -789,7 +789,7 @@ class EditAttendanceLogController extends Controller
                         // 差異理由UPDATE
                         $attendance_model->setParamidAttribute($date['pcstart_id']);
                         $attendance_model->setDifferencereasonAttribute($date['difference_reason']);
-                        $attendance_model->setUpdateduserAttribute($login_user_id);
+                        $attendance_model->setUpdateduserAttribute($login_user_code);
                         $attendance_model->setUpdatedatAttribute($systemdate);
                         $attendance_model->updReasonFromID();
                     }
@@ -797,7 +797,7 @@ class EditAttendanceLogController extends Controller
                         // 差異理由UPDATE
                         $attendance_model->setParamidAttribute($date['pcend_id']);
                         $attendance_model->setDifferencereasonAttribute($date['difference_reason']);
-                        $attendance_model->setUpdateduserAttribute($login_user_id);
+                        $attendance_model->setUpdateduserAttribute($login_user_code);
                         $attendance_model->setUpdatedatAttribute($systemdate);
                         $attendance_model->updReasonFromID();
                     }

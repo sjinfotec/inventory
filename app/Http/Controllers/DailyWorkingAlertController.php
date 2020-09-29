@@ -26,7 +26,7 @@ class DailyWorkingAlertController extends Controller
     {
         $authusers = Auth::user();
         $login_user_code = $authusers->code;
-        $accountid = substr($login_user_code, 0 ,4);
+        $accountid = $authusers->account_id;
         $edition = Config::get('const.EDITION.EDITION');
         $indexorhome = 1;       // メニューより起動
         return view('daily_working_alert',
@@ -58,7 +58,7 @@ class DailyWorkingAlertController extends Controller
     {
         $authusers = Auth::user();
         $login_user_code = $authusers->code;
-        $accountid = substr($login_user_code, 0 ,4);
+        $accountid = $authusers->account_id;
         $edition = Config::get('const.EDITION.EDITION');
         $indexorhome = 2;       // ホームより起動
         return view('daily_working_alert',
@@ -123,9 +123,13 @@ class DailyWorkingAlertController extends Controller
             }
             $this->collect_massegedata = collect();
     
+            $authusers = Auth::user();
+            $login_user_code = $authusers->code;
+            $accountid = $authusers->account_id;
             $details = new Collection();
             $work_time_model = new WorkTime();
             // 打刻時刻を取得
+            $work_time_model->setParamAccountidAttribute($accountid);
             $work_time_model->setParamdatefromAttribute($alert_form_date);
             $work_time_model->setParamdatetoAttribute($alert_to_date);
             $work_time_model->setParamemploymentstatusAttribute($employmentstatus);

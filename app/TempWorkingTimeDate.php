@@ -1797,6 +1797,8 @@ class TempWorkingTimeDate extends Model
             }
 
             $mainquery = DB::table($this->table_users.' AS t1')
+                ->select('t1.account_id as account_id');
+            $mainquery
                 ->selectRaw('(case when t2.working_date is not null then t2.working_date else '.$this->param_date_from.' end) as working_date');
             $mainquery->addselect('t1.employment_status')
                 ->addselect('t1.department_code')
@@ -2090,7 +2092,7 @@ class TempWorkingTimeDate extends Model
                 ->addselect('t2.check_result')
                 ->addselect('t2.check_max_times')
                 ->addselect('t2.check_interval');
-            $mainquery->selectRaw(Auth::user()->id.' as created_user');
+            $mainquery->selectRaw(Auth::user()->code.' as created_user');
             $mainquery->selectRaw('null as updated_user');
             $mainquery->leftJoinSub($subquery1, 't2', function ($join) { 
                     $join->on('t2.account_id', '=', 't1.account_id');
@@ -2105,9 +2107,7 @@ class TempWorkingTimeDate extends Model
                     ->where('t3.account_id', '=', $this->param_account_id);
                 })
                 ->leftJoin($this->table_generalcodes.' as t4', function ($join) { 
-                    $join->on('t4.account_id', '=', 't1.account_id');
                     $join->on('t4.code', '=', 't1.employment_status')
-                    ->where('t4.account_id', '=', $this->param_account_id)
                     ->where('t4.identification_id', '=', Config::get('const.C001.value'))
                     ->where('t4.is_deleted', '=', 0);
                 })
@@ -2173,6 +2173,7 @@ class TempWorkingTimeDate extends Model
     public function insertTempWorkingTimeDate(){
         try{
             $array_insert_items = array(
+                'account_id' => $this->account_id,
                 'working_date' => $this->working_date,
                 'employment_status' => $this->employment_status,
                 'department_code' => $this->department_code,
@@ -2531,7 +2532,8 @@ class TempWorkingTimeDate extends Model
      */
     public function delTempWorkingTimeDate(){
         try{
-            $mainquery = DB::table($this->table)->truncate();
+            $mainquery = DB::table($this->table)->where('account_id', '=', $this->param_account_id)->delete();
+            // $mainquery = DB::table($this->table)->truncate();
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$pe');
             Log::error($pe->getMessage());
