@@ -99,7 +99,6 @@ class DailyWorkingInformationController extends Controller
         return view('daily_working_information',
             compact(
                 'authusers',
-                'accountid',
                 'edition'
             ));
     }

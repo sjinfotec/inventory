@@ -39,7 +39,6 @@
 		@endif
 		<daily-working-alert
 			v-bind:authusers="{{ $authusers }}"
-			v-bind:accountid='{{ $accountid }}'
 			v-bind:edition="{{ $edition }}"
 			v-bind:feature_item_selections="{{ $feature_item_selections }}"
 			v-bind:const_generaldatas="{{ $const_general_datas }}"

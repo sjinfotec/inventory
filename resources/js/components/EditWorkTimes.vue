@@ -155,7 +155,7 @@
           v-bind:const_c025="get_C025"
           v-bind:const_generaldatas="const_generaldatas"
           v-bind:heads="heads"
-          v-bind:accountdatas="accountid"
+          v-bind:accountdatas="authusers['account_id']"
           v-bind:halfautoset="get_AutoHalfSet"
           v-bind:feature-item-selections="feature_item_selections"
           v-on:backclick-event="backclick"
@@ -189,10 +189,6 @@ export default {
     authusers: {
         type: Array,
         default: []
-    },
-    accountid: {
-      type: String,
-      default: ""
     },
     edition: {
       type: String,

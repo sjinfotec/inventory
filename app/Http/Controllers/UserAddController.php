@@ -205,18 +205,18 @@ class UserAddController extends Controller
         $datas = $params['datas'];
         $fromdate = $users->getApplytermfromAttribute();
         $dt = new Carbon($fromdate);
-        // Log::debug(' calendarByUser  $dt = '.$dt);
+        Log::debug(' calendarByUser  $dt = '.$dt);
         $dtfrom = $dt->copy()->subDay();
-        // Log::debug(' calendarByUser  $dt = '.$dt);
-        // Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
+        Log::debug(' calendarByUser  $dt = '.$dt);
+        Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
         $todate = new Carbon($dtfrom);
-        // Log::debug(' calendarByUser  $dt = '.$dt);
-        // Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
-        // Log::debug(' calendarByUser  $todate = '.$todate);
+        Log::debug(' calendarByUser  $dt = '.$dt);
+        Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
+        Log::debug(' calendarByUser  $todate = '.$todate);
         $todate->addYear()->subDay();
-        // Log::debug(' calendarByUser  $dt = '.$dt);
-        // Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
-        // Log::debug(' calendarByUser  $todate = '.$todate);
+        Log::debug(' calendarByUser  $dt = '.$dt);
+        Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
+        Log::debug(' calendarByUser  $todate = '.$todate);
         try{
             $calendar_setting_model = new CalendarSettingInformation();
             // 作成
@@ -228,8 +228,8 @@ class UserAddController extends Controller
             $calendar_setting_model->getParamemploymentstatusAttribute($users->getEmploymentstatusAttribute());
             $calendar_setting_model->getParamdepartmentcodeAttribute($users->getDepartmentcodeAttribute());
             $calendar_setting_model->setParamusercodeAttribute($users->getCodeAttribute());
-            // Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
-            // Log::debug(' calendarByUser  $todate = '.$todate);
+            Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
+            Log::debug(' calendarByUser  $todate = '.$todate);
             $calendar_setting_model->setParamfromdateAttribute($dtfrom->format('Ymd'));
             $calendar_setting_model->setParamtodateAttribute($todate->format('Ymd'));
             // 削除
@@ -423,6 +423,7 @@ class UserAddController extends Controller
             $carbon = new Carbon($data['apply_term_from']);
             $temp_from = $carbon->copy()->format('Ymd');
             $apply_term_from = $temp_from;
+            $user_model->setParamAccountidAttribute($login_account_id);
             $user_model->setAccountidAttribute($login_account_id);
             $user_model->setApplytermfromAttribute($apply_term_from);
             $user_model->setCodeAttribute($data['code']);
@@ -438,6 +439,7 @@ class UserAddController extends Controller
             }
             $kill_from_date = $temp_from;
             $user_model->setKillfromdateAttribute($kill_from_date);
+            Log::debug('UserAddController update working_timetable_no = '.$data['working_timetable_no']);
             $user_model->setWorkingtimetablenoAttribute($data['working_timetable_no']);
             $user_model->setEmailAttribute($data['email']);
             $user_model->setMobileEmailAttribute($data['mobile_email']);
@@ -450,7 +452,7 @@ class UserAddController extends Controller
             if ($data['id'] == "" || $data['id'] == null) {
                 $user_model->setCreateduserAttribute($login_user_code);
                 $user_model->setCreatedatAttribute($systemdate);
-                // // Log::debug('update password = '.$data['code']);
+                Log::debug('UserAddController update password = '.$data['code']);
                 $user_model->setPasswordAttribute(bcrypt($data['code']));
                 $user_model->insertNewUser();
                 $isUpdateDepartment = true;

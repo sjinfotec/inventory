@@ -24,7 +24,8 @@ class ApiCardRegisterController extends Controller
      */
     public function index(Request $request){
         Log::debug('ApiCardRegisterController in');
-        $account_id = $request->account_id;                 // ユーザーコード
+        $account_id = $request->account_id;                 // アカウントID
+        Log::debug('ApiCardRegisterController request = '.$request);
         Log::debug('ApiCardRegisterController account_id = '.$account_id);
         $user = new User();
         $result = '';
@@ -66,6 +67,10 @@ class ApiCardRegisterController extends Controller
             // 新規登録
             DB::beginTransaction();
             try{
+                Log::debug('store $user_code = '.$user_code );
+                Log::debug('store $card_id = '.$card_id );
+                Log::debug('store $department_code = '.$department_code );
+                Log::debug('store $account_id = '.$account_id );
                 $result = $this->insCardInfo($user_code,$card_id,$department_code, $account_id);
                 $user_datas = $user->getUserCardData($card_id, $account_id);
                 if (count($user_datas) > 0) {
@@ -131,13 +136,12 @@ class ApiCardRegisterController extends Controller
     private function insCardInfo($user_code,$card_id,$department_code, $account_id){
         $card_info = new CardInformation();
         $systemdate = Carbon::now();
-        $login_user = Auth::user();
         try{
             $card_info->setAccountidAttribute($account_id);
             $card_info->setUserCodeAttribute($user_code);
             $card_info->setDepartmentcodeAttribute($department_code);
             $card_info->setCardIdmAttribute($card_id);
-            $card_info->setCreatedUserAttribute($login_user);
+            $card_info->setCreatedUserAttribute($account_id);
             $card_info->setSystemDateAttribute($systemdate);
             $card_info->insertCardInfo();
 

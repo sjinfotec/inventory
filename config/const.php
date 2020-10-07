@@ -175,6 +175,36 @@ return [
         'weekly_compensation_holiday' => "1日休暇"
     ],
 
+    'C013_PHYSICAL_NAME' => [
+        'value' => 'C013',
+        'non_set' => "non_set",
+        'paid_holiday' => "paid_holiday",
+        'morning_off' => "morning_off",
+        'afternoon_off' => "afternoon_off",
+        'substitute_holiday' => "substitute_holiday",
+        'compensation_holiday' => "compensation_holiday",
+        'summer_leave' => "summer_leave",
+        'year_end_and_new_year_leave' => "year_end_and_new_year_leave",
+        'organization_anniversary' => "organization_anniversary",
+        'prenatal_postnatal' => "prenatal_postnatal",
+        'physiology_days_leave' => "physiology_days_leave",
+        'childcare_care_leave' => "childcare_care_leave",
+        'nursing_care_leave' => "nursing_care_leave",
+        'congratulatory_or_consolatory_leave' => "congratulatory_or_consolatory_leave",
+        'refresh_leave' => "refresh_leave",
+        'absence_work' => "absence_work",
+        'late_work' => "late_work",
+        'leave_early_work' => "leave_early_work",
+        'deemed_business_trip' => "deemed_business_trip",
+        'deemed_direct_go' => "deemed_direct_go",
+        'deemed_direct_return' => "deemed_direct_return",
+        'public_damage' => "public_damage",
+        'nigth_shift' => "nigth_shift",
+        'deemed_direct_go_return' => "deemed_direct_go_return",
+        'assign_paid_holiday' => "assign_paid_holiday",
+        'weekly_compensation_holiday' => "weekly_compensation_holiday"
+    ],
+
     'C014' => [
         'value' => 'C014',
         'fixed' => 1
@@ -638,7 +668,8 @@ return [
         'department_code' => 'department_code',
         'department_name' => 'department_name',
         'record_time' => 'record_time',
-        'source_mode' => 'source_mode'
+        'source_mode' => 'source_mode',
+        'value_mode' => 'value_mode'
     ],
  
     'RESULT_CODE' => [
@@ -888,7 +919,7 @@ return [
     ],
 
     'ACCOUNTID' => [
-        'account_id' => 'SSJJOO00'
+        'account_id' => 'DC3XCZH1'
     ],
 
     'TRIALACCOUNTID' => [

@@ -269,7 +269,7 @@
                 v-bind:login-user="get_LoginUserCode"
                 v-bind:login-role="get_LoginUserRole"
                 v-bind:admin-role="get_AdminUserRole"
-                v-bind:account-data="accountid"
+                v-bind:account-data="authusers['account_id']"
                 v-bind:menu-data="menudatas"
                 v-bind:edituser-index="get_EditUserIndex"
                 v-bind:edituser-con-index="get_EditUserConIndex"
@@ -375,7 +375,7 @@
               v-bind:btn-mode="btnmodeswitch"
               v-bind:login-user="get_LoginUserCode"
               v-bind:login-role="get_LoginUserRole"
-              v-bind:account-data="accountid"
+              v-bind:account-data="authusers['account_id']"
               v-bind:menu-data="menudatas"
               v-bind:edituser-index="get_EditUserIndex"
               v-bind:edituser-con-index="get_EditUserConIndex"
@@ -443,10 +443,6 @@ export default {
     authusers: {
         type: Array,
         default: []
-    },
-    accountid: {
-      type: String,
-      default: ""
     },
     edition: {
       type: String,

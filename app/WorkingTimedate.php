@@ -2711,6 +2711,73 @@ class WorkingTimedate extends Model
             $case_working_status .= "     ELSE 0 ";
             $case_working_status .= '   END ';
             $case_working_status .= ' END ';
+            // 20201001001 add 出勤時刻がある場合は出勤とカウントするtime_autoset
+            $case_working_attendance = "CASE substr(ifnull({0}, '00'), {1}, 1) ";
+            $case_working_attendance .= "  WHEN '1' THEN ";
+            $case_working_attendance .= "    CASE ifnull(t2.physical_name, '') ";
+            $case_working_attendance .= "      WHEN '{7}' THEN 1 ";
+            $case_working_attendance .= "      ELSE 0 ";
+            $case_working_attendance .= '    END ';
+            $case_working_attendance .= "  ELSE ";
+            $case_working_attendance .= "    CASE ifnull({2},0) ";
+            $case_working_attendance .= "      WHEN 0 THEN ";
+            $case_working_attendance .= "        CASE ifnull({3},0) ";
+            $case_working_attendance .= "          WHEN 0 THEN ";
+            $case_working_attendance .= "            CASE substr(ifnull({0}, '000'), {4}, 1) ";
+            $case_working_attendance .= "              WHEN '1' THEN ";
+            $case_working_attendance .= "                CASE ifnull(t2.physical_name, '') ";
+            $case_working_attendance .= "                  WHEN '{5}' THEN 0.5 ";
+            $case_working_attendance .= "                  WHEN '{6}' THEN 0.5 ";
+            $case_working_attendance .= "                  ELSE 1 ";
+            $case_working_attendance .= '                END ';
+            $case_working_attendance .= "              WHEN '2' THEN ";
+            $case_working_attendance .= "                CASE ifnull(t2.physical_name, '') ";
+            $case_working_attendance .= "                  WHEN '{5}' THEN 0.5 ";
+            $case_working_attendance .= "                  WHEN '{6}' THEN 0.5 ";
+            $case_working_attendance .= "                  ELSE 1 ";
+            $case_working_attendance .= '                END ';
+            $case_working_attendance .= "              WHEN '3' THEN 1 ";
+            $case_working_attendance .= "              ELSE 0 ";
+            $case_working_attendance .= '            END ';
+            $case_working_attendance .= "          ELSE ";
+            $case_working_attendance .= "             CASE substr(ifnull({0}, '000'), {4}, 1) ";
+            $case_working_attendance .= "              WHEN '0' THEN 1 ";
+            $case_working_attendance .= "              WHEN '1' THEN ";
+            $case_working_attendance .= "                CASE ifnull(t2.physical_name, '') ";
+            $case_working_attendance .= "                  WHEN '{5}' THEN 0.5 ";
+            $case_working_attendance .= "                  WHEN '{6}' THEN 0.5 ";
+            $case_working_attendance .= "                  ELSE 1 ";
+            $case_working_attendance .= '                END ';
+            $case_working_attendance .= "              WHEN '2' THEN ";
+            $case_working_attendance .= "                CASE ifnull(t2.physical_name, '') ";
+            $case_working_attendance .= "                  WHEN '{5}' THEN 0.5 ";
+            $case_working_attendance .= "                  WHEN '{6}' THEN 0.5 ";
+            $case_working_attendance .= "                  ELSE 1 ";
+            $case_working_attendance .= '                END ';
+            $case_working_attendance .= "              WHEN '3' THEN 1 ";
+            $case_working_attendance .= "              ELSE 0 ";
+            $case_working_attendance .= '            END ';
+            $case_working_attendance .= '        END ';
+            $case_working_attendance .= "      ELSE ";
+            $case_working_attendance .= "        CASE substr(ifnull({0}, '000'), {4}, 1) ";
+            $case_working_attendance .= "          WHEN '0' THEN 1 ";
+            $case_working_attendance .= "          WHEN '1' THEN ";
+            $case_working_attendance .= "            CASE ifnull(t2.physical_name, '') ";
+            $case_working_attendance .= "              WHEN '{5}' THEN 0.5 ";
+            $case_working_attendance .= "              WHEN '{6}' THEN 0.5 ";
+            $case_working_attendance .= "              ELSE 1 ";
+            $case_working_attendance .= '            END ';
+            $case_working_attendance .= "          WHEN '2' THEN ";
+            $case_working_attendance .= "            CASE ifnull(t2.physical_name, '') ";
+            $case_working_attendance .= "              WHEN '{5}' THEN 0.5 ";
+            $case_working_attendance .= "              WHEN '{6}' THEN 0.5 ";
+            $case_working_attendance .= "              ELSE 1 ";
+            $case_working_attendance .= '            END ';
+            $case_working_attendance .= "          WHEN '3' THEN 1 ";
+            $case_working_attendance .= "          ELSE 0 ";
+            $case_working_attendance .= '        END ';
+            $case_working_attendance .= '    END ';
+            $case_working_attendance .= 'END ';
 
             $case_go_out = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
             $case_go_out .= "WHEN {1} THEN 1 ";
@@ -2774,6 +2841,16 @@ class WorkingTimedate extends Model
             $str_replace_working_status9 =str_replace('{9}', Config::get('const.C012.emergency'), $str_replace_working_status8);
             $str_replace_working_status10 =str_replace('{10}', Config::get('const.C012.emergency_return'), $str_replace_working_status9);
             $str_replace_working_status11 =str_replace('{11}', Config::get('const.C012.continue_work'), $str_replace_working_status10);
+    
+            // 20201001001 add 出勤時刻がある場合は出勤とカウントする
+            $str_replace_working_attendance0 =str_replace('{0}', 't2.use_free_item', $case_working_attendance);
+            $str_replace_working_attendance1 =str_replace('{1}', Config::get('const.USEFREEITEM.day_holiday')+1, $str_replace_working_attendance0);
+            $str_replace_working_attendance2 =str_replace('{2}', $this->table.'.attendance_time_1', $str_replace_working_attendance1);
+            $str_replace_working_attendance3 =str_replace('{3}', $this->table.'.leaving_time_1', $str_replace_working_attendance2);
+            $str_replace_working_attendance4 =str_replace('{4}', Config::get('const.USEFREEITEM.time_autoset')+1, $str_replace_working_attendance3);
+            $str_replace_working_attendance5 =str_replace('{5}', Config::get('const.C013_PHYSICAL_NAME.morning_off'), $str_replace_working_attendance4);
+            $str_replace_working_attendance6 =str_replace('{6}', Config::get('const.C013_PHYSICAL_NAME.afternoon_off'), $str_replace_working_attendance5);
+            $str_replace_working_attendance7 =str_replace('{7}', Config::get('const.C013_PHYSICAL_NAME.paid_holiday'), $str_replace_working_attendance6);
 
             $str_replace_go_out0 =str_replace('{0}', $this->table.'.working_status', $case_go_out);
             $str_replace_go_out1 =str_replace('{1}', Config::get('const.C012.missing_middle'), $str_replace_go_out0);
@@ -2877,7 +2954,8 @@ class WorkingTimedate extends Model
                 ->selectRaw($sum_time28)
                 ->selectRaw($sum_time30)
                 ->selectRaw($sum_time32)
-                ->selectRaw('sum('.$str_replace_working_status11.') as total_working_status')
+                // ->selectRaw('sum('.$str_replace_working_status11.') as total_working_status')        // 20201001001 del
+                ->selectRaw('sum('.$str_replace_working_attendance7.') as total_working_status')
                 ->selectRaw('sum('.$str_replace_go_out2.') as total_go_out')
                 ->selectRaw('sum('.$str_replace_paid_holidays4.') as total_paid_holidays')
                 ->selectRaw('sum('.$str_replace_holiday_kubun10.') as total_holiday_kubun')

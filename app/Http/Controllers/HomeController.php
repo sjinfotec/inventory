@@ -56,7 +56,6 @@ class HomeController extends Controller
         return view('home',
             compact(
                 'authusers',
-                'accountid',
                 'edition',
                 'isexistdownload',
                 'settingtable'
