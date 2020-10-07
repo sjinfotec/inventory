@@ -167,19 +167,19 @@
           <!-- ----------- waitメッセージ部 END ---------------- -->
           <div class="row justify-content-between print-none" v-if="infomationmessage.length">
             <!-- col -->
-            <!-- <div class="col-md-12"> -->
-            <div v-if="login_user_role === get_c025[2]['code'] || login_user_role === get_c025[3]['code']">
-              <a
-                class
-                href="/daily_alert/home"
-                v-for="(messagevalidate,index) in infomationmessage"
-                v-bind:key="index"
-              >{{ messagevalidate }}</a>
-            </div>
-            <div v-else>
-              <span style="color: #808080;">通知事項はありません</span>
-            </div>
-            <!-- </div> -->
+            <div class="col-md-12">
+              <div v-if="login_user_role === get_c025[2]['code'] || login_user_role === get_c025[3]['code']">
+                <a
+                  class
+                  href="/daily_alert/home"
+                  v-for="(messagevalidate,index) in infomationmessage"
+                  v-bind:key="index"
+                >{{ messagevalidate }}</a>
+              </div>
+              <div v-else>
+                <span style="color: #808080;">通知事項はありません</span>
+              </div>
+            </div> 
             <!-- /.col -->
           </div>
           <div class="row justify-content-between print-none" v-else>
@@ -214,7 +214,7 @@
           v-bind:target-date="''"
           v-bind:login-user="authusers['code']"
           v-bind:login-role="authusers['role']"
-          v-bind:account-data="accountid"
+          v-bind:account-data="authusers['account_id']"
           v-bind:menu-data="menudatas"
         ></table-working-status>
       </div>
@@ -301,10 +301,6 @@ export default {
     authusers: {
       type: Array,
       default: []
-    },
-    accountid: {
-      type: String,
-      default: ""
     },
     edition: {
       type: String,

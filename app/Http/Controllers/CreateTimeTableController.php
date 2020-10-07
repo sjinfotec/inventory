@@ -418,15 +418,19 @@ class CreateTimeTableController extends Controller
             $start_index = ($index - 1) * ($attendance_count + $rest_count + 1);
             $end_index = $start_index + $attendance_count + $rest_count;
             for ($i=$start_index; $i <= $end_index; $i++) {
+                // Log::debug('CreateTimeTableController update $start_index) = '.$start_index));
                 if($i == $start_index){
+                    // Log::debug('CreateTimeTableController update $details[$i][apply_term_from]) = '.$details[$i]['apply_term_from']));
                     if(isset($details[$i]['apply_term_from'])){
                         $carbon = new Carbon($details[$i]['apply_term_from']);
                         $temp_from = $carbon->copy()->format('Ymd');
                         $apply_term_from = $temp_from;
                     }
+                    // Log::debug('CreateTimeTableController update $details[$i][no]) = '.$details[$i]['no']));
                     if(isset($details[$i]['no'])){
                         $no = $details[$i]['no'];
                     }
+                    // Log::debug('CreateTimeTableController update $details[$i][name]) = '.$details[$i]['name']));
                     if(isset($details[$i]['name'])){
                         $name = $details[$i]['name'];
                     }
@@ -451,7 +455,7 @@ class CreateTimeTableController extends Controller
                     $time_table->setUpdateduserAttribute($login_user_code);
                     $time_table->setUpdatedatAttribute($systemdate);
                     $time_table->setParamaccountidAttribute($login_account_id);
-                    $time_table->updateDetail();
+                    $time_table->updateDetailTimeTable();
                 }
             }
             DB::commit();
@@ -547,6 +551,7 @@ class CreateTimeTableController extends Controller
             $attendance_count = 0;
             $rest_count = 0;
             foreach($feature_data as $item) {
+                // Log::debug('$item->item_code) = '.$item->item_code));
                 if (isset($item->item_code)) {
                     if ($item->item_code == Config::get('const.C042.attendance_count')) {
                         $attendance_count = intval($item->value_select);

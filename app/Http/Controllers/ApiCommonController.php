@@ -3067,10 +3067,12 @@ class ApiCommonController extends Controller
             // 6.カレンダー設定
             $dt = new Carbon();
             $target_year = $dt->format('Y');
-            // 翌月でチェック
-            $target_month = $dt->addMonth()->format('m');
-            Log::debug('apicommon getNotSetting $target_year = '.$target_year);
-            Log::debug('apicommon getNotSetting $target_month = '.$target_month);
+            // 当月でチェック
+            $target_month = $dt->format('m');
+            $target_dd = $dt->format('d');
+            Log::debug('apicommon getNotSetting $target_year1 = '.$target_year);
+            Log::debug('apicommon getNotSetting $target_month1 = '.$target_month);
+            Log::debug('apicommon getNotSetting $target_dd1 = '.$target_dd);
             $Calendar_controller = new EditCalendarController();
             $array_impl_getDetailFuncCalendar = array (
                 'departmentcode' => null,
@@ -3080,6 +3082,9 @@ class ApiCommonController extends Controller
                 'month' => $target_month
             );
             $details = $Calendar_controller->getDetailsFunc($array_impl_getDetailFuncCalendar);
+            Log::debug('apicommon getNotSetting $target_year2 = '.$target_year);
+            Log::debug('apicommon getNotSetting $target_month2 = '.$target_month);
+            Log::debug('apicommon getNotSetting $target_dd2 = '.$target_dd);
             $r_cnt = 0;
             foreach($details as $item) {
                 if (isset($item->date)) {
@@ -3088,6 +3093,9 @@ class ApiCommonController extends Controller
                 break;
             }
             if ($r_cnt > 0) { $array_result["calendar_setting_informations"] = 1; }
+            Log::debug('apicommon getNotSetting $target_year3 = '.$target_year);
+            Log::debug('apicommon getNotSetting $target_month3 = '.$target_month);
+            Log::debug('apicommon getNotSetting $target_dd3 = '.$target_dd);
 
             return $array_result;
         }catch(\PDOException $pe){
@@ -4765,7 +4773,8 @@ class ApiCommonController extends Controller
             if ($target_mode == Config::get('const.C005.attendance_time')) {
                 return Config::get('const.RESULT_CODE.normal');
             }
-            return Config::get('const.C018.forget_stamp');
+            // return Config::get('const.C018.forget_stamp');
+            return Config::get('const.RESULT_CODE.normal');
         }
         if ($target_mode == Config::get('const.C005.attendance_time')) {
             if ($source_mode == Config::get('const.C005.leaving_time')) {

@@ -45,6 +45,7 @@ class ApiGetAttendanceResultController extends Controller
             Log::debug('store account_id = '.$account_id);
             $response = collect();              // 端末の戻り値
             $this->source_mode = '';
+            $value_mode = $mode;
             $array_chkAttendance_result = 
                 array(Config::get('const.RESULT_CODE.normal')
                     , Config::get('const.RESULT_CODE.normal')
@@ -54,8 +55,48 @@ class ApiGetAttendanceResultController extends Controller
             $is_exists = DB::table('card_informations')->where('account_id', $account_id)->where('card_idm', $card_id)->exists();
             if($is_exists){
                 $user_datas = $user_model->getUserCardData($card_id, $account_id);
+                Log::debug('ApiGetAttendanceResultController store count($user_datas) = '.count($user_datas));
                 if (count($user_datas) > 0) {
+                    $work_time = new WorkTime();
+                    $work_time->setParamAccountidAttribute($account_id);
+                    Log::debug('ApiGetAttendanceResultController user_datas ari');
                     foreach($user_datas as $user_data) {
+                        if (isset($user_data->from_time) && isset($user_data->to_time)) {
+                            // 打刻時刻で集計する場合 $user_data->from_time == $user_data->to_time
+                            Log::debug('ApiGetAttendanceResultController store $user_data->from_time = '.$user_data->from_time);
+                            Log::debug('ApiGetAttendanceResultController store $user_data->to_time = '.$user_data->to_time);
+                            if ($user_data->from_time == $user_data->to_time) {
+                                Log::debug('ApiGetAttendanceResultController store department_code = '.$user_data->department_code);
+                                Log::debug('ApiGetAttendanceResultController store code = '.$user_data->code);
+                                Log::debug('ApiGetAttendanceResultController store systemdate = '.$systemdate->format('Y/m/d H:i:s'));
+                                // 前回のモードを探す
+                                $work_time->setParamDepartmentcodeAttribute($user_data->department_code);
+                                $work_time->setParamUsercodeAttribute($user_data->code);
+                                $work_time->setParamStartDateAttribute($systemdate->format('Y/m/d H:i:s'));
+                                $before_times = $work_time->getBeforeDailyMaxData();
+                                // nullクリアする
+                                $value_mode == null;
+                                foreach ($before_times as $before_result) {
+                                    // 打刻時刻の設定
+                                    Log::debug('ApiGetAttendanceResultController null判定前 $before_result->record_date = '.$before_result->record_date);
+                                    Log::debug('ApiGetAttendanceResultController null判定前 $before_result->mode = '.$before_result->mode);
+                                    if ($before_result->record_date == $systemdate->format('Ymd')) {
+                                        if ($before_result->mode == Config::get('const.C005.emergency_time')) {
+                                            $value_mode = Config::get('const.C005.emergency_return_time');
+                                        } else {
+                                            $value_mode = Config::get('const.C005.emergency_time');
+                                        }
+                                    } else {
+                                        $value_mode = Config::get('const.C005.emergency_time');
+                                    }
+                                    break;
+                                }
+                                Log::debug('ApiGetAttendanceResultController null判定前 store value_mode = '.$value_mode);
+                                if ($value_mode == null) {$value_mode = Config::get('const.C005.emergency_time');}
+                                Log::debug('ApiGetAttendanceResultController store value_mode = '.$value_mode);
+                                $mode = $value_mode;
+                            }
+                        }
                         // chkAttendance implement
                         $array_impl_chkAttendance = array (
                             'account_id' => $account_id,
@@ -127,10 +168,12 @@ class ApiGetAttendanceResultController extends Controller
                         $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
                         $response->put(Config::get('const.PUT_ITEM.record_time'),$systemdate->format('H:i:s'));
                         $response->put(Config::get('const.PUT_ITEM.source_mode'),$this->source_mode);
+                        $response->put(Config::get('const.PUT_ITEM.value_mode'),(int)$value_mode);
                         Log::debug('store $user_data->code = '.$user_data->code);
                         Log::debug('store $user_data->name = '.$user_data->name);
                         Log::debug('store $systemdate = '.$systemdate->format('H:i:s'));
                         Log::debug('store source_mode = '.$this->source_mode);
+                        Log::debug('store value_mode = '.$value_mode);
                         break;
                     }
                 } else {

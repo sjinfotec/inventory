@@ -2092,7 +2092,7 @@ class TempWorkingTimeDate extends Model
                 ->addselect('t2.check_result')
                 ->addselect('t2.check_max_times')
                 ->addselect('t2.check_interval');
-            $mainquery->selectRaw(Auth::user()->code.' as created_user');
+            $mainquery->selectRaw("'".Auth::user()->code."'".' as created_user');
             $mainquery->selectRaw('null as updated_user');
             $mainquery->leftJoinSub($subquery1, 't2', function ($join) { 
                     $join->on('t2.account_id', '=', 't1.account_id');

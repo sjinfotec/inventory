@@ -491,36 +491,37 @@ class WorkingTimeTable extends Model
      *
      * @return void
      */
-    // public function updateDetail(){
-    //     try {
-    //         DB::table($this->table)
-    //         ->where($this->table.'.id', $this->id)
-    //         ->where($this->table.'.is_deleted', 0)
-    //         ->update(
-    //             [
-    //                 'apply_term_from' => $this->apply_term_from,
-    //                 'name' => $this->name,
-    //                 'working_time_kubun' => $this->working_time_kubun,
-    //                 'from_time' => $this->from_time,
-    //                 'to_time' => $this->to_time,
-    //                 'ago_time_no' => $this->ago_time_no,
-    //                 'updated_user' => $this->updated_user,
-    //                 'updated_at' => $this->updated_at,
-    //             ]
-    //         );
-    //         return true;
+    public function updateDetailTimeTable(){
+        try {
+            DB::table($this->table)
+            ->where($this->table.'.account_id', $this->param_account_id)
+            ->where($this->table.'.id', $this->id)
+            ->where($this->table.'.is_deleted', 0)
+            ->update(
+                [
+                    'apply_term_from' => $this->apply_term_from,
+                    'name' => $this->name,
+                    'working_time_kubun' => $this->working_time_kubun,
+                    'from_time' => $this->from_time,
+                    'to_time' => $this->to_time,
+                    'ago_time_no' => $this->ago_time_no,
+                    'updated_user' => $this->updated_user,
+                    'updated_at' => $this->updated_at,
+                ]
+            );
+            return true;
     
-    //     }catch(\PDOException $pe){
-    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
-    //         Log::error($pe->getMessage());
-    //         throw $pe;
-    //     }catch(\Exception $e){
-    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
-    //         Log::error($e->getMessage());
-    //         throw $e;
-    //     }
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
 
-    // }
+    }
 
     /**
      * 詳細取得

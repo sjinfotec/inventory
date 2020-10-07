@@ -32,7 +32,6 @@ class DailyWorkingAlertController extends Controller
         return view('daily_working_alert',
             compact(
                 'authusers',
-                'accountid',
                 'edition',
                 'indexorhome'
             ));
@@ -64,7 +63,6 @@ class DailyWorkingAlertController extends Controller
         return view('daily_working_alert',
             compact(
                 'authusers',
-                'accountid',
                 'edition',
                 'indexorhome'
             ));

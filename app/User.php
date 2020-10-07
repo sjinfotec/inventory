@@ -51,10 +51,13 @@ class User extends Authenticatable
      */
     public function getUserCardData($card_id, $account_id){
         try {
+            $dt = new Carbon();
+            $target_date = $dt->format('Ymd');
             // usersの最大適用開始日付subquery
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             $subquery2 = $apicommon->getUserApplyTermSubquery(null, $account_id);
+            $subquery3 = $apicommon->getTimetableApplyTermSubquery(null, $account_id);
             $mainquery = DB::table('users')
                 ->select(
                     'users.account_id',
@@ -63,20 +66,37 @@ class User extends Authenticatable
                     'users.employment_status as employment_status',
                     'users.name as name',
                     'users.code as code',
-                    'card_informations.card_idm as card_idm'
+                    'card_informations.card_idm as card_idm',
+                    't3.from_time as from_time',
+                    't3.to_time as to_time'
                 )
-                ->Join('card_informations', function ($join) { 
-                    $join->on('card_informations.account_id', '=', $account_id);
+                ->Join('card_informations', function ($join) use ($account_id) { 
+                    $join->on('card_informations.account_id', '=', 'users.account_id');
                     $join->on('card_informations.user_code', '=', 'users.code');
                     $join->on('card_informations.department_code', '=', 'users.department_code')
                     ->where('card_informations.account_id', $account_id)
                     ->where('card_informations.is_deleted',0);
+                })
+                ->leftJoin('calendar_setting_informations as t2', function ($join) use ($account_id, $target_date) { 
+                    $join->on('t2.account_id', '=', 'users.account_id');
+                    $join->on('t2.user_code', '=', 'users.code');
+                    $join->on('t2.department_code', '=', 'users.department_code')
+                    ->where('t2.account_id', $account_id)
+                    ->where('t2.date', $target_date)
+                    ->where('t2.is_deleted',0);
+                })
+                ->leftJoinSub($subquery3, 't3', function ($join) use ($account_id) { 
+                    $join->on('t3.account_id', '=', 't2.account_id');
+                    $join->on('t3.no', '=', 't2.working_timetable_no')
+                    ->where('t3.account_id', '=', $account_id)
+                    ->where('t3.working_time_kubun', '=', Config::get('const.C004.regular_working_time'));
                 });
             $mainquery
-                ->JoinSub($subquery2, 't1', function ($join) { 
-                    $join->on('t1.account_id', '=', $account_id);
+                ->JoinSub($subquery2, 't1', function ($join) use ($account_id) { 
+                    $join->on('t1.account_id', '=', 'users.account_id');
                     $join->on('t1.code', '=', 'users.code');
-                    $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                    $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from')
+                    ->where('t1.account_id', '=', $account_id);
                 });
             $mainquery
                 ->where('card_informations.account_id',$account_id)
@@ -169,7 +189,7 @@ class User extends Authenticatable
                     't1.department_code as department_code'
                     )
                 ->selectRaw("IFNULL(t4.name,'') as department_name")
-                ->leftJoin('card_informations as t2', function ($join) { 
+                ->leftJoin('card_informations as t2', function ($join) use ($account_id) { 
                     $join->on('t2.account_id', '=', 't1.account_id');
                     $join->on('t2.user_code', '=', 't1.code');
                     $join->on('t2.department_code', '=', 't1.department_code')
@@ -177,7 +197,7 @@ class User extends Authenticatable
                     ->where('t2.is_deleted',0);
                 });
             $mainquery
-                ->JoinSub($subquery1, 't3', function ($join) { 
+                ->JoinSub($subquery1, 't3', function ($join) use ($account_id) { 
                     $join->on('t3.account_id', '=', 't1.account_id');
                     $join->on('t3.code', '=', 't1.code');
                     $join->on('t3.max_apply_term_from', '=', 't1.apply_term_from')

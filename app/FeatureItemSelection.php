@@ -258,7 +258,8 @@ class FeatureItemSelection extends Model
             if ($this->param_selection_code !== null && $this->param_selection_code !== "") {
                 $query->where('selection_code', $this->param_selection_code);
             }
-            Log::debug('getItem $this->param_item_code = '.$this->param_item_code);
+            Log::debug('FeatureItemSelection getItem $this->param_account_id = '.$this->param_account_id);
+            Log::debug('FeatureItemSelection getItem $this->param_item_code = '.$this->param_item_code);
             if ($this->param_item_code !== null && $this->param_item_code !== "") {
                 $query->where('item_code', $this->param_item_code);
             }

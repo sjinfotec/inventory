@@ -38,7 +38,6 @@
 					<div class="row justify-content-between">
 						<home-component
 							v-bind:authusers="{{ $authusers }}"
-							v-bind:accountid='{{ $accountid }}'
 							v-bind:edition="{{ $edition }}"
 							v-bind:isexistdownload="{{ $isexistdownload }}"
 							v-bind:settingcompanies="{{ $settingtable['companies'] }}"

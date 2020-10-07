@@ -1497,6 +1497,7 @@ class WorkTime extends Model
                     $this->table.'.mode as mode',
                     $this->table.'.user_holiday_kubuns_id as user_holiday_kubuns_id',
                     $this->table.'.record_time as record_datetime')
+                ->selectRaw('DATE_FORMAT('.$this->table.".record_time, '%Y%m%d') as record_date")
                 ->JoinSub($subquery_max, 't3', function ($join) { 
                     $join->on('t3.account_id', '=', $this->table.'.account_id');
                     $join->on('t3.user_code', '=', $this->table.'.user_code');

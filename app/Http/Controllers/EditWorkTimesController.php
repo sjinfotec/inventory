@@ -34,7 +34,6 @@ class EditWorkTimesController extends Controller
         return view('edit_work_times',
             compact(
                 'authusers',
-                'accountid',
                 'edition'
             ));
     }
