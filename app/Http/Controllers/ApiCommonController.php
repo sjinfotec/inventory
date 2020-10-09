@@ -316,6 +316,7 @@ class ApiCommonController extends Controller
                     't1.from_time as from_time',
                     't1.to_time as to_time',
                     't1.ago_time_no as ago_time_no',
+                    't1.item_times as item_times',
                     't1.working_time_kubun as working_time_kubun'
                 )
                 ->JoinSub($subquery1, 't2', function ($join) { 
@@ -351,6 +352,7 @@ class ApiCommonController extends Controller
         $makeSql .= "   ,t1.from_time as from_time ";
         $makeSql .= "   ,t1.to_time as to_time ";
         $makeSql .= "   ,t1.ago_time_no as ago_time_no ";
+        $makeSql .= "   ,t1.item_times as item_times ";
         $makeSql .= "   ,t1.working_time_kubun as working_time_kubun ";
         $makeSql .= " from ";
         $makeSql .= " ".$this->table_working_timetables." as t1 ";
@@ -2539,7 +2541,7 @@ class ApiCommonController extends Controller
                     } elseif ($mode == Config::get('const.C005.leaving_time') ||
                             $mode == Config::get('const.C005.missing_middle_return_time') ||
                             $mode == Config::get('const.C005.public_going_out_return_time')) {
-                        if ($record_datetime_date > $item->working_timetable_to_record_time ||
+                            if ($record_datetime_date > $item->working_timetable_to_record_time ||
                             ($record_datetime_date > $item->working_timetable_from_record_time &&
                             $record_datetime_date <= $item->working_timetable_to_record_time)) {
                             Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
@@ -5106,7 +5108,7 @@ class ApiCommonController extends Controller
             $filtered = $timetables->where('no', $working_timetable_no)->where('working_time_kubun', $working_time_kubun);
             foreach($filtered as $result_time) {
                 if (isset($result_time->from_time) && isset($result_time->to_time)) {
-                    $array_times[] = array('from_time' => $result_time->from_time , 'to_time' => $result_time->to_time);
+                    $array_times[] = array('from_time' => $result_time->from_time , 'to_time' => $result_time->to_time , 'item_times' => $result_time->item_times);
                 }
             }
         } else {
@@ -5205,7 +5207,7 @@ class ApiCommonController extends Controller
                                 } else {
                                     $temp_to_time = str_pad($i,2,0,STR_PAD_LEFT).':'.str_pad($j,2,0,STR_PAD_LEFT).':00';
                                     Log::debug('            analyzeTimeTable 配列=0の範囲を設定する temp_to_time = '.$temp_to_time);
-                                    $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time);
+                                    $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time , 'item_times' => $result_time->item_times);
                                     // from to の判定は予備もとで行います。
                                     // if ($result_time->from_time < $result_time->to_time) {
                                     //     $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time);
@@ -5222,7 +5224,7 @@ class ApiCommonController extends Controller
                     }
                     if ($temp_from_time != "") {
                         $temp_from_time = str_pad($save_i,2,0,STR_PAD_LEFT).':'.str_pad($save_j,2,0,STR_PAD_LEFT).':00';
-                        $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time);
+                        $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time , 'item_times' => $result_time->item_times);
                         // if ($result_time->from_time < $result_time->to_time) {
                         //     $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time);
                         // } else {

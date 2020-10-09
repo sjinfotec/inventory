@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Providers;
+use Illuminate\Http\Request;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\DB;
@@ -31,7 +32,7 @@ class CommonServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(Request $request)
     {
         // $user = Auth::user();
         // $login_user_code = $user->code;
@@ -44,6 +45,7 @@ class CommonServiceProvider extends ServiceProvider
         //     'edition' => Config::get('const.EDITION.EDITION')
         // ]);
         // View::share('account_datas', $account_data);
+        Log::debug('boot ip_address = '.$request-> ip());
 
         //menu selection
         $menu_model = new MenuItemSelection();

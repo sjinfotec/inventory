@@ -75,24 +75,24 @@ class ApiGetAttendanceResultController extends Controller
                                 $work_time->setParamStartDateAttribute($systemdate->format('Y/m/d H:i:s'));
                                 $before_times = $work_time->getBeforeDailyMaxData();
                                 // nullクリアする
-                                $value_mode == null;
+                                $value_mode = null;
                                 foreach ($before_times as $before_result) {
                                     // 打刻時刻の設定
                                     Log::debug('ApiGetAttendanceResultController null判定前 $before_result->record_date = '.$before_result->record_date);
                                     Log::debug('ApiGetAttendanceResultController null判定前 $before_result->mode = '.$before_result->mode);
                                     if ($before_result->record_date == $systemdate->format('Ymd')) {
-                                        if ($before_result->mode == Config::get('const.C005.emergency_time')) {
-                                            $value_mode = Config::get('const.C005.emergency_return_time');
+                                        if ($before_result->mode == Config::get('const.C005.attendance_time')) {
+                                            $value_mode = Config::get('const.C005.leaving_time');
                                         } else {
-                                            $value_mode = Config::get('const.C005.emergency_time');
+                                            $value_mode = Config::get('const.C005.attendance_time');
                                         }
                                     } else {
-                                        $value_mode = Config::get('const.C005.emergency_time');
+                                        $value_mode = Config::get('const.C005.attendance_time');
                                     }
                                     break;
                                 }
                                 Log::debug('ApiGetAttendanceResultController null判定前 store value_mode = '.$value_mode);
-                                if ($value_mode == null) {$value_mode = Config::get('const.C005.emergency_time');}
+                                if ($value_mode == null) {$value_mode = Config::get('const.C005.attendance_time');}
                                 Log::debug('ApiGetAttendanceResultController store value_mode = '.$value_mode);
                                 $mode = $value_mode;
                             }

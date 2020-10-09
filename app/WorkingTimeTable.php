@@ -28,6 +28,7 @@ class WorkingTimeTable extends Model
     private $from_time;                  
     private $to_time;                  
     private $ago_time_no;                  
+    private $item_times;                  
     private $created_user;                  
     private $updated_user;                  
     private $created_at;                  
@@ -115,6 +116,16 @@ class WorkingTimeTable extends Model
     public function setAgotimenoAttribute($value)
     {
         $this->ago_time_no = $value;
+    }
+
+    public function getItemtimesAttribute()
+    {
+        return $this->item_times;
+    }
+
+    public function setItemtimesAttribute()
+    {
+        return $this->item_times;
     }
      
     public function getCreateduserAttribute()
@@ -471,6 +482,7 @@ class WorkingTimeTable extends Model
                 'from_time' => $this->from_time,
                 'to_time' => $this->to_time,
                 'ago_time_no' => $this->ago_time_no,
+                'item_times' => $this->item_times,
                 'created_user' => $this->created_user,
                 'created_at' => $this->created_at,
             ]);
@@ -505,6 +517,7 @@ class WorkingTimeTable extends Model
                     'from_time' => $this->from_time,
                     'to_time' => $this->to_time,
                     'ago_time_no' => $this->ago_time_no,
+                    'item_times' => $this->item_times,
                     'updated_user' => $this->updated_user,
                     'updated_at' => $this->updated_at,
                 ]
@@ -561,6 +574,7 @@ class WorkingTimeTable extends Model
                 ->selectRaw("DATE_FORMAT(t1.to_time, '%H:%i') as to_time")
                 ->selectRaw($case_sql2)
                 ->addselect('t1.ago_time_no')
+                ->addselect('t1.item_times')
                 ->addselect('t1.created_user')
                 ->addselect('t1.updated_user');
             $mainquery
@@ -741,7 +755,8 @@ class WorkingTimeTable extends Model
                     't1.working_time_kubun as working_time_kubun',
                     't1.from_time as from_time',
                     't1.to_time as to_time',
-                    't1.ago_time_no as ago_time_no'
+                    't1.ago_time_no as ago_time_no',
+                    't1.item_times as item_times'
                 )
                 ->Join(DB::raw('('.$subquery11.') AS t2'), function ($join) { 
                     $join->on('t2.account_id', '=', 't1.account_id');

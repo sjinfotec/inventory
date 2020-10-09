@@ -17,7 +17,7 @@
                 <td class="text-left align-middle mw-rem-4">私外</td>
                 <td class="text-left align-middle mw-rem-4">私外戻</td>
                 <td class="text-center align-middle mw-rem-5">勤務状態</td>
-                <td class="text-center align-middle mw-rem-10">勤務帯</td>
+                <td class="text-center align-middle mw-rem-15">勤務帯</td>
                 <td
                   class="text-center align-middle mw-rem-5 color-royalblue"
                   data-toggle="tooltip"
@@ -66,7 +66,7 @@
                 <td class="text-left align-middle mw-rem-4">私外戻</td>
                 <td class="text-center align-middle mw-rem-10">編集氏名</td>
                 <td class="text-center align-middle mw-rem-5">勤務状態</td>
-                <td class="text-center align-middle mw-rem-10">勤務帯</td>
+                <td class="text-center align-middle mw-rem-15">勤務帯</td>
                 <td
                   class="text-center align-middle mw-rem-5 color-royalblue"
                   data-toggle="tooltip"
@@ -290,7 +290,7 @@
                 >{{ calcList.working_status_name }}</td>
                 <!-- /勤務状態 -->
                 <!-- タイムテーブル名 -->
-                <td class="text-center align-middle mw-rem-10">{{ calcList.working_timetable_name }}</td>
+                <td class="text-center align-middle mw-rem-15">{{ calcList.working_timetable_name }}</td>
                 <!-- /タイムテーブル名 -->
                 <!-- 実働時間 -->
                 <td
@@ -634,7 +634,7 @@
                 >{{ calcList.working_status_name }}</td>
                 <!-- /勤務状態 -->
                 <!-- タイムテーブル名 -->
-                <td class="text-center align-middle mw-rem-10">{{ calcList.working_timetable_name }}</td>
+                <td class="text-center align-middle mw-rem-15">{{ calcList.working_timetable_name }}</td>
                 <!-- /タイムテーブル名 -->
                 <!-- 実働時間 -->
                 <td
