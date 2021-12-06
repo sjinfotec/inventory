@@ -23,9 +23,27 @@ Auth::routes();
 // ------------------ ホーム --------------------------------
 Route::get('/', 'HomeController@index')->middleware('auth');
 Route::get('/home', 'HomeController@index')->name('home');
-// ------------------ 集計 --------------------------------
-// 日次集計
-Route::get('/daily', 'DailyWorkingInformationController@index')->middleware('auth');
+// ------------------ 加工指示／工程管理 --------------------------------
+// 指示書／管理書作成
+Route::get('/edit_work_order', 'EditWorkOrderController@index')->middleware('auth');
+Route::get('/edit_work_order/home', 'EditWorkOrderController@homeindex')->middleware('auth');
+Route::get('/edit_work_order/edithome', 'EditWorkOrderController@edithome')->middleware('auth')->name('edit_work_order.edithome');
+Route::post('/edit_work_order/put_process', 'ApiCommonController@putProcess')->middleware('auth');
+// 受注残登録
+Route::get('/store_backorder', 'StoreBackOrderController@index')->middleware('auth');
+Route::post('/store_backorder/store', 'StoreBackOrderController@store')->middleware('auth');
+// モバイル
+Route::get('/process_info', 'MobileAccessController@index')->middleware('auth');
+Route::post('/process_info/get', 'MobileAccessController@getProductheader')->middleware('auth');
+Route::post('/process_history/put', 'MobileAccessController@putProcessHistoery')->middleware('auth');
+// 進捗状況
+Route::get('/process_view', 'ProcessViewController@index')->middleware('auth');
+Route::post('/process_view/get', 'ApiCommonController@getProcessView')->middleware('auth');
+
+
+
+
+Route::get('/working_status', 'WorkingStatusController@index')->middleware('auth');
 Route::post('/daily/calc', 'DailyWorkingInformationController@show')->middleware('auth');
 Route::get('/daily/show', 'DailyWorkingInformationController@show')->middleware('auth');
 // 月次集計
@@ -104,6 +122,10 @@ Route::post('/edit_attendancelog/get', 'EditAttendanceLogController@get')->middl
 Route::post('/edit_attendancelog/store', 'EditAttendanceLogController@store')->middleware('auth');
 Route::post('/edit_attendancelog/fix', 'EditAttendanceLogController@fix')->middleware('auth');
 // ------------------ 設定 --------------------------------
+// 機器情報
+Route::get('/setting_device', 'SettingDeviceController@index')->middleware('auth');
+Route::post('/create_company_information/get', 'CreateCompanyInformationController@getCompanyInfo')->middleware('auth');
+Route::post('/create_company_information/store', 'CreateCompanyInformationController@store')->middleware('auth');
 // 会社情報
 Route::get('/create_company_information', 'CreateCompanyInformationController@index')->middleware('auth');
 Route::post('/create_company_information/get', 'CreateCompanyInformationController@getCompanyInfo')->middleware('auth');
@@ -173,8 +195,18 @@ Route::get('/file_download', 'FileDownloadController@index')->middleware('auth')
 Route::get('/file_download/getdownload', 'FileDownloadController@getfileDownload')->middleware('auth');
 // ------------------ 共通 --------------------------------
 // リスト取得
+Route::post('/get_office_list', 'ApiCommonController@getOfficeList')->middleware('auth');
+Route::post('/get_customers_list', 'ApiCommonController@getCustomerList')->middleware('auth');
+Route::post('/get_product_list', 'ApiCommonController@getProductList')->middleware('auth');
+Route::post('/get_device_list', 'ApiCommonController@getDeviceList')->middleware('auth');
 Route::post('/get_departments_list', 'ApiCommonController@getDepartmentList')->middleware('auth');
 Route::post('/get_employment_status_list', 'ApiCommonController@getEmploymentStatusList')->middleware('auth');
+// データ取得
+Route::post('/get_progress_header', 'ApiCommonController@getProductHeader')->middleware('auth');
+Route::post('/get_product_chart', 'ApiCommonController@getProductChart')->middleware('auth');
+Route::post('/get_progress_chart', 'ApiCommonController@getProgress')->middleware('auth');
+Route::post('/get_product_processes', 'ApiCommonController@getProductProcess')->middleware('auth');
+
 Route::post('/get_time_table_list', 'ApiCommonController@getTimeTableList')->middleware('auth');
 Route::post('/get_business_day_list', 'ApiCommonController@getBusinessDayList')->middleware('auth');
 Route::post('/get_holi_day_list', 'ApiCommonController@getHoliDayList')->middleware('auth');

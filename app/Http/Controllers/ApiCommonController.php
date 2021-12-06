@@ -25,6 +25,8 @@ use App\CsvItemSelection;
 use App\CalendarSettingInformation;
 use App\FeatureItemSelection;
 use App\DownloadLog;
+use App\BackOrder;
+use App\Progressheader;
 use App\Http\Controllers\CreateCompanyInformationController;
 use App\Http\Controllers\CreateDepartmentController;
 use App\Http\Controllers\SettingCalcController;
@@ -43,6 +45,9 @@ use App\Http\Controllers\EditCalendarController;
  *          ユーザーリスト取得          : getUserList               : users
  *          ユーザーリストCSV作成取得   : getUserListCsv            : users
  *          部署リスト取得              : getDepartmentList         : departments
+ *          営業所リスト取得            : getOfficeList             : doffices
+ *          客先リスト取得              : getCustomerList         : customers
+ *          品名リスト取得              : getProductList         : products
  *          タイムテーブルリスト取得     : getTimeTableList         : working_timetables
  *          承認リスト取得              : getApprovalroutenoList    : approvals 
  *          承認明細リスト取得          : getApprovalauthorizerList : approval_authorizers
@@ -115,6 +120,14 @@ use App\Http\Controllers\EditCalendarController;
 class ApiCommonController extends Controller
 {
 
+    protected $table_offices = 'offices';
+    protected $table_customers = 'customers';
+    protected $table_products = 'products';
+    protected $table_devices = 'devices';
+    protected $table_progress_headers = 'progress_headers';
+    protected $table_progress_details = 'progress_details';
+    protected $table_product_processes = 'product_processes';
+    protected $table_process_histories = 'process_histories';
     protected $table_generalcodes = 'generalcodes';
     protected $table_companies = 'companies';
     protected $table_confirms = 'confirms';
@@ -623,7 +636,6 @@ class ApiCommonController extends Controller
      */
     public function getUserListCsv(Request $request){
 
-        Log::debug('getUserListCsv = ');
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
@@ -695,7 +707,6 @@ class ApiCommonController extends Controller
      * @return list departments
      */
     public function getDepartmentList(Request $request){
-        Log::debug('getDepartmentList in');
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
@@ -834,6 +845,1064 @@ class ApiCommonController extends Controller
             throw $pe;
         }catch(\Exception $e){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
+    /** 営業所リスト取得
+     *
+     * @return list customer
+     */
+    public function getOfficeList(Request $request){
+        Log::debug('getOfficeList in');
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            // ログインユーザの権限取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
+
+            $mainQuery = DB::table($this->table_offices)
+                ->select($this->table_offices.'.code',$this->table_offices.'.name');
+            $mainQuery
+                ->where($this->table_offices.'.is_deleted', 0)
+                ->orderby($this->table_offices.'.code','asc');
+            $details = $mainQuery->get();
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
+    /** 客先リスト取得
+     *
+     * @return list customer
+     */
+    public function getCustomerList(Request $request){
+        Log::debug('getCustomerList in');
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            $office_code = null;
+            if (isset($request->keyparams)) {
+                $params = $request->keyparams;
+                if (isset($params['officecode'])) {
+                    $office_code = $params['officecode'];
+                }
+            }
+
+            // ログインユーザの権限取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
+
+            $mainQuery = DB::table($this->table_customers)
+                ->select($this->table_customers.'.code',$this->table_customers.'.name');
+            Log::debug('getCustomerList office_code = '.$office_code);
+            if (isset($office_code)) {
+                $mainQuery->where($this->table_customers.'.office_code', '=',$office_code);
+            }
+            $mainQuery
+                ->where($this->table_customers.'.is_deleted', 0)
+                ->orderby($this->table_customers.'.office_code','asc')
+                ->orderby($this->table_customers.'.code','asc');
+            $details = $mainQuery->get();
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
+    /** 品名リスト取得
+     *
+     * @return list customer
+     */
+    public function getProductList(Request $request){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            $product_code = null;
+            $processes_code = null;
+            $distinct_kbn = null;
+            if (isset($request->keyparams)) {
+                $params = $request->keyparams;
+                if (isset($params['code'])) {
+                    $product_code = $params['code'];
+                }
+                if (isset($params['processes_code'])) {
+                    $processes_code = $params['processes_code'];
+                }
+                if (isset($params['distinct_kbn'])) {
+                    $distinct_kbn = $params['distinct_kbn'];
+                }
+            }
+
+            // ログインユーザの権限取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
+
+            $mainQuery = DB::table($this->table_products)
+                ->select($this->table_products.'.code',$this->table_products.'.processes_code',$this->table_products.'.name');
+            if (isset($product_code)) {
+                $mainQuery->where($this->table_products.'.code', '=',$product_code);
+            }
+            if (isset($processes_code)) {
+                $mainQuery->where($this->table_products.'.processes_code', '=',$processes_code);
+            }
+            $mainQuery
+                ->where($this->table_products.'.is_deleted', 0);
+            if (isset($distinct_kbn)) {
+                $mainQuery->groupBy($this->table_products.'.code');
+            }
+            $mainQuery
+                ->orderby($this->table_products.'.code','asc')
+                ->orderby($this->table_products.'.processes_code','asc');
+            $details = $mainQuery->get();
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
+    /** 機器リスト取得
+     *
+     * @return list customer
+     */
+    public function getDeviceList(Request $request){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            $device_code = null;
+            if (isset($request->keyparams)) {
+                $params = $request->keyparams;
+                if (isset($params['code'])) {
+                    $device_code = $params['code'];
+                }
+            }
+
+            // ログインユーザの権限取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
+
+            $mainQuery = DB::table($this->table_devices)
+                ->select($this->table_devices.'.code',$this->table_devices.'.name',$this->table_devices.'.floor_pos');
+            if (isset($product_code)) {
+                $mainQuery->where($this->table_devices.'.code', '=',$device_code);
+            }
+            $mainQuery
+                ->where($this->table_devices.'.is_deleted', 0);
+            $mainQuery
+                ->orderby($this->table_devices.'.code','asc');
+            $details = $mainQuery->get();
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
+    /** 工程リスト取得
+     *
+     * @return list customer
+     */
+    public function getProductProcess(Request $request){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            $product_code = null;
+            if (isset($request->keyparams)) {
+                $params = $request->keyparams;
+                if (isset($params['product_code'])) {
+                    $params_product_code = $params['product_code'];
+                }
+            }
+
+            // ログインユーザの権限取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
+            $sqlString = "";
+            $sqlString .= "select ";
+            $sqlString .= "  t1.code as products_code ";
+            $sqlString .= "  , t1.processes_code as processes_code ";
+            $sqlString .= "  , t1.name as processes_name ";
+            $sqlString .= "  , t2.code as product_processes_code ";
+            $sqlString .= "  , t2.detail_no as product_processes_detail_no ";
+            $sqlString .= "  , t2.name as detail_name ";
+            $sqlString .= "  from ";
+            $sqlString .= "  ".$this->table_products." as t1 ";
+            $sqlString .= "    inner join ";
+            $sqlString .= "      ".$this->table_product_processes." as t2 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t1.processes_code = t2.code ";
+            $sqlString .= "      and t1.is_deleted = 0 ";
+            $sqlString .= "      and t2.is_deleted = 0 ";
+            $sqlString .= "  where ";
+            $sqlString .= "    ? = ? ";
+            if (!empty($params_product_code)) {
+                $sqlString .= "    and t1.code = ? ";
+            }
+            $sqlString .= "order by ";
+            $sqlString .= "  t1.code asc ";
+            $sqlString .= " , t2.code asc ";
+            $sqlString .= " , t2.detail_no asc ";
+            // バインド
+            $array_setBindingsStr = array();
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            if (!empty($params_product_code)) {
+                $array_setBindingsStr[] = $params_product_code;
+            }
+            $details = DB::select($sqlString, $array_setBindingsStr);
+            // setArrayProductProcess implement
+            $array_impl_setArrayProductProcess = array (
+                'details' => $details
+            );
+            $array_products_processes = $this->setArrayProductProcess($array_impl_setArrayProductProcess);
+            Log::debug('setArrayProductProcess array_products_processes = '.count($array_products_processes));
+            return response()->json(
+                ['result' => true, 'details' => $array_products_processes,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
+    /** 工程情報登録
+     *
+     * @return list customer
+     */
+    public function putProcess(Request $request){
+        $this->array_messagedata = array();
+        $result_exists = false;
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            $params_product_process_data = null;
+            if (isset($request->keyparams)) {
+                $params = $request->keyparams;
+                if (isset($params['form'])) {
+                    $params_product_process_data = $params['form'];
+                }
+            }
+            $order_no = $params_product_process_data["order_no"];
+            $seq = $params_product_process_data["seq"];
+            Log::debug('putProcess o_office_code = ['.$params_product_process_data["o_office_code"].']');
+            Log::debug('putProcess material_customer_code = '.$params_product_process_data["material_customer_code"]);
+            // 新規の場合($seq=0)MAXseqを取得
+            if ($seq == 0) {
+                $result_maxseq = DB::table($this->table_progress_headers)
+                ->where('order_no', $order_no)
+                ->max('seq');
+                $seq = $result_maxseq + 1;
+            } else {
+                // データが存在するか
+                $result_exists = DB::table($this->table_progress_headers)
+                    ->where('order_no', $order_no)
+                    ->where('seq', $params_product_process_data["seq"])
+                    ->exists();
+            }
+            // データが存在するか
+            $result_exists = DB::table($this->table_progress_headers)
+                ->where('order_no', $order_no)
+                ->where('seq', $params_product_process_data["seq"])
+                ->exists();
+            Log::debug('$result_exists = '.$result_exists);
+            // データ作成（ヘッダ）
+            $systemdate = Carbon::now();
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
+
+            $array_putData = array();
+            DB::beginTransaction();
+            $unit_price = $params_product_process_data["unit_price"];
+            if ($params_product_process_data["unit_price"] == "" || $params_product_process_data["unit_price"] == null) {
+                $unit_price = 0;
+            }
+            $material_cost = $params_product_process_data["material_cost"];
+            if ($params_product_process_data["material_cost"] == "" || $params_product_process_data["material_cost"] == null) {
+                $material_cost = 0;
+            }
+            $heat_cost = $params_product_process_data["heat_cost"];
+            if ($params_product_process_data["heat_cost"] == "" || $params_product_process_data["heat_cost"] == null) {
+                $heat_cost = 0;
+            }
+            $outsourcing_cost = $params_product_process_data["outsourcing_cost"];
+            if ($params_product_process_data["outsourcing_cost"] == "" || $params_product_process_data["outsourcing_cost"] == null) {
+                $outsourcing_cost = 0;
+            }
+            // if ($params_product_process_data["seq"] == 0) {
+            if (!$result_exists) {
+	        Log::debug('!$result_exists = '.$order_no);
+	        Log::debug('!$result_exists = '.$seq);
+                $array_putData = [
+                    'order_no' => $order_no,
+                    'seq' => $seq,
+                    'row_seq' => $params_product_process_data["row_seq"],
+                    'drawing_no' => $params_product_process_data["drawing_no"],
+                    'order_date' => $params_product_process_data["order_date"],
+                    'supply_date' => $params_product_process_data["supply_date"],
+                    'office_code' => $params_product_process_data["office_code"],
+                    'customer_code' => $params_product_process_data["customer_code"],
+                    'back_order_customer_name' => $params_product_process_data["back_order_customer_name"],
+                    'order_count' => $params_product_process_data["order_count"],
+                    'model_number' => $params_product_process_data["model_number"],
+                    'product_code' => $params_product_process_data["product_code"],
+                    'processes_code' => $params_product_process_data["processes_code"],
+                    'back_order_product_name' => $params_product_process_data["back_order_product_name"],
+                    'unit_price' => $unit_price,
+                    'outline_name' => $params_product_process_data["outline_name"],
+                    'back_order_quality_name' => $params_product_process_data["back_order_quality_name"],
+                    'material_cost' => $material_cost,
+                    'material_office_code' => $params_product_process_data["m_office_code"],
+                    'material_customer_code' => $params_product_process_data["material_customer_code"],
+                    'heat_process' => $params_product_process_data["heat_process"],
+                    'heat_cost' => $heat_cost,
+                    'outsourcing_office_code' => $params_product_process_data["o_office_code"],
+                    'outsourcing_customer_code' => $params_product_process_data["outsourcing_customer_code"],
+                    'outsourcing_cost' => $outsourcing_cost,
+                    'created_user' => $login_user_code,
+                    'created_at' => $systemdate
+                ];
+                DB::table($this->table_progress_headers)
+                    ->insert($array_putData);
+            } else {
+	        Log::debug('$result_exists = '.$order_no);
+	        Log::debug('$result_exists = '.$seq);
+                $array_putData = [
+                    'order_no' => $order_no,
+                    'seq' => $seq,
+                    'row_seq' => $params_product_process_data["row_seq"],
+                    'drawing_no' => $params_product_process_data["drawing_no"],
+                    'order_date' => $params_product_process_data["order_date"],
+                    'supply_date' => $params_product_process_data["supply_date"],
+                    'office_code' => $params_product_process_data["office_code"],
+                    'customer_code' => $params_product_process_data["customer_code"],
+                    'back_order_customer_name' => $params_product_process_data["back_order_customer_name"],
+                    'order_count' => $params_product_process_data["order_count"],
+                    'model_number' => $params_product_process_data["model_number"],
+                    'product_code' => $params_product_process_data["product_code"],
+                    'processes_code' => $params_product_process_data["processes_code"],
+                    'back_order_product_name' => $params_product_process_data["back_order_product_name"],
+                    'unit_price' => $unit_price,
+                    'outline_name' => $params_product_process_data["outline_name"],
+                    'back_order_quality_name' => $params_product_process_data["back_order_quality_name"],
+                    'material_cost' => $material_cost,
+                    'material_office_code' => $params_product_process_data["m_office_code"],
+                    'material_customer_code' => $params_product_process_data["material_customer_code"],
+                    'heat_process' => $params_product_process_data["heat_process"],
+                    'heat_cost' => $heat_cost,
+                    'outsourcing_office_code' => $params_product_process_data["o_office_code"],
+                    'outsourcing_customer_code' => $params_product_process_data["outsourcing_customer_code"],
+                    'outsourcing_cost' => $outsourcing_cost,
+                    'updated_user' => $login_user_code,
+                    'updated_at' => $systemdate
+                ];
+                DB::table($this->table_progress_headers)
+                    ->where('order_no', $order_no)
+                    ->where('seq', $seq)
+                    ->update($array_putData);
+            }
+            // データ作成（明細）　最初物理削除
+            DB::table($this->table_progress_details)
+                ->where('order_no', '=', $order_no)
+                ->where('seq', '=', $seq)
+                ->delete();
+            // 明細insert
+            for ($i=0;$i<count($params_product_process_data["progress_no"]);$i++) {
+                $array_putData = array();
+                $process_time_h = $params_product_process_data["process_time_h"][$i];
+                if ($params_product_process_data["process_time_h"][$i] == "" || $params_product_process_data["process_time_h"][$i] == null) {
+                    $process_time_h = 0;
+                }
+                $process_time_m = $params_product_process_data["process_time_m"][$i];
+                if ($params_product_process_data["process_time_m"][$i] == "" || $params_product_process_data["process_time_m"][$i] == null) {
+                    $process_time_m = 0;
+                }
+                $setup_time_h = $params_product_process_data["setup_time_h"][$i];
+                if ($params_product_process_data["setup_time_h"][$i] == "" || $params_product_process_data["setup_time_h"][$i] == null) {
+                    $setup_time_h = 0;
+                }
+                $setup_time_m = $params_product_process_data["setup_time_m"][$i];
+                if ($params_product_process_data["setup_time_m"][$i] == "" || $params_product_process_data["setup_time_m"][$i] == null) {
+                    $setup_time_m = 0;
+                }
+                $product_processes_code = $params_product_process_data["product_processes_code"][$i];
+                if ($params_product_process_data["product_processes_code"][$i] == "" || $params_product_process_data["product_processes_code"][$i] == null) {
+                    $product_processes_code = '00';
+                }
+                $product_processes_detail_no = $params_product_process_data["product_processes_detail_no"][$i];
+                if ($params_product_process_data["product_processes_detail_no"][$i] == "" || $params_product_process_data["product_processes_detail_no"][$i] == null) {
+                    $product_processes_detail_no = 0;
+                }
+                $array_putData = [
+                    'order_no' => $order_no,
+                    'seq' => $seq,
+                    'progress_no' => $params_product_process_data['progress_no'][$i],
+                    'product_processes_code' => $product_processes_code,
+                    'product_processes_detail_no' => $product_processes_detail_no,
+                    'device_code' => $params_product_process_data["device_code"][$i],
+                    'department_code' => $params_product_process_data["process_department_code"][$i],
+                    'users_code' => $params_product_process_data["process_user_code"][$i],
+                    'process_history_no' => $params_product_process_data["process_history_no"][$i],
+                    'process_time_h' => $process_time_h,
+                    'process_time_m' => $process_time_m,
+                    'setup_history_no' => $params_product_process_data["setup_history_no"][$i],
+                    'setup_time_h' => $setup_time_h,
+                    'setup_time_m' => $setup_time_m,
+                    'complete_date' => $params_product_process_data["complete_date"][$i],
+                    'qr_code' => $params_product_process_data["qrText"][$i],
+                    'created_user' => $login_user_code,
+                    'created_at' => $systemdate
+                ];
+                DB::table($this->table_progress_details)
+                ->insert($array_putData);
+            }
+            DB::commit();
+            return response()->json(
+                ['result' => true,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            DB::rollBack();
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            DB::rollBack();
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
+    /** 工程リスト取得
+     *
+     * @return list customer
+     */
+    public function setArrayProductProcess($params){
+        Log::debug('setArrayProductProcess in ');
+        $param_details = $params['details'];
+        $array_products_processes = array();
+        try {
+            // 計算エリア
+            $before_products_code = null;
+            $before_processes_name = null;
+            $before_product_processes_code = null;
+            $array_products = array();
+            $array_products_details = array();
+            foreach($param_details as $items) {
+                if ($before_products_code != $items->products_code) {
+                    if ($before_products_code != null) {
+                        $array_products[] = array(
+                            'products_code' => $before_products_code,
+                            'processes_name' => $before_processes_name,
+                            'processes_code' => $before_product_processes_code,
+                            'array_products_details' => $array_products_details
+                        );
+                    }
+                    $before_products_code = $items->products_code;
+                    $before_processes_name = $items->processes_name;
+                    $before_product_processes_code = $items->product_processes_code;
+                    $array_products_details = array();
+                } elseif($before_product_processes_code != $items->product_processes_code) {
+                    if ($before_products_code != null) {
+                        $array_products[] = array(
+                            'products_code' => $before_products_code,
+                            'processes_name' => $before_processes_name,
+                            'processes_code' => $before_product_processes_code,
+                            'array_products_details' => $array_products_details
+                        );
+                    }
+                    $before_product_processes_code = $items->product_processes_code;
+                    $array_products_details = array();
+                }
+                $array_products_details[] = array(
+                    'product_processes_code' => $items->product_processes_code,
+                    'product_processes_detail_no' => $items->product_processes_detail_no,
+                    'detail_name' => $items->detail_name
+                );
+            }
+            Log::debug('setArrayProductProcess count($array_products_details) '.count($array_products_details));
+            if(count($array_products_details) > 0) {
+                $array_products[] = array(
+                    'products_code' => $before_products_code,
+                    'processes_name' => $before_processes_name,
+                    'processes_code' => $before_product_processes_code,
+                    'array_products_details' => $array_products_details
+                );
+            }
+            Log::debug('setArrayProductProcess end '.count($array_products_details));
+            return $array_products;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
+    /** 加工指示書／工程管理取得
+     *
+     * @return list customer
+     */
+    public function getProductheader(Request $request){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            $params_target_from_date = null;
+            $params_target_to_date = null;
+            $params_office_code = null;
+            $params_customer_code = null;
+            if (isset($request->keyparams)) {
+                $params = $request->keyparams;
+                if (isset($params['target_from_date'])) {
+                    $params_target_from_date = $params['target_from_date'];
+                }
+                if (isset($params['target_to_date'])) {
+                    $params_target_to_date = $params['target_to_date'];
+                }
+                if (isset($params['office_code'])) {
+                    $params_office_code = $params['office_code'];
+                }
+                if (isset($params['customer_code'])) {
+                    $params_customer_code = $params['customer_code'];
+                }
+            }
+
+            // 加工指示書／工程管理事前登録
+            DB::beginTransaction();
+            $array_impl_putProductheader = array (
+                'target_from_date' => $params_target_from_date,
+                'target_to_date' => $params_target_to_date,
+                'office_code' => $params_office_code,
+                'customer_code' => $params_customer_code
+            );
+            $result = $this->putProductheader($array_impl_putProductheader);
+            if ($result) {
+                $array_impl_getProductheadertable = array (
+                    'target_from_date' => $params_target_from_date,
+                    'target_to_date' => $params_target_to_date,
+                    'office_code' => $params_office_code,
+                    'customer_code' => $params_customer_code
+                );
+                $details = $this->getProductheadertable($array_impl_getProductheadertable);
+            }
+            DB::commit();
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            DB::rollBack();
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            DB::rollBack();
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
+    /** 加工指示書／工程管理事前登録
+     *
+     * @return list customer
+     */
+    private function putProductheader($param){
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            $params_target_from_date = $param['target_from_date'];
+            $params_target_to_date = $param['target_to_date'];
+            $params_office_code = $param['office_code'];
+            $params_customer_code = $param['customer_code'];
+
+            // ログインユーザの権限取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
+            // 未登録の存在チェック
+            $back_order_model = new BackOrder();
+            $back_order_model->setParamOrderdateFromAttribute($params_target_from_date);
+            $back_order_model->setParamOrderdateToAttribute($params_target_to_date);
+            $back_order_model->setParamIsUpdateAttribute(false);
+            $result_exists = $back_order_model->getIsUpdate();
+            if (!$result_exists) {
+                // 未登録データは指示書に登録
+                $progress_header_model = new Progressheader();
+                $details = $back_order_model->getData();
+                foreach($details as $item) {
+                    $progress_header_model->setOrdernoAttribute($item->order_no);
+                    $progress_header_model->setSeqAttribute($item->seq);
+                    $progress_header_model->setRowseqAttribute($item->row_seq);
+                    $progress_header_model->setDrawingnoAttribute($item->drawing_no);
+                    $progress_header_model->setOrderdateAttribute($item->order_date);
+                    $progress_header_model->setSupplydateAttribute($item->supply_date);
+                    $progress_header_model->setOfficecodeAttribute($item->office_code);
+                    $progress_header_model->setCustomercodeAttribute($item->customer_code);
+                    $progress_header_model->setBackordercustomernameAttribute($item->customer_name);
+                    $progress_header_model->setOrdercountAttribute($item->order_count);
+                    $progress_header_model->setModelnumberAttribute($item->model_number);
+                    $progress_header_model->setOrdercountAttribute($item->order_count);
+                    $progress_header_model->setProductcodeAttribute($item->product_code);
+                    $progress_header_model->setProcessescodeAttribute($item->processes_code);
+                    $progress_header_model->setBackorderproductnameAttribute($item->product_name);
+                    $progress_header_model->setUnitpriceAttribute(0);
+                    $progress_header_model->setOutlinenameAttribute($item->outline_name);
+                    $progress_header_model->setBackorderqualitynameAttribute(null);
+                    $progress_header_model->setMaterialcostAttribute(0);
+                    $progress_header_model->setMaterialofficecodeAttribute(null);
+                    $progress_header_model->setMaterialcustomercodeAttribute(null);
+                    $progress_header_model->setHeatprocessAttribute(null);
+                    $progress_header_model->setHeatcostAttribute(0);
+                    $progress_header_model->setOutsourcingofficecodeAttribute(null);
+                    $progress_header_model->setOutsourcingcustomercodeAttribute(null);
+                    $progress_header_model->setHeatcostAttribute(0);
+                    $progress_header_model->setCreateduserAttribute($login_user_code);
+                    $progress_header_model->setCreatedatAttribute(Carbon::now());
+                    $progress_header_model->insert();
+                    // 受注残を登録済みにする
+                    $back_order_model->setParamOrdernoAttribute($item->order_no);
+                    $back_order_model->setParamSeqAttribute($item->seq);
+                    $back_order_model->setIsUpdateAttribute(true);
+                    $back_order_model->updateIsupdate();
+                }
+    
+            }
+            return $result;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_insert_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_insert_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
+    /** 加工指示書／工程管理取得
+     *
+     * @return list customer
+     */
+    public function getProductheadertable($param){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            $params_target_from_date = $param['target_from_date'];
+            $params_target_to_date = $param['target_to_date'];
+            $params_office_code = $param['office_code'];
+            $params_customer_code = $param['customer_code'];
+
+            // ログインユーザの権限取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
+            $progress_header_model = new Progressheader();
+            $progress_header_model->setParamOrderdateFromAttribute($params_target_from_date);
+            $progress_header_model->setParamOrderdateToAttribute($params_target_to_date);
+            $details = $progress_header_model->getProductheader();
+            return $details;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
+    /** 加工指示書／工程管理取得
+     *
+     * @return list customer
+     */
+    public function getProductChart(Request $request){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            $params_target_from_date = null;
+            $params_target_to_date = null;
+            $params_office_code = null;
+            $params_customer_code = null;
+            $params_order_no = null;
+            $params_row_seq = null;
+            if (isset($request->keyparams)) {
+                $params = $request->keyparams;
+                if (isset($params['target_from_date'])) {
+                    $params_target_from_date = $params['target_from_date'];
+                }
+                if (isset($params['target_to_date'])) {
+                    $params_target_to_date = $params['target_to_date'];
+                }
+                if (isset($params['office_code'])) {
+                    $params_office_code = $params['office_code'];
+                }
+                if (isset($params['customer_code'])) {
+                    $params_customer_code = $params['customer_code'];
+                }
+                if (isset($params['order_no'])) {
+                    $params_order_no = $params['order_no'];
+                }
+                if (isset($params['row_seq'])) {
+                    $params_row_seq = $params['row_seq'];
+                }
+            }
+            Log::debug('getProductChart order_no = '.$params_order_no);
+            Log::debug('getProductChart order_no = '.$params['order_no']);
+            Log::debug('getProductChart row_seq = '.$params_row_seq);
+
+            // ログインユーザの権限取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
+            $sqlString = "";
+            $sqlString .= "select ";
+            $sqlString .= "  t1.order_no as order_no ";
+            $sqlString .= "  , t1.seq as seq ";
+            $sqlString .= "  , t1.row_seq as row_seq ";
+            $sqlString .= "  , t1.drawing_no as drawing_no ";
+            $sqlString .= "  , t1.order_date as order_date ";
+            $sqlString .= "  , date_format(t1.order_date,'%Y年%m月%d日') as order_date_name ";
+            $sqlString .= "  , t1.supply_date as supply_date ";
+            $sqlString .= "  , date_format(t1.supply_date,'%Y年%m月%d日') as supply_date_name ";
+            $sqlString .= "  , t1.office_code as office_code ";
+            $sqlString .= "  , t1.customer_code as customer_code ";
+            $sqlString .= "  , t1.back_order_customer_name as back_order_customer_name ";
+            $sqlString .= "  , t1.order_count as order_count ";
+            $sqlString .= "  , t1.model_number as model_number ";
+            $sqlString .= "  , t1.product_code as product_code ";
+            $sqlString .= "  , t1.processes_code as processes_code ";
+            $sqlString .= "  , t1.back_order_product_name as back_order_product_name ";
+            $sqlString .= "  , t1.unit_price as unit_price ";
+            $sqlString .= "  , t1.outline_name as outline_name ";
+            $sqlString .= "  , t1.back_order_quality_name as back_order_quality_name ";
+            $sqlString .= "  , t1.material_cost as material_cost ";
+            $sqlString .= "  , t1.material_office_code as material_office_code ";
+            $sqlString .= "  , t1.material_customer_code as material_customer_code ";
+            $sqlString .= "  , t1.heat_process as heat_process ";
+            $sqlString .= "  , t1.heat_cost as heat_cost ";
+            $sqlString .= "  , t1.outsourcing_office_code as outsourcing_office_code ";
+            $sqlString .= "  , t1.outsourcing_customer_code as outsourcing_customer_code ";
+            $sqlString .= "  , t1.outsourcing_cost as outsourcing_cost ";
+            $sqlString .= "  , t2.progress_no as progress_no ";
+            $sqlString .= "  , t2.product_processes_code as product_processes_code ";
+            $sqlString .= "  , t2.product_processes_detail_no as product_processes_detail_no ";
+            $sqlString .= "  , t2.device_code as device_code ";
+            $sqlString .= "  , t2.department_code as department_code ";
+            $sqlString .= "  , t2.users_code as users_code ";
+            $sqlString .= "  , t2.process_history_no as process_history_no ";
+            $sqlString .= "  , t2.process_time_m as process_time_m ";
+            $sqlString .= "  , t2.process_time_h as process_time_h ";
+            $sqlString .= "  , t2.setup_history_no as setup_history_no ";
+            $sqlString .= "  , t2.setup_time_m as setup_time_m ";
+            $sqlString .= "  , t2.setup_time_h as setup_time_h ";
+            $sqlString .= "  , t2.complete_date as complete_date ";
+            $sqlString .= "  , t2.qr_code as qr_code ";
+            $sqlString .= "  , t2.process_time_h as process_time_h ";
+            $sqlString .= "  , t3.name as office_name ";
+            $sqlString .= "  , t4.name as customer_name ";
+            $sqlString .= "  , t5.name as product_name ";
+            $sqlString .= "  , t6.name as material_office_name ";
+            $sqlString .= "  , t7.name as material_customer_name ";
+            $sqlString .= "  , t8.name as outsourcing_office_name ";
+            $sqlString .= "  , t9.name as outsourcing_customer_name ";
+            $sqlString .= "  , t10.name as product_process_name ";
+            $sqlString .= "  , t11.name as device_name ";
+            $sqlString .= "  , t12.name as department_name ";
+            $sqlString .= "  , t13.name as user_name ";
+            $sqlString .= "  from ";
+            $sqlString .= "  ".$this->table_progress_headers." as t1 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_progress_details." as t2 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t1.order_no = t2.order_no ";
+            $sqlString .= "      and t1.seq = t2.seq ";
+            $sqlString .= "      and t1.is_deleted = 0 ";
+            $sqlString .= "      and t2.is_deleted = 0 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_offices." as t3 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t1.office_code = t3.code";
+            $sqlString .= "      and t3.is_deleted = 0 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_customers." as t4 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t1.office_code = t4.office_code";
+            $sqlString .= "      and t1.customer_code = t4.code";
+            $sqlString .= "      and t4.is_deleted = 0 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_products." as t5 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t1.product_code = t5.code";
+            $sqlString .= "      and t1.processes_code = t5.processes_code";
+            $sqlString .= "      and t5.is_deleted = 0 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_offices." as t6 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t1.material_office_code = t6.code";
+            $sqlString .= "      and t6.is_deleted = 0 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_customers." as t7 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t1.material_office_code = t7.office_code";
+            $sqlString .= "      and t1.material_customer_code = t7.code";
+            $sqlString .= "      and t7.is_deleted = 0 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_offices." as t8 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t1.outsourcing_office_code = t8.code";
+            $sqlString .= "      and t8.is_deleted = 0 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_customers." as t9 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t1.outsourcing_office_code = t9.office_code";
+            $sqlString .= "      and t1.outsourcing_customer_code = t9.code";
+            $sqlString .= "      and t9.is_deleted = 0 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_product_processes." as t10 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t2.product_processes_code = t10.code";
+            $sqlString .= "      and t2.product_processes_detail_no = t10.detail_no";
+            $sqlString .= "      and t10.is_deleted = 0 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_devices." as t11 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t2.device_code = t11.code";
+            $sqlString .= "      and t11.is_deleted = 0 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_departments." as t12 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t2.department_code = t12.code";
+            $sqlString .= "      and t12.is_deleted = 0 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_users." as t13 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t2.department_code = t13.department_code";
+            $sqlString .= "      and t2.users_code = t13.code";
+            $sqlString .= "      and t13.is_deleted = 0 ";
+            $sqlString .= "  where ";
+            $sqlString .= "    ? = ? ";
+            if (!empty($params_target_from_date)) {
+                $sqlString .= "    and t1.supply_date >= ? ";
+            }
+            if (!empty($params_target_to_date)) {
+                $sqlString .= "    and t1.supply_date <= ? ";
+            }
+            if (!empty($params_office_code)) {
+                $sqlString .= "    and t1.office_code = ? ";
+            }
+            if (!empty($params_customer_code)) {
+                $sqlString .= "    and t1.customer_code = ? ";
+            }
+            if (!empty($params_order_no)) {
+                $sqlString .= "    and t1.order_no = ? ";
+            }
+            if (!empty($params_row_seq)) {
+                $sqlString .= "    and t1.row_seq = ? ";
+            }
+            $sqlString .= "group by ";
+            $sqlString .= "  t1.supply_date ";
+            $sqlString .= " , t1.order_no ";
+            $sqlString .= "order by ";
+            $sqlString .= "  t1.supply_date asc ";
+            $sqlString .= " , t1.order_no asc ";
+            $sqlString .= " , t2.progress_no asc ";
+            // バインド
+            $array_setBindingsStr = array();
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            if (!empty($params_target_from_date)) {
+                $array_setBindingsStr[] = $params_target_from_date;
+            }
+            if (!empty($params_target_to_date)) {
+                $array_setBindingsStr[] = $params_target_to_date;
+            }
+            if (!empty($params_office_code)) {
+                $array_setBindingsStr[] = $params_office_code;
+            }
+            if (!empty($params_customer_code)) {
+                $array_setBindingsStr[] = $params_customer_code;
+            }
+            if (!empty($params_order_no)) {
+                $array_setBindingsStr[] = $params_order_no;
+            }
+            if (!empty($params_row_seq)) {
+                $array_setBindingsStr[] = $params_row_seq;
+            }
+            $details = DB::select($sqlString, $array_setBindingsStr);
+            Log::error('getProductChart details = '.count($details));
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
+    /** 作業工程取得
+     *
+     * @return list customer
+     */
+    public function getProcessView(Request $request){
+        Log::debug('getProcessView in ');
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            // ログインユーザの権限取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
+
+            $dt = new Carbon();
+            $sqlString = "";
+            $sqlString .= "select ";
+            $sqlString .= "  date_format(t2.supply_date,'%Y年%m月%d日') as supply_date_name ";
+            $sqlString .= "  , t2.back_order_customer_name as back_order_customer_name ";
+            $sqlString .= "  , t2.order_no as order_no ";
+            $sqlString .= "  , t2.row_seq as row_seq ";
+            $sqlString .= "  , t2.back_order_product_name as back_order_product_name ";
+            $sqlString .= "  , t3.name as device_name ";
+            $sqlString .= "  , t4.name as user_name ";
+            $sqlString .= "  , CASE ifnull(t1.work_kind,'') ";
+            $sqlString .= "    WHEN '1' THEN '稼働中' ";
+            $sqlString .= "    WHEN '2' THEN '作業終了' ";
+            $sqlString .= "    WHEN '3' THEN 'ミス' ";
+            $sqlString .= "    WHEN '9' THEN '作業完了' ";
+            $sqlString .= "    ELSE '' END as work_kind_name";
+            $sqlString .= "  , date_format(t1.process_history_time,'%H:%i') as process_history_time_name ";
+            $sqlString .= "  from ";
+            $sqlString .= "  ".$this->table_process_histories." as t1 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_progress_headers." as t2 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t1.order_no = t2.order_no";
+            $sqlString .= "      and t1.seq = t2.seq";
+            $sqlString .= "      and t2.is_deleted = 0 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_devices." as t3 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t1.device_code = t3.code";
+            $sqlString .= "      and t3.is_deleted = 0 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_users." as t4 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t1.user_code = t4.code";
+            $sqlString .= "      and t4.is_deleted = 0 ";
+            $sqlString .= "  where ";
+            $sqlString .= "    ? = ? ";
+            $sqlString .= "    and t1.process_history_time >= ? ";
+            $sqlString .= "    and t1.process_history_time <= ? ";
+            $sqlString .= "    and t1.is_deleted = ? ";
+            $sqlString .= "order by ";
+            $sqlString .= "  t1.order_no asc ";
+            $sqlString .= " , t1.seq asc ";
+            $sqlString .= " , t1.process_history_no desc ";
+            // バインド
+            $array_setBindingsStr = array();
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $dt->format('Y/m/d '.'00:00:00');
+            $array_setBindingsStr[] = $dt->format('Y/m/d '.'23:59:59');
+            $array_setBindingsStr[] = 0;
+            $details = DB::select($sqlString, $array_setBindingsStr);
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }

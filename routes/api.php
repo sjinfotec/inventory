@@ -25,10 +25,10 @@ Route::resource('card_register', 'ApiCardRegisterController');
 // メール送信API
 Route::post('/mail/inquiry', 'MailController@inquiry');
 
-// 勤怠ログアップロード
-Route::post('attendanceLogUpload', function () {
+// 受注残アップロード
+Route::post('backorderUpload', function () {
     $user_code = Auth::user()->code;
-    $file_name = "winlog_".$user_code;
+    $file_name = request()->file->getClientOriginalName();
     try{
         request()->file->storeAs('private', $file_name);
     }catch(\Exception $e){
