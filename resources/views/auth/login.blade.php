@@ -6,7 +6,7 @@
         <div class="card">
             <div class="card-body" style="text-align:center;">
                 <div class="px-4 pb-4">
-                    <img class="" src="{{ asset('images/onedawn-logo-full.svg') }}" alt="OneDawn 勤怠管理システム" width="80%" height="80%">
+                    <img class="" src="{{ asset('images/onedawn-logo-full.svg') }}" alt="工程管理システム" width="80%" height="80%">
                 </div>
                 <form method="POST" action="{{ route('login') }}">
                     @csrf
@@ -41,6 +41,7 @@
                             @endif
                         </div>
                     </div>
+                    <!--
                     <div class="col pb-2">
                         <div class="input-group">
                             <div class="input-group-prepend">
@@ -54,6 +55,7 @@
                             @endif
                         </div>
                     </div>
+                    -->
                     <div class="col pb-2">
                         <div class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" id="customCheck" name="remember" {{ old('remember') ? 'checked' : '' }}>

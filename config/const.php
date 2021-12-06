@@ -907,7 +907,7 @@ return [
     ],
 
     'EDITION' => [
-        'EDITION' => 2
+        'EDITION' => 5
     ],
 
     'EDITION_VALUE' => [
@@ -919,11 +919,11 @@ return [
     ],
 
     'ACCOUNTID' => [
-        'account_id' => 'DC3XCZH1'
+        'account_id' => 'KK76'
     ],
 
     'TRIALACCOUNTID' => [
-        'account_id' => 'TRIAL000'
+        'account_id' => 'KK76'
     ],
 
     // メニュー項目数   未使用
@@ -940,38 +940,23 @@ return [
     
     //
     'MENUITEM' => [
-        'calc_block' => 1,
-        'daily' => 2,
-        'monthly' => 3,
-        'alert_block' => 4,
-        'daily_alert' => 5,
-        'monthly_alert' => 6,
-        'attendancelog_block' => 7,
-        'store_attendancelog' => 8,
-        'edit_attendancelog' => 9,
-        'edit_block' => 10,
-        'create_shift_time' => 11,
-        'edit_work_times' => 12,
-        'demand_block' => 13,
-        'demand' => 14,
-        'approval' => 15,
-        'confirm' => 16,
-        'setting_block' => 17,
-        'create_company_information' => 18,
-        'create_department' => 19,
-        'setting_calc' => 20,
-        'create_time_table' => 21,
-        'setting_calendar' => 22,
-        'edit_user' => 23,
-        'operation_block' => 24,
-        'user_pass' => 25,
-        'file_download' => 26,
-        'edit_worktime_user' => 27,
-        'edit_worktime_user_conditional' => 28,
-        'TeamViewer' => 29,
-        'account_admin' => 30,
-        'clientServer' => 31,
-        'setting_employment' => 32
+        'process_block' => 1,
+        'edit_work_order' => 2,
+        'upload_backorder' => 3,
+        'progress_block' => 4,
+        'check_progress' => 5,
+        'setting_block' => 6,
+        'setting_product' => 7,
+        'setting_pcustomer' => 8,
+        'setting_device' => 9,
+        'setting_user' => 10,
+        'setting_office' => 11,
+        'setting_department' => 12,
+        'setting_company' => 13,
+        'setting_employment' => 14,
+        'operation_block' => 15,
+        'change_pass' => 16,
+        'download_document' => 17
     ],
 
     // feature_item_selections
@@ -985,6 +970,18 @@ return [
         'half_holiday' => 7,                // 休暇区分選択リスト設定項目
         'calc_list_allselect' => 8,         // 日次月次集計選択リスト
         'account_id_valid' => 9             // アカウントID有効
+    ],
+
+    // filepath
+    'FILEPATH' => [
+        'import_path' => '/var/www/html/laravel/storage/app/private',                 // インポート先
+        'export_path' => '/var/www/html/laravel/storage/app/private',                 // エクスポート元
+        'download_path' => '/var/www/html/laravel/storage/app/private'                // ダウンロード元
+    ],
+
+    // シリアル基準値
+    'SERIALDATA' => [
+        'excel_serial_base' => 25569        // excel日付シリアル基準値
     ]
 
 ];

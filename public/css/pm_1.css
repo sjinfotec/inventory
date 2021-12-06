@@ -1,0 +1,356 @@
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,
+pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
+   margin:0;
+   padding:0;
+}
+/*--material
+  overflow:auto;
+
+*/
+
+/*--side menu--*/
+.side-base  {
+  background: #196f2e;
+  /*background: #19436f;*/
+}
+.side-head  {
+  background: #17670d;
+  /*background: #0d3867;*/
+}
+[data-toggle].btn-secondary {
+  background: #196f2e;
+}
+
+/*--main title--*/
+.bg-secondary {
+  background: #17670d !important;
+}
+
+
+#input-area_1 {
+  border: 1px solid #ccd4dd;
+}
+#input-area_1 .input-area-prepend  {
+  color:#000;
+}
+/*--input項目名--*/
+#input-area_1 .input-area-text {
+  display: flex;
+  height: 1.2rem;
+  align-items: center;
+  padding: 0.15rem 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  font-weight: 400;
+  /*line-height: 1.6rem;*/
+  color: #495057;
+  text-align: center;
+  white-space: nowrap;
+  background-color: #e9ecef;
+  /*border: 1px solid #ced4da;*/
+  /*border-radius: 0.25rem;*/
+}
+/*--inputフォーム--*/
+#input-area_1 .form-control {
+  display: block;
+  width: 100%;
+  height: calc(1.6em + 0.75rem + 2px);
+  padding: 0.375rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 0px solid #ced4da;
+  /* border-radius: 0.25rem; */
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+/*--納期年月日--*/
+#input-area_1 .vdp-datepicker div input {
+  display: flex;
+  flex: 1 1 auto;
+  padding-left: 12px;
+  padding-top: 4px;
+  padding-bottom: 5px;
+  border-radius: 0.25rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border: 0px solid #ced4da;
+  color: #495057;
+}
+
+/*--各項目の横幅 1段目--*/
+.col-cnt_01 {
+  flex: 0 0 100%;
+  max-width: 100%;
+}
+/*--各項目の横幅 2段目--*/
+.col-cnt_02 {
+  flex: 0 0 10%;
+  max-width: 10%;
+}
+.col-cnt_03 {
+  flex: 0 0 25%;
+  max-width: 25%;
+}
+.col-cnt_04 {
+  flex: 0 0 25%;
+  max-width: 25%;
+}
+.col-cnt_05 {
+  flex: 0 0 10%;
+  max-width: 10%;
+}
+.col-cnt_06 {
+  flex: 0 0 25%;
+  max-width: 25%;
+}
+.col-cnt_07 {
+  flex: 0 0 5%;
+  max-width: 5%;
+}
+/*--各項目の横幅 3段目--*/
+.col-cnt_08 {
+  flex: 0 0 20%;
+  max-width: 20%;
+}
+.col-cnt_09 {
+  flex: 0 0 30%;
+  max-width: 30%;
+}
+.col-cnt_10 {
+  flex: 0 0 20%;
+  max-width: 20%;
+}
+.col-cnt_11 {
+  flex: 0 0 30%;
+  max-width: 30%;
+}
+/*--各項目の横幅 4段目--*/
+.col-cnt_12 {
+  flex: 0 0 50%;
+  max-width: 50%;
+}
+.col-cnt_13 {
+  flex: 0 0 15%;
+  max-width: 15%;
+}
+.col-cnt_14 {
+  /*未使用*/
+  flex: 0 0 15%;
+  max-width: 15%;
+}
+.col-cnt_15 {
+  flex: 0 0 35%;
+  max-width: 35%;
+}
+/*--各項目の横幅 5段目--*/
+.col-cnt_16 {
+  flex: 0 0 45%;
+  max-width: 45%;
+}
+.col-cnt_17 {
+  flex: 0 0 15%;
+  max-width: 15%;
+}
+.col-cnt_18 {
+  /*未使用*/
+  flex: 0 0 10%;
+  max-width: 10%;
+}
+.col-cnt_19 {
+  flex: 0 0 25%;
+  max-width: 25%;
+}
+.col-cnt_20 {
+  flex: 0 0 15%;
+  max-width: 15%;
+}
+
+/*--項目のパディング--*/
+.pb-2 {
+  padding-bottom: 0rem !important;
+}
+
+/*--工程--*/
+.table {
+  width: 100%;
+  margin-bottom: 1rem;
+  color: #212529;
+}
+#table_cnt1  {width: 100%;}
+#table_cnt1 .form-control {
+  display: block;
+  width: 100%;
+  /*height: calc(1.6em + 0.75rem + 2px);*/
+  padding: 0.2rem 0rem 0.2rem 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+  /*line-height: 1.6;*/
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 0px solid #ced4da;
+  /*border-radius: 0.25rem;*/
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+#table_cnt1 .table th, .table td {
+  padding: 0.2rem;
+  vertical-align: top;
+  border-top: 1px solid #dee2e6;
+  border-left: 1px solid #dee2e6;
+}
+#table_cnt1 .td-first  {
+  border-left: 0px solid #dee2e6;
+}
+#table_cnt1 tbody tr {
+  background-color: rgba(255, 255, 255, 1);  
+}
+.w-5{width:0;}
+.w-15{width:0;}
+#table_cnt1 td.w1  {max-width:5em;}
+#table_cnt1 td.w2  {width:45%;}
+#table_cnt1 td.w3  {width:20%;}
+#table_cnt1 td.w4  {width:10%;}
+#table_cnt1 td.w5  {width:10%;}
+#table_cnt1 td.w6  {width:auto;}
+#table_cnt1 .ws1 {
+  width:3.4rem;
+}
+#table_cnt1 .ws2 {
+  width:1rem;
+}
+#table_cnt1 .pad1  {
+  padding-left:0;
+}
+#table_cnt1 .pad2  {
+  padding-right:2rem;
+}
+#table_cnt1 .f_style_1 {
+  border-top:3px double #dee2e6;
+}
+
+/*--下部コンテンツ：加工時間実績等--*/
+#table_cnt2 {
+  width:100%;
+  border-collapse: collapse;
+  margin-bottom:15px;
+}
+#table_cnt2 td {
+  padding:4px 8px;
+  border: solid 1px #dee2e6;
+  line-height:1.1rem;
+  /*overflow: hidden;*/
+  /*white-space: nowrap;*/
+  /*text-overflow: ellipsis;*/
+}
+#table_cnt2 .border_off_l {
+  border-left:none 0px;
+}
+#table_cnt2 .border_off_r {
+  border-right:none 0px;
+}
+#table_cnt2 .border_off_t {
+  border-top:none 0px;
+}
+#table_cnt2 .border_off_b {
+  border-bottom:none 0px;
+}
+#table_cnt2 .border_off {
+  border:none 0px;
+}
+#table_cnt2 .nowrap {
+  white-space: nowrap;
+}
+#table_cnt2 .wrmode {
+/*
+  -ms-writing-mode: tb-rl;
+  writing-mode: vertical-rl;
+*/
+  text-align: center;
+  vertical-align: middle;
+  width:2rem;
+  height:192px;
+}
+#table_cnt2 .flex1  {
+  display:-webkit-flex;
+  display:flex;
+  align-items: center;
+  width:100%;
+}
+#table_cnt2 .cnt2_name  {
+  flex:auto;
+  text-align:left;
+}
+#table_cnt2 .cnt2_hm {
+  flex:auto;
+  text-align:right;
+}
+#table_cnt2 .str01 {
+  margin-left:5px;
+}
+
+#table_cnt2 .flex2  {
+  display:-webkit-flex;
+  display:flex;
+  align-items: center;
+  justify-content: flex-end;
+  width:100%;
+}
+#table_cnt2 .str03 {
+  flex:none;
+  text-align:center;
+}
+
+#table_cnt2 .textalign1 {
+  text-align: right;
+}
+#table_cnt2 .frame_wh1  {
+  height:48px;
+}
+#table_cnt2 .ws1 {
+  width:2rem;
+}
+#table_cnt2 .ws2 {
+  width:1rem;
+}
+#table_cnt2 .pad1  {
+  padding-left:0;
+}
+
+/*--QRコード--*/
+#position_base1  {
+  position: relative;
+}
+#position_base1 .cnt_view_qr  {
+  display:none;
+  position: absolute;
+  top:30%;
+  width:100%;
+}
+#position_base1 .cnt_view_position  {
+  text-align:center;
+}
+
+/*--print out--*/
+@media print {
+  .col-cnt_04 {
+    flex: 0 0 35%;
+    max-width: 35%;
+  }
+  #position_base1 .cnt_view_qr  {
+    display:block;
+  }
+  #table_cnt2 tr {
+    height:48px;
+  }
+  #table_cnt2 .wrmode {
+  border-top:none 0px;
+  border-bottom:none 0px;
+  border-left:none 0px;
+  vertical-align: middle;
+  height:192px;
+  }
+}
+

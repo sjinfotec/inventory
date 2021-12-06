@@ -18,6 +18,7 @@
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" >
     <!-- Styles -->
     <link href="{{ mix('css/app.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/pm_1.css') }}" rel="stylesheet">
 </head>
 <body class="pb-0">
     <div id="app" class="min-height-full">
@@ -34,7 +35,8 @@
                 <!-- editable title -->
                 <a class="navbar-brand mr-auto mr-lg-0" href="{{ url('/') }}">
                     <img class="logo-height" src="{{ asset('images/home-solid.svg') }}" alt=>
-                    <img class="logo-height" src="{{ asset('images/onedawn-logo-long.svg') }}" alt="One Dawn">
+                    <!--<img class="logo-height" src="{{ asset('images/logo.png') }}" alt="受発注管理システム">-->
+                    受発注管理システム
                 </a>
                 <!-- /editable title -->
                 <div class="form-inline my-lg-0 ml-auto">
@@ -114,7 +116,7 @@
                     <!-- .panel -->
                     <div class="col-md p-3">
                         <div class="text-center">
-                            <small>© 2019 One Dawn</small>
+                            <small>© 2021 Ordering System</small>
                         </div>
                     </div>
                     <!-- /.panel -->
