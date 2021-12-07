@@ -22,11 +22,15 @@ class EditWorkOrderController extends Controller
         $authusers = Auth::user();
         $login_user_code = $authusers->code;
         $accountid = $authusers->account_id;
+        $order_no = "$";
+        $row_seq = "$";
 
         $indexorhome = 1;       // メニューより起動
         return view('edit_work_order',
             compact(
                 'authusers',
+                'order_no',
+                'row_seq',
                 'indexorhome'
             ));
     }
@@ -36,10 +40,13 @@ class EditWorkOrderController extends Controller
      *
      * @return void
      */
-    public function homeindex()
+    public function homeindex(Request $request)
     {
         // 日次警告アラートリダイレクト
-        return redirect()->route('edit_work_order.edithome');
+        return redirect()->route('edit_work_order.edithome', [
+            'order_no' => $_GET["order_no"],
+            'row_seq' => $_GET["row_seq"]
+        ]);
     }
 
     /**
@@ -47,8 +54,16 @@ class EditWorkOrderController extends Controller
      *
      * @return void
      */
-    public function edithome()
+    public function edithome(Request $request)
     {
+        $order_no = null;
+        $row_seq = null;
+        if (isset($request->order_no)) {
+            $order_no = $request->order_no;
+        }
+        if (isset($request->row_seq)) {
+            $row_seq = $request->row_seq;
+        }
         $authusers = Auth::user();
         $login_user_code = $authusers->code;
         $accountid = $authusers->account_id;
@@ -56,6 +71,8 @@ class EditWorkOrderController extends Controller
         return view('edit_work_order',
             compact(
                 'authusers',
+                'order_no',
+                'row_seq',
                 'indexorhome'
             ));
     }

@@ -11,27 +11,31 @@
               <!-- <table class="table"> -->
               <thead class="thead-dark">
                 <tr>
+                  <td class="text-center align-middle mw-rem-5">No.</td>
                   <td class="text-center align-middle mw-rem-8">納期</td>
-                  <td class="text-center align-middle mw-rem-20">客先</td>
-                  <td class="text-center align-middle mw-rem-20">受注番号</td>
-                  <td class="text-center align-middle mw-rem-10">図面番号</td>
-                  <td class="text-center align-middle mw-rem-10">個数</td>
-                  <td class="text-center align-middle mw-rem-10">型式／型番</td>
-                  <td class="text-center align-middle mw-rem-10">品名</td>
+                  <td class="text-center align-middle mw-rem-15">客先</td>
+                  <td class="text-center align-middle mw-rem-5">受注番号</td>
+                  <td class="text-center align-middle mw-rem-5">行</td>
+                  <td class="text-center align-middle mw-rem-15">図面番号</td>
+                  <td class="text-center align-middle mw-rem-5">個数</td>
+                  <td class="text-center align-middle mw-rem-15">型式／型番</td>
+                  <td class="text-center align-middle mw-rem-15">品名</td>
                   <td colspan="2" class="text-center align-middle mw-rem-10">操作</td>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(item,rowIndex) in details" :key="rowIndex">
+                  <td class="text-left align-middle mw-rem-8">{{ rowIndex }}</td>
                   <td class="text-left align-middle mw-rem-8">{{ item['supply_date_name'] }}</td>
-                  <td class="text-left align-middle mw-rem-20">{{ item['customer_name'] }}</td>
-                  <td class="text-left align-middle mw-rem-20">{{ item['order_no'] }}</td>
-                  <td class="text-left align-middle mw-rem-10">{{ item['drawing_no'] }}</td>
-                  <td class="text-left align-middle mw-rem-10">{{ item['order_count'] }}</td>
-                  <td class="text-left align-middle mw-rem-10">{{ item['model_number'] }}</td>
-                  <td class="text-left align-middle mw-rem-10">{{ item['product_name'] }}</td>
-                  <td class="text-center align-middle mw-rem-10">
-                    <a :href="'/edit_work_order/home'" class="btn btn-primary">編集</a>
+                  <td class="text-left align-middle mw-rem-15">{{ item['customer_name'] }}</td>
+                  <td class="text-left align-middle mw-rem-5">{{ item['order_no'] }}</td>
+                  <td class="text-left align-middle mw-rem-5">{{ item['row_seq'] }}</td>
+                  <td class="text-left align-middle mw-rem-15">{{ item['drawing_no'] }}</td>
+                  <td class="text-left align-middle mw-rem-5">{{ item['order_count'] }}</td>
+                  <td class="text-left align-middle mw-rem-15">{{ item['model_number'] }}</td>
+                  <td class="text-left align-middle mw-rem-15">{{ item['product_name'] }}</td>
+                  <td class="text-center align-middle mw-rem-5">
+                    <a :href="edtUrl(item['order_no'],item['row_seq'] )" class="btn btn-primary">編集</a>
                   </td>
                   <td class="text-center align-middle mw-rem-5">
                     <button type="button" class="btn btn-danger mb-1" @click="delClick(rowIndex)">
@@ -50,10 +54,13 @@
               <thead class="thead-dark">
                 <tr>
                   <td class="text-center align-middle mw-rem-8">納期</td>
-                  <td class="text-center align-middle mw-rem-20">客先</td>
-                  <td class="text-center align-middle mw-rem-30">受注番号</td>
-                  <td class="text-center align-middle mw-rem-10">図面番号</td>
-                  <td class="text-center align-middle mw-rem-10">個数</td>
+                  <td class="text-center align-middle mw-rem-10">客先</td>
+                  <td class="text-center align-middle mw-rem-5">受注番号</td>
+                  <td class="text-center align-middle mw-rem-5">行</td>
+                  <td class="text-center align-middle mw-rem-15">図面番号</td>
+                  <td class="text-center align-middle mw-rem-5">個数</td>
+                  <td class="text-center align-middle mw-rem-15">型式／型番</td>
+                  <td class="text-center align-middle mw-rem-15">品名</td>
                   <td colspan="2" class="text-center align-middle mw-rem-10">操作</td>
                 </tr>
               </thead>
@@ -115,6 +122,11 @@ export default {
     },
     edit_user_id: function() {
       return C_EDIT_USER;
+    },
+    edtUrl: function() {
+      return function(orderno,row_seq) {
+        return "/edit_work_order/home?order_no='" + orderno + "'&row_seq= '" + row_seq + "'";
+      }
     }
   },
   data() {

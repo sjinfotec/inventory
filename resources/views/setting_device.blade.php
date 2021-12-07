@@ -4,7 +4,7 @@
 <!-- main contents -->
 <div class="col-xl-10">
 	<!-- main contentns row -->
-	<div class="row justify-content-between">
+	<div class="row justify-content-between  print-none">
 		<!-- .panel -->
 		<div class="col-md">
 			<div class="card bg-secondary text-white pt-2 border-0 shadow-pl">
@@ -22,7 +22,7 @@
 	<!-- /main contentns row -->
 	@if (session('status'))
 	<!-- main contentns row -->
-	<div class="row justify-content-between">
+	<div class="row justify-content-between  print-none">
 		<!-- .panel -->
 		<div class="col-md pt-3">
 			<div class="card shadow-pl">

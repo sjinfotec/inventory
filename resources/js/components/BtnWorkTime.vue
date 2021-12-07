@@ -109,6 +109,10 @@
       <button type="button" class="btn btn-info btn-lg font-size-rg w-100" :disabled="isPush">
         戻る</button>
     </div>
+    <div v-if="btnMode === 'ok'" class="btn-group d-flex" v-on:click="okclickBtn()">
+      <button type="button" class="btn btn-info btn-lg font-size-rg w-100" :disabled="isPush">
+        ＯＫ</button>
+    </div>
     <div v-if="btnMode === 'cancel'" class="btn-group d-flex" v-on:click="cancelclickBtn()">
       <button type="button" class="btn btn-info btn-lg font-size-rg w-100" :disabled="isPush">
         キャンセル</button>
@@ -253,6 +257,9 @@ export default {
     },
     backclickBtn : function() {
       this.$emit('backclick-event',event);
+    },
+    okclickBtn : function() {
+      this.$emit('okclick-event',event);
     },
     cancelclickBtn : function() {
       this.$emit('cancelclick-event',event);

@@ -61,6 +61,7 @@ export default {
   },
     // マウント時
   mounted() {
+    console.log('selecOfficeList mounted this.selectedValue =' + this.selectedValue);
     this.selectedvalue = this.selectedValue;
     this.getList();
   },
@@ -75,6 +76,7 @@ export default {
     },
     // -------------------- サーバー処理 ----------------------------
     getList(targetdate){
+      console.log('selecOfficeList getList this.selectedValue =' + this.selectedValue);
       this.postRequest("/get_office_list", [])
         .then(response  => {
           this.getThen(response);

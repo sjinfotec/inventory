@@ -17,6 +17,10 @@ class Progressheader extends Model
     protected $table = 'progress_headers';
     protected $table_progress_details = 'progress_details';
     protected $table_back_order = 'back_order';
+    protected $table_products = 'products';
+    protected $table_customers = 'customers';
+    protected $table_devices = 'devices';
+    protected $table_users = 'users';
 
     //--------------- メンバー属性 -----------------------------------
     private $id;                              // ID
@@ -414,6 +418,8 @@ class Progressheader extends Model
     private $param_created_at;                              // 作成日時
     private $param_updated_at;                              // 修正日時
     private $param_is_deleted;                              // 削除フラグ
+    private $param_device_code;                              // 機器コード（devices）
+    private $param_user_code;                              // 社員コード（users）
 
     //--------------- パラメータアクセサ -----------------------------------
     //ID
@@ -746,6 +752,26 @@ class Progressheader extends Model
     {
         $this->param_is_deleted = $value;
     }
+    //機器コード（devices）
+    public function getParamDevicecodeAttribute()
+    {
+        return $this->param_device_code;
+    }
+    
+    public function setParamDevicecodeAttribute($value)
+    {
+        $this->param_device_code = $value;
+    }
+    //社員コード（users）
+    public function getParamUsercodeAttribute()
+    {
+        return $this->param_user_code;
+    }
+    
+    public function setParamUsercodeAttribute($value)
+    {
+        $this->param_user_code = $value;
+    }
     
 
 
@@ -767,7 +793,7 @@ class Progressheader extends Model
             $sqlString = "";
             $sqlString .= "select" ;
             $sqlString .= "  t1.order_no as order_no" ;
-            $sqlString .= "  , MAX(t1.seq) as max_seq" ;
+            $sqlString .= "  , t1.seq as max_seq" ;
             $sqlString .= "  , t1.row_seq as row_seq" ;
             $sqlString .= "  , t1.drawing_no as drawing_no" ;
             $sqlString .= "  , t1.order_date as order_date" ;
@@ -793,8 +819,33 @@ class Progressheader extends Model
             $sqlString .= "  , t1.outsourcing_office_code as outsourcing_office_code" ;
             $sqlString .= "  , t1.outsourcing_customer_code as outsourcing_customer_code" ;
             $sqlString .= "  , t1.outsourcing_cost as outsourcing_cost" ;
+            $sqlString .= "  , case ifnull(t3.name ,'') when '' then t1.back_order_product_name else t3.name end as product_name" ;
+            $sqlString .= "  , case ifnull(t4.name ,'') when '' then t1.back_order_customer_name else t4.name end as customer_name" ;
             $sqlString .= "  from" ;
             $sqlString .= "  ".$this->table." as t1" ;
+            $sqlString .= "  left outer join" ;
+            $sqlString .= "    ( select ";
+            $sqlString .= "        code ";
+            $sqlString .= "        , min(processes_code) as processes_code ";
+            $sqlString .= "        , name ";
+            $sqlString .= "        , is_deleted ";
+            $sqlString .= "      from ";
+            $sqlString .= "        ".$this->table_products." as t1 ";
+            $sqlString .= "      group by ";
+            $sqlString .= "         code ";
+            $sqlString .= "    ) t3 ";
+            $sqlString .= "  on" ;
+            $sqlString .= "    t1.product_code = t3.code ";
+            $sqlString .= "    and t1.product_code is not null " ;
+            $sqlString .= "    and t3.is_deleted = 0 " ;
+            $sqlString .= "  left outer join ";
+            $sqlString .= "    ".$this->table_customers." as t4 ";
+            $sqlString .= "  on ";
+            $sqlString .= "    t1.office_code = t4.office_code";
+            $sqlString .= "    and t1.customer_code = t4.code";
+            $sqlString .= "    and t1.office_code is not null " ;
+            $sqlString .= "    and t1.customer_code is not null " ;
+            $sqlString .= "    and t4.is_deleted = 0 ";
             $sqlString .= "  where" ;
             $sqlString .= "    ? = ?" ;
             if (!empty($this->param_order_date_from)) {
@@ -803,8 +854,8 @@ class Progressheader extends Model
             if (!empty($this->param_order_date_to)) {
                 $sqlString .= "    and t1.order_date <= ?" ;
             }
-            $sqlString .= "  group by t1.order_no, t1.order_date" ;
-            $sqlString .= "  order by t1.order_no, t1.order_date desc" ;
+            // $sqlString .= "  group by t1.order_no, t1.order_date " ;
+            $sqlString .= "  order by t1.order_no, t1.order_date desc " ;
             // バインド
             $array_setBindingsStr = array();
             $array_setBindingsStr[] = 1;
@@ -875,5 +926,109 @@ class Progressheader extends Model
         }
     }
 
+    /** 加工指示書／工程管理取得（モバイル表示用）
+     *
+     * @return list customer
+     */
+    public function getProductheaderM(){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+
+            // ログインユーザの権限取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
+            $sqlString = "";
+            $sqlString .= "select" ;
+            $sqlString .= "  t1.order_no as order_no" ;
+            $sqlString .= "  , MAX(t1.seq) as max_seq" ;
+            $sqlString .= "  , t1.row_seq as row_seq" ;
+            $sqlString .= "  , t1.drawing_no as drawing_no" ;
+            $sqlString .= "  , t1.order_date as order_date" ;
+            $sqlString .= "  , t1.supply_date as supply_date" ;
+            $sqlString .= "  , date_format(t1.order_date,'%Y年%m月%d日') as order_date_name" ;
+            $sqlString .= "  , date_format(t1.supply_date,'%Y年%m月%d日') as supply_date_name" ;
+            $sqlString .= "  , t1.office_code as office_code" ;
+            $sqlString .= "  , t1.customer_code as customer_code" ;
+            $sqlString .= "  , t1.back_order_customer_name as back_order_customer_name" ;
+            $sqlString .= "  , t1.order_count as order_count" ;
+            $sqlString .= "  , t1.model_number as model_number" ;
+            $sqlString .= "  , t1.product_code as product_code" ;
+            $sqlString .= "  , t1.processes_code as processes_code" ;
+            $sqlString .= "  , t1.back_order_product_name as back_order_product_name" ;
+            $sqlString .= "  , t1.unit_price as unit_price" ;
+            $sqlString .= "  , t1.outline_name as outline_name" ;
+            $sqlString .= "  , t1.back_order_quality_name as back_order_quality_name" ;
+            $sqlString .= "  , t1.material_cost as material_cost" ;
+            $sqlString .= "  , t1.material_office_code as material_office_code" ;
+            $sqlString .= "  , t1.material_customer_code as material_customer_code" ;
+            $sqlString .= "  , t1.heat_process as heat_process" ;
+            $sqlString .= "  , t1.heat_cost as heat_cost" ;
+            $sqlString .= "  , t1.outsourcing_office_code as outsourcing_office_code" ;
+            $sqlString .= "  , t1.outsourcing_customer_code as outsourcing_customer_code" ;
+            $sqlString .= "  , t1.outsourcing_cost as outsourcing_cost" ;
+            $sqlString .= "  , case ifnull(t3.name ,'') when '' then t1.back_order_product_name else t3.name end as product_name" ;
+            $sqlString .= "  , case ifnull(t4.name ,'') when '' then t1.back_order_customer_name else t4.name end as customer_name" ;
+            $sqlString .= "  , ( select name from ".$this->table_devices." where code = ".$this->param_device_code." ) as device_name" ;
+            $sqlString .= "  , ( select name from ".$this->table_users." where code = ".$this->param_user_code." ) as user_name" ;
+            $sqlString .= "  from" ;
+            $sqlString .= "  ".$this->table." as t1" ;
+            $sqlString .= "  left outer join" ;
+            $sqlString .= "    ( select ";
+            $sqlString .= "        code ";
+            $sqlString .= "        , min(processes_code) as processes_code ";
+            $sqlString .= "        , name ";
+            $sqlString .= "        , is_deleted ";
+            $sqlString .= "      from ";
+            $sqlString .= "        ".$this->table_products." as t1 ";
+            $sqlString .= "      group by ";
+            $sqlString .= "         code ";
+            $sqlString .= "    ) t3 ";
+            $sqlString .= "  on" ;
+            $sqlString .= "    t1.product_code = t3.code ";
+            $sqlString .= "    and t1.product_code is not null " ;
+            $sqlString .= "    and t3.is_deleted = 0 " ;
+            $sqlString .= "  left outer join ";
+            $sqlString .= "    ".$this->table_customers." as t4 ";
+            $sqlString .= "  on ";
+            $sqlString .= "    t1.office_code = t4.office_code";
+            $sqlString .= "    and t1.customer_code = t4.code";
+            $sqlString .= "    and t1.office_code is not null " ;
+            $sqlString .= "    and t1.customer_code is not null " ;
+            $sqlString .= "    and t4.is_deleted = 0 ";
+            $sqlString .= "  where" ;
+            $sqlString .= "    ? = ?" ;
+            if (!empty($this->param_order_no)) {
+                $sqlString .= "    and t1.order_no = ?" ;
+            }
+            if (!empty($this->param_seq)) {
+                $sqlString .= "    and t1.seq = ?" ;
+            }
+            $sqlString .= "  group by t1.order_no, t1.order_date" ;
+            $sqlString .= "  order by t1.order_no, t1.order_date desc" ;
+            // バインド
+            $array_setBindingsStr = array();
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            if (!empty($this->param_order_no)) {
+                $array_setBindingsStr[] = $this->param_order_no;
+            }
+            if (!empty($this->param_seq)) {
+                $array_setBindingsStr[] = $this->param_seq;
+            }
+            $details = DB::select($sqlString, $array_setBindingsStr);
+            return $details;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
 
 }

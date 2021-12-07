@@ -66,6 +66,7 @@ export default {
     // マウント時
   mounted() {
     this.selectedvalue = this.selectedValue;
+    console.log('selecCustomerList mounted this.officeCode =' + this.officeCode);
     this.getList(this.officeCode);
   },
   methods: {
@@ -79,6 +80,7 @@ export default {
     },
     // -------------------- サーバー処理 ----------------------------
     getList(office_code){
+      console.log('selecCustomerList getList this.officeCode =' + office_code);
       this.postRequest("/get_customers_list", { officecode: office_code })
         .then(response  => {
           this.getThen(response);

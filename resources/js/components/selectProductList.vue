@@ -75,10 +75,7 @@ export default {
     },
     // -------------------- サーバー処理 ----------------------------
     getList(targetcode, processescode, distinctkbn){
-      console.log('selecProductList getList targetcode= ' + targetcode);
-      console.log('selecProductList getList processescode= ' + processescode);
-      console.log('selecProductList getList distinctkbn= ' + distinctkbn);
-      var arrayParams = { code: targetcode, processes_code: processescode, distinct_kbn: distinctkbn };
+      var arrayParams = { code: null, processes_code: null, distinct_kbn: distinctkbn };
       this.postRequest("/get_product_list", arrayParams)
         .then(response  => {
           this.getThen(response);

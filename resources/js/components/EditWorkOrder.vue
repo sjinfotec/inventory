@@ -11,7 +11,7 @@
             v-bind:header-text2="''"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
-          <div class="card-body pt-2">
+          <div class="card-body pt-2" v-if="isQr">
             <!-- panel contents -->
             <!-- .row -->
             <div class="row justify-content-between">
@@ -28,7 +28,7 @@
                     </span>
                   </div>
                   <input-datepicker
-                    v-bind:default-date="valuedate"
+                    v-bind:default-date="valuesupplydate"
                     v-bind:date-format="DatePickerFormat"
                     v-bind:place-holder="'納期日付を選択してください'"
                     v-on:change-event="supplydateChanges"
@@ -43,7 +43,6 @@
               <!-- /.col -->
             </div>
             <!-- /.row -->
-
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- panel header -->
@@ -69,6 +68,7 @@
                   </div>
                   <select-officelist
                     ref="selectofficelist"
+                    v-if="showofficelist"
                     v-bind:blank-data="true"
                     v-bind:placeholder-data="'営業所を選択してください'"
                     v-bind:selected-value="selectedOfficeValue"
@@ -94,6 +94,7 @@
                   </div>
                   <select-customerlist
                     ref="selectcustomerlist"
+                    v-if="showoCustomerlist"
                     v-bind:blank-data="true"
                     v-bind:placeholder-data="'客先を選択してください'"
                     v-bind:selected-value="selectedCustomerValue"
@@ -125,6 +126,7 @@
                       type="text"
                       title="受注番号"
                       class="form-control"
+                      :value="value_order_no"
                       @change="ordernoChanges"
                     />
                   </div>
@@ -146,6 +148,7 @@
                       type="text"
                       title="行"
                       class="form-control"
+                      :value="value_row_seq"
                       @change="seqChanges"
                     />
                   </div>
@@ -167,6 +170,7 @@
                       type="text"
                       title="図面番号"
                       class="form-control"
+                      :value="value_drawing_no"
                       @change="drawingnoChanges"
                     />
                   </div>
@@ -188,6 +192,7 @@
                       type="text"
                       title="個数"
                       class="form-control"
+                      :value="value_order_count"
                       @change="ordercountChanges"
                     />
                   </div>
@@ -237,6 +242,7 @@
                       type="text"
                       title="型式／型番"
                       class="form-control"
+                      :value="value_model_number"
                       @change="modelnumberChanges"
                     />
                   </div>
@@ -255,10 +261,11 @@
                   </div>
                   <div class="form-control p-0">
                     <select-productlist
-                      ref="selectofficelist"
+                      ref="selectproductlist"
+                      v-if="showoProductlist"
                       v-bind:blank-data="true"
                       v-bind:placeholder-data="'品名を選択してください'"
-                      v-bind:selected-value="selectedProductsNameValue"
+                      v-bind:selected-value="selectedProductsValue"
                       v-bind:add-new="false"
                       v-bind:row-index="0"
                       v-on:change-event="productsnameChanges"
@@ -285,6 +292,7 @@
                       min="0"
                       step="1"
                       class="form-control"
+                      :value="value_unit_price"
                       @change="unitpriceChanges"
                     />
                   </div>
@@ -306,6 +314,7 @@
                       type="text"
                       title="明細摘要"
                       class="form-control"
+                      :value="value_outline_name"
                       @change="outlinenameChanges"
                     />
                   </div>
@@ -336,6 +345,7 @@
                       type="text"
                       title="材質・寸法"
                       class="form-control"
+                      :value="value_back_order_quality_name"
                       @change="backorderqualitychanges"
                     />
                   </div>
@@ -360,6 +370,7 @@
                       min="0"
                       step="1"
                       class="form-control"
+                      :value="value_material_cost"
                       @change="materialcostChanges"
                     />
                   </div>
@@ -410,6 +421,7 @@
                       type="text"
                       title="熱処理"
                       class="form-control"
+                      :value="value_heat_process"
                       @change="heatprocesschanges"
                     />
                   </div>
@@ -434,6 +446,7 @@
                       min="0"
                       step="1"
                       class="form-control"
+                      :value="value_heat_cost"
                       @change="heatcostChanges"
                     />
                   </div>
@@ -452,6 +465,7 @@
                   </div>
                   <select-customerlist
                     ref="selectoutsourcingcustomerlist"
+                    v-if="showoOutsourcingcustomerlist"
                     v-bind:blank-data="true"
                     v-bind:placeholder-data="'外注先を選択してください'"
                     v-bind:selected-value="selectedOutsourcingCustomerValue"
@@ -484,6 +498,7 @@
                       min="0"
                       step="1"
                       class="form-control"
+                      :value="value_outsourcing_cost"
                       @change="outsourcingcostChanges"
                     />
                   </div>
@@ -495,7 +510,58 @@
             <!-- /.row -->
             <!-- /.panel contents -->
           </div>
-          <div class="card-body mb-3 p-0 border-top">
+
+
+
+
+          <div class="card-body mb-3 p-0 border-top" v-if="isQr">
+            <!-- panel contents -->
+            <!-- .row -->
+            <div class="row justify-content-between px-3">
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <a @click="qrcodeClick" class="btn btn-primary print-none">QRコード作成</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+          </div>
+          <div class="card-body mb-3 p-0 border-top" v-else>
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-3 pb-2">
+                <span>[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}]</span>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-9 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <vue-qrcode v-if="qrText" :value="qrText" :options="qroption1" tag="img"></vue-qrcode>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <a @click="backClick" class="btn btn-primary print-none">戻る</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+          </div>
+          <div class="card-body mb-3 p-0 border-top" v-if="isQr">
+
+
+
+
             <!-- panel contents -->
             <!-- .row -->
             <div class="row justify-content-between px-3">
@@ -593,11 +659,6 @@
                               />
                             </div>
                           </td>
-                          <!--
-                          <td class="text-center align-middle">
-                            <vue-qrcode v-if="form.qrText[index]" :value="form.qrText[index]" :options="qroption" tag="img"></vue-qrcode>
-                          </td>
-                          -->
                         </tr>
                         <tr>
                           <td colspan="4" class="td-first text-right align-middle pad2 f_style_1">実績合計</td>
@@ -607,7 +668,7 @@
                                 type="number"
                                 step="1"
                                 class="form-control"
-                                v-model="form.process_time_h[index]"
+                                v-model="form.setup_time_h[index]"
                               />
                             </div>
                           </td>
@@ -618,7 +679,7 @@
                                 type="number"
                                 step="1"
                                 class="form-control"
-                                v-model="form.process_time_m[index]"
+                                v-model="form.setup_time_m[index]"
                               />
                             </div>
                           </td>
@@ -845,6 +906,14 @@ export default {
       type: Array,
       default: []
     },
+    order_no: {
+      type: String,
+      default: ""
+    },
+    row_seq: {
+      type: String,
+      default: ""
+    },
     const_generaldatas: {
         type: Array,
         default: []
@@ -859,12 +928,12 @@ export default {
   },
   data() {
     return {
-      valuedate: "",
+      valuesupplydate: "",
       defaultDate: new Date(),
       DatePickerFormat: "yyyy年MM月dd日",
       selectedOfficeValue: "",
       selectedCustomerValue: "",
-      selectedProductsNameValue: "",
+      selectedProductsValue: "",
       selectedMaterialOfficeValue: "",
       selectedMaterialCustomerValue: "",
       selectedOutsourcingOfficeValue: "",
@@ -872,7 +941,7 @@ export default {
       value_order_no: "",
       value_drawing_no: "",
       value_order_count: "",
-      value_seq: "",
+      value_row_seq: "",
       value_model_number: "",
       value_unit_price: 0,
       value_material_cost: 0,
@@ -881,6 +950,11 @@ export default {
       value_heat_process: "",
       value_heat_cost: 0,
       value_outsourcing_cost: 0,
+      value_seq: 0,
+      value_back_order_customer_name: "",
+      value_order_date: "",
+      value_processes_code: "",
+      value_back_order_product_name: "",
       getDo: 1,
       messagedatasupplydate: [],
       messagedataoffice: [],
@@ -931,11 +1005,12 @@ export default {
         outline_name: "",
         back_order_quality_name: "",
         material_cost: "",
-        material_office_code: "",
+        m_office_code: "",
+        material: "",
         material_customer_code: "",
         heat_process: "",
         heat_cost: "",
-        outsourcing_office_code: "",
+        o_office_code: "",
         outsourcing_customer_code: "",
         outsourcing_cost: "",
         progress_no: [{}],
@@ -958,20 +1033,27 @@ export default {
         total_setup_time_h: [{}],
         total_setup_time_m: [{}]
       },
+      qrText:"",
       product_resresults: [],
-      qroption: {
+      qroption1: {
         errorCorrectionLevel: "M",
         maskPattern: 0,
-        margin: 5,
+        margin: 10,
         scale: 2,
-        width: 50,
+        width: 300,
         color: {
           dark: "#000000FF",
           light: "#FFFFFFFF"
         }
       },
-
-
+      isQr:true,
+      showofficelist: true,
+      showoCustomerlist: true,
+      showoProductlist: true,
+      showoMaterialofficelist: true,
+      showoMaterialcustomerlist: true,
+      showoOutsourcingofficelist: true,
+      showoOutsourcingcustomerlist: true,
       year: "",
       bMonth: "",
       valueymd: "",
@@ -1057,7 +1139,7 @@ export default {
   },
   // マウント時
   mounted() {
-    this.valuedate = this.defaultDate;
+    this.valuesupplydate = this.defaultDate;
     var date = new Date();
     this.valueymd = moment(this.defaultDate).format("YYYY");
     this.year = moment(this.valueymd).format("YYYY");
@@ -1067,12 +1149,11 @@ export default {
     this.index_or_home = this.indexorhome;
     // 1:index 2:homeindex
     if (this.index_or_home == CONST_INDEXORHOME_HOME) {
-      this.itemClear();
-      this.getItem(false);
+      this.getItem();
     }
     this.getDeviceList();
-    this.getUserList(this.valuedate);
-    this.form.supply_date = this.valuedate;
+    this.getUserList(this.valuesupplydate);
+    this.form.supply_date = this.valuesupplydate;
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -1127,7 +1208,7 @@ export default {
     },
     // 指定日付がクリアされた場合の処理
     supplydateCleared: function() {
-      this.valuedate = "";
+      this.valuesupplydate = "";
       this.form.supply_date = "";
       this.stringtext = "";
     },
@@ -1191,10 +1272,11 @@ export default {
     },
     // 素材納入営業所が変更された場合の処理
     materialofficeChanges: function(value, arrayitem) {
-      this.form.material_Office_code = value;
+      this.form.m_office_code = value;
+      console.log('materialofficeChanges this.form.m_office_code = ' + this.form.m_office_code);
       // 客先選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
-      this.getMaterialCustomerSelected(this.form.material_Office_code);
+      this.getMaterialCustomerSelected(this.form.m_office_code);
     },
     // 素材納入元が変更された場合の処理
     materialcustomerChanges: function(value, arrayitem) {
@@ -1210,10 +1292,11 @@ export default {
     },
     // 外注先営業所が変更された場合の処理
     outsourcingofficecodeChanges: function(value, arrayitem) {
-      this.form.outsourcing_Office_code = value;
+      console.log('outsourcingofficecodeChanges value = ' + value);
+      this.form.o_office_code = value;
       // 客先選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
-      this.getOutsourcingCustomerSelected(this.this.form.outsourcing_Office_code);
+      this.getOutsourcingCustomerSelected(this.form.o_office_code);
     },
     // 外注先が変更された場合の処理
     outsourcingcustomerChanges: function(value, arrayitem) {
@@ -1278,6 +1361,16 @@ export default {
         });
       }
     },
+    
+    // QRコード作成ボタンクリック処理
+    qrcodeClick() {
+      this.isQr = false;
+      this.setQrText();
+      this.$forceUpdate();
+    },
+    backClick() {
+      this.isQr = true;
+    },
     // -------------------- サーバー処理 ----------------------------
     // 機器リスト取得処理
     getDeviceList(){
@@ -1326,13 +1419,19 @@ export default {
       }
     },
     
-    // 労働時間基本設定取得処理
+    // 指示書／管理書取得
     getItem() {
       this.inputClear();
       this.messageClear();
-      this.form.year = this.year;
-      var arrayParams = { year : this.year };
-      this.postRequest("/setting_calc/get", arrayParams)
+      var arrayParams = { 
+        target_from_date : null ,
+        target_to_date : null ,
+        office_code : null ,
+        customer_code : null ,
+        order_no : this.order_no ,
+        row_seq : this.row_seq
+        };
+      this.postRequest("/get_product_chart", arrayParams)
         .then(response  => {
           this.getThen(response);
         })
@@ -1342,8 +1441,8 @@ export default {
     },
     // 登録処理
     storeData() {
-      this.form.seq = 0;
-      this.form.supply_date = moment(this.valuedate).format("YYYYMMDD")
+      this.form.supply_date = moment(this.valuesupplydate).format("YYYYMMDD");
+      console.log('storeData this.form.processes_code = ' + this.form.processes_code);
       var arrayParams = { form : this.form };
       this.postRequest("/edit_work_order/put_process", arrayParams)
         .then(response => {
@@ -1354,6 +1453,10 @@ export default {
         });
     },
     // -------------------- 共通 ----------------------------
+    // 営業所選択コンポーネント取得メソッド
+    getOfficeSelected: function(value) {
+      this.$refs.selectofficelist.getList(value);
+    },
     // 客先選択コンポーネント取得メソッド
     getCustomerSelected: function(value) {
       this.$refs.selectcustomerlist.getList(value);
@@ -1382,9 +1485,7 @@ export default {
     // 取得正常処理
     getThenuser(response) {
       var res = response.data;
-      console.log('getThenuser = res.result' + res.result);
       if (res.result) {
-        console.log('getThenuser = res.details' + res.details.length);
         this.progress_details_userList = res.details;
       } else {
         if (res.messagedata.length > 0) {
@@ -1402,6 +1503,7 @@ export default {
           this.product_resresults = res.details;
           this.product_processes_index = 0;
           this.setProductProcessTable();
+          console.log('getThenprocess this.form.processes_code = ' + this.form.processes_code);
         }
       } else {
         if (res.messagedata.length > 0) {
@@ -1419,67 +1521,142 @@ export default {
         this.count = this.details.length;
         this.before_count = this.count;
         if ( this.details.length > 0) {
-          this.form.year = this.details[0].fiscal_year;
-          this.form.biginningMonth = this.details[0].beginning_month;
-          this.form.sp_count = this.details[0].count_sp;
-          if (this.details[0].calc_auto_time != null) {
-            this.form.calc_auto_time = this.details[0].calc_auto_time.toString();
-            this.valuecalcauto = this.form.calc_auto_time;
-          }
-          if (this.details[0].max_1month_total != null) {
-            this.form.oneMonthTotal = this.details[0].max_1month_total.toString();
-            this.valueoneMonthTotal = this.details[0].max_1month_total.toString();
-            this.limit_valueoneMonthTotal = this.details[0].max_1month_total;
-          }
-          if (this.details[0].max_2month_total != null) {
-            this.form.twoMonthTotal = this.details[0].max_2month_total.toString();
-            this.valuetwoMonthTotal = this.details[0].max_2month_total.toString();
-          }
-          if (this.details[0].max_3month_total != null) {
-            this.form.threeMonthTotal = this.details[0].max_3month_total.toString();
-            this.valuethreeMonthTotal = this.details[0].max_3month_total.toString();
-          }
-          if (this.details[0].max_12month_total != null) {
-            this.form.yearTotal = this.details[0].max_12month_total.toString();
-          }
-          if (this.details[0].max_1month_total_sp != null) {
-            this.form.sp_oneMonthTotal = this.details[0].max_1month_total_sp.toString();
-            this.value_order_no = this.details[0].max_1month_total_sp.toString();
-            this.limit_valueoneMonthTotal = this.details[0].max_1month_total_sp;
-          }
-          if (this.details[0].ave_2_6_time_sp != null) {
-            this.form.sp_ave_2_6 = this.details[0].ave_2_6_time_sp.toString();
-          }
-          if (this.details[0].max_12month_total_sp != null) {
-            this.form.value_drawing_no = this.details[0].max_12month_total_sp.toString();
-          }
-          if (this.details[0].interval != null) {
-            this.form.sp_interval = this.details[0].interval.toString();
-          }
+          this.form.order_no = this.details[0].order_no;
+          this.form.seq = this.details[0].seq;
+          this.form.row_seq = this.details[0].row_seq;
+          this.form.drawing_no = this.details[0].drawing_no;
+          this.form.order_date = this.details[0].order_date;
+          this.form.supply_date = this.details[0].supply_date;
+          this.form.office_code = this.details[0].office_code;
+          this.form.customer_code = this.details[0].customer_code;
+          this.form.back_order_customer_name = this.details[0].back_order_customer_name;
+          this.form.order_count = this.details[0].order_count;
+          this.form.model_number = this.details[0].model_number;
+          this.form.product_code = this.details[0].product_code;
+          this.form.processes_code = this.details[0].processes_code;
+          this.form.back_order_product_name = this.details[0].back_order_product_name;
+          this.form.unit_price = this.details[0].unit_price;
+          this.form.outline_name = this.details[0].outline_name;
+          this.form.back_order_quality_name = this.details[0].back_order_quality_name;
+          this.form.material_cost = this.details[0].material_cost;
+          this.form.m_office_code = this.details[0].material_office_code;
+          this.form.material_customer_code = this.details[0].material_customer_code;
+          this.form.heat_process = this.details[0].heat_process;
+          this.form.heat_cost = this.details[0].heat_cost;
+          this.form.o_office_code = this.details[0].outsourcing_office_code;
+          this.form.outsourcing_customer_code = this.details[0].outsourcing_customer_code;
+          this.form.outsourcing_cost = this.details[0].outsourcing_cost;
+          this.form.progress_no[0] = 1;
+          this.form.progress_name[0] = CONST_PROGRESSNO_1;
           this.details.forEach((detail, i) => {
-            if (detail.closing != null) {
-              this.form.closingDate[i] = detail.closing.toString();
-            } else {
-              this.form.closingDate[i] = "";
+            if (i > 0) {
+              if (detail.progress_no != null) {
+                this.form.progress_no[i] = detail.progress_no.toString();
+              } else {
+                this.form.progress_no[i] = "";
+              }
+              if (detail.progress_name != null) {
+                this.form.progress_name[i] = detail.progress_name;
+              } else {
+                this.form.progress_name[i] = "";
+              }
+              if (detail.product_processes_code != null) {
+                this.form.product_processes_code[i] = detail.product_processes_code;
+              } else {
+                this.form.product_processes_code[i] = "";
+              }
+              if (detail.product_processes_detail_no != null) {
+                this.form.product_processes_detail_no[i] = detail.product_processes_detail_no.toString();
+              } else {
+                this.form.product_processes_detail_no[i] = "";
+              }
+              if (detail.device_code != null) {
+                this.form.device_code[i] = detail.device_code;
+              } else {
+                this.form.device_code[i] = "";
+              }
+              if (detail.process_department_code != null) {
+                this.form.process_department_code[i] = detail.process_department_code;
+              } else {
+                this.form.process_department_code[i] = "";
+              }
+              if (detail.process_user_code != null) {
+                this.form.process_user_code[i] = detail.process_user_code;
+              } else {
+                this.form.process_user_code[i] = "";
+              }
+              if (detail.process_history_no != null) {
+                this.form.process_history_no[i] = detail.process_history_no;
+              } else {
+                this.form.process_history_no[i] = "";
+              }
+              if (detail.process_time_h != null) {
+                this.form.process_time_h[i] = detail.process_time_h.toString();
+              } else {
+                this.form.process_time_h[i] = "";
+              }
+              if (detail.process_time_m != null) {
+                this.form.process_time_m[i] = detail.process_time_m.toString();
+              } else {
+                this.form.process_time_m[i] = "";
+              }
+              if (detail.setup_history_no != null) {
+                this.form.setup_history_no[i] = detail.setup_history_no.toString();
+              } else {
+                this.form.setup_history_no[i] = "";
+              }
+              if (detail.setup_time_h != null) {
+                this.form.setup_time_h[i] = detail.setup_time_h.toString();
+              } else {
+                this.form.setup_time_h[i] = "";
+              }
+              if (detail.setup_time_m != null) {
+                this.form.setup_time_m[i] = detail.setup_time_m.toString();
+              } else {
+                this.form.setup_time_m[i] = "";
+              }
+              if (detail.complete_date != null) {
+                this.form.complete_date[i] = detail.complete_date;
+              } else {
+                this.form.complete_date[i] = "";
+              }
+              if (detail.qrText != null) {
+                this.form.qrText[i] = detail.qrText;
+              } else {
+                this.form.qrText[i] = "";
+              }
+              if (detail.total_process_time_h != null) {
+                this.form.total_process_time_h[i] = detail.total_process_time_h.toString();
+              } else {
+                this.form.total_process_time_h[i] = "";
+              }
+              if (detail.total_process_time_m != null) {
+                this.form.total_process_time_m[i] = detail.total_process_time_m.toString();
+              } else {
+                this.form.total_process_time_m[i] = "";
+              }
+              if (detail.total_setup_time_h != null) {
+                this.form.total_setup_time_h[i] = detail.total_setup_time_h.toString();
+              } else {
+                this.form.total_setup_time_h[i] = "";
+              }
+              if (detail.total_setup_time_m != null) {
+                this.form.total_setup_time_m[i] = detail.total_setup_time_m.toString();
+              } else {
+                this.form.total_setup_time_m[i] = "";
+              }
             }
-            if (detail.uplimit_time != null) {
-              this.form.upTime[i] = detail.uplimit_time.toString();
-            } else {
-              this.form.upTime[i] = "";
-            }
-            if (detail.time_unit != null) {
-              this.form.timeunit[i] = detail.time_unit.toString();
-            } else {
-              this.form.timeunit[i] = "";
-            }
-            if (detail.time_rounding != null) {
-              this.form.timeround[i] = detail.time_rounding.toString();
-            } else {
-              this.form.timeround[i] = "";
-            }
-            this.bMonth = detail.beginning_month;
           });
         }
+        this.setValue();
+        this.refresOfficeList();
+        this.refresCustomerlist();
+        this.refresProductlist();
+        this.refresMaterialofficelist();
+        this.refresMaterialcustomerlist();
+        this.refresOutsourcingofficelist();
+        this.refresOutsourcingcustomerlist();
+        this.$forceUpdate();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
@@ -1495,6 +1672,7 @@ export default {
       if (res.result) {
         messages.push("加工指示書／工程管理書を" + eventtext + "しました。");
         this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
+        this.getItem();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -1509,6 +1687,37 @@ export default {
       messages.push("" + eventtext + "に失敗しました");
       this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
+    // value値設定
+    setValue() {
+      this.valuesupplydate = moment(this.form.supply_date).format("YYYY-MM-DD");
+      this.selectedOfficeValue = this.form.office_code;
+      this.selectedCustomerValue = this.form.customer_code;
+      this.selectedProductsValue = this.form.product_code;
+      this.selectedMaterialOfficeValue = this.form.m_office_code;
+      console.log('setValue this.form.outsourcing_Office_code = ' + this.form.m_office_code);
+      this.selectedMaterialCustomerValue = this.form.material_customer_code;
+      this.selectedOutsourcingOfficeValue = this.form.o_office_code;
+      console.log('setValue this.form.outsourcing_Office_code = ' + this.form.o_office_code);
+      this.selectedOutsourcingCustomerValue = this.form.outsourcing_customer_code;
+      this.value_order_no = this.form.order_no;
+      this.value_seq = this.form.seq;
+      this.value_back_order_customer_name = this.form.back_order_customer_name;
+      this.value_order_date = this.form.order_date;
+      this.value_processes_code = this.form.processes_code;
+      console.log('setValue this.form.processes_code = ' + this.form.processes_code);
+      this.value_back_order_product_name = this.form.back_order_product_name;
+      this.value_drawing_no = this.form.drawing_no;
+      this.value_order_count = this.form.order_count;
+      this.value_row_seq = this.form.row_seq;
+      this.value_model_number = this.form.model_number;
+      this.value_unit_price = this.form.unit_price;
+      this.value_material_cost = this.form.material_cost;
+      this.value_outline_name = this.form.outline_name;
+      this.value_back_order_quality_name = this.form.back_order_quality_name;
+      this.value_heat_process = this.form.heat_process;
+      this.value_heat_cost = this.form.heat_cost;
+      this.value_outsourcing_cost = this.form.outsourcing_cost;
+    },
     // 項目クリア
     inputClear() {
       this.details = [];
@@ -1520,6 +1729,10 @@ export default {
       this.form.customer_code = "";
       this.form.order_no = "";
       this.form.row_seq = "";
+      this.form.seq = 0;
+      this.form.back_order_customer_name = "";
+      this.form.back_order_product_name = "";
+      this.form.order_date = "";
       this.form.drawing_no = "";
       this.form.order_count = "";
       this.form.model_number = "";
@@ -1529,11 +1742,11 @@ export default {
       this.form.outline_name = "";
       this.form.back_order_quality_name = "";
       this.form.material_cost = "";
-      this.form.material_Office_code = "";
+      this.form.m_office_code = "";
       this.form.material_customer_code = "";
       this.form.heat_process = "";
       this.form.heat_cost = "";
-      this.form.outsourcing_Office_code = "";
+      this.form.o_office_code = "";
       this.form.outsourcing_customer_code = "";
       this.form.outsourcing_cost = "";
 
@@ -1620,9 +1833,16 @@ export default {
     },
     // QRセット
     setQrText() {
-      for (let index = 0; index < 12; index++) {
-        this.form.qrText[index] = this.form.order_no + this.form.row_seq + this.form.drawing_no + ('00' + (index+1)).slice(-2);
+      if (this.form.seq == 0) {
+        this.qrText = 'A' + "order_no='" + this.form.order_no + "'&seq='1'";
+      } else {
+        this.qrText = 'A' + "order_no='" + this.form.order_no + "'&seq='" + this.form.seq + "'";
       }
+      console.log('setQrText this.qrText = ' + this.form.order_no);
+      console.log('setQrText this.qrText = ' + this.qrText);
+      // for (let index = 0; index < 12; index++) {
+        // this.form.qrText[index] = this.form.order_no + this.form.row_seq + this.form.drawing_no + ('00' + (index+1)).slice(-2);
+      // }
       this.$forceUpdate();
     },
     // 使用機種セット
@@ -1656,7 +1876,37 @@ export default {
         }
         i = i + 1;
       });
+      console.log('setProductProcessTable this.form.processes_code = ' + this.form.processes_code);
       this.$forceUpdate();
+    },
+    // 最新リストの表示
+    refresOfficeList() {
+      this.showofficelist = false;
+      this.$nextTick(() => (this.showofficelist = true));
+    },
+    refresCustomerlist() {
+      this.showoCustomerlist = false;
+      this.$nextTick(() => (this.showoCustomerlist = true));
+    },
+    refresProductlist() {
+      this.showoProductlist = false;
+      this.$nextTick(() => (this.showoProductlist = true));
+    },
+    refresMaterialofficelist() {
+      this.showoMaterialofficelist = false;
+      this.$nextTick(() => (this.showoMaterialofficelist = true));
+    },
+    refresMaterialcustomerlist() {
+      this.showoMaterialcustomerlist = false;
+      this.$nextTick(() => (this.showoMaterialcustomerlist = true));
+    },
+    refresOutsourcingofficelist() {
+      this.showoOutsourcingofficelist = false;
+      this.$nextTick(() => (this.showoOutsourcingofficelist = true));
+    },
+    refresOutsourcingcustomerlist() {
+      this.showoOutsourcingcustomerlist = false;
+      this.$nextTick(() => (this.showoOutsourcingcustomerlist = true));
     }
   }
 };

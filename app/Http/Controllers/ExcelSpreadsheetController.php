@@ -31,7 +31,9 @@ class ExcelSpreadsheetController extends Controller
             $reader = new Xlsx();
             Log::debug('getExcelRowData file_name = '.Config::get('const.FILEPATH.import_path')."/".$filename);
             $spreadsheet = $reader->load(Config::get('const.FILEPATH.import_path')."/".$filename);
-            return $spreadsheet->getActiveSheet()->toArray($cellnodata, $calcresult, $cellformat, $indexkey);
+            $worksheet = $spreadsheet->getSheetByName('ﾘｽﾄ');
+            // return $spreadsheet->getActiveSheet()->toArray($cellnodata, $calcresult, $cellformat, $indexkey);
+            return $worksheet->toArray($cellnodata, $calcresult, $cellformat, $indexkey);
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.data_insert_error'));
             Log::error($pe->getMessage());

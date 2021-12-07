@@ -982,6 +982,14 @@ return [
     // シリアル基準値
     'SERIALDATA' => [
         'excel_serial_base' => 25569        // excel日付シリアル基準値
+    ],
+
+    // 作業種別
+    'WORKKINDS' => [
+        'start' => '1',                      // 作業開始
+        'end' => '2',                        // 作業終了
+        'stop' => '3',                       // 作業中断
+        'complete' => '9',                   // 作業完了
     ]
 
 ];

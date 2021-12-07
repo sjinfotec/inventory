@@ -42,6 +42,7 @@ export default {
   // マウント時
   mounted() {
     console.log("inputDatePicker Component mounted.");
+    console.log("defaultDate = " + this.defaultDate);
   },
   data: function() {
     return {

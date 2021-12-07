@@ -491,7 +491,7 @@ class BackOrder extends Model
      *
      * @return void
      */
-    public function getDataGroupby(){
+    public function getData(){
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
@@ -504,7 +504,7 @@ class BackOrder extends Model
             $sqlString = "";
             $sqlString .= "select" ;
             $sqlString .= "  t1.order_no as order_no" ;
-            $sqlString .= "  , max(t1.seq) as seq" ;
+            $sqlString .= "  , t1.seq as seq" ;
             $sqlString .= "  , t1.order_date as order_date" ;
             $sqlString .= "  , t1.row_seq as row_seq" ;
             $sqlString .= "  , t1.drawing_no as drawing_no" ;
@@ -529,7 +529,16 @@ class BackOrder extends Model
             $sqlString .= "    t1.customer_name = t2.name ";
             $sqlString .= "    and t2.is_deleted = 0 " ;
             $sqlString .= "  left outer join" ;
-            $sqlString .= "  ".$this->table_products." as t3 " ;
+            $sqlString .= "    ( select ";
+            $sqlString .= "        code ";
+            $sqlString .= "        , min(processes_code) as processes_code ";
+            $sqlString .= "        , name ";
+            $sqlString .= "        , is_deleted ";
+            $sqlString .= "      from ";
+            $sqlString .= "        ".$this->table_products." as t1 ";
+            $sqlString .= "      group by ";
+            $sqlString .= "         code ";
+            $sqlString .= "    ) t3 ";
             $sqlString .= "  on" ;
             $sqlString .= "    t1.product_name = t3.name ";
             $sqlString .= "    and t3.is_deleted = 0 " ;
@@ -544,7 +553,7 @@ class BackOrder extends Model
             if (!empty($this->param_is_update)) {
                 $sqlString .= "    and t1.is_update = ?" ;
             }
-            $sqlString .= "  group by order_no, t1.order_date " ;
+            // $sqlString .= "  group by order_no, t1.order_date " ;
             $sqlString .= "  order by order_no, t1.order_date " ;
             // バインド
             $array_setBindingsStr = array();

@@ -127,6 +127,7 @@ class ApiCommonController extends Controller
     protected $table_progress_headers = 'progress_headers';
     protected $table_progress_details = 'progress_details';
     protected $table_product_processes = 'product_processes';
+    protected $table_process_histories = 'process_histories';
     protected $table_generalcodes = 'generalcodes';
     protected $table_companies = 'companies';
     protected $table_confirms = 'confirms';
@@ -1147,14 +1148,14 @@ class ApiCommonController extends Controller
             }
             $order_no = $params_product_process_data["order_no"];
             $seq = $params_product_process_data["seq"];
+            Log::debug('putProcess o_office_code = ['.$params_product_process_data["o_office_code"].']');
+            Log::debug('putProcess material_customer_code = '.$params_product_process_data["material_customer_code"]);
             // 新規の場合($seq=0)MAXseqを取得
             if ($seq == 0) {
                 $result_maxseq = DB::table($this->table_progress_headers)
                 ->where('order_no', $order_no)
                 ->max('seq');
                 $seq = $result_maxseq + 1;
-                Log::debug('setArrayProductProcess result_maxseq '.$result_maxseq);
-                Log::debug('setArrayProductProcess seq '.$seq);
             } else {
                 // データが存在するか
                 $result_exists = DB::table($this->table_progress_headers)
@@ -1162,6 +1163,12 @@ class ApiCommonController extends Controller
                     ->where('seq', $params_product_process_data["seq"])
                     ->exists();
             }
+            // データが存在するか
+            $result_exists = DB::table($this->table_progress_headers)
+                ->where('order_no', $order_no)
+                ->where('seq', $params_product_process_data["seq"])
+                ->exists();
+            Log::debug('$result_exists = '.$result_exists);
             // データ作成（ヘッダ）
             $systemdate = Carbon::now();
             $user = Auth::user();
@@ -1186,7 +1193,10 @@ class ApiCommonController extends Controller
             if ($params_product_process_data["outsourcing_cost"] == "" || $params_product_process_data["outsourcing_cost"] == null) {
                 $outsourcing_cost = 0;
             }
-            if ($params_product_process_data["seq"] == 0) {
+            // if ($params_product_process_data["seq"] == 0) {
+            if (!$result_exists) {
+	        Log::debug('!$result_exists = '.$order_no);
+	        Log::debug('!$result_exists = '.$seq);
                 $array_putData = [
                     'order_no' => $order_no,
                     'seq' => $seq,
@@ -1200,16 +1210,17 @@ class ApiCommonController extends Controller
                     'order_count' => $params_product_process_data["order_count"],
                     'model_number' => $params_product_process_data["model_number"],
                     'product_code' => $params_product_process_data["product_code"],
+                    'processes_code' => $params_product_process_data["processes_code"],
                     'back_order_product_name' => $params_product_process_data["back_order_product_name"],
                     'unit_price' => $unit_price,
                     'outline_name' => $params_product_process_data["outline_name"],
                     'back_order_quality_name' => $params_product_process_data["back_order_quality_name"],
                     'material_cost' => $material_cost,
-                    'material_office_code' => $params_product_process_data["material_office_code"],
+                    'material_office_code' => $params_product_process_data["m_office_code"],
                     'material_customer_code' => $params_product_process_data["material_customer_code"],
                     'heat_process' => $params_product_process_data["heat_process"],
                     'heat_cost' => $heat_cost,
-                    'outsourcing_office_code' => $params_product_process_data["outsourcing_office_code"],
+                    'outsourcing_office_code' => $params_product_process_data["o_office_code"],
                     'outsourcing_customer_code' => $params_product_process_data["outsourcing_customer_code"],
                     'outsourcing_cost' => $outsourcing_cost,
                     'created_user' => $login_user_code,
@@ -1218,6 +1229,8 @@ class ApiCommonController extends Controller
                 DB::table($this->table_progress_headers)
                     ->insert($array_putData);
             } else {
+	        Log::debug('$result_exists = '.$order_no);
+	        Log::debug('$result_exists = '.$seq);
                 $array_putData = [
                     'order_no' => $order_no,
                     'seq' => $seq,
@@ -1231,16 +1244,17 @@ class ApiCommonController extends Controller
                     'order_count' => $params_product_process_data["order_count"],
                     'model_number' => $params_product_process_data["model_number"],
                     'product_code' => $params_product_process_data["product_code"],
+                    'processes_code' => $params_product_process_data["processes_code"],
                     'back_order_product_name' => $params_product_process_data["back_order_product_name"],
                     'unit_price' => $unit_price,
                     'outline_name' => $params_product_process_data["outline_name"],
                     'back_order_quality_name' => $params_product_process_data["back_order_quality_name"],
                     'material_cost' => $material_cost,
-                    'material_office_code' => $params_product_process_data["material_office_code"],
+                    'material_office_code' => $params_product_process_data["m_office_code"],
                     'material_customer_code' => $params_product_process_data["material_customer_code"],
                     'heat_process' => $params_product_process_data["heat_process"],
                     'heat_cost' => $heat_cost,
-                    'outsourcing_office_code' => $params_product_process_data["outsourcing_office_code"],
+                    'outsourcing_office_code' => $params_product_process_data["o_office_code"],
                     'outsourcing_customer_code' => $params_product_process_data["outsourcing_customer_code"],
                     'outsourcing_cost' => $outsourcing_cost,
                     'updated_user' => $login_user_code,
@@ -1312,10 +1326,12 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
+            DB::rollBack();
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
+            DB::rollBack();
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
@@ -1482,13 +1498,11 @@ class ApiCommonController extends Controller
             $back_order_model->setParamOrderdateToAttribute($params_target_to_date);
             $back_order_model->setParamIsUpdateAttribute(false);
             $result_exists = $back_order_model->getIsUpdate();
-            if ($result_exists) {
+            if (!$result_exists) {
                 // 未登録データは指示書に登録
                 $progress_header_model = new Progressheader();
-                $details = $back_order_model->getDataGroupby();
+                $details = $back_order_model->getData();
                 foreach($details as $item) {
-                    Log::debug('putProductheader $item->order_no = '.$item->order_no);
-                    Log::debug('putProductheader $item->seq = '.$item->seq);
                     $progress_header_model->setOrdernoAttribute($item->order_no);
                     $progress_header_model->setSeqAttribute($item->seq);
                     $progress_header_model->setRowseqAttribute($item->row_seq);
@@ -1589,6 +1603,8 @@ class ApiCommonController extends Controller
             $params_target_to_date = null;
             $params_office_code = null;
             $params_customer_code = null;
+            $params_order_no = null;
+            $params_row_seq = null;
             if (isset($request->keyparams)) {
                 $params = $request->keyparams;
                 if (isset($params['target_from_date'])) {
@@ -1603,7 +1619,16 @@ class ApiCommonController extends Controller
                 if (isset($params['customer_code'])) {
                     $params_customer_code = $params['customer_code'];
                 }
+                if (isset($params['order_no'])) {
+                    $params_order_no = $params['order_no'];
+                }
+                if (isset($params['row_seq'])) {
+                    $params_row_seq = $params['row_seq'];
+                }
             }
+            Log::debug('getProductChart order_no = '.$params_order_no);
+            Log::debug('getProductChart order_no = '.$params['order_no']);
+            Log::debug('getProductChart row_seq = '.$params_row_seq);
 
             // ログインユーザの権限取得
             $user = Auth::user();
@@ -1615,8 +1640,10 @@ class ApiCommonController extends Controller
             $sqlString .= "  , t1.seq as seq ";
             $sqlString .= "  , t1.row_seq as row_seq ";
             $sqlString .= "  , t1.drawing_no as drawing_no ";
-            $sqlString .= "  , date_format(t1.order_date,'%Y年%m月%d日') as order_date ";
-            $sqlString .= "  , date_format(t1.supply_date,'%Y年%m月%d日') as supply_date ";
+            $sqlString .= "  , t1.order_date as order_date ";
+            $sqlString .= "  , date_format(t1.order_date,'%Y年%m月%d日') as order_date_name ";
+            $sqlString .= "  , t1.supply_date as supply_date ";
+            $sqlString .= "  , date_format(t1.supply_date,'%Y年%m月%d日') as supply_date_name ";
             $sqlString .= "  , t1.office_code as office_code ";
             $sqlString .= "  , t1.customer_code as customer_code ";
             $sqlString .= "  , t1.back_order_customer_name as back_order_customer_name ";
@@ -1664,7 +1691,7 @@ class ApiCommonController extends Controller
             $sqlString .= "  , t13.name as user_name ";
             $sqlString .= "  from ";
             $sqlString .= "  ".$this->table_progress_headers." as t1 ";
-            $sqlString .= "    inner join ";
+            $sqlString .= "    left outer join ";
             $sqlString .= "      ".$this->table_progress_details." as t2 ";
             $sqlString .= "    on ";
             $sqlString .= "      t1.order_no = t2.order_no ";
@@ -1746,6 +1773,12 @@ class ApiCommonController extends Controller
             if (!empty($params_customer_code)) {
                 $sqlString .= "    and t1.customer_code = ? ";
             }
+            if (!empty($params_order_no)) {
+                $sqlString .= "    and t1.order_no = ? ";
+            }
+            if (!empty($params_row_seq)) {
+                $sqlString .= "    and t1.row_seq = ? ";
+            }
             $sqlString .= "group by ";
             $sqlString .= "  t1.supply_date ";
             $sqlString .= " , t1.order_no ";
@@ -1769,6 +1802,96 @@ class ApiCommonController extends Controller
             if (!empty($params_customer_code)) {
                 $array_setBindingsStr[] = $params_customer_code;
             }
+            if (!empty($params_order_no)) {
+                $array_setBindingsStr[] = $params_order_no;
+            }
+            if (!empty($params_row_seq)) {
+                $array_setBindingsStr[] = $params_row_seq;
+            }
+            $details = DB::select($sqlString, $array_setBindingsStr);
+            Log::error('getProductChart details = '.count($details));
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
+    /** 作業工程取得
+     *
+     * @return list customer
+     */
+    public function getProcessView(Request $request){
+        Log::debug('getProcessView in ');
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            // ログインユーザの権限取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
+
+            $dt = new Carbon();
+            $sqlString = "";
+            $sqlString .= "select ";
+            $sqlString .= "  date_format(t2.supply_date,'%Y年%m月%d日') as supply_date_name ";
+            $sqlString .= "  , t2.back_order_customer_name as back_order_customer_name ";
+            $sqlString .= "  , t2.order_no as order_no ";
+            $sqlString .= "  , t2.row_seq as row_seq ";
+            $sqlString .= "  , t2.back_order_product_name as back_order_product_name ";
+            $sqlString .= "  , t3.name as device_name ";
+            $sqlString .= "  , t4.name as user_name ";
+            $sqlString .= "  , CASE ifnull(t1.work_kind,'') ";
+            $sqlString .= "    WHEN '1' THEN '稼働中' ";
+            $sqlString .= "    WHEN '2' THEN '作業終了' ";
+            $sqlString .= "    WHEN '3' THEN 'ミス' ";
+            $sqlString .= "    WHEN '9' THEN '作業完了' ";
+            $sqlString .= "    ELSE '' END as work_kind_name";
+            $sqlString .= "  , date_format(t1.process_history_time,'%H:%i') as process_history_time_name ";
+            $sqlString .= "  from ";
+            $sqlString .= "  ".$this->table_process_histories." as t1 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_progress_headers." as t2 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t1.order_no = t2.order_no";
+            $sqlString .= "      and t1.seq = t2.seq";
+            $sqlString .= "      and t2.is_deleted = 0 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_devices." as t3 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t1.device_code = t3.code";
+            $sqlString .= "      and t3.is_deleted = 0 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_users." as t4 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t1.user_code = t4.code";
+            $sqlString .= "      and t4.is_deleted = 0 ";
+            $sqlString .= "  where ";
+            $sqlString .= "    ? = ? ";
+            $sqlString .= "    and t1.process_history_time >= ? ";
+            $sqlString .= "    and t1.process_history_time <= ? ";
+            $sqlString .= "    and t1.is_deleted = ? ";
+            $sqlString .= "order by ";
+            $sqlString .= "  t1.order_no asc ";
+            $sqlString .= " , t1.seq asc ";
+            $sqlString .= " , t1.process_history_no desc ";
+            // バインド
+            $array_setBindingsStr = array();
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $dt->format('Y/m/d '.'00:00:00');
+            $array_setBindingsStr[] = $dt->format('Y/m/d '.'23:59:59');
+            $array_setBindingsStr[] = 0;
             $details = DB::select($sqlString, $array_setBindingsStr);
             return response()->json(
                 ['result' => true, 'details' => $details,

@@ -3,7 +3,7 @@
     <!-- main contentns row -->
     <div class="row justify-content-between">
       <!-- .panel -->
-      <div class="col-md pt-3">
+      <div class="col-md pt-3 print-none">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -54,7 +54,7 @@
           <!-- panel contents -->
           <div class="card-body pt-2">
             <!-- .row -->
-            <div class="row justify-content-between" v-if="messagevalidatesNew.length">
+            <div class="row justify-content-between  print-none" v-if="messagevalidatesNew.length">
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <ul class="error-red color-red">
@@ -65,7 +65,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between  print-none">
               <!-- .col -->
               <div class="col-md-3 pb-2">
                 <div class="input-group">
@@ -114,39 +114,73 @@
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- .col -->
-              <div class="col-md-3 pb-2">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <vue-qrcode v-if="form.qrText" :value="form.qrText" :options="qroption1" tag="img"></vue-qrcode>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3 pb-2">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <vue-qrcode v-if="form.qrText" :value="form.qrText" :options="qroption2" tag="img"></vue-qrcode>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3 pb-2">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <vue-qrcode v-if="form.qrText" :value="form.qrText" :options="qroption3" tag="img"></vue-qrcode>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3 pb-2">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <vue-qrcode v-if="form.qrText" :value="form.qrText" :options="qroption4" tag="img"></vue-qrcode>
-                  </div>
-                </div>
+              <div class="col-md-3 pb-2" v-if="form.qrText1">
+                <span>----[作業開始]----[{{ form.code }}] [{{ form.name }}]</span>
               </div>
               <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-9 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <vue-qrcode v-if="form.qrText1" :value="form.qrText1" :options="qroption1" tag="img"></vue-qrcode>
+                  </div>
+                </div>
+              </div>
             </div>
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-3 pb-2" v-if="form.qrText2">
+                <span>----[作業終了]----[{{ form.code }}] [{{ form.name }}]</span>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-9 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <vue-qrcode v-if="form.qrText2" :value="form.qrText2" :options="qroption1" tag="img"></vue-qrcode>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-3 pb-2" v-if="form.qrText3">
+                <span>----[作業中断]----[{{ form.code }}] [{{ form.name }}]</span>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-9 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <vue-qrcode v-if="form.qrText3" :value="form.qrText3" :options="qroption1" tag="img"></vue-qrcode>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-3 pb-2" v-if="form.qrText9">
+                <span>----[作業完了]----[{{ form.code }}] [{{ form.name }}]</span>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-9 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <vue-qrcode v-if="form.qrText9" :value="form.qrText9" :options="qroption1" tag="img"></vue-qrcode>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between  print-none">
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time
@@ -189,8 +223,12 @@ export default {
     return {
       form: {
         code: "",
+        floor_pos: "",
         name: "",
-        qrText: null
+        qrText1: "",
+        qrText2: "",
+        qrText3: "",
+        qrText9: ""
       },
       addNew: true,
       details: [],
@@ -329,13 +367,17 @@ export default {
         this.addNew = false;
         this.form.code = arrayitem['code'];
         this.form.name = arrayitem['name'];
+        this.form.floor_pos = arrayitem['floor_pos'];
         this.getdevice();
       }
     },
     
     // QRコード作成ボタンクリック処理
     qrcodeClick() {
-      this.form.qrText = this.form.code + this.form.name;
+      this.form.qrText1 = "&kind='1'&device='" + this.form.code + "'";
+      this.form.qrText2 = "&kind='2'&device='" + this.form.code + "'";
+      this.form.qrText3 = "&kind='3'&device='" + this.form.code + "'";
+      this.form.qrText9 = "&kind='9'&device='" + this.form.code + "'";
       this.$forceUpdate();
     },
     // 新規作成ボタンクリック処理
@@ -504,6 +546,7 @@ export default {
     inputClear() {
       this.details = [];
       this.form.name = "";
+      this.form.floor_pos = "";
       this.form.id = "";
       this.form.code = "";
       this.selectedValue = "";

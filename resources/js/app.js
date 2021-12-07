@@ -84,11 +84,23 @@
      require("./components/TableWorkingStatus.vue").default
  );
  
+ // 作業進捗状況表示
+ Vue.component(
+    "process-view",
+    require("./components/Processview.vue").default
+);
+
  // 受注残アップロード
  Vue.component(
      "store-backorder",
      require("./components/StoreBackorder.vue").default
  );
+ 
+ // 作業
+ Vue.component(
+    "process-info",
+    require("./components/ProcessInfo.vue").default
+);
  
  Vue.component(
      "daily-working-information-panel-header",

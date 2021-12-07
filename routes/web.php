@@ -32,6 +32,15 @@ Route::post('/edit_work_order/put_process', 'ApiCommonController@putProcess')->m
 // 受注残登録
 Route::get('/store_backorder', 'StoreBackOrderController@index')->middleware('auth');
 Route::post('/store_backorder/store', 'StoreBackOrderController@store')->middleware('auth');
+// モバイル
+Route::get('/process_info', 'MobileAccessController@index')->middleware('auth');
+Route::post('/process_info/get', 'MobileAccessController@getProductheader')->middleware('auth');
+Route::post('/process_history/put', 'MobileAccessController@putProcessHistoery')->middleware('auth');
+// 進捗状況
+Route::get('/process_view', 'ProcessViewController@index')->middleware('auth');
+Route::post('/process_view/get', 'ApiCommonController@getProcessView')->middleware('auth');
+
+
 
 Route::get('/working_status', 'WorkingStatusController@index')->middleware('auth');
 Route::post('/daily/calc', 'DailyWorkingInformationController@show')->middleware('auth');
@@ -193,8 +202,9 @@ Route::post('/get_departments_list', 'ApiCommonController@getDepartmentList')->m
 Route::post('/get_employment_status_list', 'ApiCommonController@getEmploymentStatusList')->middleware('auth');
 // データ取得
 Route::post('/get_progress_header', 'ApiCommonController@getProductHeader')->middleware('auth');
-Route::post('/get_product_processes', 'ApiCommonController@getProductChart')->middleware('auth');
+Route::post('/get_product_chart', 'ApiCommonController@getProductChart')->middleware('auth');
 Route::post('/get_progress_chart', 'ApiCommonController@getProgress')->middleware('auth');
+Route::post('/get_product_processes', 'ApiCommonController@getProductProcess')->middleware('auth');
 
 Route::post('/get_time_table_list', 'ApiCommonController@getTimeTableList')->middleware('auth');
 Route::post('/get_business_day_list', 'ApiCommonController@getBusinessDayList')->middleware('auth');
