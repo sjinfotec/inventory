@@ -21,19 +21,19 @@
               <div class="col-12">
                 <div class="table-responsive">
                   <div class="col-12 p-0">
-                    <table class="table table-striped border-bottom font-size-sm text-nowrap">
+                    <table id="table_cnt4" class="table table-striped border-bottom font-size-sm text-nowrap">
                       <thead>
                         <tr>
-                          <td class="text-center align-middle w-10">納期</td>
-                          <td class="text-center align-middle w-10">客先</td>
-                          <td class="text-center align-middle w-10">受注番号</td>
-                          <td class="text-center align-middle w-10">行</td>
-                          <td class="text-center align-middle w-10">品名</td>
-                          <td class="text-center align-middle w-10">機器名</td>
-                          <td class="text-center align-middle w-10">作業者名</td>
-                          <td class="text-center align-middle w-10">状況</td>
-                          <td class="text-center align-middle w-10">作業時刻</td>
-                          <td class="text-center align-middle w-10">作業時間</td>
+                          <td class="style1 text-center align-middle w-10">納期</td>
+                          <td class="style1 text-center align-middle w-10">客先</td>
+                          <td class="style1 text-center align-middle w-10">受注番号</td>
+                          <td class="style1 text-center align-middle w-10">行</td>
+                          <td class="style1 text-center align-middle w-10">品名</td>
+                          <td class="style1 text-center align-middle w-10">機器名</td>
+                          <td class="style1 text-center align-middle w-10">作業者名</td>
+                          <td class="style1 text-center align-middle w-10">状況</td>
+                          <td class="style1 text-center align-middle w-10">作業時刻</td>
+                          <td class="style1 text-center align-middle w-10">作業時間</td>
                         </tr>
                       </thead>
                       <tbody>
@@ -47,6 +47,12 @@
                           <td class="text-center align-middle">{{ item.user_name }}</td>
                           <td class="text-center align-middle">{{ item.work_kind_name }}</td>
                           <td class="text-center align-middle">{{ item.process_history_time_name }}</td>
+                          <div v-if="item.process_time_h">
+                            <td class="text-center align-middle">{{ item.process_time_h }}時間{{ item.process_time_m }}分</td>
+                          </div>
+                          <div v-else>
+                            <td class="text-center align-middle"></td>
+                          </div>
                           <td class="text-center align-middle"></td>
                         </tr>
                       </tbody>

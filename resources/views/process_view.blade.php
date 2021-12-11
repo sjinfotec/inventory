@@ -2,7 +2,7 @@
 
 @section('content')
 				<!-- main contents -->
-				<div class="col-xl-10">
+				<div id="cnt_p_view">
 					@if (session('status'))
 					<!-- main contentns row -->
 					<div class="row justify-content-between">

@@ -38,8 +38,7 @@ class MobileAccessController extends Controller
         //     'order_no' => $_GET["order_no"],
         //     'seq' => $_GET["seq"]
         // ]);
-	if (isset($_GET["kind"])) {
-	        Log::debug('MobileAccessController index in '.$_GET["kind"]);
+	if (isset($_GET["order_no"])) {
         	Log::debug('MobileAccessController index in '.$_GET["order_no"]);
         	Log::debug('MobileAccessController index in '.$_GET["seq"]);
         	Log::debug('MobileAccessController index in '.$_GET["device"]);
@@ -47,7 +46,6 @@ class MobileAccessController extends Controller
 	        return view('process_info', [
             	'order_no' => $_GET["order_no"],
             	'seq' => $_GET["seq"],
-            	'kind' => $_GET["kind"],
             	'device' => $_GET["device"],
             	'user_code' => $_GET["user_code"]
 	        ]);
@@ -164,6 +162,16 @@ class MobileAccessController extends Controller
             $user_code = $data["user_code"];
             $row_seq = $data["row_seq"];
             $progress_no = $data["progress_no"];
+            if ($data["process_time_h"] == null || $data["process_time_h"] == "") {
+                $process_time_h = 0;
+            } else {
+                $process_time_h = $data["process_time_h"];
+            }
+            if ($data["process_time_m"] == null || $data["process_time_m"] == "") {
+                $process_time_m = 0;
+            } else {
+                $process_time_m = $data["process_time_m"];
+            }
             // 新規の場合加工履歴No=1に、既存はMAX番号+1を設定
             // データが存在するか
             $process_history_no = 1;
@@ -193,6 +201,8 @@ class MobileAccessController extends Controller
             $process_histories_model->setRowseqAttribute($row_seq);
             $process_histories_model->setProgressnoAttribute($progress_no);
             $process_histories_model->setProcesshistorytimeAttribute(Carbon::now());
+            $process_histories_model->setProcessTimeHAttribute($process_time_h);
+            $process_histories_model->setProcessTimeMAttribute($process_time_m);
             $process_histories_model->setCreateduserAttribute($login_user_code);
             $process_histories_model->setCreatedatAttribute(Carbon::now());
             $process_histories_model->insert();

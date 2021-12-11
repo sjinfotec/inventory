@@ -168,6 +168,34 @@
       <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush">
         日次集計印刷</button>
     </div>
+    <div v-if="btnMode ==='startwork1'" class="btn-group d-flex" v-on:click="startclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor1" :disabled="isPush">
+        作業開始</button>
+    </div>
+    <div v-if="btnMode ==='startwork2'" class="btn-group d-flex" v-on:click="startclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor2" :disabled="isPush">
+        作業中断</button>
+    </div>
+    <div v-if="btnMode ==='startwork3'" class="btn-group d-flex" v-on:click="startclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor3" :disabled="isPush">
+        作業完了</button>
+    </div>
+    <div v-if="btnMode ==='startworkok'" class="btn-group d-flex" v-on:click="okclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor11" :disabled="isPush">
+        OK</button>
+    </div>
+    <div v-if="btnMode ==='startworkcancel'" class="btn-group d-flex" v-on:click="cancelclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor12" :disabled="isPush">
+        キャンセル</button>
+    </div>
+    <div v-if="btnMode ==='startworkmissok'" class="btn-group d-flex" v-on:click="okclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor14" :disabled="isPush">
+        ミス</button>
+    </div>
+    <div v-if="btnMode ==='startsearchgo'" class="btn-group d-flex" v-on:click="searchclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg  btncolor13" :disabled="isPush">
+        この条件で表示する</button>
+    </div>
   </div>
 </template>
 <script>
@@ -305,6 +333,9 @@ export default {
     },
     dailycalcclickBtn : function() {
       this.$emit('dailycalc-event',event);
+    },
+    startclickBtn : function() {
+      this.$emit('start-event',event);
     },
     // tooltips
     edttooltips: function(value1) {

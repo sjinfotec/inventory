@@ -26,7 +26,7 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   background: #17670d !important;
 }
 
-
+/*--------------------## EDIT WORK ORDER ##--------------------*/
 #input-area_1 {
   border: 1px solid #ccd4dd;
 }
@@ -78,6 +78,9 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   border-bottom-left-radius: 0;
   border: 0px solid #ced4da;
   color: #495057;
+}
+#input-area_1 .inputnum_r {
+  text-align:right;
 }
 
 /*--各項目の横幅 1段目--*/
@@ -173,6 +176,28 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   padding-bottom: 0rem !important;
 }
 
+/*--印刷ボタン--*/
+#btn_cnt4 {
+  display:-webkit-flex;
+  display:flex;
+  align-items: center;
+  justify-content: flex-start;
+  width:100%;
+  padding:10px 15px 5px 15px;
+  background:#FFF;
+}
+#btn_cnt4 .btn_col_1  {
+  flex: 0 0 300px;
+  padding:0 20px;
+}
+#btn_cnt4 .btn_sty_1 a  {
+  flex:0 0 200px;
+}
+#btn_cnt4 .btn_sty_1 a:hover  {
+  color:#FFF;
+}
+
+
 /*--工程--*/
 .table {
   width: 100%;
@@ -229,6 +254,10 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 }
 #table_cnt1 .f_style_1 {
   border-top:3px double #dee2e6;
+}
+#table_cnt1 .jtime  {
+  padding-top:12px;
+  padding-bottom:12px;
 }
 
 /*--下部コンテンツ：加工時間実績等--*/
@@ -320,11 +349,14 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 }
 
 /*--QRコード--*/
+#view_off {
+  display:none;
+}
 #position_base1  {
   position: relative;
 }
 #position_base1 .cnt_view_qr  {
-  display:none;
+  /*display:none;*/
   position: absolute;
   top:30%;
   width:100%;
@@ -333,15 +365,314 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   text-align:center;
 }
 
+
+/*--------------------## process info Mobile ##--------------------*/
+#table_cnt3 {
+  width:100%;
+  border-collapse: collapse;
+  margin-bottom:15px;
+}
+#table_cnt3 td{
+  padding:0.75rem;
+}
+#table_cnt3 .w1 {
+  width:30%;
+}
+
+#input_cnt1 {
+  display:flex;
+  align-items: center;
+  justify-content: center;
+}
+#input_cnt1 span  {
+  display:inline-block;
+}
+#input_cnt1 span.input_w1 {
+  padding:0 8px;
+  width:5em;
+}
+#input_cnt1 .form-control {
+  padding:0 0 0 8px;
+}
+
+#btn_cnt1 {
+  display:-webkit-flex;
+  display:flex;
+  align-items: center;
+  justify-content: space-between;;
+  width:100%;
+  padding:0 15px;
+  background:#FFF;
+  padding-top:20px;
+}
+#btn_cnt1 .btn_col_1  {
+  flex: 0 0 30%;
+  max-width: 30%;
+}
+#btn_cnt1 .btncolor1  {
+	background: #80bb60;
+  border:none;
+}
+#btn_cnt1 .btncolor2  {
+	background: #dd6060;
+  border:none;
+}
+#btn_cnt1 .btncolor3  {
+	background: #6cb2eb;
+  border:none;
+  outline: none;
+}
+#btn_cnt1 .btncolor1:hover, #btn_cnt1 .btncolor2:hover, #btn_cnt1 .btncolor3:hover, #cancelbtn:hover {
+  color: #212529;
+}
+#btn_cnt1 .btncolor1:hover  {
+	background: rgba(128, 187, 96, 0.7);
+}
+#btn_cnt1 .btncolor2:hover  {
+  background:rgba(221, 96, 96, 0.7);
+}
+#btn_cnt1 .btncolor3:hover  {
+	background: rgba(108, 178, 235, 0.7);
+}
+
+
+
+#btn_cnt2 {
+
+  display:-webkit-flex;
+  display:flex;
+  align-items: center;
+  justify-content: space-between;
+  width:100%;
+  /*padding-left: 25px;*/
+  background:#FFF;
+  padding-top:20px;
+}
+#btn_cnt2 .btn_col_1  {
+  flex: 0 0 30%;
+  max-width: 30%;
+}
+#btn_cnt2 .btncolor11  {
+	background: #bb8c60;
+  border:none;
+}
+#btn_cnt2 .btncolor12  {
+	background: #60bbac;
+  border:none;
+}
+#btn_cnt2 .btncolor14  {
+	background: #bb6086;
+  border:none;
+}
+#btn_cnt2 .btncolor11:hover  {
+  color: #212529;
+	background: rgba(187, 140, 96, 0.7);
+}
+#btn_cnt2 .btncolor12:hover  {
+  color: #212529;
+	background: rgba(96, 187, 172, 0.7);
+}
+
+button:focus {
+	outline:none;
+  outline-style: none;
+}
+
+
+/*--------------------## process view ##--------------------*/
+.title001 {
+  font-size:1.2rem;
+  letter-spacing: 0.2rem;
+  padding:0.5rem 0;
+}
+
+#cnt_p_view {
+  flex: 0 0 100%;
+  max-width: 100%;
+  padding:0 15px;
+}
+
+#table_cnt4 {
+  width:100%;
+  border-collapse: collapse;
+  margin-bottom:15px;
+
+}
+#table_cnt4 .style1{
+background:#DDEECC;
+border-bottom:4px solid #88CC88;
+}
+
+/*--------------------## table progress header  (TOP page) ##--------------------*/
+#search_btn_cnt {
+  display:flex;
+  justify-content: space-between;
+  flex-wrap:wrap;
+}
+#search_btn_cnt .flex_width {
+  flex: 1 1 auto;
+}
+
+
+#divtable {
+  display:block;
+  width:100%;
+}
+#divtable .scrollbox  {
+  overflow-x: hidden;
+  overflow-y: scroll;
+  height: 300px;
+}
+#divtable .cate_top {
+  display:flex;
+  width:100%;
+}
+#divtable .cate_top_cell  {
+    padding: 0rem;
+    border-style: solid dashed ;
+    border-width: 1px ;
+    border-color: #95c5ed #dee2e6;
+    white-space: nowrap;
+}
+
+#divtable .divtable_cnt {
+  width:100%;
+  display:flex;
+  align-items: stretch;
+  flex-wrap:wrap;
+}
+#divtable .cate_side {
+  width:20%;
+}
+#divtable .cate_main {
+  /*flex:1 1 auto;*/
+  width:80%;
+}
+
+
+
+
+#table_cnt5 {
+  width:100%;
+  border-collapse: collapse;
+  margin-bottom:15px;
+}
+#table_cnt5 .w1{
+  min-width:3rem;
+}
+#table_cnt5 .w2{
+  min-width:7rem;
+}
+#table_cnt5 .w3{
+  min-width:6rem;
+}
+#table_cnt5 .w4{
+  min-width:2.4rem;
+}
+#table_cnt5 .w5{
+  min-width:14rem;
+}
+
+#input-area_2  {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  /*flex-wrap: wrap;*/
+  align-items: stretch;
+  /*justify-content: space-between;*/
+  border: 1px solid #ced4da;
+
+}
+#input-area_2 .input-area-prepend {
+  display: flex;
+  align-items: center;
+  background-color: #e9ecef;
+}
+#input-area_2 .input-area-text {
+  display: flex;
+  align-items: center;
+  /*background-color: #CCDD88;*/
+  height: 1.2rem;
+  padding: 0.15rem 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  font-weight: 400;
+  /*line-height: 1.6rem;*/
+  color: #495057;
+  text-align: center;
+  white-space: nowrap;
+  /*border: 1px solid #ced4da;*/
+  /*border-radius: 0.25rem;*/
+}
+#input-area_2 .form-control {
+  display: block;
+  width: 100%;
+  height: calc(1.6em + 0.75rem + 2px);
+  padding: 0.375rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 0px solid #ced4da;
+  /* border-radius: 0.25rem; */
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+#input-area_2 .vdp-datepicker input {
+  display: flex;
+  flex: 1 1 auto;
+  height: calc(1.6em + 0.75rem + 2px);
+  padding-left: 12px;
+  padding-top: 4px;
+  padding-bottom: 5px;
+  border-radius: 0.25rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border: 0px solid #ced4da;
+  color: #495057;
+}
+#input-area_2 .w1{width:5rem;}
+#input-area_2 .w_cate {
+  flex: 0 0 80px;
+  width:80px;
+}
+#btn_cnt3 {
+  display:-webkit-flex;
+  display:flex;
+  align-items: center;
+  justify-content: center;;
+  width:100%;
+  padding:10px 15px 15px 15px;
+  background:#FFF;
+}
+#btn_cnt3 .btn_col_1  {
+  flex: 0 0 90%;
+  max-width: 90%;
+}
+
+
+
+
+
+.transition1  {
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
 /*--print out--*/
 @media print {
   .col-cnt_04 {
     flex: 0 0 35%;
     max-width: 35%;
   }
+  #view_off {
+    display:block;
+  }
+  /*
   #position_base1 .cnt_view_qr  {
     display:block;
   }
+  */
   #table_cnt2 tr {
     height:48px;
   }

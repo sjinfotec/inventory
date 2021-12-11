@@ -25,6 +25,8 @@ class ProcessHistory extends Model
     private $row_seq;                              // 行
     private $progress_no;                              // 工程NO
     private $process_history_time;                              // 加工時刻
+    private $process_time_h;                              // 作業時間H
+    private $process_time_m;                              // 作業時間M
     private $created_user;                              // 作成ユーザー
     private $updated_user;                              // 修正ユーザー
     private $created_at;                              // 作成日時
@@ -131,6 +133,26 @@ class ProcessHistory extends Model
     {
         $this->process_history_time = $value;
     }
+    //作業時間H
+    public function getProcessTimeHAttribute()
+    {
+        return $this->process_time_h;
+    }
+
+    public function setProcessTimeHAttribute($value)
+    {
+        $this->process_time_h = $value;
+    }
+    //作業時間M
+    public function getProcessTimeMAttribute()
+    {
+        return $this->process_time_m;
+    }
+
+    public function setProcessTimeMAttribute($value)
+    {
+        $this->process_time_m = $value;
+    }
     //作成ユーザー
     public function getCreateduserAttribute()
     {
@@ -192,6 +214,8 @@ class ProcessHistory extends Model
     private $param_row_seq;                              // 行
     private $param_progress_no;                              // 工程NO
     private $param_process_history_time;                              // 加工時刻
+    private $param_process_time_h;                              // 作業時間H
+    private $param_process_time_m;                              // 作業時間M
     private $param_created_user;                              // 作成ユーザー
     private $param_updated_user;                              // 修正ユーザー
     private $param_created_at;                              // 作成日時
@@ -298,6 +322,26 @@ class ProcessHistory extends Model
     {
         $this->param_process_history_time = $value;
     }
+    //作業時間H
+    public function getParamProcessTimeHAttribute()
+    {
+        return $this->param_process_time_h;
+    }
+
+    public function setParamProcessTimeHAttribute($value)
+    {
+        $this->param_process_time_h = $value;
+    }
+    //作業時間M
+    public function getParamProcessTimeMAttribute()
+    {
+        return $this->param_process_time_m;
+    }
+
+    public function setParamProcessTimeMAttribute($value)
+    {
+        $this->param_process_time_m = $value;
+    }
     //作成ユーザー
     public function getParamCreateduserAttribute()
     {
@@ -365,6 +409,8 @@ class ProcessHistory extends Model
                     'row_seq' => $this->row_seq,
                     'progress_no' => $this->progress_no,
                     'process_history_time' => $this->process_history_time,
+                    'process_time_h' => $this->process_time_h,
+                    'process_time_m' => $this->process_time_m,
                     'created_user'=>$this->created_user,
                     'created_at'=>$this->created_at
                 ]

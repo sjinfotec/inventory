@@ -115,7 +115,7 @@
             <div class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-3 pb-2" v-if="form.qrText1">
-                <span>----[作業開始]----[{{ form.code }}] [{{ form.name }}]</span>
+                <span>[{{ form.code }}] [{{ form.name }}]</span>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -374,10 +374,10 @@ export default {
     
     // QRコード作成ボタンクリック処理
     qrcodeClick() {
-      this.form.qrText1 = "&kind='1'&device='" + this.form.code + "'";
-      this.form.qrText2 = "&kind='2'&device='" + this.form.code + "'";
-      this.form.qrText3 = "&kind='3'&device='" + this.form.code + "'";
-      this.form.qrText9 = "&kind='9'&device='" + this.form.code + "'";
+      this.form.qrText1 = "&device='" + this.form.code + "'";
+      this.form.qrText2 = "";
+      this.form.qrText3 = "";
+      this.form.qrText9 = "";
       this.$forceUpdate();
     },
     // 新規作成ボタンクリック処理
