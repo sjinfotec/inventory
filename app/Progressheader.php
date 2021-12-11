@@ -394,6 +394,8 @@ class Progressheader extends Model
     private $param_order_date_from;                         // 受注日（開始）
     private $param_order_date_to;                           // 受注日（終了）
     private $param_supply_date;                              // 納期
+    private $param_supply_date_from;                         // 納期（開始）
+    private $param_supply_date_to;                           // 納期（終了）
     private $param_office_code;                              // 営業所コード
     private $param_customer_code;                              // 顧客コード
     private $param_back_order_customer_name;                              // 受注残客先
@@ -495,12 +497,12 @@ class Progressheader extends Model
     //受注日（終了）
     public function getParamOrderdateToAttribute()
     {
-        return $this->param_order_date_from;
+        return $this->param_order_date_to;
     }
 
     public function setParamOrderdateToAttribute($value)
     {
-        $this->param_order_date_from = $value;
+        $this->param_order_date_to = $value;
     }
     //納期
     public function getParamSupplydateAttribute()
@@ -511,6 +513,26 @@ class Progressheader extends Model
     public function setParamSupplydateAttribute($value)
     {
         $this->param_supply_date = $value;
+    }
+    //納期日（開始）
+    public function getParamSupplydateFromAttribute()
+    {
+        return $this->param_supply_date_from;
+    }
+
+    public function setParamSupplydateFromAttribute($value)
+    {
+        $this->param_supply_date_from = $value;
+    }
+    //納期日（終了）
+    public function getParamSupplydateToAttribute()
+    {
+        return $this->param_supply_date_to;
+    }
+
+    public function setParamSupplydateToAttribute($value)
+    {
+        $this->param_supply_date_to = $value;
     }
     //営業所コード
     public function getParamOfficecodeAttribute()
@@ -848,11 +870,24 @@ class Progressheader extends Model
             $sqlString .= "    and t4.is_deleted = 0 ";
             $sqlString .= "  where" ;
             $sqlString .= "    ? = ?" ;
-            if (!empty($this->param_order_date_from)) {
-                $sqlString .= "    and t1.order_date >= ?" ;
+            Log::debug('getProductheader = '.$this->param_order_date_from);
+            if (!empty($this->param_supply_date_from)) {
+                $sqlString .= "    and t1.supply_date = ?" ;
             }
-            if (!empty($this->param_order_date_to)) {
-                $sqlString .= "    and t1.order_date <= ?" ;
+            if (!empty($this->param_supply_date_to)) {
+                $sqlString .= "    and t1.supply_date <= ?" ;
+            }
+            if (!empty($this->param_office_code)) {
+                $sqlString .= "    and t1.office_code = ?" ;
+            }
+            if (!empty($this->param_customer_code)) {
+                $sqlString .= "    and t1.customer_code = ?" ;
+            }
+            if (!empty($this->param_order_no)) {
+                $sqlString .= "    and t1.order_no = ?" ;
+            }
+            if (!empty($this->param_drawing_no)) {
+                $sqlString .= "    and t1.drawing_no = ?" ;
             }
             // $sqlString .= "  group by t1.order_no, t1.order_date " ;
             $sqlString .= "  order by t1.order_no, t1.order_date desc " ;
@@ -860,11 +895,23 @@ class Progressheader extends Model
             $array_setBindingsStr = array();
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
-            if (!empty($this->param_order_date_from)) {
-                $array_setBindingsStr[] = $this->param_order_date_from;
+            if (!empty($this->param_supply_date_from)) {
+                $array_setBindingsStr[] = $this->param_supply_date_from;
             }
-            if (!empty($this->param_order_date_to)) {
-                $array_setBindingsStr[] = $this->param_order_date_to;
+            if (!empty($this->param_supply_date_to)) {
+                $array_setBindingsStr[] = $this->param_supply_date_to;
+            }
+            if (!empty($this->param_office_code)) {
+                $array_setBindingsStr[] = $this->param_office_code;
+            }
+            if (!empty($this->param_customer_code)) {
+                $array_setBindingsStr[] = $this->param_customer_code;
+            }
+            if (!empty($this->param_order_no)) {
+                $array_setBindingsStr[] = $this->param_order_no;
+            }
+            if (!empty($this->param_drawing_no)) {
+                $array_setBindingsStr[] = $this->param_drawing_no;
             }
             $details = DB::select($sqlString, $array_setBindingsStr);
             return $details;

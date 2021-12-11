@@ -35,7 +35,7 @@ Route::post('/store_backorder/store', 'StoreBackOrderController@store')->middlew
 // モバイル
 Route::get('/process_info', 'MobileAccessController@index')->middleware('auth');
 Route::post('/process_info/get', 'MobileAccessController@getProductheader')->middleware('auth');
-Route::post('/process_history/put', 'MobileAccessController@putProcessHistoery')->middleware('auth');
+Route::post('/process_history/put', 'MobileAccessController@putProcessHistory')->middleware('auth');
 // 進捗状況
 Route::get('/process_view', 'ProcessViewController@index')->middleware('auth');
 Route::post('/process_view/get', 'ApiCommonController@getProcessView')->middleware('auth');

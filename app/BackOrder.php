@@ -591,28 +591,6 @@ class BackOrder extends Model
         $details = new Collection();
         $result = true;
         try {
-            // パラメータチェック
-            $params = array();
-            $params_target_from_date = null;
-            $params_target_to_date = null;
-            $params_office_code = null;
-            $params_customer_code = null;
-            if (isset($request->keyparams)) {
-                $params = $request->keyparams;
-                if (isset($params['target_from_date'])) {
-                    $params_target_from_date = $params['target_from_date'];
-                }
-                if (isset($params['target_to_date'])) {
-                    $params_target_to_date = $params['target_to_date'];
-                }
-                if (isset($params['office_code'])) {
-                    $params_office_code = $params['office_code'];
-                }
-                if (isset($params['customer_code'])) {
-                    $params_customer_code = $params['customer_code'];
-                }
-            }
-
             // ログインユーザの権限取得
             $user = Auth::user();
             $login_user_code = $user->code;
@@ -742,17 +720,11 @@ class BackOrder extends Model
             $sqlString .= "      and t13.is_deleted = 0 " ;
             $sqlString .= "  where" ;
             $sqlString .= "    ? = ?" ;
-            if (!empty($params_target_from_date)) {
+            if (!empty($this->param_order_date_from)) {
                 $sqlString .= "    and t1.supply_date >= ?" ;
             }
-            if (!empty($params_target_to_date)) {
+            if (!empty($this->param_order_date_to)) {
                 $sqlString .= "    and t1.supply_date <= ?" ;
-            }
-            if (!empty($params_office_code)) {
-                $sqlString .= "    and t1.office_code = ?" ;
-            }
-            if (!empty($params_customer_code)) {
-                $sqlString .= "    and t1.customer_code = ?" ;
             }
             $sqlString .= "group by" ;
             $sqlString .= "  t1.supply_date" ;
@@ -770,12 +742,6 @@ class BackOrder extends Model
             }
             if (!empty($params_target_to_date)) {
                 $array_setBindingsStr[] = $params_target_to_date;
-            }
-            if (!empty($params_office_code)) {
-                $array_setBindingsStr[] = $params_office_code;
-            }
-            if (!empty($params_customer_code)) {
-                $array_setBindingsStr[] = $params_customer_code;
             }
             $details = DB::select($sqlString, $array_setBindingsStr);
             return $details;
@@ -799,36 +765,17 @@ class BackOrder extends Model
         $this->array_messagedata = array();
         $result = true;
         try {
-            // パラメータチェック
-            $params = array();
-            $params_target_from_date = null;
-            $params_target_to_date = null;
-            $params_office_code = null;
-            $params_customer_code = null;
-            if (isset($request->keyparams)) {
-                $params = $request->keyparams;
-                if (isset($params['target_from_date'])) {
-                    $params_target_from_date = $params['target_from_date'];
-                }
-                if (isset($params['target_to_date'])) {
-                    $params_target_to_date = $params['target_to_date'];
-                }
-                if (isset($params['office_code'])) {
-                    $params_office_code = $params['office_code'];
-                }
-                if (isset($params['customer_code'])) {
-                    $params_customer_code = $params['customer_code'];
-                }
-            }
-
             $mainQuery = DB::table($this->table)->whereRaw(' 1 = 1 ');
-            if (!empty($params_target_from_date)) {
-                $mainQuery->where('order_date', '>=', $params_target_from_date);
+            if (!empty($param_order_date_from)) {
+                $mainQuery->where('order_date', '>=', $this->param_order_date_from);
             }
-            if (!empty($params_target_to_date)) {
-                $mainQuery->where('order_date', '<=', $params_target_to_date);
+            if (!empty($param_order_date_to)) {
+                $mainQuery->where('order_date', '<=', $this->param_order_date_to);
             }
-            $mainQuery->where('is_update', '=', 0);
+            // 数値=0も判定するためisset
+            if (isset($this->param_is_update)) {
+                $mainQuery->where('is_update', '=', $this->param_is_update);
+            }
             $result = $mainQuery->exists();
 
             return $result;

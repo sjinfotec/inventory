@@ -121,24 +121,24 @@ class StoreBackOrderController extends Controller
             $details = $excelspread->getExcelRowData($array_impl_getExcelRowData);
             $item_count = 0;
             foreach($details as $item) {
-                if (!isset($item['B'])) {
+                if (!isset($item['A'])) {
                     break;
                 }
                 $item_count += 1;
                 if ($item_count > 1) {
                     $array_items = array(
-                        'order_date' => $item['B'],
-                        'row_seq' => $item['C'],
-                        'drawing_no' => $item['D'],
-                        'order_no' => $item['E'],
-                        'customer_name' => $item['F'],
-                        'model_number' => $item['G'],
-                        'product_name' => $item['H'],
-                        'quality_name' => $item['I'],
-                        'order_count' => $item['J'],
-                        'supply_date' => $item['K'],
-                        'order_kingaku' => $item['L'],
-                        'outline_name' => $item['M'],
+                        'order_date' => $item['A'],
+                        'row_seq' => $item['B'],
+                        'drawing_no' => $item['C'],
+                        'order_no' => $item['D'],
+                        'customer_name' => $item['E'],
+                        'model_number' => $item['F'],
+                        'product_name' => $item['G'],
+                        'quality_name' => $item['H'],
+                        'order_count' => $item['I'],
+                        'supply_date' => $item['J'],
+                        'order_kingaku' => $item['K'],
+                        'outline_name' => $item['L'],
                         'created_user' => $login_user_code,
                         'updated_user' => null
                     );
@@ -206,18 +206,21 @@ class StoreBackOrderController extends Controller
                     $backorder_order_no = $item->order_no;
                 }
                 $backorder_seq += 1;
+                Log::debug('insertBackorder $backorder_seq = '.$backorder_seq);
                 $backorder_model->setOrdernoAttribute($item_backorder_order_no );
                 $backorder_model->setSeqAttribute($backorder_seq);
                 $backorder_model->setOrderdateAttribute(date('Ymd', ($item->order_date - (int)Config::get('const.SERIALDATA.excel_serial_base')) * 60 * 60 * 24));
-                $backorder_model->setRowseqAttribute(date('n/j', ($item->row_seq - (int)Config::get('const.SERIALDATA.excel_serial_base')) * 60 * 60 * 24));
+                if (strpos($item->row_seq, "/")) {
+                    $backorder_model->setRowseqAttribute($item->row_seq);
+                } else {
+                    $backorder_model->setRowseqAttribute(date('n/j', ($item->row_seq - (int)Config::get('const.SERIALDATA.excel_serial_base')) * 60 * 60 * 24));
+                }
                 $backorder_model->setDrawingnoAttribute($item->drawing_no);
                 $backorder_model->setCustomernameAttribute($item->customer_name);
                 $backorder_model->setModelnumberAttribute($item->model_number);
                 $backorder_model->setProductnameAttribute($item->product_name);
                 $backorder_model->setQualitynameAttribute($item->quality_name);
                 $backorder_model->setOrdercountAttribute($item->order_count);
-                Log::debug('insertBackorder $item->supply_date = '.$item->supply_date);
-                Log::debug('insertBackorder $item->supply_date = '.substr($item->supply_date,0,1));
                 if (is_numeric(substr($item->supply_date,0,1))) {
                     $backorder_model->setSupplydateAttribute(date('Ymd', ($item->supply_date - (int)Config::get('const.SERIALDATA.excel_serial_base')) * 60 * 60 * 24));
                 } else {

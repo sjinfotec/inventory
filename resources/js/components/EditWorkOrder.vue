@@ -661,27 +661,13 @@
                           </td>
                         </tr>
                         <tr>
-                          <td colspan="4" class="td-first text-right align-middle pad2 f_style_1">実績合計</td>
+                          <td colspan="4" class="td-first text-right align-middle pad2 f_style_1 jtime">実績合計</td>
                           <td class="text-center align-middle ws1 f_style_1">
-                            <div class>
-                              <input
-                                type="number"
-                                step="1"
-                                class="form-control"
-                                v-model="form.setup_time_h[index]"
-                              />
-                            </div>
+                            23
                           </td>
                           <td class="td-first text-left align-middle ws2 pad1 f_style_1">H</td>
                           <td class="td-first text-center align-middle ws1 f_style_1">
-                            <div class>
-                              <input
-                                type="number"
-                                step="1"
-                                class="form-control"
-                                v-model="form.setup_time_m[index]"
-                              />
-                            </div>
+                            59
                           </td>
                           <td class="td-first text-left align-middle ws2 pad1 f_style_1">M</td>
                           <td class="text-center align-middle w6 f_style_1 print-none">

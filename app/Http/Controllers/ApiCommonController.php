@@ -1422,8 +1422,11 @@ class ApiCommonController extends Controller
             $params_target_to_date = null;
             $params_office_code = null;
             $params_customer_code = null;
+            $params_order_no = null;
+            $params_drawing_no = null;
             if (isset($request->keyparams)) {
                 $params = $request->keyparams;
+                Log::debug('getProductheader  $params[target_from_date] = '.$params['target_from_date']);
                 if (isset($params['target_from_date'])) {
                     $params_target_from_date = $params['target_from_date'];
                 }
@@ -1436,15 +1439,22 @@ class ApiCommonController extends Controller
                 if (isset($params['customer_code'])) {
                     $params_customer_code = $params['customer_code'];
                 }
+                if (isset($params['order_no'])) {
+                    $params_order_no = $params['order_no'];
+                }
+                if (isset($params['drawing_no'])) {
+                    $params_drawing_no = $params['drawing_no'];
+                }
             }
+            Log::debug('getProductheader  $params_target_from_date = '.$params_target_from_date);
 
-            // 加工指示書／工程管理事前登録
             DB::beginTransaction();
+            // いったん全件を取得し、加工指示書／工程管理未登録データを事前登録する
             $array_impl_putProductheader = array (
-                'target_from_date' => $params_target_from_date,
-                'target_to_date' => $params_target_to_date,
-                'office_code' => $params_office_code,
-                'customer_code' => $params_customer_code
+                'target_from_date' => null,
+                'target_to_date' => null,
+                'office_code' => null,
+                'customer_code' => null
             );
             $result = $this->putProductheader($array_impl_putProductheader);
             if ($result) {
@@ -1452,7 +1462,9 @@ class ApiCommonController extends Controller
                     'target_from_date' => $params_target_from_date,
                     'target_to_date' => $params_target_to_date,
                     'office_code' => $params_office_code,
-                    'customer_code' => $params_customer_code
+                    'customer_code' => $params_customer_code,
+                    'order_no' => $params_order_no,
+                    'drawing_no' => $params_drawing_no
                 );
                 $details = $this->getProductheadertable($array_impl_getProductheadertable);
             }
@@ -1496,13 +1508,25 @@ class ApiCommonController extends Controller
             $back_order_model = new BackOrder();
             $back_order_model->setParamOrderdateFromAttribute($params_target_from_date);
             $back_order_model->setParamOrderdateToAttribute($params_target_to_date);
-            $back_order_model->setParamIsUpdateAttribute(false);
+            $back_order_model->setParamIsUpdateAttribute(0);
             $result_exists = $back_order_model->getIsUpdate();
-            if (!$result_exists) {
+            if ($result_exists) {
                 // 未登録データは指示書に登録
                 $progress_header_model = new Progressheader();
                 $details = $back_order_model->getData();
+                $backorder_order_no = null;
                 foreach($details as $item) {
+                    if ($item->order_no  != $backorder_order_no) {
+                        $result_exists = DB::table($this->table_progress_headers)
+                        ->where('order_no', $item->order_no )
+                        ->exists();
+                        if ($result_exists) {
+                            DB::table($this->table_progress_headers)
+                            ->where('order_no', $item->order_no)
+                            ->delete();
+                        }
+                        $backorder_order_no = $item->order_no;
+                    }
                     $progress_header_model->setOrdernoAttribute($item->order_no);
                     $progress_header_model->setSeqAttribute($item->seq);
                     $progress_header_model->setRowseqAttribute($item->row_seq);
@@ -1563,18 +1587,25 @@ class ApiCommonController extends Controller
         try {
             // パラメータチェック
             $params = array();
+            Log::debug('getProductheadertable  $$param[target_from_date] = '.$param['target_from_date']);
             $params_target_from_date = $param['target_from_date'];
             $params_target_to_date = $param['target_to_date'];
             $params_office_code = $param['office_code'];
             $params_customer_code = $param['customer_code'];
+            $params_order_no = $param['order_no'];
+            $params_drawing_no = $param['drawing_no'];
 
             // ログインユーザの権限取得
             $user = Auth::user();
             $login_user_code = $user->code;
             $login_account_id = $user->account_id;
             $progress_header_model = new Progressheader();
-            $progress_header_model->setParamOrderdateFromAttribute($params_target_from_date);
-            $progress_header_model->setParamOrderdateToAttribute($params_target_to_date);
+            $progress_header_model->setParamSupplydateFromAttribute($params_target_from_date);
+            $progress_header_model->setParamSupplydateToAttribute($params_target_to_date);
+            $progress_header_model->setParamOfficecodeAttribute($params_office_code);
+            $progress_header_model->setParamCustomercodeAttribute($params_customer_code);
+            $progress_header_model->setParamOrdernoAttribute($params_order_no);
+            $progress_header_model->setParamDrawingnoAttribute($params_drawing_no);
             $details = $progress_header_model->getProductheader();
             return $details;
         }catch(\PDOException $pe){
@@ -1844,38 +1875,61 @@ class ApiCommonController extends Controller
             $dt = new Carbon();
             $sqlString = "";
             $sqlString .= "select ";
-            $sqlString .= "  date_format(t2.supply_date,'%Y年%m月%d日') as supply_date_name ";
-            $sqlString .= "  , t2.back_order_customer_name as back_order_customer_name ";
-            $sqlString .= "  , t2.order_no as order_no ";
-            $sqlString .= "  , t2.row_seq as row_seq ";
-            $sqlString .= "  , t2.back_order_product_name as back_order_product_name ";
-            $sqlString .= "  , t3.name as device_name ";
-            $sqlString .= "  , t4.name as user_name ";
+            $sqlString .= "  date_format(t3.supply_date,'%Y年%m月%d日') as supply_date_name ";
+            $sqlString .= "  , t3.back_order_customer_name as back_order_customer_name ";
+            $sqlString .= "  , t1.order_no as order_no ";
+            $sqlString .= "  , t1.seq as seq ";
+            $sqlString .= "  , t1.row_seq as row_seq ";
+            $sqlString .= "  , t3.back_order_product_name as back_order_product_name ";
+            $sqlString .= "  , t4.code as device_code ";
+            $sqlString .= "  , t4.name as device_name ";
+            $sqlString .= "  , t5.name as user_name ";
             $sqlString .= "  , CASE ifnull(t1.work_kind,'') ";
             $sqlString .= "    WHEN '1' THEN '稼働中' ";
             $sqlString .= "    WHEN '2' THEN '作業終了' ";
-            $sqlString .= "    WHEN '3' THEN 'ミス' ";
+            $sqlString .= "    WHEN '3' THEN '作業中断' ";
             $sqlString .= "    WHEN '9' THEN '作業完了' ";
             $sqlString .= "    ELSE '' END as work_kind_name";
+            $sqlString .= "  , CASE ifnull(t1.work_kind,'') ";
+            $sqlString .= "    WHEN '1' THEN '' ";
+            $sqlString .= "    WHEN '2' THEN '' ";
+            $sqlString .= "    WHEN '3' THEN '' ";
+            $sqlString .= "    WHEN '9' THEN t1.process_time_h ";
+            $sqlString .= "    ELSE '' END as process_time_h";
+            $sqlString .= "  , CASE ifnull(t1.work_kind,'') ";
+            $sqlString .= "    WHEN '1' THEN '' ";
+            $sqlString .= "    WHEN '2' THEN '' ";
+            $sqlString .= "    WHEN '3' THEN '' ";
+            $sqlString .= "    WHEN '9' THEN t1.process_time_m ";
+            $sqlString .= "    ELSE '' END as process_time_m";
             $sqlString .= "  , date_format(t1.process_history_time,'%H:%i') as process_history_time_name ";
             $sqlString .= "  from ";
             $sqlString .= "  ".$this->table_process_histories." as t1 ";
-            $sqlString .= "    left outer join ";
-            $sqlString .= "      ".$this->table_progress_headers." as t2 ";
+            $sqlString .= "    inner join ";
+            $sqlString .= "      (select order_no, seq, max(process_history_no) as max_process_history_no ";
+            $sqlString .= "       from ".$this->table_process_histories;
+            $sqlString .= "       where is_deleted = 0 ";
+            $sqlString .= "       group by order_no, seq) as t2 ";
             $sqlString .= "    on ";
             $sqlString .= "      t1.order_no = t2.order_no";
             $sqlString .= "      and t1.seq = t2.seq";
-            $sqlString .= "      and t2.is_deleted = 0 ";
+            $sqlString .= "      and t1.process_history_no = t2.max_process_history_no";
             $sqlString .= "    left outer join ";
-            $sqlString .= "      ".$this->table_devices." as t3 ";
+            $sqlString .= "      ".$this->table_progress_headers." as t3 ";
             $sqlString .= "    on ";
-            $sqlString .= "      t1.device_code = t3.code";
+            $sqlString .= "      t1.order_no = t3.order_no";
+            $sqlString .= "      and t1.seq = t3.seq";
             $sqlString .= "      and t3.is_deleted = 0 ";
             $sqlString .= "    left outer join ";
-            $sqlString .= "      ".$this->table_users." as t4 ";
+            $sqlString .= "      ".$this->table_devices." as t4 ";
             $sqlString .= "    on ";
-            $sqlString .= "      t1.user_code = t4.code";
+            $sqlString .= "      t1.device_code = t4.code";
             $sqlString .= "      and t4.is_deleted = 0 ";
+            $sqlString .= "    left outer join ";
+            $sqlString .= "      ".$this->table_users." as t5 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t1.user_code = t5.code";
+            $sqlString .= "      and t5.is_deleted = 0 ";
             $sqlString .= "  where ";
             $sqlString .= "    ? = ? ";
             $sqlString .= "    and t1.process_history_time >= ? ";
@@ -1884,7 +1938,6 @@ class ApiCommonController extends Controller
             $sqlString .= "order by ";
             $sqlString .= "  t1.order_no asc ";
             $sqlString .= " , t1.seq asc ";
-            $sqlString .= " , t1.process_history_no desc ";
             // バインド
             $array_setBindingsStr = array();
             $array_setBindingsStr[] = 1;

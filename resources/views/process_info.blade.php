@@ -23,7 +23,6 @@
 					<process-info
 						v-bind:order_no="{{ $order_no }}"
 						v-bind:seq="{{ $seq }}"
-						v-bind:kind="{{ $kind }}"
 						v-bind:device="{{ $device }}"
 						v-bind:user_code="{{ $user_code }}"
 					></process-info>

@@ -5,16 +5,42 @@
       <!-- .panel -->
       <div class="col-md pt-3">
         <div class="card shadow-pl">
-          <div class="card-body mb-3 p-0 border-top">
+          <div id="target" class="transition1 card-body mb-3 p-0 border-top">
             <!-- panel contents -->
             <div class="row">
               <div class="col-12">
                 <div class="table-responsive">
                   <div class="col-12 p-0">
-                    <table class="table table-striped border-bottom font-size-sm text-nowrap">
+                    <table id="table_cnt3" class="table table-striped border-bottom font-size-sm text-nowrap">
                       <tr v-for="(n,index) in form_count " :key="index">
-                        <td class="text-center align-middle">{{ form.item_name[index] }}</td>
-                        <td class="text-center align-middle">{{ form.item_data[index] }}</td>
+                        <td class="w1 text-center align-middle">{{ form.item_name[index] }}</td>
+                        <td class="w2 text-center align-middle">{{ form.item_data[index] }}</td>
+                      </tr>
+                      <tr>
+                        <td class="text-center align-middle"><div id="pview_status" v-if="maketime">時間入力</div></td>
+                        <td>
+                          <div id="input_cnt1" v-if="maketime">
+                          加工時間
+                              <span class="input_w1">
+                                <input
+                                  type="number"
+                                  step="1"
+                                  class="form-control"
+                                  v-model="form.process_time_h"
+                                />
+                              </span>
+                              <span class="input_w2">H</span>
+                              <span class="input_w1">
+                                <input
+                                  type="number"
+                                  step="1"
+                                  class="form-control"
+                                  v-model="form.process_time_m"
+                                />
+                              </span>
+                              <span class="input_w2">M</span>
+                          </div>
+                        </td>
                       </tr>
                     </table>
                   </div>
@@ -23,25 +49,48 @@
             </div>
             <!-- /.row -->
             <!-- ----------- ボタン部 START ---------------- -->
+            <div id="btn_cnt1" class="print-none" v-if="isbtnctrl">
+              <div class="btn_col_1">
+                <btn-work-time
+                  v-on:start-event="startClick1"
+                  v-bind:btn-mode="'startwork1'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <div class="btn_col_1">
+                <btn-work-time
+                  v-on:start-event="startClick2"
+                  v-bind:btn-mode="'startwork2'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <div class="btn_col_1">
+                <btn-work-time
+                  v-on:start-event="startClick3"
+                  v-bind:btn-mode="'startwork3'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+            </div>
             <!-- .row -->
-            <div class="row justify-content-between print-none">
+            <div id="btn_cnt2" class="print-none" v-else>
               <!-- col -->
               <div class="col-md-6 pb-2">
                 <btn-work-time
-                  v-on:okclick-event="okclick"
-                  v-bind:btn-mode="'ok'"
+                  v-on:okclick-event="startClickok"
+                  v-bind:btn-mode="'startworkok'"
                   v-bind:is-push="false"
                 ></btn-work-time>
               </div>
               <!-- /.col -->
               <!-- col -->
-              <!-- <div class="col-md-6 pb-2">
+              <div class="col-md-6 pb-2">
                 <btn-work-time
-                  v-on:cancelclick-event="cancelclick"
-                  v-bind:btn-mode="'cancel'"
+                  v-on:cancelclick-event="startClickcancel"
+                  v-bind:btn-mode="'startworkcancel'"
                   v-bind:is-push="false"
                 ></btn-work-time>
-              </div> -->
+              </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
@@ -76,7 +125,7 @@ const C_KIND_START_NAME = "作業開始";
 const C_KIND_END = "2";
 const C_KIND_END_NAME = "作業終了";
 const C_KIND_STOP = "3";
-const C_KIND_STOP_NAME = "作業中止";
+const C_KIND_STOP_NAME = "作業中断";
 const C_KIND_COMPLETE = "9";
 const C_KIND_COMPLETE_NAME = "作業完了";
 
@@ -91,10 +140,6 @@ export default {
     seq: {
       type: Number,
       default: 0
-    },
-    kind: {
-      type: String,
-      default: ""
     },
     device: {
       type: String,
@@ -116,8 +161,14 @@ export default {
         row_seq: "",
         progress_no: "",
         item_name: [{}],
-        item_data: [{}]
+        item_data: [{}],
+        process_time_h: "",
+        process_time_m: "",
+        statusText: ""
       },
+      isbtnctrl: true,
+      kind_index: 0,
+      kind_name: "",
       count: 0,
       before_count: 0,
       form_count: 0,
@@ -135,9 +186,54 @@ export default {
     // ------------------------ バリデーション ------------------------------------
     // バリデーション
     // ------------------------ イベント処理 ------------------------------------
+    // 作業開始処理
+    startClick1() {
+      this.isbtnctrl = false;
+      this.form.kind = C_KIND_START;
+      this.setKind();
+      this.form.item_name[this.kind_index] = this.kind_name;
+    	target.style.background = '#80bb60';
+      table_cnt3.style.color = '#FFF';
+    },
+    // 作業中断処理
+    startClick2() {
+      this.isbtnctrl = false;
+      this.form.kind = C_KIND_STOP;
+      this.setKind();
+      this.form.item_name[this.kind_index] = this.kind_name;
+  	  target.style.background = '#dd6060';
+      table_cnt3.style.color = '#FFF';
+      //btn_cnt2.style.display = 'flex';
+      //btn_cnt1.style.display = 'none';
+      //this.style.display = 'none';
+    },
+    // 作業完了処理
+    startClick3() {
+      this.isbtnctrl = false;
+      this.form.kind = C_KIND_COMPLETE;
+      this.setKind();
+      this.form.item_name[this.kind_index] = this.kind_name;
+      this.maketime = true;
+      //this.strintime = true;
+  	  target.style.background = '#6cb2eb';
+      table_cnt3.style.color = '#FFF';
+      //btn_cnt2.style.display = 'flex';
+      //btn_cnt1.style.display = 'none';
+    },
     // 確認OK
-    okclick() {
+    startClickok() {
       this.storeData();
+    },
+    // 作業キャンセル処理
+    startClickcancel() {
+      this.isbtnctrl = true;
+      this.form.kind = "";
+      this.setKind();
+      this.form.item_name[this.kind_index] = this.kind_name;
+      this.maketime = false;
+  	  target.style.background = '#FFF';
+      table_cnt3.style.color = '#212529';
+//document.getElementById('btn_cnt1').getElementsByClassName('btncolor2').style.color = '#8888CC';
     },
     // キャンセル
     cancelclick() {
@@ -153,7 +249,6 @@ export default {
       var arrayParams = { 
         order_no : this.order_no ,
         seq : this.seq,
-        kind : this.kind,
         device : this.device,
         user_code : this.user_code
         };
@@ -179,75 +274,58 @@ export default {
     // -------------------- 共通 ----------------------------
     // 取得正常処理
     getThen(response) {
+      console.log('getThen in');
+      this.setKind();
       var res = response.data;
-      var kind_data = "";
-      if (res.result) {
-        switch (this.kind) {
-          case C_KIND_START:
-            kind_data = C_KIND_START_NAME;
-            break;
-          case C_KIND_END:
-            kind_data = C_KIND_END_NAME;
-            break;
-          case C_KIND_STOP:
-            kind_data = C_KIND_STOP_NAME;
-            break;
-          case C_KIND_COMPLETE:
-            kind_data = C_KIND_COMPLETE_NAME;
-            break;
-          default:
-            break;
-        }
-        console.log('getThen in kind_data = ' + kind_data);
-        this.details = res.details;
-        this.count = this.details.length;
-        if ( this.details.length > 0) {
-          this.form.kind = this.kind;
-          this.form.device_code = this.device;
-          this.form.user_code = this.user_code;
-          this.form.order_no = this.order_no;
-          this.form.seq = this.seq;
-          var set_index = 0;
-          let $this = this;
-          this.details.forEach((detail, i) => {
-            $this.form.row_seq = detail.row_seq;
-            // progress_noは廃止する方向
-            $this.form.progress_no = null;
-            $this.form.item_name[set_index] = C_SUPPLY_DATE_NAME;
-            $this.form.item_data[set_index] = detail.supply_date_name;
-            console.log('getThen detail.supply_date_name = ' + $this.form.item_data[set_index]);
-            set_index = set_index + 1;
-            $this.form.item_name[set_index] = C_ORDER_NO_NAME;
-            $this.form.item_data[set_index] = detail.order_no;
-            set_index = set_index + 1;
-            $this.form.item_name[set_index] = C_ROW_SEQ_NAME;
-            $this.form.item_data[set_index] = detail.row_seq;
-            set_index = set_index + 1;
-            $this.form.item_name[set_index] = C_DRAWING_NO_NAME;
-            $this.form.item_data[set_index] = detail.drawing_no;
-            set_index = set_index + 1;
-            $this.form.item_name[set_index] = C_ORDER_COUNT_NAME;
-            $this.form.item_data[set_index] = detail.order_count;
-            set_index = set_index + 1;
-            $this.form.item_name[set_index] = C_MODEL_NUMBER_NAME;
-            $this.form.item_data[set_index] = detail.model_number;
-            set_index = set_index + 1;
-            $this.form.item_name[set_index] = C_PRODUCT_NAME;
-            $this.form.item_data[set_index] = detail.back_order_product_name;
-            set_index = set_index + 1;
-            $this.form.item_name[set_index] = C_OUTLINE_NAME;
-            $this.form.item_data[set_index] = detail.outline_name;
-            set_index = set_index + 1;
-            $this.form.item_name[set_index] = C_DEVICE_NAME;
-            $this.form.item_data[set_index] = detail.device_name;
-            set_index = set_index + 1;
-            $this.form.item_name[set_index] = C_USER_NAME;
-            $this.form.item_data[set_index] = detail.user_name;
-            set_index = set_index + 1;
-            $this.form.item_name[set_index] = "QRコードの種類";
-            $this.form.item_data[set_index] = kind_data;
-          });
-        }
+      this.details = res.details;
+      this.count = this.details.length;
+      if ( this.details.length > 0) {
+        this.form.kind = this.kind;
+        this.form.device_code = this.device;
+        this.form.user_code = this.user_code;
+        this.form.order_no = this.order_no;
+        this.form.seq = this.seq;
+        var set_index = 0;
+        let $this = this;
+        this.details.forEach((detail, i) => {
+          $this.form.row_seq = detail.row_seq;
+          // progress_noは廃止する方向
+          $this.form.progress_no = null;
+          $this.form.item_name[set_index] = C_SUPPLY_DATE_NAME;
+          $this.form.item_data[set_index] = detail.supply_date_name;
+          console.log('getThen detail.supply_date_name = ' + $this.form.item_data[set_index]);
+          set_index = set_index + 1;
+          $this.form.item_name[set_index] = C_ORDER_NO_NAME;
+          $this.form.item_data[set_index] = detail.order_no;
+          set_index = set_index + 1;
+          $this.form.item_name[set_index] = C_ROW_SEQ_NAME;
+          $this.form.item_data[set_index] = detail.row_seq;
+          set_index = set_index + 1;
+          $this.form.item_name[set_index] = C_DRAWING_NO_NAME;
+          $this.form.item_data[set_index] = detail.drawing_no;
+          set_index = set_index + 1;
+          $this.form.item_name[set_index] = C_ORDER_COUNT_NAME;
+          $this.form.item_data[set_index] = detail.order_count;
+          set_index = set_index + 1;
+          $this.form.item_name[set_index] = C_MODEL_NUMBER_NAME;
+          $this.form.item_data[set_index] = detail.model_number;
+          set_index = set_index + 1;
+          $this.form.item_name[set_index] = C_PRODUCT_NAME;
+          $this.form.item_data[set_index] = detail.back_order_product_name;
+          set_index = set_index + 1;
+          $this.form.item_name[set_index] = C_OUTLINE_NAME;
+          $this.form.item_data[set_index] = detail.outline_name;
+          set_index = set_index + 1;
+          $this.form.item_name[set_index] = C_DEVICE_NAME;
+          $this.form.item_data[set_index] = detail.device_name;
+          set_index = set_index + 1;
+          $this.form.item_name[set_index] = C_USER_NAME;
+          $this.form.item_data[set_index] = detail.user_name;
+          set_index = set_index + 1;
+          $this.form.item_name[set_index] = $this.kind_name;
+          $this.form.item_data[set_index] = "";
+          $this.kind_index = set_index;
+        });
         this.form_count = set_index + 1;
         console.log('getThen in form_count = ' + this.form_count);
       } else {
@@ -280,8 +358,34 @@ export default {
       messages.push("" + eventtext + "に失敗しました");
       this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
+    // 作業ステータス設定
+    setKind(eventtext) {
+      console.log('setKind in = ' + this.form.kind);
+      this.kind_name = "";
+      switch (this.form.kind) {
+        case C_KIND_START:
+          this.kind_name = C_KIND_START_NAME;
+          break;
+        case C_KIND_END:
+          this.kind_name = C_KIND_END_NAME;
+          break;
+        case C_KIND_STOP:
+          this.kind_name = C_KIND_STOP_NAME;
+          break;
+        case C_KIND_COMPLETE:
+          this.kind_name = C_KIND_COMPLETE_NAME;
+          break;
+        default:
+          break;
+      }
+      console.log('setKind out = ' + this.kind_name);
+    },
   }
 };
+
+
+
+
 </script>
 <style scoped>
 .mw-rem-2 {

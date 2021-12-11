@@ -60,7 +60,7 @@ export default {
     return {
       selectedvalue: 0,
       selectedname: '',
-      itemList: []
+      itemList: [],
     };
   },
     // マウント時
@@ -80,7 +80,7 @@ export default {
     },
     // -------------------- サーバー処理 ----------------------------
     getList(office_code){
-      console.log('selecCustomerList getList this.officeCode =' + office_code);
+      console.log('selecCustomerList_vue getList this.officeCode =' + office_code);
       this.postRequest("/get_customers_list", { officecode: office_code })
         .then(response  => {
           this.getThen(response);
