@@ -97,10 +97,6 @@
                 ></btn-work-time>
               </div>
             </div>
-
-
-
->>>>>>> shindo002
             <!-- .row -->
             <div id="btn_cnt2" class="print-none" v-else>
               <!-- col -->
