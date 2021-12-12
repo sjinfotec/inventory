@@ -9,7 +9,7 @@
         <!-- .col -->
         <div class="flex_width print-none">
           <div id="input-area_2">
-            <div class="input-area-prepend">
+            <div class="input-area-prepend w_cate">
               <span
                 class="input-area-text"
                 for="target_fromdate"
@@ -35,12 +35,13 @@
         <!-- .col -->
         <div class="flex_width print-none">
           <div id="input-area_2">
-            <div class="input-area-prepend">
-              <label
+            <div class="input-area-prepend w_cate">
+              <span
                 class="input-area-text"
                 for="target_customer"
-              >営業所</label>
+              >営業所</span>
             </div>
+            <div class="form-control p-0">
             <select-officelist
               ref="selectofficelist"
               v-bind:blank-data="true"
@@ -50,6 +51,7 @@
               v-bind:row-index="0"
               v-on:change-event="officeChanges"
             ></select-officelist>
+            </div>
           </div>
           <message-data
             v-bind:message-datas="messagedataoffice"
@@ -60,12 +62,13 @@
         <!-- .col -->
         <div class="flex_width print-none">
           <div id="input-area_2">
-            <div class="input-area-prepend">
-              <label
+            <div class="input-area-prepend w_cate">
+              <span
                 class="input-area-text"
                 for="target_customer"
-              >客先</label>
+              >客先</span>
             </div>
+            <div class="form-control p-0">
             <select-customerlist
               ref="selectcustomerlist"
               v-bind:blank-data="true"
@@ -76,6 +79,7 @@
               v-bind:row-index="0"
               v-on:change-event="customerChanges"
             ></select-customerlist>
+            </div>
           </div>
           <message-data
             v-bind:message-datas="messagedatacustomer"
@@ -90,7 +94,7 @@
         <!-- .col -->
         <div class="flex_width print-none">
           <div id="input-area_2">
-            <div class="input-area-prepend">
+            <div class="input-area-prepend w_cate">
               <span
                 class="input-area-text"
                 id="basic-addon1"
@@ -114,7 +118,7 @@
         <!-- .col -->
         <div class="flex_width print-none">
           <div id="input-area_2">
-            <div class="input-area-prepend">
+            <div class="input-area-prepend w_cate">
               <span
                 class="input-area-text"
                 id="basic-addon1"
@@ -137,7 +141,7 @@
         <!-- .col -->
         <!-- <div class="flex_width print-none">
           <div id="input-area_2">
-            <div class="input-area-prepend">
+            <div class="input-area-prepend w_cate">
               <span
                 class="input-area-text"
                 id="basic-addon1"
@@ -330,17 +334,13 @@ export default {
       messagedataorderno: "",
       messagedatadrawingno: "",
       messagedataproductsname: "",
-      form: {
-        supply_date: ""
-      
-      
-      }
 
     };
   },
   // マウント時
   mounted() {
-    this.valuesupplydate = this.defaultDate;
+    //this.valuesupplydate = this.defaultDate;
+    this.valuesupplydate = null;
     console.log('mounted defaultDate = ' + this.defaultDate);
     console.log('mounted valuesupplydate = ' + this.valuesupplydate);
     var date = new Date();
@@ -362,9 +362,12 @@ export default {
     this.value_order_no = null;
     this.value_drawing_no = null;
     this.getItem();
-    this.form.supply_date = this.valuesupplydate;
     console.log('mounted valuesupplydate = ' + this.valuesupplydate);
+    if (this.valuesupplydate == null || this.valuesupplydate == "") {
+    this.targetFromYmd = null;
+    } else {
     this.targetFromYmd= moment(this.valuesupplydate).format("YYYYMMDD");
+    }
   },
   methods: {
     // ------------------------ イベント処理 ------------------------------------
@@ -382,14 +385,12 @@ export default {
     supplydateChanges: function(value) {
       moment.locale("ja");
       this.valuesupplydate = value;
-      this.form.supply_date = value;
       this.targetFromYmd = moment(value).format("YYYYMMDD");
       this.targetToYmd = null;
     },
     // 指定日付がクリアされた場合の処理
     supplydateCleared: function() {
       this.valuesupplydate = "";
-      this.form.supply_date = "";
       this.targetFromYmd = null;
     },
       // 営業所選択が変更された場合の処理

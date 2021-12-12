@@ -49,7 +49,7 @@
             </div>
             <!-- /.row -->
             <!-- ----------- ボタン部 START ---------------- -->
-            <div id="btn_cnt1" class="print-none" v-if="isbtnctrl">
+            <div id="btn_cnt1" class="print-none" v-if="isbtnctrl == 'top'">
               <div class="btn_col_1">
                 <btn-work-time
                   v-on:start-event="startClick1"
@@ -72,6 +72,35 @@
                 ></btn-work-time>
               </div>
             </div>
+
+
+            <div id="btn_cnt2" class="print-none" v-else-if="isbtnctrl == 'suspen'">
+              <div class="btn_col_1">
+                <btn-work-time
+                  v-on:okclick-event="startClickok"
+                  v-bind:btn-mode="'startworkok'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <div class="btn_col_1">
+                <btn-work-time
+                  v-on:okclick-event="startClickmissok"
+                  v-bind:btn-mode="'startworkmissok'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <div class="btn_col_1">
+                <btn-work-time
+                  v-on:cancelclick-event="startClickcancel"
+                  v-bind:btn-mode="'startworkcancel'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+            </div>
+
+
+
+>>>>>>> shindo002
             <!-- .row -->
             <div id="btn_cnt2" class="print-none" v-else>
               <!-- col -->
@@ -126,6 +155,8 @@ const C_KIND_END = "2";
 const C_KIND_END_NAME = "作業終了";
 const C_KIND_STOP = "3";
 const C_KIND_STOP_NAME = "作業中断";
+const C_KIND_MSTOP = "4";
+const C_KIND_MSTOP_NAME = "ミス中断";
 const C_KIND_COMPLETE = "9";
 const C_KIND_COMPLETE_NAME = "作業完了";
 
@@ -166,7 +197,7 @@ export default {
         process_time_m: "",
         statusText: ""
       },
-      isbtnctrl: true,
+      isbtnctrl: 'top',
       kind_index: 0,
       kind_name: "",
       count: 0,
@@ -197,7 +228,7 @@ export default {
     },
     // 作業中断処理
     startClick2() {
-      this.isbtnctrl = false;
+      this.isbtnctrl = 'suspen';
       this.form.kind = C_KIND_STOP;
       this.setKind();
       this.form.item_name[this.kind_index] = this.kind_name;
@@ -224,9 +255,16 @@ export default {
     startClickok() {
       this.storeData();
     },
+    // ミス中断
+    startClickmissok() {
+      this.form.kind = C_KIND_MSTOP;
+      this.setKind();
+      this.form.item_name[this.kind_index] = this.kind_name;
+      this.storeData();
+    },
     // 作業キャンセル処理
     startClickcancel() {
-      this.isbtnctrl = true;
+      this.isbtnctrl = 'top';
       this.form.kind = "";
       this.setKind();
       this.form.item_name[this.kind_index] = this.kind_name;
@@ -263,6 +301,7 @@ export default {
     // 登録処理
     storeData() {
       var arrayParams = { form : this.form };
+      console.log('storeData this.form.kind = ' + this.form.kind);
       this.postRequest("/process_history/put", arrayParams)
         .then(response => {
           this.putThen(response, "登録");
@@ -371,6 +410,9 @@ export default {
           break;
         case C_KIND_STOP:
           this.kind_name = C_KIND_STOP_NAME;
+          break;
+        case C_KIND_MSTOP:
+          this.kind_name = C_KIND_MSTOP_NAME;
           break;
         case C_KIND_COMPLETE:
           this.kind_name = C_KIND_COMPLETE_NAME;

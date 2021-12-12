@@ -162,6 +162,7 @@ class MobileAccessController extends Controller
             $device_code = $data["device_code"];
             $user_code = $data["user_code"];
             $row_seq = $data["row_seq"];
+            $progress_no = $data["progress_no"];
             if ($data["process_time_h"] == null || $data["process_time_h"] == "") {
                 $process_time_h = 0;
             } else {
@@ -264,7 +265,7 @@ class MobileAccessController extends Controller
             $process_histories_model->setProcesshistorytimeAttribute(Carbon::now());
             $process_histories_model->setProcessTimeHAttribute($process_time_h);
             $process_histories_model->setProcessTimeMAttribute($process_time_m);
-            $process_histories_model->setCreateduserAttribute($user_code);
+            $process_histories_model->setCreateduserAttribute($login_user_code);
             $process_histories_model->setCreatedatAttribute(Carbon::now());
             $process_histories_model->insert();
             // 指示書／管理書の明細に登録する

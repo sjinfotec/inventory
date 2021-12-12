@@ -11,7 +11,7 @@
             v-bind:header-text2="''"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
-          <div class="card-body pt-2" v-if="isQr">
+          <div class="card-body pt-2">
             <!-- panel contents -->
             <!-- .row -->
             <div class="row justify-content-between">
@@ -131,7 +131,7 @@
                     />
                   </div>
                 </div>
-                <message-data v-bind:message-datas="messagedataorderno" v-bind:message-class="'warning'"></message-data>
+                <span class="print-none"><message-data v-bind:message-datas="messagedataorderno" v-bind:message-class="'warning'"></message-data></span>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -260,6 +260,14 @@
                     >品名</span>
                   </div>
                   <div class="form-control p-0">
+                    <input
+                      type="text"
+                      title="品名"
+                      class="form-control"
+                      v-model="selectedProductsValue"
+                      @change="productsnameChanges"
+                    />
+<!--
                     <select-productlist
                       ref="selectproductlist"
                       v-if="showoProductlist"
@@ -270,6 +278,7 @@
                       v-bind:row-index="0"
                       v-on:change-event="productsnameChanges"
                     ></select-productlist>
+-->
                   </div>
                 </div>
                 <message-data v-bind:message-datas="messagedataproductsname" v-bind:message-class="'warning'"></message-data>
@@ -291,7 +300,7 @@
                       max="999999999"
                       min="0"
                       step="1"
-                      class="form-control"
+                      class="form-control inputnum_r"
                       :value="value_unit_price"
                       @change="unitpriceChanges"
                     />
@@ -369,7 +378,7 @@
                       max="999999999"
                       min="0"
                       step="1"
-                      class="form-control"
+                      class="form-control inputnum_r"
                       :value="value_material_cost"
                       @change="materialcostChanges"
                     />
@@ -445,7 +454,7 @@
                       max="999999999"
                       min="0"
                       step="1"
-                      class="form-control"
+                      class="form-control inputnum_r"
                       :value="value_heat_cost"
                       @change="heatcostChanges"
                     />
@@ -497,7 +506,7 @@
                       max="999999999"
                       min="0"
                       step="1"
-                      class="form-control"
+                      class="form-control inputnum_r"
                       :value="value_outsourcing_cost"
                       @change="outsourcingcostChanges"
                     />
@@ -517,51 +526,31 @@
           <div class="card-body mb-3 p-0 border-top" v-if="isQr">
             <!-- panel contents -->
             <!-- .row -->
-            <div class="row justify-content-between px-3">
+            <div id="btn_cnt4">
               <!-- .col -->
-              <div class="col-md-6 pb-2">
-                <div class="input-group">
-                  <a @click="qrcodeClick" class="btn btn-primary print-none">QRコード作成</a>
+              <div class="btn_col_1">
+                <div class="input-group btn_sty_1">
+                  <a @click="no_qrcodeClick" class="btn btn-primary print-none">印刷</a>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="btn_col_1">
+                <div class="input-group btn_sty_1">
+                  <a @click="qrcodeClick" class="btn btn-primary print-none">QRコード付き印刷</a>
                 </div>
               </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
           </div>
-          <div class="card-body mb-3 p-0 border-top" v-else>
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- .col -->
-              <div class="col-md-3 pb-2">
-                <span>[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}]</span>
-              </div>
-              <!-- /.col -->
-              <!-- .col -->
-              <div class="col-md-9 pb-2">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <vue-qrcode v-if="qrText" :value="qrText" :options="qroption1" tag="img"></vue-qrcode>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- .col -->
-              <div class="col-md-6 pb-2">
-                <div class="input-group">
-                  <a @click="backClick" class="btn btn-primary print-none">戻る</a>
-                </div>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-          </div>
-          <div class="card-body mb-3 p-0 border-top" v-if="isQr">
+
+
+ 
 
 
 
-
+          <div class="card-body mb-3 p-0 border-top" >
             <!-- panel contents -->
             <!-- .row -->
             <div class="row justify-content-between px-3">
@@ -677,9 +666,16 @@
                     </table>
                   </div>
                 </div>
-<div class="cnt_view_qr">
-  <div class="cnt_view_position"><img src="/images/test_qr.png"></div>
-</div><!--end view QR code-->
+                <!-- 印刷用QRコード-->
+                <div id="view_off">
+                  <div id="print_view_qr" class="cnt_view_qr">
+                    <div class="cnt_view_position">
+                      <vue-qrcode  :value="qrText" :options="qroption1" tag="img"></vue-qrcode>
+                      <p><span>[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}]</span></p>
+                    </div>
+                  </div><!--end view QR code v-if="isprint_qrText"-->
+                </div>
+                <!--/印刷用QRコード-->
               </div>
             </div>
             <!-- /.row -->
@@ -830,15 +826,10 @@
                   <td colspan="4" class="textalign1 border_off">時間単価</td>
                   <td colspan="4" class="textalign1">10000</td>
                 </tr>
-
-
-
-
               </table>
               </div>
             </div>
             <!-- /.row -->
-
 
             <!-- ----------- ボタン部 START ---------------- -->
             <!-- .row -->
@@ -929,13 +920,13 @@ export default {
       value_order_count: "",
       value_row_seq: "",
       value_model_number: "",
-      value_unit_price: 0,
-      value_material_cost: 0,
+      value_unit_price: "",
+      value_material_cost: "",
       value_outline_name: "",
       value_back_order_quality_name: "",
       value_heat_process: "",
-      value_heat_cost: 0,
-      value_outsourcing_cost: 0,
+      value_heat_cost: "",
+      value_outsourcing_cost: "",
       value_seq: 0,
       value_back_order_customer_name: "",
       value_order_date: "",
@@ -1072,7 +1063,8 @@ export default {
       messagedatatimeround: [],
       const_C009_data: [],
       const_C010_data: [],
-      storeisPush: false
+      storeisPush: false,
+      isprint_qrText: false
     };
   },
   computed: {
@@ -1213,48 +1205,58 @@ export default {
     // 受注番号が変更された場合の処理
     ordernoChanges: function(event) {
       this.form.order_no = event.target.value;
+      this.value_order_no = event.target.value;
       this.setQrText();
 
     },
     // 行が変更された場合の処理
     seqChanges: function(event) {
       this.form.row_seq = event.target.value;
+      this.value_row_seq = event.target.value;
       this.setQrText();
     },
     // 図面番号が変更された場合の処理
     drawingnoChanges: function(event) {
       this.form.drawing_no = event.target.value;
+      this.value_drawing_no = event.target.value;
       this.setQrText();
     },
     // 個数が変更された場合の処理
     ordercountChanges: function(event) {
       this.form.order_count = event.target.value;
+      this.value_order_count = event.target.value;
     },
     // 型式／型番が変更された場合の処理
     modelnumberChanges: function(event) {
       this.form.model_number = event.target.value;
+      this.value_model_number= event.target.value;
     },
     // 品名が変更された場合の処理
-    productsnameChanges: function(value, arrayitem) {
+    productsnameChanges: function(event) {
       this.form.product_code = event.target.value;
+      this.selectedProductsValue = event.target.value;
       // 工程データ読み込み工程管理書入力の2-11に設定する
       this.getProductProcess(this.form.product_code);
     },
     // 単価が変更された場合の処理
     unitpriceChanges: function(event) {
       this.form.unit_price = event.target.value;
+      this.value_unit_price = event.target.value;
     },
     // 明細摘要が変更された場合の処理
     outlinenameChanges: function(event) {
       this.form.outline_name = event.target.value;
+      this.value_outline_name = event.target.value;
     },
     // 材質・寸法が変更された場合の処理
     backorderqualitychanges: function(event) {
       this.form.back_order_quality_name = event.target.value;
+      this.value_back_order_quality_name = event.target.value;
     },
     // 材料費が変更された場合の処理
     materialcostChanges: function(event) {
       this.form.material_cost = event.target.value;
+      this.value_material_cost = event.target.value;
     },
     // 素材納入営業所が変更された場合の処理
     materialofficeChanges: function(value, arrayitem) {
@@ -1271,10 +1273,12 @@ export default {
     // 熱処理が変更された場合の処理
     heatprocesschanges: function(event) {
       this.form.heat_process = event.target.value;
+      this.value_heat_process = event.target.value;
     },
     // 熱処理費が変更された場合の処理
     heatcostChanges: function(event) {
       this.form.heat_cost = event.target.value;
+      this.value_heat_cost = event.target.value;
     },
     // 外注先営業所が変更された場合の処理
     outsourcingofficecodeChanges: function(value, arrayitem) {
@@ -1291,6 +1295,7 @@ export default {
     // 外注費が変更された場合の処理
     outsourcingcostChanges: function(event) {
       this.form.outsourcing_cost = event.target.value;
+      this.value_outsourcing_cost = event.target.value;
     },
     // 機器名が変更された場合の処理
     devicecodeChanges: function(value , index) {
@@ -1350,9 +1355,36 @@ export default {
     
     // QRコード作成ボタンクリック処理
     qrcodeClick() {
-      this.isQr = false;
-      this.setQrText();
-      this.$forceUpdate();
+      if (this.checkForm()) {
+        //this.isQr = false;
+        this.isQr = true;
+        this.setQrText();
+        this.$forceUpdate();
+        print_view_qr.style.display = 'block';
+        //this.isprint_qrText = true;
+        this.qr_print();
+        // 項目数が多い場合以下コメントアウト
+      } else {
+        this.countswal(
+          "エラー",
+          this.messagedatastore,
+          "error",
+          true,
+          false,
+          true
+        ).then(result => {
+          if (result) {
+          }
+        });
+      }
+    },
+    no_qrcodeClick() {
+      print_view_qr.style.display = 'none';
+      //this.isprint_qrText = false;
+      this.qr_print();
+    },
+    qr_print() {
+      window.print();
     },
     backClick() {
       this.isQr = true;

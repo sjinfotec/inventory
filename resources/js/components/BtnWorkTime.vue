@@ -188,6 +188,10 @@
       <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor12" :disabled="isPush">
         キャンセル</button>
     </div>
+    <div v-if="btnMode ==='startworkmissok'" class="btn-group d-flex" v-on:click="okclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor14" :disabled="isPush">
+        ミス</button>
+    </div>
     <div v-if="btnMode ==='startsearchgo'" class="btn-group d-flex" v-on:click="searchclickBtn()">
       <button type="button" class="btn btn-primary btn-lg font-size-rg  btncolor13" :disabled="isPush">
         この条件で表示する</button>
