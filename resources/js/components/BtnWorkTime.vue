@@ -180,6 +180,10 @@
       <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor3" :disabled="isPush">
         作業完了</button>
     </div>
+    <div v-if="btnMode ==='startwork4'" class="btn-group d-flex" v-on:click="startclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor1" :disabled="isPush">
+        作業再開</button>
+    </div>
     <div v-if="btnMode ==='startworkok'" class="btn-group d-flex" v-on:click="okclickBtn()">
       <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor11" :disabled="isPush">
         OK</button>
@@ -188,9 +192,21 @@
       <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor12" :disabled="isPush">
         キャンセル</button>
     </div>
-    <div v-if="btnMode ==='startworkmissok'" class="btn-group d-flex" v-on:click="okclickBtn()">
-      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor14" :disabled="isPush">
+    <div v-if="btnMode ==='startworksus'" class="btn-group d-flex" v-on:click="okclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor13" :disabled="isPush">
+        中断</button>
+    </div>
+    <div v-if="btnMode ==='startworkmiss'" class="btn-group d-flex" v-on:click="okclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor13" :disabled="isPush">
         ミス</button>
+    </div>
+    <div v-if="btnMode ==='startworkcomp'" class="btn-group d-flex" v-on:click="okclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor14" :disabled="isPush">
+        完成</button>
+    </div>
+    <div v-if="btnMode ==='startworknext'" class="btn-group d-flex" v-on:click="okclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100 btncolor15" :disabled="isPush">
+        次工程</button>
     </div>
     <div v-if="btnMode ==='startsearchgo'" class="btn-group d-flex" v-on:click="searchclickBtn()">
       <button type="button" class="btn btn-primary btn-lg font-size-rg  btncolor13" :disabled="isPush">

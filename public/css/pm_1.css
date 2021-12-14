@@ -337,6 +337,7 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 }
 #table_cnt2 .frame_wh1  {
   height:48px;
+  width:16%;
 }
 #table_cnt2 .ws1 {
   width:2rem;
@@ -366,11 +367,7 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 }
 
 
-<<<<<<< HEAD
-/*--process info Mobile--*/
-=======
 /*--------------------## process info Mobile ##--------------------*/
->>>>>>> shindo002
 #table_cnt3 {
   width:100%;
   border-collapse: collapse;
@@ -452,13 +449,10 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   background:#FFF;
   padding-top:20px;
 }
-<<<<<<< HEAD
-=======
 #btn_cnt2 .btn_col_1  {
   flex: 0 0 30%;
   max-width: 30%;
 }
->>>>>>> shindo002
 #btn_cnt2 .btncolor11  {
 	background: #bb8c60;
   border:none;
@@ -467,13 +461,19 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 	background: #60bbac;
   border:none;
 }
-<<<<<<< HEAD
-=======
-#btn_cnt2 .btncolor14  {
-	background: #bb6086;
+#btn_cnt2 .btncolor13  {
+	background: #dd6060;
   border:none;
 }
->>>>>>> shindo002
+#btn_cnt2 .btncolor14  {
+	/*background: #bb6086;*/
+	background: #6cb2eb;
+  border:none;
+}
+#btn_cnt2 .btncolor15  {
+	background: #eeaa00;
+  border:none;
+}
 #btn_cnt2 .btncolor11:hover  {
   color: #212529;
 	background: rgba(187, 140, 96, 0.7);
@@ -482,6 +482,19 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   color: #212529;
 	background: rgba(96, 187, 172, 0.7);
 }
+#btn_cnt2 .btncolor13:hover  {
+  color: #212529;
+  background:rgba(221, 96, 96, 0.7);
+}
+#btn_cnt2 .btncolor14:hover  {
+  color: #212529;
+	/*background: #bb6086;*/
+	background: rgba(108, 178, 235, 0.7);
+}
+#btn_cnt2 .btncolor15:hover  {
+  color: #212529;
+	background: rgba(238, 170, 0, 0.7);
+}
 
 button:focus {
 	outline:none;
@@ -489,11 +502,7 @@ button:focus {
 }
 
 
-<<<<<<< HEAD
-/*--process view--*/
-=======
 /*--------------------## process view ##--------------------*/
->>>>>>> shindo002
 .title001 {
   font-size:1.2rem;
   letter-spacing: 0.2rem;
@@ -515,13 +524,13 @@ button:focus {
 #table_cnt4 .style1{
 background:#DDEECC;
 border-bottom:4px solid #88CC88;
+white-space: nowrap;
+}
+#table_cnt4 td {
+  font-size:1.2rem;
 }
 
-<<<<<<< HEAD
-/*--table progress header  (TOP page)--*/
-=======
 /*--------------------## table progress header  (TOP page) ##--------------------*/
->>>>>>> shindo002
 #search_btn_cnt {
   display:flex;
   justify-content: space-between;
@@ -576,20 +585,37 @@ border-bottom:4px solid #88CC88;
   margin-bottom:15px;
 }
 #table_cnt5 .w1{
-  min-width:3rem;
+  width:50px;
 }
 #table_cnt5 .w2{
-  min-width:7rem;
+  width:120px;
 }
 #table_cnt5 .w3{
-  min-width:6rem;
+  width:210px;
 }
 #table_cnt5 .w4{
-  min-width:2.4rem;
+  width:100px;
 }
 #table_cnt5 .w5{
-  min-width:14rem;
+  width:40px;
 }
+#table_cnt5 .w6{
+  width:240px;
+}
+#table_cnt5 .w7{
+  width:50px;
+}
+#table_cnt5 .w8{
+  width:230px;
+}
+#table_cnt5 .w9{
+  width:230px;
+}
+#table_cnt5 .textwrap {
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
 
 #input-area_2  {
   position: relative;
@@ -651,13 +677,10 @@ border-bottom:4px solid #88CC88;
   color: #495057;
 }
 #input-area_2 .w1{width:5rem;}
-<<<<<<< HEAD
-=======
 #input-area_2 .w_cate {
   flex: 0 0 80px;
   width:80px;
 }
->>>>>>> shindo002
 #btn_cnt3 {
   display:-webkit-flex;
   display:flex;
@@ -704,5 +727,13 @@ border-bottom:4px solid #88CC88;
   vertical-align: middle;
   height:192px;
   }
+  #table_cnt2 td  {
+    padding:4px 4px;
+  }
+  #table_cnt2 .str01{
+    margin-left: 2px;
+  }
+
+
 }
 

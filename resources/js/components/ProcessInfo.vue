@@ -72,20 +72,43 @@
                 ></btn-work-time>
               </div>
             </div>
-
-
-            <div id="btn_cnt2" class="print-none" v-else-if="isbtnctrl == 'suspen'">
+            <div id="btn_cnt1" class="print-none" v-else-if="isbtnctrl == 'top2'">
               <div class="btn_col_1">
                 <btn-work-time
-                  v-on:okclick-event="startClickok"
-                  v-bind:btn-mode="'startworkok'"
+                  v-on:start-event="startClick4"
+                  v-bind:btn-mode="'startwork4'"
                   v-bind:is-push="false"
                 ></btn-work-time>
               </div>
               <div class="btn_col_1">
                 <btn-work-time
-                  v-on:okclick-event="startClickmissok"
-                  v-bind:btn-mode="'startworkmissok'"
+                  v-on:start-event="startClick2"
+                  v-bind:btn-mode="'startwork2'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <div class="btn_col_1">
+                <btn-work-time
+                  v-on:start-event="startClick3"
+                  v-bind:btn-mode="'startwork3'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+            </div>
+
+
+            <div id="btn_cnt2" class="print-none" v-else-if="isbtnctrl == 'suspen'">
+              <div class="btn_col_1">
+                <btn-work-time
+                  v-on:okclick-event="startClicksus"
+                  v-bind:btn-mode="'startworksus'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <div class="btn_col_1">
+                <btn-work-time
+                  v-on:okclick-event="startClickmiss"
+                  v-bind:btn-mode="'startworkmiss'"
                   v-bind:is-push="false"
                 ></btn-work-time>
               </div>
@@ -97,6 +120,31 @@
                 ></btn-work-time>
               </div>
             </div>
+
+            <div id="btn_cnt2" class="print-none" v-else-if="isbtnctrl == 'comple'">
+              <div class="btn_col_1">
+                <btn-work-time
+                  v-on:okclick-event="startClickcomp"
+                  v-bind:btn-mode="'startworkcomp'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <div class="btn_col_1">
+                <btn-work-time
+                  v-on:okclick-event="startClicknext"
+                  v-bind:btn-mode="'startworknext'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <div class="btn_col_1">
+                <btn-work-time
+                  v-on:cancelclick-event="startClickcancel"
+                  v-bind:btn-mode="'startworkcancel'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+            </div>
+
             <!-- .row -->
             <div id="btn_cnt2" class="print-none" v-else>
               <!-- col -->
@@ -145,16 +193,19 @@ const C_PRODUCT_NAME = "品名";
 const C_OUTLINE_NAME = "明細摘要";
 const C_DEVICE_NAME = "機器名";
 const C_USER_NAME = "作業者";
-const C_KIND_START = "1";
+const C_KIND_INI = "1";
+const C_KIND_INI_NAME = "初期（テスト表示）";
+const C_KIND_START = "2";
 const C_KIND_START_NAME = "作業開始";
-const C_KIND_END = "2";
-const C_KIND_END_NAME = "作業終了";
 const C_KIND_STOP = "3";
 const C_KIND_STOP_NAME = "作業中断";
 const C_KIND_MSTOP = "4";
 const C_KIND_MSTOP_NAME = "ミス中断";
-const C_KIND_COMPLETE = "9";
+const C_KIND_COMPLETE = "5";
 const C_KIND_COMPLETE_NAME = "作業完了";
+const C_KIND_NEXT = "6";
+const C_KIND_NEXT_NAME = "次工程";
+const kindcolorArr = {"初期（テスト表示）":"#FFF", "作業開始":"#80bb60", "作業中断":"#dd6060", "ミス中断":"#dd6060", "作業完了":"#6cb2eb", "次工程":"#eeaa00" };
 
 export default {
   name: "ProcessInfo",
@@ -199,7 +250,9 @@ export default {
       count: 0,
       before_count: 0,
       form_count: 0,
-      details: []
+      details: [],
+      maketime: false,
+      kindstatus: "",
     };
   },
   computed: {
@@ -230,43 +283,86 @@ export default {
       this.form.item_name[this.kind_index] = this.kind_name;
   	  target.style.background = '#dd6060';
       table_cnt3.style.color = '#FFF';
-      //btn_cnt2.style.display = 'flex';
-      //btn_cnt1.style.display = 'none';
-      //this.style.display = 'none';
     },
     // 作業完了処理
     startClick3() {
-      this.isbtnctrl = false;
+      this.isbtnctrl = 'comple';
       this.form.kind = C_KIND_COMPLETE;
       this.setKind();
       this.form.item_name[this.kind_index] = this.kind_name;
       this.maketime = true;
-      //this.strintime = true;
   	  target.style.background = '#6cb2eb';
       table_cnt3.style.color = '#FFF';
       //btn_cnt2.style.display = 'flex';
       //btn_cnt1.style.display = 'none';
     },
+    // 作業再開処理
+    startClick4() {
+      this.isbtnctrl = false;
+      this.form.kind = C_KIND_START;
+      this.setKind();
+      this.form.item_name[this.kind_index] = this.kind_name;
+    	target.style.background = '#80bb60';
+      table_cnt3.style.color = '#FFF';
+    },
     // 確認OK
     startClickok() {
       this.storeData();
+      this.isbtnctrl = 'top';
+
     },
-    // ミス中断
-    startClickmissok() {
+    // 中断処理
+    startClicksus() {
+      //this.kindstatus = C_KIND_STOP;
+      this.form.kind = C_KIND_STOP;
+      this.setKind();
+      this.form.item_name[this.kind_index] = this.kind_name;
+      this.storeData();
+      this.isbtnctrl = 'top2';
+    },
+    // ミス処理
+    startClickmiss() {
+      //this.kindstatus = C_KIND_MSTOP;
       this.form.kind = C_KIND_MSTOP;
       this.setKind();
       this.form.item_name[this.kind_index] = this.kind_name;
       this.storeData();
+      this.isbtnctrl = 'top2';
+    },
+    // 完成処理
+    startClickcomp() {
+      //this.kindstatus = C_KIND_COMPLETE;
+      this.form.kind = C_KIND_COMPLETE;
+      this.setKind();
+      this.form.item_name[this.kind_index] = this.kind_name;
+      this.storeData();
+      this.maketime = false;
+      this.isbtnctrl = 'top';
+    },
+    // 次工程処理
+    startClicknext() {
+      //this.kindstatus = C_KIND_NEXT;
+      this.form.kind = C_KIND_NEXT;
+      this.setKind();
+      this.form.item_name[this.kind_index] = this.kind_name;
+      this.storeData();
+      this.maketime = false;
+      this.isbtnctrl = 'top';
     },
     // 作業キャンセル処理
     startClickcancel() {
       this.isbtnctrl = 'top';
-      this.form.kind = "";
-      this.setKind();
-      this.form.item_name[this.kind_index] = this.kind_name;
+      //this.form.kind = this.kindstatus;
+      //this.form.kind = "";
+      //this.setKind();
+      //this.form.item_name[this.kind_index] = this.kind_name;
+      this.form.item_name[this.kind_index] = this.kindstatus;
       this.maketime = false;
-  	  target.style.background = '#FFF';
-      table_cnt3.style.color = '#212529';
+console.log( kindcolorArr );
+console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
+  	  target.style.background = kindcolorArr[this.kindstatus];
+  	  //target.style.background = '#FFF';
+      //table_cnt3.style.color = '#212529';
 //document.getElementById('btn_cnt1').getElementsByClassName('btncolor2').style.color = '#8888CC';
     },
     // キャンセル
@@ -276,10 +372,6 @@ export default {
     // -------------------- サーバー処理 ----------------------------
     // 指示書／管理書取得
     getItem() {
-      console.log('ProcessInfo getItem order_no = ' + this.order_no);
-      console.log('ProcessInfo getItem seq = ' + this.seq);
-      console.log('ProcessInfo getItem kind = ' + this.kind);
-      console.log('ProcessInfo getItem device = ' + this.device);
       var arrayParams = { 
         order_no : this.order_no ,
         seq : this.seq,
@@ -315,7 +407,6 @@ export default {
       this.details = res.details;
       this.count = this.details.length;
       if ( this.details.length > 0) {
-        this.form.kind = this.kind;
         this.form.device_code = this.device;
         this.form.user_code = this.user_code;
         this.form.order_no = this.order_no;
@@ -360,6 +451,7 @@ export default {
           $this.form.item_name[set_index] = $this.kind_name;
           $this.form.item_data[set_index] = "";
           $this.kind_index = set_index;
+          $this.kindstatus = $this.kind_name;
         });
         this.form_count = set_index + 1;
         console.log('getThen in form_count = ' + this.form_count);
@@ -379,6 +471,8 @@ export default {
         messages.push("作業工程を" + eventtext + "しました。");
         this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
         this.getItem();
+        //this.isbtnctrl = 'top';
+
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -401,19 +495,25 @@ export default {
         case C_KIND_START:
           this.kind_name = C_KIND_START_NAME;
           break;
-        case C_KIND_END:
-          this.kind_name = C_KIND_END_NAME;
-          break;
         case C_KIND_STOP:
           this.kind_name = C_KIND_STOP_NAME;
+          //this.isbtnctrl = 'top2';
           break;
         case C_KIND_MSTOP:
           this.kind_name = C_KIND_MSTOP_NAME;
+          //this.isbtnctrl = 'top2';
           break;
         case C_KIND_COMPLETE:
           this.kind_name = C_KIND_COMPLETE_NAME;
+          //this.isbtnctrl = 'top';
+          break;
+        case C_KIND_NEXT:
+          this.kind_name = C_KIND_NEXT_NAME;
+          //this.isbtnctrl = 'top';
+      	  target.style.background = '#eeaa00';
           break;
         default:
+          this.kind_name = C_KIND_INI_NAME;
           break;
       }
       console.log('setKind out = ' + this.kind_name);

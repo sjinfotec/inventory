@@ -44,6 +44,7 @@ class Progressheader extends Model
     private $material_cost;                              // 材料費
     private $material_office_code;                              // 素材納入営業所コード
     private $material_customer_code;                              // 素材納入顧客コード
+    private $material_customer_name;                         // 素材納入元
     private $heat_process;                              // 熱処理
     private $heat_cost;                              // 熱処理費
     private $outsourcing_office_code;                              // 外注営業所コード
@@ -274,6 +275,16 @@ class Progressheader extends Model
     {
         $this->material_customer_code = $value;
     }
+    // 素材納入元
+    public function getMaterialcustomernameAttribute()
+    {
+        return $this->material_customer_name;
+    }
+
+    public function setMaterialcustomernameAttribute($value)
+    {
+        $this->material_customer_name = $value;
+    }
     //熱処理
     public function getHeatprocessAttribute()
     {
@@ -410,6 +421,7 @@ class Progressheader extends Model
     private $param_material_cost;                              // 材料費
     private $param_material_office_code;                              // 素材納入営業所コード
     private $param_material_customer_code;                              // 素材納入顧客コード
+    private $param_material_customer_name;                              // 素材納入元
     private $param_heat_process;                              // 熱処理
     private $param_heat_cost;                              // 熱処理費
     private $param_outsourcing_office_code;                              // 外注営業所コード
@@ -674,6 +686,16 @@ class Progressheader extends Model
     {
         $this->param_material_customer_code = $value;
     }
+    //素材納入元
+    public function getParamMaterialcustomernameAttribute()
+    {
+        return $this->param_material_customer_name;
+    }
+    
+    public function setParamMaterialcustomernameAttribute($value)
+    {
+        $this->param_material_customer_name = $value;
+    }
     //熱処理
     public function getParamHeatprocessAttribute()
     {
@@ -836,6 +858,7 @@ class Progressheader extends Model
             $sqlString .= "  , t1.material_cost as material_cost" ;
             $sqlString .= "  , t1.material_office_code as material_office_code" ;
             $sqlString .= "  , t1.material_customer_code as material_customer_code" ;
+            $sqlString .= "  , t1.material_customer_name as material_customer_name" ;
             $sqlString .= "  , t1.heat_process as heat_process" ;
             $sqlString .= "  , t1.heat_cost as heat_cost" ;
             $sqlString .= "  , t1.outsourcing_office_code as outsourcing_office_code" ;
@@ -953,6 +976,7 @@ class Progressheader extends Model
                     'material_cost' => $this->material_cost,
                     'material_office_code' => $this->material_office_code,
                     'material_customer_code' => $this->material_customer_code,
+                    'material_customer_name' => $this->material_customer_name,
                     'heat_process' => $this->heat_process,
                     'heat_cost' => $this->heat_cost,
                     'outsourcing_office_code' => $this->outsourcing_office_code,
@@ -1011,6 +1035,7 @@ class Progressheader extends Model
             $sqlString .= "  , t1.material_cost as material_cost" ;
             $sqlString .= "  , t1.material_office_code as material_office_code" ;
             $sqlString .= "  , t1.material_customer_code as material_customer_code" ;
+            $sqlString .= "  , t1.material_customer_name as material_customer_name" ;
             $sqlString .= "  , t1.heat_process as heat_process" ;
             $sqlString .= "  , t1.heat_cost as heat_cost" ;
             $sqlString .= "  , t1.outsourcing_office_code as outsourcing_office_code" ;

@@ -32,8 +32,10 @@
                           <td class="style1 text-center align-middle w-10">機器名</td>
                           <td class="style1 text-center align-middle w-10">作業者名</td>
                           <td class="style1 text-center align-middle w-10">状況</td>
+                          <!--
                           <td class="style1 text-center align-middle w-10">作業時刻</td>
                           <td class="style1 text-center align-middle w-10">作業時間</td>
+                          -->
                         </tr>
                       </thead>
                       <tbody>
@@ -46,6 +48,7 @@
                           <td class="text-center align-middle">{{ item.device_name }}</td>
                           <td class="text-center align-middle">{{ item.user_name }}</td>
                           <td class="text-center align-middle">{{ item.work_kind_name }}</td>
+                          <!--
                           <td class="text-center align-middle">{{ item.process_history_time_name }}</td>
                           <div v-if="item.process_time_h">
                             <td class="text-center align-middle">{{ item.process_time_h }}時間{{ item.process_time_m }}分</td>
@@ -54,6 +57,7 @@
                             <td class="text-center align-middle"></td>
                           </div>
                           <td class="text-center align-middle"></td>
+                          -->
                         </tr>
                       </tbody>
                     </table>

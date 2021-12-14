@@ -189,13 +189,13 @@
                 <tr>
                   <td class="text-center align-middle w1">No.</td>
                   <td class="text-center align-middle w2">納期</td>
-                  <td class="text-center align-middle w5">客先</td>
-                  <td class="text-center align-middle w3">受注番号</td>
-                  <td class="text-center align-middle w4">行</td>
-                  <td class="text-center align-middle mw-rem-15">図面番号</td>
-                  <td class="text-center align-middle w1">個数</td>
-                  <td class="text-center align-middle mw-rem-15">型式／型番</td>
-                  <td class="text-center align-middle mw-rem-15">品名</td>
+                  <td class="text-center align-middle w3">客先</td>
+                  <td class="text-center align-middle w4">受注番号</td>
+                  <td class="text-center align-middle w5">行</td>
+                  <td class="text-center align-middle w6">図面番号</td>
+                  <td class="text-center align-middle w7">個数</td>
+                  <td class="text-center align-middle w8">型式／型番</td>
+                  <td class="text-center align-middle w9">品名</td>
                   <td colspan="2" class="text-center align-middle mw-rem-10">操作</td>
                 </tr>
               </thead>
@@ -203,13 +203,13 @@
                 <tr v-for="(item,rowIndex) in details" :key="rowIndex">
                   <td class="text-right align-middle w1">{{ rowIndex + 1 }}</td>
                   <td class="text-left align-middle w2">{{ item['supply_date_name'] }}</td>
-                  <td class="text-left align-middle w5">{{ item['customer_name'] }}</td>
-                  <td class="text-left align-middle w3">{{ item['order_no'] }}</td>
-                  <td class="text-left align-middle w4">{{ item['row_seq'] }}</td>
-                  <td class="text-left align-middle mw-rem-15">{{ item['drawing_no'] }}</td>
-                  <td class="text-left align-middle w1">{{ item['order_count'] }}</td>
-                  <td class="text-left align-middle mw-rem-15">{{ item['model_number'] }}</td>
-                  <td class="text-left align-middle mw-rem-15">{{ item['product_name'] }}</td>
+                  <td class="text-left align-middle w3" textwrap>{{ item['customer_name'] }}</td>
+                  <td class="text-left align-middle w4">{{ item['order_no'] }}</td>
+                  <td class="text-left align-middle w5">{{ item['row_seq'] }}</td>
+                  <td class="text-left align-middle w6">{{ item['drawing_no'] }}</td>
+                  <td class="text-left align-middle w7">{{ item['order_count'] }}</td>
+                  <td class="text-left align-middle w8 textwrap">{{ item['model_number'] }}</td>
+                  <td class="text-left align-middle w9 textwrap">{{ item['product_name'] }}</td>
                   <td class="text-center align-middle mw-rem-5">
                     <a :href="edtUrl(item['order_no'],item['row_seq'] )" class="btn btn-primary">編集</a>
                   </td>

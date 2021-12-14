@@ -422,6 +422,10 @@
      require("./components/SelectCustomerList.vue").default
  );
  Vue.component(
+    "select-outsoucingcustomerlist",
+    require("./components/SelectOutsorcingCustomerList.vue").default
+);
+Vue.component(
      "select-productlist",
      require("./components/selectProductList.vue").default
  );

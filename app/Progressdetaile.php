@@ -584,6 +584,9 @@ class Progressdetaile extends Model
             if (!empty($this->param_users_code)) {
                 $sqlString .= "    and t1.users_code = ?" ;
             }
+            if (!empty($this->param_progress_no)) {
+                $sqlString .= "    and t1.progress_no = ?" ;
+            }
             // バインド
             $array_setBindingsStr = array();
             $array_setBindingsStr[] = 1;
@@ -599,6 +602,9 @@ class Progressdetaile extends Model
             }
             if (!empty($this->param_users_code)) {
                 $array_setBindingsStr[] = $this->param_users_code;
+            }
+            if (!empty($this->param_progress_no)) {
+                $array_setBindingsStr[] = $this->param_progress_no;
             }
             $details = DB::select($sqlString, $array_setBindingsStr);
             return $details;
@@ -665,7 +671,7 @@ class Progressdetaile extends Model
             ->where('device_code', $this->param_device_code)
             ->where('users_code', $this->param_users_code)
             ->update([
-                'progress_no' => $this->apply_term_from,
+                'progress_no' => $this->progress_no,
                 'product_processes_code' => $this->product_processes_code,
                 'product_processes_detail_no' => $this->product_processes_detail_no,
                 'department_code' => $this->department_code,
