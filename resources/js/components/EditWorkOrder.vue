@@ -401,7 +401,8 @@
                       type="text"
                       title="素材納入元"
                       class="form-control"
-                      @change="backorderqualitychanges"
+                      :value="value_material_customer_name"
+                      @change="materialcustomerChanges"
                     />
                   </div>
                 </div>
@@ -472,17 +473,16 @@
                       for="target_customer"
                     >外注先</label>
                   </div>
-                  <select-customerlist
+                  <select-outsoucingcustomerlist
                     ref="selectoutsourcingcustomerlist"
                     v-if="showoOutsourcingcustomerlist"
                     v-bind:blank-data="true"
                     v-bind:placeholder-data="'外注先を選択してください'"
                     v-bind:selected-value="selectedOutsourcingCustomerValue"
                     v-bind:add-new="false"
-                    v-bind:office-code="selectedOutsourcingOfficeValue"
                     v-bind:row-index="0"
                     v-on:change-event="outsourcingcustomerChanges"
-                  ></select-customerlist>
+                  ></select-outsoucingcustomerlist>
                 </div>
                 <message-data
                   v-bind:message-datas="messagedataoutsourcingcustomer"
@@ -575,15 +575,7 @@
                       <thead>
                         <tr>
                           <td class="td-first text-center align-middle w1">工程No.</td>
-                          <td class="text-center align-middle w2">
-                            <div v-if="product_processes_maxindex > 1">
-                              <btn-work-time
-                                v-on:changepattern-event="changepatternclick"
-                                v-bind:btn-mode="'changepattern'"
-                                v-bind:is-push="false"
-                              ></btn-work-time>
-                            </div>
-                          <span>使用機種</span></td>
+                          <td class="text-center align-middle w2">使用機種</td>
                           <td class="text-center align-middle w3">機器名</td>
                           <td class="text-center align-middle w4">加工者</td>
                           <td  colspan="4" class="text-center align-middle ">加工時間</td>
@@ -597,7 +589,7 @@
                           <td class="text-center align-middle">{{form.progress_name[index]}}</td>
                           <td class="text-center align-middle">
                             <select class="form-control" v-model="form.device_code[index]"
-                              @change="devicecodeChanges(form.device_code[index1], index1)">
+                              @change="devicecodeChanges(form.device_code[index], index)">
                               <option value></option>
                               <option
                                 v-for="tlist in progress_details_deviceList"
@@ -608,7 +600,7 @@
                           </td>
                           <td class="text-center align-middle">
                             <select class="form-control" v-model="form.process_user_code[index]"
-                              @change="usercodeChanges(form.process_user_code[index], index1)">
+                              @change="usercodeChanges(form.process_user_code[index], index)">
                               <option value></option>
                               <option
                                 v-for="tlist in progress_details_userList"
@@ -624,6 +616,7 @@
                                 step="1"
                                 class="form-control"
                                 v-model="form.process_time_h[index]"
+                                @change="processtimeHChanges()"
                               />
                             </div>
                           </td>
@@ -635,6 +628,7 @@
                                 step="1"
                                 class="form-control"
                                 v-model="form.process_time_m[index]"
+                                @change="processtimeMChanges()"
                               />
                             </div>
                           </td>
@@ -652,11 +646,11 @@
                         <tr>
                           <td colspan="4" class="td-first text-right align-middle pad2 f_style_1 jtime">実績合計</td>
                           <td class="text-center align-middle ws1 f_style_1">
-                            23
+                            {{form.result_process_time_h}}
                           </td>
                           <td class="td-first text-left align-middle ws2 pad1 f_style_1">H</td>
                           <td class="td-first text-center align-middle ws1 f_style_1">
-                            59
+                            {{form.result_process_time_m}}
                           </td>
                           <td class="td-first text-left align-middle ws2 pad1 f_style_1">M</td>
                           <td class="text-center align-middle w6 f_style_1 print-none">
@@ -667,11 +661,11 @@
                   </div>
                 </div>
                 <!-- 印刷用QRコード-->
-                <div id="view_off">
+                <div id="view_off" v-if="qrText">
                   <div id="print_view_qr" class="cnt_view_qr">
                     <div class="cnt_view_position">
                       <vue-qrcode  :value="qrText" :options="qroption1" tag="img"></vue-qrcode>
-                      <p><span>[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}]</span></p>
+                      <p><span>[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}]{{qrText}}</span></p>
                     </div>
                   </div><!--end view QR code v-if="isprint_qrText"-->
                 </div>
@@ -687,144 +681,98 @@
               <table id="table_cnt2">
                 <tr>
                   <td rowspan="4" class="wrmode">加工時間合計</td>
-                  <td class="frame_wh1">
-                    <div class="flex1">
-                      <div class="cnt2_name">name01</div>
-                      <div class="cnt2_hm"><span class="str01">99 H</span><span class="str01">59 M</span></div>
+                  <td class="frame_wh1" v-for="(n,index1) in 4" :key="index1">
+                    <div class="flex1" v-if="form.total.process_total_user_name_1[index1]">
+                      <div class="cnt2_name">{{ form.total.process_total_user_name_1[index1] }}</div>
+                      <div class="cnt2_hm">
+                        <span class="str01">{{ form.total.process_result_process_time_h_1[index1] }}H</span>
+                        <span class="str01">{{ form.total.process_result_process_time_m_1[index1] }}M</span></div>
                     </div>
-                  </td>
-                  <td>
-                    <div class="flex1">
-                      <div class="cnt2_name">name02</div>
-                      <div class="cnt2_hm"><span class="str01">99 H</span><span class="str01">59 M</span></div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex1">
-                      <div class="cnt2_name">name03</div>
-                      <div class="cnt2_hm"><span class="str01">99 H</span><span class="str01">59 M</span></div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex1">
-                      <div class="cnt2_name">name04</div>
-                      <div class="cnt2_hm"><span class="str01">99 H</span><span class="str01">59 M</span></div>
+                    <div class="flex1" v-else>
+                      <div class="cnt2_name"></div>
+                      <div class="cnt2_hm">
+                        <span class="str01"></span>
+                        <span class="str01"></span></div>
                     </div>
                   </td>
                   <td class="border_off"><div class="flex2"><p class="str03">前回実績<br>月日＆時間</p></div></td>
                           <td class="text-center align-middle ws1 border_off_r">
-                          12
                           </td>
                           <td class="text-left align-middle ws2 pad1 border_off_l border_off_r">月</td>
                           <td class="text-center align-middle ws1 border_off_l border_off_r">
-                          31
                           </td>
                           <td class="text-left align-middle ws2 pad1 border_off_l">日</td>
                           <td class="text-center align-middle ws1 border_off_r">
-                          23
                           </td>
                           <td class="text-left align-middle ws2 pad1 border_off_l border_off_r">H</td>
                           <td class="text-center align-middle ws1 border_off_l border_off_r">
-                          59
                           </td>
                           <td class="text-left align-middle ws2 pad1 border_off_l">M</td>
                 </tr>
 
                 <tr>
-                  <td class="frame_wh1">
-                    <div class="flex1">
-                      <div class="cnt2_name">name05</div>
-                      <div class="cnt2_hm"><span class="str01">99 H</span><span class="str01">59 M</span></div>
+                  <td class="frame_wh1" v-for="(n,index2) in 4" :key="index2">
+                    <div class="flex1" v-if="form.total.process_total_user_name_2[index2]">
+                      <div class="cnt2_name">{{ form.total.process_total_user_name_2[index2] }}</div>
+                      <div class="cnt2_hm">
+                        <span class="str01">{{ form.total.process_result_process_time_h_2[index2] }}H</span>
+                        <span class="str01">{{ form.total.process_result_process_time_m_2[index2] }}M</span></div>
                     </div>
-                  </td>
-                  <td>
-                    <div class="flex1">
-                      <div class="cnt2_name">name06</div>
-                      <div class="cnt2_hm"><span class="str01">99 H</span><span class="str01">59 M</span></div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex1">
-                      <div class="cnt2_name">name07</div>
-                      <div class="cnt2_hm"><span class="str01">99 H</span><span class="str01">59 M</span></div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex1">
-                      <div class="cnt2_name">name08</div>
-                      <div class="cnt2_hm"><span class="str01">99 H</span><span class="str01">59 M</span></div>
+                    <div class="flex1" v-else>
+                      <div class="cnt2_name"></div>
+                      <div class="cnt2_hm">
+                        <span class="str01"></span>
+                        <span class="str01"></span></div>
                     </div>
                   </td>
                   <td class="border_off"></td>
                   <td colspan="4" class="textalign1 border_off">目標加工時間</td>
                           <td class="text-center align-middle ws1 border_off_r">
-                          23
                           </td>
                           <td class="text-left align-middle ws2 pad1 border_off_l border_off_r">H</td>
                           <td class="text-center align-middle ws1 border_off_l border_off_r">
-                          59
                           </td>
                           <td class="text-left align-middle ws2 pad1 border_off_l">M</td>
                 </tr>
 
                 <tr>
-                  <td class="frame_wh1">
-                    <div class="flex1">
-                      <div class="cnt2_name">name09</div>
-                      <div class="cnt2_hm"><span class="str01">99 H</span><span class="str01">59 M</span></div>
+                  <td class="frame_wh1" v-for="(n,index3) in 4" :key="index3">
+                    <div class="flex1" v-if="form.total.process_total_user_name_3[index3]">
+                      <div class="cnt2_name">{{ form.total.process_total_user_name_3[index3] }}</div>
+                      <div class="cnt2_hm">
+                        <span class="str01">{{ form.total.process_result_process_time_h_3[index3] }}H</span>
+                        <span class="str01">{{ form.total.process_result_process_time_m_3[index3] }}M</span></div>
                     </div>
-                  </td>
-                  <td>
-                    <div class="flex1">
-                      <div class="cnt2_name">name10</div>
-                      <div class="cnt2_hm"><span class="str01">99 H</span><span class="str01">59 M</span></div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex1">
-                      <div class="cnt2_name">name11</div>
-                      <div class="cnt2_hm"><span class="str01">99 H</span><span class="str01">59 M</span></div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex1">
-                      <div class="cnt2_name">name12</div>
-                      <div class="cnt2_hm"><span class="str01">99 H</span><span class="str01">59 M</span></div>
+                    <div class="flex1" v-else>
+                      <div class="cnt2_name"></div>
+                      <div class="cnt2_hm">
+                        <span class="str01"></span>
+                        <span class="str01"></span></div>
                     </div>
                   </td>
                   <td class="border_off"></td>
                   <td colspan="4" class="textalign1 border_off">目標金額</td>
-                  <td colspan="4" class="textalign1">99999999</td>
+                  <td colspan="4" class="textalign1"></td>
                 </tr>
 
                 <tr>
-                  <td class="frame_wh1">
-                    <div class="flex1">
-                      <div class="cnt2_name">name13</div>
-                      <div class="cnt2_hm"><span class="str01">99 H</span><span class="str01">59 M</span></div>
+                  <td class="frame_wh1" v-for="(n,index4) in 4" :key="index4">
+                    <div class="flex1" v-if="form.total.process_total_user_name_4[index4]">
+                      <div class="cnt2_name">{{ form.total.process_total_user_name_4[index4] }}</div>
+                      <div class="cnt2_hm">
+                        <span class="str01">{{ form.total.process_result_process_time_h_4[index4] }}H</span>
+                        <span class="str01">{{ form.total.process_result_process_time_m_4[index4] }}M</span></div>
                     </div>
-                  </td>
-                  <td>
-                    <div class="flex1">
-                      <div class="cnt2_name">name14</div>
-                      <div class="cnt2_hm"><span class="str01">99 H</span><span class="str01">59 M</span></div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex1">
-                      <div class="cnt2_name">name15</div>
-                      <div class="cnt2_hm"><span class="str01">99 H</span><span class="str01">59 M</span></div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex1">
-                      <div class="cnt2_name">name16</div>
-                      <div class="cnt2_hm"><span class="str01">99 H</span><span class="str01">59 M</span></div>
+                    <div class="flex1" v-else>
+                      <div class="cnt2_name"></div>
+                      <div class="cnt2_hm">
+                        <span class="str01"></span>
+                        <span class="str01"></span></div>
                     </div>
                   </td>
                   <td></td>
                   <td colspan="4" class="textalign1 border_off">時間単価</td>
-                  <td colspan="4" class="textalign1">10000</td>
+                  <td colspan="4" class="textalign1"></td>
                 </tr>
               </table>
               </div>
@@ -922,6 +870,7 @@ export default {
       value_model_number: "",
       value_unit_price: "",
       value_material_cost: "",
+      value_material_customer_name: "",
       value_outline_name: "",
       value_back_order_quality_name: "",
       value_heat_process: "",
@@ -971,6 +920,7 @@ export default {
         order_date: "",
         supply_date: "",
         office_code: "",
+        order_kingaku: "",
         customer_code: "",
         back_order_customer_name: "",
         order_count: "",
@@ -985,6 +935,7 @@ export default {
         m_office_code: "",
         material: "",
         material_customer_code: "",
+        material_customer_name: "",
         heat_process: "",
         heat_cost: "",
         o_office_code: "",
@@ -997,6 +948,7 @@ export default {
         device_code: [{}],
         process_department_code: [{}],
         process_user_code: [{}],
+        process_user_name: [{}],
         process_history_no: [{}],
         process_time_h: [{}],
         process_time_m: [{}],
@@ -1005,10 +957,25 @@ export default {
         setup_time_m: [{}],
         complete_date: [{}],
         qrText: [{}],
-        total_process_time_h: [{}],
-        total_process_time_m: [{}],
-        total_setup_time_h: [{}],
-        total_setup_time_m: [{}]
+        result_process_time_h: 0,
+        result_process_time_m: 0,
+        result_setup_time_h: 0,
+        result_setup_time_m: 0,
+        total: {
+          process_total_cnt: 0,
+          process_total_user_name_1: [{}],
+          process_result_process_time_h_1: [{}],
+          process_result_process_time_m_1: [{}],
+          process_total_user_name_2: [{}],
+          process_result_process_time_h_2: [{}],
+          process_result_process_time_m_2: [{}],
+          process_total_user_name_3: [{}],
+          process_result_process_time_h_3: [{}],
+          process_result_process_time_m_3: [{}],
+          process_total_user_name_4: [{}],
+          process_result_process_time_h_4: [{}],
+          process_result_process_time_m_4: [{}],
+        }
       },
       qrText:"",
       product_resresults: [],
@@ -1233,10 +1200,10 @@ export default {
     },
     // 品名が変更された場合の処理
     productsnameChanges: function(event) {
-      this.form.product_code = event.target.value;
+      this.form.back_order_product_name = event.target.value;
       this.selectedProductsValue = event.target.value;
       // 工程データ読み込み工程管理書入力の2-11に設定する
-      this.getProductProcess(this.form.product_code);
+      // this.getProductProcess(this.form.product_code);
     },
     // 単価が変更された場合の処理
     unitpriceChanges: function(event) {
@@ -1267,8 +1234,9 @@ export default {
       this.getMaterialCustomerSelected(this.form.m_office_code);
     },
     // 素材納入元が変更された場合の処理
-    materialcustomerChanges: function(value, arrayitem) {
-      this.form.material_customer_code = value;
+    materialcustomerChanges: function(event) {
+      this.form.material_customer_name = event.target.value;
+      this.value_material_customer_name = event.target.value;
     },
     // 熱処理が変更された場合の処理
     heatprocesschanges: function(event) {
@@ -1279,14 +1247,6 @@ export default {
     heatcostChanges: function(event) {
       this.form.heat_cost = event.target.value;
       this.value_heat_cost = event.target.value;
-    },
-    // 外注先営業所が変更された場合の処理
-    outsourcingofficecodeChanges: function(value, arrayitem) {
-      console.log('outsourcingofficecodeChanges value = ' + value);
-      this.form.o_office_code = value;
-      // 客先選択コンポーネントの取得メソッドを実行
-      this.getDo = 1;
-      this.getOutsourcingCustomerSelected(this.form.o_office_code);
     },
     // 外注先が変更された場合の処理
     outsourcingcustomerChanges: function(value, arrayitem) {
@@ -1304,8 +1264,12 @@ export default {
     usercodeChanges: function(value , index) {
     },
     // 加工時間が変更された場合の処理
-    processtimeChanges: function(index) {
-      //
+    processtimeHChanges: function() {
+      this.calcTimes();
+    },
+    // 加工時間が変更された場合の処理
+    processtimeMChanges: function() {
+      this.calcTimes();
     },
     // 段取り時間が変更された場合の処理
     setuptimeChanges: function(index) {
@@ -1449,6 +1413,8 @@ export default {
         order_no : this.order_no ,
         row_seq : this.row_seq
         };
+        console.log('getItem this.order_no = ' + this.order_no);
+        console.log('getItem this.row_seq = ' + this.row_seq);
       this.postRequest("/get_product_chart", arrayParams)
         .then(response  => {
           this.getThen(response);
@@ -1539,133 +1505,120 @@ export default {
         this.count = this.details.length;
         this.before_count = this.count;
         if ( this.details.length > 0) {
-          this.form.order_no = this.details[0].order_no;
-          this.form.seq = this.details[0].seq;
-          this.form.row_seq = this.details[0].row_seq;
-          this.form.drawing_no = this.details[0].drawing_no;
-          this.form.order_date = this.details[0].order_date;
-          this.form.supply_date = this.details[0].supply_date;
-          this.form.office_code = this.details[0].office_code;
-          this.form.customer_code = this.details[0].customer_code;
-          this.form.back_order_customer_name = this.details[0].back_order_customer_name;
-          this.form.order_count = this.details[0].order_count;
-          this.form.model_number = this.details[0].model_number;
-          this.form.product_code = this.details[0].product_code;
-          this.form.processes_code = this.details[0].processes_code;
-          this.form.back_order_product_name = this.details[0].back_order_product_name;
-          this.form.unit_price = this.details[0].unit_price;
-          this.form.outline_name = this.details[0].outline_name;
-          this.form.back_order_quality_name = this.details[0].back_order_quality_name;
-          this.form.material_cost = this.details[0].material_cost;
-          this.form.m_office_code = this.details[0].material_office_code;
-          this.form.material_customer_code = this.details[0].material_customer_code;
-          this.form.heat_process = this.details[0].heat_process;
-          this.form.heat_cost = this.details[0].heat_cost;
-          this.form.o_office_code = this.details[0].outsourcing_office_code;
-          this.form.outsourcing_customer_code = this.details[0].outsourcing_customer_code;
-          this.form.outsourcing_cost = this.details[0].outsourcing_cost;
-          this.form.progress_no[0] = 1;
-          this.form.progress_name[0] = CONST_PROGRESSNO_1;
+          this.form.supply_date = this.details[0]['supply_date'];
+          this.form.office_code = this.details[0]['office_code'];
+          this.form.customer_code = this.details[0]['customer_code'];
+          this.form.back_order_product_name = this.details[0]['back_order_product_name'];
+          this.form.order_no = this.details[0]['order_no'];
+          this.form.seq = this.details[0]['seq'];
+          this.form.order_date = this.details[0]['order_date'];
+          this.form.order_kingaku = this.details[0]['order_kingaku'];
+          this.form.processes_code = this.details[0]['processes_code'];
+          this.form.back_order_customer_name = this.details[0]['back_order_customer_name'];
+          this.form.drawing_no = this.details[0]['drawing_no'];
+          this.form.order_count = this.details[0]['order_count'];
+          this.form.row_seq = this.details[0]['row_seq'];
+          this.form.model_number = this.details[0]['model_number'];
+          this.form.unit_price = this.details[0]['unit_price'];
+          this.form.m_office_code = this.details[0]['material_office_code'];
+          this.form.material_cost = this.details[0]['material_cost'];
+          this.form.material_customer_code = this.details[0]['material_customer_code'];
+          this.form.material_customer_name = this.details[0]['material_customer_name'];
+          this.form.outline_name = this.details[0]['outline_name'];
+          this.form.back_order_quality_name = this.details[0]['back_order_quality_name'];
+          this.form.heat_process = this.details[0]['heat_process'];
+          this.form.heat_cost = this.details[0]['heat_cost'];
+          this.form.o_office_code = this.details[0]['outsourcing_office_code'];
+          this.form.outsourcing_cost = this.details[0]['outsourcing_cost'];
+          this.form.outsourcing_customer_code = this.details[0]['outsourcing_customer_code'];
+
+          this.result_process_time_h = 0;
+          this.result_process_time_m = 0;
           this.details.forEach((detail, i) => {
-            if (i > 0) {
-              if (detail.progress_no != null) {
-                this.form.progress_no[i] = detail.progress_no.toString();
-              } else {
-                this.form.progress_no[i] = "";
-              }
-              if (detail.progress_name != null) {
-                this.form.progress_name[i] = detail.progress_name;
-              } else {
-                this.form.progress_name[i] = "";
-              }
-              if (detail.product_processes_code != null) {
-                this.form.product_processes_code[i] = detail.product_processes_code;
-              } else {
-                this.form.product_processes_code[i] = "";
-              }
-              if (detail.product_processes_detail_no != null) {
-                this.form.product_processes_detail_no[i] = detail.product_processes_detail_no.toString();
-              } else {
-                this.form.product_processes_detail_no[i] = "";
-              }
-              if (detail.device_code != null) {
-                this.form.device_code[i] = detail.device_code;
-              } else {
-                this.form.device_code[i] = "";
-              }
-              if (detail.process_department_code != null) {
-                this.form.process_department_code[i] = detail.process_department_code;
-              } else {
-                this.form.process_department_code[i] = "";
-              }
-              if (detail.process_user_code != null) {
-                this.form.process_user_code[i] = detail.process_user_code;
-              } else {
-                this.form.process_user_code[i] = "";
-              }
-              if (detail.process_history_no != null) {
-                this.form.process_history_no[i] = detail.process_history_no;
-              } else {
-                this.form.process_history_no[i] = "";
-              }
-              if (detail.process_time_h != null) {
-                this.form.process_time_h[i] = detail.process_time_h.toString();
-              } else {
-                this.form.process_time_h[i] = "";
-              }
-              if (detail.process_time_m != null) {
-                this.form.process_time_m[i] = detail.process_time_m.toString();
-              } else {
-                this.form.process_time_m[i] = "";
-              }
-              if (detail.setup_history_no != null) {
-                this.form.setup_history_no[i] = detail.setup_history_no.toString();
-              } else {
-                this.form.setup_history_no[i] = "";
-              }
-              if (detail.setup_time_h != null) {
-                this.form.setup_time_h[i] = detail.setup_time_h.toString();
-              } else {
-                this.form.setup_time_h[i] = "";
-              }
-              if (detail.setup_time_m != null) {
-                this.form.setup_time_m[i] = detail.setup_time_m.toString();
-              } else {
-                this.form.setup_time_m[i] = "";
-              }
-              if (detail.complete_date != null) {
-                this.form.complete_date[i] = detail.complete_date;
-              } else {
-                this.form.complete_date[i] = "";
-              }
-              if (detail.qrText != null) {
-                this.form.qrText[i] = detail.qrText;
-              } else {
-                this.form.qrText[i] = "";
-              }
-              if (detail.total_process_time_h != null) {
-                this.form.total_process_time_h[i] = detail.total_process_time_h.toString();
-              } else {
-                this.form.total_process_time_h[i] = "";
-              }
-              if (detail.total_process_time_m != null) {
-                this.form.total_process_time_m[i] = detail.total_process_time_m.toString();
-              } else {
-                this.form.total_process_time_m[i] = "";
-              }
-              if (detail.total_setup_time_h != null) {
-                this.form.total_setup_time_h[i] = detail.total_setup_time_h.toString();
-              } else {
-                this.form.total_setup_time_h[i] = "";
-              }
-              if (detail.total_setup_time_m != null) {
-                this.form.total_setup_time_m[i] = detail.total_setup_time_m.toString();
-              } else {
-                this.form.total_setup_time_m[i] = "";
-              }
+            if (detail.progress_no != null) {
+              this.form.progress_no[i] = detail.progress_no.toString();
+            } else {
+              this.form.progress_no[i] = "";
+            }
+            if (detail.progress_name != null) {
+              this.form.progress_name[i] = detail.progress_name;
+            } else {
+              this.form.progress_name[i] = "";
+            }
+            if (detail.product_processes_code != null) {
+              this.form.product_processes_code[i] = detail.product_processes_code;
+            } else {
+              this.form.product_processes_code[i] = "";
+            }
+            if (detail.product_processes_detail_no != null) {
+              this.form.product_processes_detail_no[i] = detail.product_processes_detail_no.toString();
+            } else {
+              this.form.product_processes_detail_no[i] = "";
+            }
+            if (detail.device_code != null) {
+              this.form.device_code[i] = detail.device_code;
+            } else {
+              this.form.device_code[i] = "";
+            }
+            if (detail.process_department_code != null) {
+              this.form.process_department_code[i] = detail.process_department_code;
+            } else {
+              this.form.process_department_code[i] = "";
+            }
+            if (detail.users_code != null) {
+              this.form.process_user_code[i] = detail.users_code;
+            } else {
+              this.form.process_user_code[i] = "";
+            }
+            if (detail.user_name != null) {
+              this.form.process_user_name[i] = detail.user_name;
+            } else {
+              this.form.process_user_name[i] = "";
+            }
+            
+            if (detail.process_history_no != null) {
+              this.form.process_history_no[i] = detail.process_history_no;
+            } else {
+              this.form.process_history_no[i] = "";
+            }
+            if (detail.process_time_h != null) {
+              this.form.process_time_h[i] = detail.process_time_h;
+            } else {
+              this.form.process_time_h[i] = "";
+            }
+            if (detail.process_time_m != null) {
+              this.form.process_time_m[i] = detail.process_time_m;
+            } else {
+              this.form.process_time_m[i] = "";
+            }
+            if (detail.setup_history_no != null) {
+              this.form.setup_history_no[i] = detail.setup_history_no.toString();
+            } else {
+              this.form.setup_history_no[i] = "";
+            }
+            if (detail.setup_time_h != null) {
+              this.form.setup_time_h[i] = detail.setup_time_h.toString();
+            } else {
+              this.form.setup_time_h[i] = "";
+            }
+            if (detail.setup_time_m != null) {
+              this.form.setup_time_m[i] = detail.setup_time_m.toString();
+            } else {
+              this.form.setup_time_m[i] = "";
+            }
+            if (detail.complete_date != null) {
+              this.form.complete_date[i] = moment(detail.complete_date).format("YYYY-MM-DD");;
+            } else {
+              this.form.complete_date[i] = "";
+            }
+            if (detail.qrText != null) {
+              this.form.qrText[i] = detail.qrText;
+            } else {
+              this.form.qrText[i] = "";
             }
           });
         }
+        this.calcTimes();
         this.setValue();
         this.refresOfficeList();
         this.refresCustomerlist();
@@ -1710,19 +1663,17 @@ export default {
       this.valuesupplydate = moment(this.form.supply_date).format("YYYY-MM-DD");
       this.selectedOfficeValue = this.form.office_code;
       this.selectedCustomerValue = this.form.customer_code;
-      this.selectedProductsValue = this.form.product_code;
+      this.selectedProductsValue = this.form.back_order_product_name; // 受注残品名に変更
       this.selectedMaterialOfficeValue = this.form.m_office_code;
-      console.log('setValue this.form.outsourcing_Office_code = ' + this.form.m_office_code);
       this.selectedMaterialCustomerValue = this.form.material_customer_code;
+      this.value_material_customer_name = this.form.material_customer_name;
       this.selectedOutsourcingOfficeValue = this.form.o_office_code;
-      console.log('setValue this.form.outsourcing_Office_code = ' + this.form.o_office_code);
       this.selectedOutsourcingCustomerValue = this.form.outsourcing_customer_code;
       this.value_order_no = this.form.order_no;
       this.value_seq = this.form.seq;
       this.value_back_order_customer_name = this.form.back_order_customer_name;
       this.value_order_date = this.form.order_date;
       this.value_processes_code = this.form.processes_code;
-      console.log('setValue this.form.processes_code = ' + this.form.processes_code);
       this.value_back_order_product_name = this.form.back_order_product_name;
       this.value_drawing_no = this.form.drawing_no;
       this.value_order_count = this.form.order_count;
@@ -1751,6 +1702,7 @@ export default {
       this.form.back_order_customer_name = "";
       this.form.back_order_product_name = "";
       this.form.order_date = "";
+      this.form.order_kingaku = "";
       this.form.drawing_no = "";
       this.form.order_count = "";
       this.form.model_number = "";
@@ -1762,58 +1714,45 @@ export default {
       this.form.material_cost = "";
       this.form.m_office_code = "";
       this.form.material_customer_code = "";
+      this.form.material_customer_name = "";
       this.form.heat_process = "";
       this.form.heat_cost = "";
       this.form.o_office_code = "";
       this.form.outsourcing_customer_code = "";
       this.form.outsourcing_cost = "";
-
-      this.form.progress_no[0] = 1;
-      this.form.progress_name[0] = CONST_PROGRESSNO_1;
-      this.form.product_processes_code[0] = '00';
-      this.form.product_processes_detail_no[0] = 0;
-      this.form.device_code[0] = "";
-      this.form.process_department_code[0] = "";
-      this.form.process_history_no[0] = "";
-      this.form.setup_history_no[0] = "";
-      this.form.process_user_code[0] = "";
-      this.form.process_time_h[0] = "";
-      this.form.process_time_m[0] = "";
-      this.form.setup_time_h[0] = "";
-      this.form.setup_time_m[0] = "";
-      this.form.complete_date[0] = "";
-      this.form.qrText[0] = null;
-      this.form.progress_no[11] = 12;
-      this.form.progress_name[11] = CONST_PROGRESSNO_12;
-      this.form.product_processes_code[11] = '99';
-      this.form.product_processes_detail_no[11] = 0;
-      this.form.device_code[11] = "";
-      this.form.process_department_code[11] = "";
-      this.form.process_history_no[11] = "";
-      this.form.setup_history_no[11] = "";
-      this.form.process_user_code[11] = "";
-      this.form.process_time_h[11] = "";
-      this.form.process_time_m[11] = "";
-      this.form.setup_time_h[11] = "";
-      this.form.setup_time_m[11] = "";
-      this.form.complete_date[11] = "";
-      this.form.qrText[11] = null;
-      for (let index = 1; index < 11; index++) {
+      for (let index = 0; index < 12; index++) {
         this.form.progress_no[index] = index + 1;
         this.form.progress_name[index] = "";
         this.form.product_processes_code[index] = "";
         this.form.product_processes_detail_no[index] = 0;
         this.form.device_code[index] = "";
+        this.form.process_user_code[index] = "";
+        this.form.process_user_name[index] = "";
         this.form.process_department_code[index] = "";
         this.form.process_history_no[index] = "";
         this.form.setup_history_no[index] = "";
-        this.form.process_user_code[index] = "";
         this.form.process_time_h[index] = "";
         this.form.process_time_m[index] = "";
         this.form.setup_time_h[index] = "";
         this.form.setup_time_m[index] = "";
         this.form.complete_date[index] = "";
         this.form.qrText[index] = null;
+      }
+
+      this.form.total.process_total_cnt = 0;
+      for (let index = 0; index < 4; index++) {
+        this.form.total.process_total_user_name_1[index] = "";
+        this.form.total.process_result_process_time_h_1[index] = 0;
+        this.form.total.process_result_process_time_m_1[index] = 0;
+        this.form.total.process_total_user_name_2[index] = "";
+        this.form.total.process_result_process_time_h_2[index] = 0;
+        this.form.total.process_result_process_time_m_2[index] = 0;
+        this.form.total.process_total_user_name_3[index] = "";
+        this.form.total.process_result_process_time_h_3[index] = 0;
+        this.form.total.process_result_process_time_m_3[index] = 0;
+        this.form.total.process_total_user_name_4[index] = "";
+        this.form.total.process_result_process_time_h_4[index] = 0;
+        this.form.total.process_result_process_time_m_4[index] = 0;
       }
     },
     // メッセージ項目クリア
@@ -1862,6 +1801,140 @@ export default {
         // this.form.qrText[index] = this.form.order_no + this.form.row_seq + this.form.drawing_no + ('00' + (index+1)).slice(-2);
       // }
       this.$forceUpdate();
+    },
+    // 実績値合計時間算出
+    calcTimes() {
+      var temp_calc_h = 0;
+      this.form.result_process_time_h = 0;
+      this.form.result_process_time_m = 0;
+      for (let index = 0; index < 12; index++) {
+        console.log('calcTimes this.form.process_time_h[index] = ' + this.form.process_time_h[index]);
+        console.log('calcTimes this.form.process_time_m[index] = ' + this.form.process_time_m[index]);
+        console.log('calcTimes this.form.result_process_time_h = ' + this.form.result_process_time_h);
+        console.log('calcTimes this.form.result_process_time_m = ' + this.form.result_process_time_m);
+        if (this.form.process_time_h[index] != "" && this.form.process_time_h[index] != null) {
+          this.form.result_process_time_h += Number(this.form.process_time_h[index]);
+        }
+        if (this.form.process_time_m[index] != "" && this.form.process_time_m[index] != null) {
+          this.form.result_process_time_m += Number(this.form.process_time_m[index]);
+        }
+      }
+      console.log('calcTimes this.form.result_process_time_h = ' + this.form.result_process_time_h);
+      console.log('calcTimes this.form.result_process_time_m = ' + this.form.result_process_time_m);
+      if (this.form.result_process_time_m > 59) {
+        temp_calc_h = Math.floor(this.form.result_process_time_m / 60);
+        this.form.result_process_time_h += temp_calc_h;
+        this.form.result_process_time_m = this.form.result_process_time_m - (temp_calc_h * 60);
+      }
+      this.form.total.process_total_cnt = 0;
+      var isSet = false;
+      for (let index1 = 0; index1 < 4; index1++) {
+        this.form.total.process_result_process_time_h_1[index1] = 0;
+        this.form.total.process_result_process_time_m_1[index1] = 0;
+        this.form.total.process_result_process_time_h_2[index1] = 0;
+        this.form.total.process_result_process_time_m_2[index1] = 0;
+        this.form.total.process_result_process_time_h_3[index1] = 0;
+        this.form.total.process_result_process_time_m_3[index1] = 0;
+        this.form.total.process_result_process_time_h_4[index1] = 0;
+        this.form.total.process_result_process_time_m_4[index1] = 0;
+      }
+      for (let index1 = 0; index1 < 12; index1++) {
+        isSet = false;
+        if (this.form.process_user_name[index1] != "") {
+          console.log('calcTimes process_user_name ' + this.form.process_user_name[index1]);
+          for (let index2 = 0; index2 < 4; index2++) {
+            if (!isSet) {
+              console.log('calcTimes this.form.total.process_total_user_name_1[index2] ' + this.form.total.process_total_user_name_1[index2]);
+              if (this.form.total.process_total_user_name_1[index2] != "") {
+                if (this.form.total.process_total_user_name_1[index2] == this.form.process_user_name[index1]) {
+                  this.form.total.process_result_process_time_h_1[index2] += Number(this.form.process_time_h[index1]);
+                  this.form.total.process_result_process_time_m_1[index2] += Number(this.form.process_time_m[index1]);
+                  isSet = true;
+                }
+              }
+            }
+            if (!isSet) {
+              console.log('calcTimes this.form.total.process_total_user_name_2[index2] ' + this.form.total.process_total_user_name_2[index2]);
+              if (this.form.total.process_total_user_name_2[index2] != "") {
+                if (this.form.total.process_total_user_name_2[index2] == this.form.process_user_name[index1]) {
+                  this.form.total.process_result_process_time_h_2[index2] += Number(this.form.process_time_h[index1]);
+                  this.form.total.process_result_process_time_m_2[index2] += Number(this.form.process_time_m[index1]);
+                  isSet = true;
+                }
+              }
+            }
+            if (!isSet) {
+              if (this.form.total.process_total_user_name_3[index2] != "") {
+                if (this.form.total.process_total_user_name_3[index2] == this.form.process_user_name[index1]) {
+                  this.form.total.process_result_process_time_h_3[index2] += Number(this.form.process_time_h[index1]);
+                  this.form.total.process_result_process_time_m_3[index2] += Number(this.form.process_time_m[index1]);
+                  isSet = true;
+                }
+              }
+            }
+            if (!isSet) {
+              if (this.form.total.process_total_user_name_4[index2] != "") {
+                if (this.form.total.process_total_user_name_4[index2] == this.form.process_user_name[index1]) {
+                  this.form.total.process_result_process_time_h_4[index2] += Number(this.form.process_time_h[index1]);
+                  this.form.total.process_result_process_time_m_4[index2] += Number(this.form.process_time_m[index1]);
+                  isSet = true;
+                }
+              }
+            }
+          }
+          if (!isSet) {
+            if (this.form.total.process_total_cnt < 4) {
+              this.form.total.process_total_user_name_1[this.form.total.process_total_cnt] = this.form.process_user_name[index1];
+              this.form.total.process_result_process_time_h_1[this.form.total.process_total_cnt] += Number(this.form.process_time_h[index1]);
+              this.form.total.process_result_process_time_m_1[this.form.total.process_total_cnt] += Number(this.form.process_time_m[index1]);
+              this.form.total.process_total_cnt +=1;
+            } else {
+              if (this.form.total.process_total_cnt < 8) {
+                this.form.total.process_total_user_name_2[this.form.total.process_total_cnt - 4] = this.form.process_user_name[index1];
+                this.form.total.process_result_process_time_h_2[this.form.total.process_total_cnt - 4] += Number(this.form.process_time_h[index1]);
+                this.form.total.process_result_process_time_m_2[this.form.total.process_total_cnt - 4] += Number(this.form.process_time_m[index1]);
+                this.form.total.process_total_cnt +=1;
+              } else {
+                if (this.form.total.process_total_cnt < 12) {
+                  this.form.total.process_total_user_name_3[this.form.total.process_total_cnt - 8] = this.form.process_user_name[index1];
+                  this.form.total.process_result_process_time_h_3[this.form.total.process_total_cnt - 8] += Number(this.form.process_time_h[index1]);
+                  this.form.total.process_result_process_time_m_3[this.form.total.process_total_cnt - 8] += Number(this.form.process_time_m[index1]);
+                  this.form.total.process_total_cnt +=1;
+                } else {
+                  if (this.form.total.process_total_cnt < 16) {
+                    this.form.total.process_total_user_name_4[this.form.total.process_total_cnt - 12] = this.form.process_user_name[index1];
+                    this.form.total.process_result_process_time_h_4[this.form.total.process_total_cnt - 12] += Number(this.form.process_time_h[index1]);
+                    this.form.total.process_result_process_time_m_4[this.form.total.process_total_cnt - 12] += Number(this.form.process_time_m[index1]);
+                    this.form.total.process_total_cnt +=1;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      for (let index1 = 0; index1 < 4; index1++) {
+        if (this.form.total.process_result_process_time_m_1[index1] > 59) {
+          temp_calc_h = Math.floor(this.form.total.process_result_process_time_m_1[index1] / 60);
+          this.form.total.process_result_process_time_h_1[index1] += temp_calc_h;
+          this.form.total.process_result_process_time_m_1[index1] = this.form.total.process_result_process_time_m_1[index1] - (temp_calc_h * 60);
+        }
+        if (this.form.total.process_result_process_time_m_2[index1] > 59) {
+          temp_calc_h = Math.floor(this.form.total.process_result_process_time_m_2[index1] / 60);
+          this.form.total.process_result_process_time_h_2[index1] += temp_calc_h;
+          this.form.total.process_result_process_time_m_2[index1] = this.form.total.process_result_process_time_m_2[index1] - (temp_calc_h * 60);
+        }
+        if (this.form.total.process_result_process_time_m_3[index1] > 59) {
+          temp_calc_h = Math.floor(this.form.total.process_result_process_time_m_3[index1] / 60);
+          this.form.total.process_result_process_time_h_3[index1] += temp_calc_h;
+          this.form.total.process_result_process_time_m_3[index1] = this.form.total.process_result_process_time_m_3[index1] - (temp_calc_h * 60);
+        }
+        if (this.form.total.process_result_process_time_m_4[index1] > 59) {
+          temp_calc_h = Math.floor(this.form.total.process_result_process_time_m_4[index1] / 60);
+          this.form.total.process_result_process_time_h_4[index1] += temp_calc_h;
+          this.form.total.process_result_process_time_m_4[index1] = this.form.total.process_result_process_time_m_4[index1] - (temp_calc_h * 60);
+        }
+      }
     },
     // 使用機種セット
     setProductProcessTable() {

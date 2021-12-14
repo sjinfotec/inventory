@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Collection;
 use Carbon\Carbon;
 
 class ProcessHistory extends Model
@@ -391,6 +392,94 @@ class ProcessHistory extends Model
     public function setParamIsdeletedAttribute($value)
     {
         $this->param_is_deleted = $value;
+    }
+    /** 加工指示書／工程管理取得
+     *
+     * @return list customer
+     */
+    public function getProcesshistories(){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+
+            // ログインユーザの権限取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
+            $sqlString = "";
+            $sqlString .= "select" ;
+            $sqlString .= "  t1.order_no as order_no" ;
+            $sqlString .= "  , t1.seq as seq" ;
+            $sqlString .= "  , t1.process_history_no as process_history_no" ;
+            $sqlString .= "  , t1.work_kind as work_kind" ;
+            $sqlString .= "  , t1.device_code as device_code" ;
+            $sqlString .= "  , t1.user_code as user_code" ;
+            $sqlString .= "  , t1.row_seq as row_seq" ;
+            $sqlString .= "  , t1.progress_no as progress_no" ;
+            $sqlString .= "  , t1.process_history_time as process_history_time" ;
+            $sqlString .= "  , t1.process_time_h as process_time_h" ;
+            $sqlString .= "  , t1.process_time_m as process_time_m" ;
+            $sqlString .= "  , t1.created_user as created_user" ;
+            $sqlString .= "  , t1.updated_user as updated_user" ;
+            $sqlString .= "  , t1.created_at as created_at" ;
+            $sqlString .= "  , t1.updated_at as updated_at" ;
+            $sqlString .= "  from" ;
+            $sqlString .= "  ".$this->table." as t1" ;
+            $sqlString .= "  where" ;
+            $sqlString .= "    ? = ?" ;
+            if (!empty($this->param_order_no)) {
+                $sqlString .= "    and t1.order_no = ?" ;
+            }
+            if (!empty($this->param_seq)) {
+                $sqlString .= "    and t1.seq = ?" ;
+            }
+            if (!empty($this->param_device_code)) {
+                $sqlString .= "    and t1.device_code = ?" ;
+            }
+            if (!empty($this->param_users_code)) {
+                $sqlString .= "    and t1.user_code = ?" ;
+            }
+            if (!empty($this->param_progress_no)) {
+                $sqlString .= "    and t1.progress_no = ?" ;
+            }
+            $sqlString .= "  order by " ;
+            $sqlString .= "   t1.order_no " ;
+            $sqlString .= "   , t1.seq " ;
+            $sqlString .= "   , t1.device_code " ;
+            $sqlString .= "   , t1.user_code " ;
+            $sqlString .= "   , t1.progress_no " ;
+            $sqlString .= "   , t1.process_history_time " ;
+            // バインド
+            $array_setBindingsStr = array();
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            if (!empty($this->param_order_no)) {
+                $array_setBindingsStr[] = $this->param_order_no;
+            }
+            if (!empty($this->param_seq)) {
+                $array_setBindingsStr[] = $this->param_seq;
+            }
+            if (!empty($this->param_device_code)) {
+                $array_setBindingsStr[] = $this->param_device_code;
+            }
+            if (!empty($this->param_users_code)) {
+                $array_setBindingsStr[] = $this->param_users_code;
+            }
+            if (!empty($this->param_progress_no)) {
+                $array_setBindingsStr[] = $this->param_progress_no;
+            }
+            $details = DB::select($sqlString, $array_setBindingsStr);
+            return $details;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 
     /** 

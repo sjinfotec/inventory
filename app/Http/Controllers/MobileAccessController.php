@@ -163,6 +163,8 @@ class MobileAccessController extends Controller
             $user_code = $data["user_code"];
             $row_seq = $data["row_seq"];
             $progress_no = $data["progress_no"];
+            $process_time_h = 0;
+            $process_time_m = 0;
             if ($data["process_time_h"] == null || $data["process_time_h"] == "") {
                 $process_time_h = 0;
             } else {
@@ -220,6 +222,7 @@ class MobileAccessController extends Controller
             $progress_details_items = $progress_details_model->getProductdetaile();
             foreach($progress_details_items as $item) {
                 $progress_details_cnt = $progress_details_cnt + 1;
+                $progress_no = $item->progress_no;
                 $product_processes_code = $item->product_processes_code;
                 $product_processes_detail_no = $item->product_processes_detail_no;
                 $department_code = $item->department_code;
@@ -261,6 +264,7 @@ class MobileAccessController extends Controller
             $process_histories_model->setDevicecodeAttribute($device_code);
             $process_histories_model->setUsercodeAttribute($user_code);
             $process_histories_model->setRowseqAttribute($row_seq);
+            Log::debug('mobile putProcessHistory process_histories_model $progress_no = '.$progress_no);
             $process_histories_model->setProgressnoAttribute($progress_no);
             $process_histories_model->setProcesshistorytimeAttribute(Carbon::now());
             $process_histories_model->setProcessTimeHAttribute($process_time_h);
@@ -271,6 +275,7 @@ class MobileAccessController extends Controller
             // 指示書／管理書の明細に登録する
             $progress_details_model->setOrdernoAttribute($order_no);
             $progress_details_model->setSeqAttribute($seq);
+            Log::debug('mobile putProcessHistory progress_details_model $progress_no = '.$progress_no);
             $progress_details_model->setProgressnoAttribute($progress_no);
             $progress_details_model->setProductprocessescodeAttribute($product_processes_code);
             $progress_details_model->setProductprocessesdetailnoAttribute($product_processes_detail_no);
@@ -280,11 +285,24 @@ class MobileAccessController extends Controller
             $progress_details_model->setProcesshistorynoAttribute($process_history_no);
             $progress_details_model->setWorkkindAttribute($work_kind);
             if ($work_kind == Config::get('const.WORKKINDS.complete')) {
-                if ($data["process_time_h"] == null || $data["process_time_h"] == "") {
-                    $process_time_h = 0;
-                } else {
-                    $process_time_h = $data["process_time_h"];
+                if ($process_time_h == 0 && $process_time_m == 0) {
+                    // 加工時間を自動計算する
+                    $api_common = new ApiCommonController();
+                    $array_impl_calcProcessTime = array (
+                        'order_no' => $order_no,
+                        'seq' => $seq,
+                        'device_code' => $device_code,
+                        'user_code' => $user_code,
+                        'progress_no' => $progress_no
+                    );
+                    $calcdifftime = $api_common->calcProcessTime($array_impl_calcProcessTime);
+                    Log::debug('mobile putProcessHistory $calcdifftime = '.$calcdifftime);
+                    $process_time_h = (int)($calcdifftime / 60 / 60);
+                    $process_time_m = ($calcdifftime - ($process_time_h * 60 * 60)) / 60;
+                    Log::debug('mobile putProcessHistory $process_time_h = '.$process_time_h);
+                    Log::debug('mobile putProcessHistory $process_time_m = '.$process_time_m);
                 }
+                // 完了日設定
                 $dt = new Carbon();
                 $complete_date = $dt->format('Ymd');
             } else {

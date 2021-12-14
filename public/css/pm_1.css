@@ -366,11 +366,7 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 }
 
 
-<<<<<<< HEAD
-/*--process info Mobile--*/
-=======
 /*--------------------## process info Mobile ##--------------------*/
->>>>>>> shindo002
 #table_cnt3 {
   width:100%;
   border-collapse: collapse;
@@ -452,13 +448,10 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   background:#FFF;
   padding-top:20px;
 }
-<<<<<<< HEAD
-=======
 #btn_cnt2 .btn_col_1  {
   flex: 0 0 30%;
   max-width: 30%;
 }
->>>>>>> shindo002
 #btn_cnt2 .btncolor11  {
 	background: #bb8c60;
   border:none;
@@ -467,13 +460,10 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 	background: #60bbac;
   border:none;
 }
-<<<<<<< HEAD
-=======
 #btn_cnt2 .btncolor14  {
 	background: #bb6086;
   border:none;
 }
->>>>>>> shindo002
 #btn_cnt2 .btncolor11:hover  {
   color: #212529;
 	background: rgba(187, 140, 96, 0.7);
@@ -489,11 +479,7 @@ button:focus {
 }
 
 
-<<<<<<< HEAD
-/*--process view--*/
-=======
 /*--------------------## process view ##--------------------*/
->>>>>>> shindo002
 .title001 {
   font-size:1.2rem;
   letter-spacing: 0.2rem;
@@ -517,11 +503,7 @@ background:#DDEECC;
 border-bottom:4px solid #88CC88;
 }
 
-<<<<<<< HEAD
-/*--table progress header  (TOP page)--*/
-=======
 /*--------------------## table progress header  (TOP page) ##--------------------*/
->>>>>>> shindo002
 #search_btn_cnt {
   display:flex;
   justify-content: space-between;
@@ -651,13 +633,10 @@ border-bottom:4px solid #88CC88;
   color: #495057;
 }
 #input-area_2 .w1{width:5rem;}
-<<<<<<< HEAD
-=======
 #input-area_2 .w_cate {
   flex: 0 0 80px;
   width:80px;
 }
->>>>>>> shindo002
 #btn_cnt3 {
   display:-webkit-flex;
   display:flex;

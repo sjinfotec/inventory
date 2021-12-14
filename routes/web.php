@@ -200,6 +200,8 @@ Route::post('/get_product_list', 'ApiCommonController@getProductList')->middlewa
 Route::post('/get_device_list', 'ApiCommonController@getDeviceList')->middleware('auth');
 Route::post('/get_departments_list', 'ApiCommonController@getDepartmentList')->middleware('auth');
 Route::post('/get_employment_status_list', 'ApiCommonController@getEmploymentStatusList')->middleware('auth');
+Route::post('/get_outsoucingcustomers_list', 'ApiCommonController@getOutsoucingCustomerList')->middleware('auth');
+
 // データ取得
 Route::post('/get_progress_header', 'ApiCommonController@getProductHeader')->middleware('auth');
 Route::post('/get_product_chart', 'ApiCommonController@getProductChart')->middleware('auth');

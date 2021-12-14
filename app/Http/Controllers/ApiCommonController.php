@@ -27,6 +27,9 @@ use App\FeatureItemSelection;
 use App\DownloadLog;
 use App\BackOrder;
 use App\Progressheader;
+use App\Progressdetaile;
+use App\ProcessHistory;
+
 use App\Http\Controllers\CreateCompanyInformationController;
 use App\Http\Controllers\CreateDepartmentController;
 use App\Http\Controllers\SettingCalcController;
@@ -122,6 +125,7 @@ class ApiCommonController extends Controller
 
     protected $table_offices = 'offices';
     protected $table_customers = 'customers';
+    protected $table_outsourcing_customers = 'outsourcing_customers';
     protected $table_products = 'products';
     protected $table_devices = 'devices';
     protected $table_progress_headers = 'progress_headers';
@@ -938,6 +942,55 @@ class ApiCommonController extends Controller
         }
     }
         
+    /** 客先リスト取得
+     *
+     * @return list customer
+     */
+    public function getOutsoucingCustomerList(Request $request){
+        Log::debug('getOutsoucingCustomerList in');
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            $code = null;
+            if (isset($request->keyparams)) {
+                $params = $request->keyparams;
+                if (isset($params['code'])) {
+                    $code = $params['code'];
+                }
+            }
+
+            // ログインユーザの権限取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
+
+            $mainQuery = DB::table($this->table_outsourcing_customers)
+                ->select($this->table_outsourcing_customers.'.code',$this->table_outsourcing_customers.'.name');
+            if (isset($code)) {
+                $mainQuery->where($this->table_outsourcing_customers.'.code', '=',$code);
+            }
+            $mainQuery
+                ->where($this->table_outsourcing_customers.'.is_deleted', 0)
+                ->orderby($this->table_outsourcing_customers.'.code','asc');
+            $details = $mainQuery->get();
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
     /** 品名リスト取得
      *
      * @return list customer
@@ -1148,8 +1201,6 @@ class ApiCommonController extends Controller
             }
             $order_no = $params_product_process_data["order_no"];
             $seq = $params_product_process_data["seq"];
-            Log::debug('putProcess o_office_code = ['.$params_product_process_data["o_office_code"].']');
-            Log::debug('putProcess material_customer_code = '.$params_product_process_data["material_customer_code"]);
             // 新規の場合($seq=0)MAXseqを取得
             if ($seq == 0) {
                 $result_maxseq = DB::table($this->table_progress_headers)
@@ -1194,17 +1245,22 @@ class ApiCommonController extends Controller
                 $outsourcing_cost = 0;
             }
             // if ($params_product_process_data["seq"] == 0) {
+            $office_code_value = null;
+            if (isset($params_product_process_data["office_code"])) {
+                $office_code_value = $params_product_process_data["office_code"];
+            }
             if (!$result_exists) {
-	        Log::debug('!$result_exists = '.$order_no);
-	        Log::debug('!$result_exists = '.$seq);
+                Log::debug('!$result_exists = '.$order_no);
+                Log::debug('!$result_exists = '.$seq);
                 $array_putData = [
                     'order_no' => $order_no,
                     'seq' => $seq,
                     'row_seq' => $params_product_process_data["row_seq"],
                     'drawing_no' => $params_product_process_data["drawing_no"],
                     'order_date' => $params_product_process_data["order_date"],
+                    'order_kingaku' => $params_product_process_data["order_kingaku"],
                     'supply_date' => $params_product_process_data["supply_date"],
-                    'office_code' => $params_product_process_data["office_code"],
+                    'office_code' => $office_code_value,
                     'customer_code' => $params_product_process_data["customer_code"],
                     'back_order_customer_name' => $params_product_process_data["back_order_customer_name"],
                     'order_count' => $params_product_process_data["order_count"],
@@ -1218,6 +1274,7 @@ class ApiCommonController extends Controller
                     'material_cost' => $material_cost,
                     'material_office_code' => $params_product_process_data["m_office_code"],
                     'material_customer_code' => $params_product_process_data["material_customer_code"],
+                    'material_customer_name' => $params_product_process_data["material_customer_name"],
                     'heat_process' => $params_product_process_data["heat_process"],
                     'heat_cost' => $heat_cost,
                     'outsourcing_office_code' => $params_product_process_data["o_office_code"],
@@ -1229,16 +1286,17 @@ class ApiCommonController extends Controller
                 DB::table($this->table_progress_headers)
                     ->insert($array_putData);
             } else {
-	        Log::debug('$result_exists = '.$order_no);
-	        Log::debug('$result_exists = '.$seq);
+                Log::debug('$result_exists = '.$order_no);
+                Log::debug('$result_exists = '.$seq);
                 $array_putData = [
                     'order_no' => $order_no,
                     'seq' => $seq,
                     'row_seq' => $params_product_process_data["row_seq"],
                     'drawing_no' => $params_product_process_data["drawing_no"],
                     'order_date' => $params_product_process_data["order_date"],
+                    'order_kingaku' => $params_product_process_data["order_kingaku"],
                     'supply_date' => $params_product_process_data["supply_date"],
-                    'office_code' => $params_product_process_data["office_code"],
+                    'office_code' => $office_code_value,
                     'customer_code' => $params_product_process_data["customer_code"],
                     'back_order_customer_name' => $params_product_process_data["back_order_customer_name"],
                     'order_count' => $params_product_process_data["order_count"],
@@ -1252,6 +1310,7 @@ class ApiCommonController extends Controller
                     'material_cost' => $material_cost,
                     'material_office_code' => $params_product_process_data["m_office_code"],
                     'material_customer_code' => $params_product_process_data["material_customer_code"],
+                    'material_customer_name' => $params_product_process_data["material_customer_name"],
                     'heat_process' => $params_product_process_data["heat_process"],
                     'heat_cost' => $heat_cost,
                     'outsourcing_office_code' => $params_product_process_data["o_office_code"],
@@ -1514,48 +1573,68 @@ class ApiCommonController extends Controller
                 // 未登録データは指示書に登録
                 $progress_header_model = new Progressheader();
                 $details = $back_order_model->getData();
-                $backorder_order_no = null;
+                // $backorder_order_no = null;
                 foreach($details as $item) {
-                    if ($item->order_no  != $backorder_order_no) {
+                    // if ($item->order_no  != $backorder_order_no) {
                         $result_exists = DB::table($this->table_progress_headers)
                         ->where('order_no', $item->order_no )
+                        ->where('seq', $item->seq )
                         ->exists();
-                        if ($result_exists) {
-                            DB::table($this->table_progress_headers)
-                            ->where('order_no', $item->order_no)
-                            ->delete();
-                        }
-                        $backorder_order_no = $item->order_no;
-                    }
+                        // if ($result_exists) {
+                            // DB::table($this->table_progress_headers)
+                            // ->where('order_no', $item->order_no)
+                            // ->delete();
+                        // }
+                        // $backorder_order_no = $item->order_no;
+                    // }
                     $progress_header_model->setOrdernoAttribute($item->order_no);
                     $progress_header_model->setSeqAttribute($item->seq);
-                    $progress_header_model->setRowseqAttribute($item->row_seq);
-                    $progress_header_model->setDrawingnoAttribute($item->drawing_no);
-                    $progress_header_model->setOrderdateAttribute($item->order_date);
-                    $progress_header_model->setSupplydateAttribute($item->supply_date);
-                    $progress_header_model->setOfficecodeAttribute($item->office_code);
-                    $progress_header_model->setCustomercodeAttribute($item->customer_code);
-                    $progress_header_model->setBackordercustomernameAttribute($item->customer_name);
-                    $progress_header_model->setOrdercountAttribute($item->order_count);
-                    $progress_header_model->setModelnumberAttribute($item->model_number);
-                    $progress_header_model->setOrdercountAttribute($item->order_count);
-                    $progress_header_model->setProductcodeAttribute($item->product_code);
-                    $progress_header_model->setProcessescodeAttribute($item->processes_code);
-                    $progress_header_model->setBackorderproductnameAttribute($item->product_name);
-                    $progress_header_model->setUnitpriceAttribute(0);
-                    $progress_header_model->setOutlinenameAttribute($item->outline_name);
-                    $progress_header_model->setBackorderqualitynameAttribute(null);
-                    $progress_header_model->setMaterialcostAttribute(0);
-                    $progress_header_model->setMaterialofficecodeAttribute(null);
-                    $progress_header_model->setMaterialcustomercodeAttribute(null);
-                    $progress_header_model->setHeatprocessAttribute(null);
-                    $progress_header_model->setHeatcostAttribute(0);
-                    $progress_header_model->setOutsourcingofficecodeAttribute(null);
-                    $progress_header_model->setOutsourcingcustomercodeAttribute(null);
-                    $progress_header_model->setHeatcostAttribute(0);
-                    $progress_header_model->setCreateduserAttribute($login_user_code);
-                    $progress_header_model->setCreatedatAttribute(Carbon::now());
-                    $progress_header_model->insert();
+                    if (!$result_exists) {
+                        $progress_header_model->setRowseqAttribute($item->row_seq);
+                        $progress_header_model->setDrawingnoAttribute($item->drawing_no);
+                        $progress_header_model->setOrderdateAttribute($item->order_date);
+                        $progress_header_model->setOrderkingakuAttribute($item->order_kingaku);
+                        $progress_header_model->setSupplydateAttribute($item->supply_date);
+                        $progress_header_model->setOfficecodeAttribute($item->office_code);
+                        $progress_header_model->setCustomercodeAttribute($item->customer_code);
+                        $progress_header_model->setBackordercustomernameAttribute($item->customer_name);
+                        $progress_header_model->setOrdercountAttribute($item->order_count);
+                        $progress_header_model->setModelnumberAttribute($item->model_number);
+                        $progress_header_model->setProductcodeAttribute($item->product_code);
+                        $progress_header_model->setProcessescodeAttribute($item->processes_code);
+                        $progress_header_model->setBackorderproductnameAttribute($item->product_name);
+                        $progress_header_model->setUnitpriceAttribute(0);
+                        $progress_header_model->setOutlinenameAttribute($item->outline_name);
+                        $progress_header_model->setBackorderqualitynameAttribute(null);
+                        $progress_header_model->setMaterialcostAttribute(0);
+                        $progress_header_model->setMaterialofficecodeAttribute(null);
+                        $progress_header_model->setMaterialcustomercodeAttribute(null);
+                        $progress_header_model->setMaterialcustomernameAttribute(null);
+                        $progress_header_model->setHeatprocessAttribute(null);
+                        $progress_header_model->setHeatcostAttribute(0);
+                        $progress_header_model->setOutsourcingofficecodeAttribute(null);
+                        $progress_header_model->setOutsourcingcustomercodeAttribute(null);
+                        $progress_header_model->setHeatcostAttribute(0);
+                        $progress_header_model->setCreateduserAttribute($login_user_code);
+                        $progress_header_model->setCreatedatAttribute(Carbon::now());
+                        $progress_header_model->insert();
+                    } else {
+                        $progress_header_model->setParamOrdernoAttribute($item->order_no);
+                        $progress_header_model->setParamSeqAttribute($item->seq);
+                        $progress_header_model->setRowseqAttribute($item->row_seq);
+                        $progress_header_model->setDrawingnoAttribute($item->drawing_no);
+                        $progress_header_model->setOrderdateAttribute($item->order_date);
+                        $progress_header_model->setOrderkingakuAttribute($item->order_kingaku);
+                        $progress_header_model->setSupplydateAttribute($item->supply_date);
+                        $progress_header_model->setOfficecodeAttribute($item->office_code);
+                        $progress_header_model->setCustomercodeAttribute($item->customer_code);
+                        $progress_header_model->setBackordercustomernameAttribute($item->customer_name);
+                        $progress_header_model->setOrdercountAttribute($item->order_count);
+                        $progress_header_model->setModelnumberAttribute($item->model_number);
+                        $progress_header_model->setProductcodeAttribute($item->product_code);
+                        $progress_header_model->setUpdateduserAttribute($login_user_code);
+                        $progress_header_model->setUpdatedatAttribute(Carbon::now());
+                    }
                     // 受注残を登録済みにする
                     $back_order_model->setParamOrdernoAttribute($item->order_no);
                     $back_order_model->setParamSeqAttribute($item->seq);
@@ -1675,7 +1754,8 @@ class ApiCommonController extends Controller
             $sqlString .= "  , date_format(t1.order_date,'%Y年%m月%d日') as order_date_name ";
             $sqlString .= "  , t1.supply_date as supply_date ";
             $sqlString .= "  , date_format(t1.supply_date,'%Y年%m月%d日') as supply_date_name ";
-            $sqlString .= "  , t1.office_code as office_code ";
+            $sqlString .= "  , t1.drawing_no as drawing_no ";
+            $sqlString .= "  , t1.order_kingaku as order_kingaku ";
             $sqlString .= "  , t1.customer_code as customer_code ";
             $sqlString .= "  , t1.back_order_customer_name as back_order_customer_name ";
             $sqlString .= "  , t1.order_count as order_count ";
@@ -1689,6 +1769,7 @@ class ApiCommonController extends Controller
             $sqlString .= "  , t1.material_cost as material_cost ";
             $sqlString .= "  , t1.material_office_code as material_office_code ";
             $sqlString .= "  , t1.material_customer_code as material_customer_code ";
+            $sqlString .= "  , t1.material_customer_name as material_customer_name ";
             $sqlString .= "  , t1.heat_process as heat_process ";
             $sqlString .= "  , t1.heat_cost as heat_cost ";
             $sqlString .= "  , t1.outsourcing_office_code as outsourcing_office_code ";
@@ -1713,7 +1794,7 @@ class ApiCommonController extends Controller
             $sqlString .= "  , t4.name as customer_name ";
             $sqlString .= "  , t5.name as product_name ";
             $sqlString .= "  , t6.name as material_office_name ";
-            $sqlString .= "  , t7.name as material_customer_name ";
+            $sqlString .= "  , t1.material_customer_name as material_customer_name ";
             $sqlString .= "  , t8.name as outsourcing_office_name ";
             $sqlString .= "  , t9.name as outsourcing_customer_name ";
             $sqlString .= "  , t10.name as product_process_name ";
@@ -1787,8 +1868,7 @@ class ApiCommonController extends Controller
             $sqlString .= "    left outer join ";
             $sqlString .= "      ".$this->table_users." as t13 ";
             $sqlString .= "    on ";
-            $sqlString .= "      t2.department_code = t13.department_code";
-            $sqlString .= "      and t2.users_code = t13.code";
+            $sqlString .= "      t2.users_code = t13.code";
             $sqlString .= "      and t13.is_deleted = 0 ";
             $sqlString .= "  where ";
             $sqlString .= "    ? = ? ";
@@ -1813,9 +1893,12 @@ class ApiCommonController extends Controller
             $sqlString .= "group by ";
             $sqlString .= "  t1.supply_date ";
             $sqlString .= " , t1.order_no ";
+            $sqlString .= " , t1.seq ";
+            $sqlString .= " , t2.progress_no ";
             $sqlString .= "order by ";
             $sqlString .= "  t1.supply_date asc ";
             $sqlString .= " , t1.order_no asc ";
+            $sqlString .= " , t1.seq asc ";
             $sqlString .= " , t2.progress_no asc ";
             // バインド
             $array_setBindingsStr = array();
@@ -1840,7 +1923,7 @@ class ApiCommonController extends Controller
                 $array_setBindingsStr[] = $params_row_seq;
             }
             $details = DB::select($sqlString, $array_setBindingsStr);
-            Log::error('getProductChart details = '.count($details));
+            Log::debug('getProductChart details = '.count($details));
             return response()->json(
                 ['result' => true, 'details' => $details,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
@@ -1956,6 +2039,106 @@ class ApiCommonController extends Controller
             throw $pe;
         }catch(\Exception $e){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
+    /** 加工時間計算
+     *
+     * @return list customer
+     */
+    public function calcProcessTime($param){
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            $params_order_no = $param['order_no'];
+            $params_seq = $param['seq'];
+            $params_device_code = $param['device_code'];
+            $params_user_code = $param['user_code'];
+            $params_progress_no = $param['progress_no'];
+
+            // ログインユーザの権限取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
+            // 未登録の存在チェック
+            Log::debug('apicommon calcProcessTime $params_order_no = '.$params_order_no);
+            Log::debug('apicommon calcProcessTime $params_seq = '.$params_seq);
+            Log::debug('apicommon calcProcessTime $params_device_code = '.$params_device_code);
+            Log::debug('apicommon calcProcessTime $params_user_code = '.$params_user_code);
+            Log::debug('apicommon calcProcessTime $params_progress_no = '.$params_progress_no);
+            $process_histories_model = new ProcessHistory();
+            $process_histories_model->setParamOrdernoAttribute($params_order_no);
+            $process_histories_model->setParamSeqAttribute($params_seq);
+            $process_histories_model->setParamDevicecodeAttribute($params_device_code);
+            $process_histories_model->setParamUsercodeAttribute($params_user_code);
+            $process_histories_model->setParamProgressnoAttribute($params_progress_no);
+            $result_details = $process_histories_model->getProcesshistories();
+            $calc_diff_time = 0;
+            $calc_diff_totaltime = 0;
+            $calc_diff_fromtime = null;
+            $calc_diff_totime = null;
+            foreach($result_details as $item) {
+                Log::debug('apicommon calcProcessTime $calc_diff_fromtime = '.$calc_diff_fromtime);
+                Log::debug('apicommon calcProcessTime $calc_diff_totime = '.$calc_diff_totime);
+                switch ($item->work_kind) {
+                    case Config::get('const.WORKKINDS.start'):
+                        $calc_diff_fromtime = $item->process_history_time;
+                        break;
+                    case Config::get('const.WORKKINDS.end'):
+                        $calc_diff_totime = $item->process_history_time;
+                        if ($calc_diff_fromtime != null) {
+                            $calc_diff_time = $this->diffTimeSerial($calc_diff_fromtime, $calc_diff_totime);
+                            Log::debug('apicommon calcProcessTime end $calc_diff_time = '.$calc_diff_time);
+                            $calc_diff_totaltime = $calc_diff_totaltime + $calc_diff_time;
+                            $calc_diff_fromtime = null;
+                            $calc_diff_totime = null;
+                        }
+                        break;
+                    case Config::get('const.WORKKINDS.stop'):
+                        $calc_diff_totime = $item->process_history_time;
+                        if ($calc_diff_fromtime != null) {
+                            $calc_diff_time = $this->diffTimeSerial($calc_diff_fromtime, $calc_diff_totime);
+                            Log::debug('apicommon calcProcessTime stop $calc_diff_time = '.$calc_diff_time);
+                            $calc_diff_totaltime = $calc_diff_totaltime + $calc_diff_time;
+                            $calc_diff_fromtime = null;
+                            $calc_diff_totime = null;
+                        }
+                        break;
+                    case Config::get('const.WORKKINDS.miss'):
+                        $calc_diff_totime = $item->process_history_time;
+                        if ($calc_diff_fromtime != null) {
+                            $calc_diff_time = $this->diffTimeSerial($calc_diff_fromtime, $calc_diff_totime);
+                            Log::debug('apicommon calcProcessTime miss $calc_diff_time = '.$calc_diff_time);
+                            $calc_diff_totaltime = $calc_diff_totaltime + $calc_diff_time;
+                            $calc_diff_fromtime = null;
+                            $calc_diff_totime = null;
+                        }
+                        break;
+                    case Config::get('const.WORKKINDS.complete'):
+                        $calc_diff_totime = $item->process_history_time;
+                        if ($calc_diff_fromtime != null) {
+                            Log::debug('apicommon calcProcessTime complete $calc_diff_fromtime = '.$calc_diff_fromtime);
+                            Log::debug('apicommon calcProcessTime complete $calc_diff_totime = '.$calc_diff_totime);
+                            $calc_diff_time = $this->diffTimeSerial($calc_diff_fromtime, $calc_diff_totime);
+                            Log::debug('apicommon calcProcessTime complete $calc_diff_time = '.$calc_diff_time);
+                            $calc_diff_totaltime = $calc_diff_totaltime + $calc_diff_time;
+                            $calc_diff_fromtime = null;
+                            $calc_diff_totime = null;
+                        }
+                        break;
+                }
+            }
+            Log::debug('apicommon calcProcessTime $calc_diff_totaltime = '.$calc_diff_totaltime);
+            return $calc_diff_totaltime;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_insert_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_insert_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }

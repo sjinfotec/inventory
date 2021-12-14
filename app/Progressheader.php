@@ -29,6 +29,7 @@ class Progressheader extends Model
     private $row_seq;                              // 行
     private $drawing_no;                              // 図面番号
     private $order_date;                              // 受注日
+    private $order_kingaku;                              // 受注金額
     private $supply_date;                              // 納期
     private $office_code;                              // 営業所コード
     private $customer_code;                              // 顧客コード
@@ -44,6 +45,7 @@ class Progressheader extends Model
     private $material_cost;                              // 材料費
     private $material_office_code;                              // 素材納入営業所コード
     private $material_customer_code;                              // 素材納入顧客コード
+    private $material_customer_name;                         // 素材納入元
     private $heat_process;                              // 熱処理
     private $heat_cost;                              // 熱処理費
     private $outsourcing_office_code;                              // 外注営業所コード
@@ -116,6 +118,17 @@ class Progressheader extends Model
     {
         $this->order_date = $value;
     }
+    //受注金額
+    public function getOrderkingakuAttribute()
+    {
+        return $this->order_kingaku;
+    }
+
+    public function setOrderkingakuAttribute($value)
+    {
+        $this->order_kingaku = $value;
+    }
+
     //納期
     public function getSupplydateAttribute()
     {
@@ -274,6 +287,16 @@ class Progressheader extends Model
     {
         $this->material_customer_code = $value;
     }
+    // 素材納入元
+    public function getMaterialcustomernameAttribute()
+    {
+        return $this->material_customer_name;
+    }
+
+    public function setMaterialcustomernameAttribute($value)
+    {
+        $this->material_customer_name = $value;
+    }
     //熱処理
     public function getHeatprocessAttribute()
     {
@@ -393,6 +416,7 @@ class Progressheader extends Model
     private $param_order_date;                              // 受注日
     private $param_order_date_from;                         // 受注日（開始）
     private $param_order_date_to;                           // 受注日（終了）
+    private $param_order_kingaku;                              // 受注金額
     private $param_supply_date;                              // 納期
     private $param_supply_date_from;                         // 納期（開始）
     private $param_supply_date_to;                           // 納期（終了）
@@ -410,6 +434,7 @@ class Progressheader extends Model
     private $param_material_cost;                              // 材料費
     private $param_material_office_code;                              // 素材納入営業所コード
     private $param_material_customer_code;                              // 素材納入顧客コード
+    private $param_material_customer_name;                              // 素材納入元
     private $param_heat_process;                              // 熱処理
     private $param_heat_cost;                              // 熱処理費
     private $param_outsourcing_office_code;                              // 外注営業所コード
@@ -443,6 +468,16 @@ class Progressheader extends Model
     public function setParamOrdernoAttribute($value)
     {
         $this->param_order_no = $value;
+    }
+    //受注金額
+    public function getParamOrderkingakuAttribute()
+    {
+        return $this->param_order_kingaku;
+    }
+
+    public function setParamOrderkingakuAttribute($value)
+    {
+        $this->param_order_kingaku = $value;
     }
     //連番
     public function getParamSeqAttribute()
@@ -674,6 +709,16 @@ class Progressheader extends Model
     {
         $this->param_material_customer_code = $value;
     }
+    //素材納入元
+    public function getParamMaterialcustomernameAttribute()
+    {
+        return $this->param_material_customer_name;
+    }
+    
+    public function setParamMaterialcustomernameAttribute($value)
+    {
+        $this->param_material_customer_name = $value;
+    }
     //熱処理
     public function getParamHeatprocessAttribute()
     {
@@ -819,6 +864,7 @@ class Progressheader extends Model
             $sqlString .= "  , t1.row_seq as row_seq" ;
             $sqlString .= "  , t1.drawing_no as drawing_no" ;
             $sqlString .= "  , t1.order_date as order_date" ;
+            $sqlString .= "  , t1.order_kingaku as order_kingaku" ;
             $sqlString .= "  , t1.supply_date as supply_date" ;
             $sqlString .= "  , date_format(t1.order_date,'%Y年%m月%d日') as order_date_name" ;
             $sqlString .= "  , date_format(t1.supply_date,'%Y年%m月%d日') as supply_date_name" ;
@@ -836,6 +882,7 @@ class Progressheader extends Model
             $sqlString .= "  , t1.material_cost as material_cost" ;
             $sqlString .= "  , t1.material_office_code as material_office_code" ;
             $sqlString .= "  , t1.material_customer_code as material_customer_code" ;
+            $sqlString .= "  , t1.material_customer_name as material_customer_name" ;
             $sqlString .= "  , t1.heat_process as heat_process" ;
             $sqlString .= "  , t1.heat_cost as heat_cost" ;
             $sqlString .= "  , t1.outsourcing_office_code as outsourcing_office_code" ;
@@ -938,6 +985,7 @@ class Progressheader extends Model
                     'row_seq' => $this->row_seq,
                     'drawing_no' => $this->drawing_no,
                     'order_date' => $this->order_date,
+                    'order_kingaku' => $this->order_kingaku,
                     'supply_date' => $this->supply_date,
                     'office_code' => $this->office_code,
                     'customer_code' => $this->customer_code,
@@ -953,6 +1001,7 @@ class Progressheader extends Model
                     'material_cost' => $this->material_cost,
                     'material_office_code' => $this->material_office_code,
                     'material_customer_code' => $this->material_customer_code,
+                    'material_customer_name' => $this->material_customer_name,
                     'heat_process' => $this->heat_process,
                     'heat_cost' => $this->heat_cost,
                     'outsourcing_office_code' => $this->outsourcing_office_code,
@@ -960,6 +1009,41 @@ class Progressheader extends Model
                     'outsourcing_cost' => $this->outsourcing_cost,
                     'created_user'=>$this->created_user,
                     'created_at'=>$this->created_at
+                ]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /** 
+     *  更新
+     */
+    public function updateHeader(){
+        try {
+            DB::table($this->table)
+            ->where('order_no', $this->param_order_no)
+            ->where('seq', $this->param_seq)
+            ->update([
+                'row_seq' => $this->row_seq,
+                'drawing_no' => $this->drawing_no,
+                'order_date' => $this->order_date,
+                'order_kingaku' => $this->order_kingaku,
+                'supply_date' => $this->supply_date,
+                'office_code' => $this->office_code,
+                'customer_code' => $this->customer_code,
+                'customer_name' => $this->customer_name,
+                'order_count' => $this->order_count,
+                'model_number' => $this->model_number,
+                'product_code' => $this->product_code,
+                'updated_user'=>$this->updated_user,
+                'updated_at' => $this->updated_at
                 ]
             );
         }catch(\PDOException $pe){
@@ -994,6 +1078,7 @@ class Progressheader extends Model
             $sqlString .= "  , t1.row_seq as row_seq" ;
             $sqlString .= "  , t1.drawing_no as drawing_no" ;
             $sqlString .= "  , t1.order_date as order_date" ;
+            $sqlString .= "  , t1.order_kingaku as order_kingaku" ;
             $sqlString .= "  , t1.supply_date as supply_date" ;
             $sqlString .= "  , date_format(t1.order_date,'%Y年%m月%d日') as order_date_name" ;
             $sqlString .= "  , date_format(t1.supply_date,'%Y年%m月%d日') as supply_date_name" ;
@@ -1011,6 +1096,7 @@ class Progressheader extends Model
             $sqlString .= "  , t1.material_cost as material_cost" ;
             $sqlString .= "  , t1.material_office_code as material_office_code" ;
             $sqlString .= "  , t1.material_customer_code as material_customer_code" ;
+            $sqlString .= "  , t1.material_customer_name as material_customer_name" ;
             $sqlString .= "  , t1.heat_process as heat_process" ;
             $sqlString .= "  , t1.heat_cost as heat_cost" ;
             $sqlString .= "  , t1.outsourcing_office_code as outsourcing_office_code" ;

@@ -276,10 +276,6 @@ export default {
     // -------------------- サーバー処理 ----------------------------
     // 指示書／管理書取得
     getItem() {
-      console.log('ProcessInfo getItem order_no = ' + this.order_no);
-      console.log('ProcessInfo getItem seq = ' + this.seq);
-      console.log('ProcessInfo getItem kind = ' + this.kind);
-      console.log('ProcessInfo getItem device = ' + this.device);
       var arrayParams = { 
         order_no : this.order_no ,
         seq : this.seq,
@@ -315,7 +311,6 @@ export default {
       this.details = res.details;
       this.count = this.details.length;
       if ( this.details.length > 0) {
-        this.form.kind = this.kind;
         this.form.device_code = this.device;
         this.form.user_code = this.user_code;
         this.form.order_no = this.order_no;
