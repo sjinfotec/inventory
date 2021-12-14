@@ -771,6 +771,7 @@
                     </div>
                   </td>
                   <td class="frame_wh1"></td>
+                  <td></td>
                   <td colspan="4" class="textalign1 border_off">時間単価</td>
                   <td colspan="4" class="textalign1"></td>
                 </tr>
@@ -920,6 +921,7 @@ export default {
         order_date: "",
         supply_date: "",
         office_code: "",
+        order_kingaku: "",
         customer_code: "",
         back_order_customer_name: "",
         order_count: "",
@@ -1513,6 +1515,7 @@ export default {
           this.form.order_no = this.details[0]['order_no'];
           this.form.seq = this.details[0]['seq'];
           this.form.order_date = this.details[0]['order_date'];
+          this.form.order_kingaku = this.details[0]['order_kingaku'];
           this.form.processes_code = this.details[0]['processes_code'];
           this.form.back_order_customer_name = this.details[0]['back_order_customer_name'];
           this.form.drawing_no = this.details[0]['drawing_no'];
@@ -1702,6 +1705,7 @@ export default {
       this.form.back_order_customer_name = "";
       this.form.back_order_product_name = "";
       this.form.order_date = "";
+      this.form.order_kingaku = "";
       this.form.drawing_no = "";
       this.form.order_count = "";
       this.form.model_number = "";

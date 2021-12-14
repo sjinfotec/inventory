@@ -374,10 +374,12 @@ export default {
     
     // QRコード作成ボタンクリック処理
     qrcodeClick() {
+      console.log('this.form.code = ' + this.form.code);
       this.form.qrText1 = "&device='" + this.form.code + "'";
       this.form.qrText2 = "";
       this.form.qrText3 = "";
       this.form.qrText9 = "";
+      console.log('this.form.qrText1 = ' + this.form.qrText1);
       this.$forceUpdate();
     },
     // 新規作成ボタンクリック処理

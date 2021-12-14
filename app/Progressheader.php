@@ -29,6 +29,7 @@ class Progressheader extends Model
     private $row_seq;                              // 行
     private $drawing_no;                              // 図面番号
     private $order_date;                              // 受注日
+    private $order_kingaku;                              // 受注金額
     private $supply_date;                              // 納期
     private $office_code;                              // 営業所コード
     private $customer_code;                              // 顧客コード
@@ -117,6 +118,17 @@ class Progressheader extends Model
     {
         $this->order_date = $value;
     }
+    //受注金額
+    public function getOrderkingakuAttribute()
+    {
+        return $this->order_kingaku;
+    }
+
+    public function setOrderkingakuAttribute($value)
+    {
+        $this->order_kingaku = $value;
+    }
+
     //納期
     public function getSupplydateAttribute()
     {
@@ -404,6 +416,7 @@ class Progressheader extends Model
     private $param_order_date;                              // 受注日
     private $param_order_date_from;                         // 受注日（開始）
     private $param_order_date_to;                           // 受注日（終了）
+    private $param_order_kingaku;                              // 受注金額
     private $param_supply_date;                              // 納期
     private $param_supply_date_from;                         // 納期（開始）
     private $param_supply_date_to;                           // 納期（終了）
@@ -455,6 +468,16 @@ class Progressheader extends Model
     public function setParamOrdernoAttribute($value)
     {
         $this->param_order_no = $value;
+    }
+    //受注金額
+    public function getParamOrderkingakuAttribute()
+    {
+        return $this->param_order_kingaku;
+    }
+
+    public function setParamOrderkingakuAttribute($value)
+    {
+        $this->param_order_kingaku = $value;
     }
     //連番
     public function getParamSeqAttribute()
@@ -841,6 +864,7 @@ class Progressheader extends Model
             $sqlString .= "  , t1.row_seq as row_seq" ;
             $sqlString .= "  , t1.drawing_no as drawing_no" ;
             $sqlString .= "  , t1.order_date as order_date" ;
+            $sqlString .= "  , t1.order_kingaku as order_kingaku" ;
             $sqlString .= "  , t1.supply_date as supply_date" ;
             $sqlString .= "  , date_format(t1.order_date,'%Y年%m月%d日') as order_date_name" ;
             $sqlString .= "  , date_format(t1.supply_date,'%Y年%m月%d日') as supply_date_name" ;
@@ -961,6 +985,7 @@ class Progressheader extends Model
                     'row_seq' => $this->row_seq,
                     'drawing_no' => $this->drawing_no,
                     'order_date' => $this->order_date,
+                    'order_kingaku' => $this->order_kingaku,
                     'supply_date' => $this->supply_date,
                     'office_code' => $this->office_code,
                     'customer_code' => $this->customer_code,
@@ -997,6 +1022,41 @@ class Progressheader extends Model
         }
     }
 
+    /** 
+     *  更新
+     */
+    public function updateHeader(){
+        try {
+            DB::table($this->table)
+            ->where('order_no', $this->param_order_no)
+            ->where('seq', $this->param_seq)
+            ->update([
+                'row_seq' => $this->row_seq,
+                'drawing_no' => $this->drawing_no,
+                'order_date' => $this->order_date,
+                'order_kingaku' => $this->order_kingaku,
+                'supply_date' => $this->supply_date,
+                'office_code' => $this->office_code,
+                'customer_code' => $this->customer_code,
+                'customer_name' => $this->customer_name,
+                'order_count' => $this->order_count,
+                'model_number' => $this->model_number,
+                'product_code' => $this->product_code,
+                'updated_user'=>$this->updated_user,
+                'updated_at' => $this->updated_at
+                ]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
     /** 加工指示書／工程管理取得（モバイル表示用）
      *
      * @return list customer
@@ -1018,6 +1078,7 @@ class Progressheader extends Model
             $sqlString .= "  , t1.row_seq as row_seq" ;
             $sqlString .= "  , t1.drawing_no as drawing_no" ;
             $sqlString .= "  , t1.order_date as order_date" ;
+            $sqlString .= "  , t1.order_kingaku as order_kingaku" ;
             $sqlString .= "  , t1.supply_date as supply_date" ;
             $sqlString .= "  , date_format(t1.order_date,'%Y年%m月%d日') as order_date_name" ;
             $sqlString .= "  , date_format(t1.supply_date,'%Y年%m月%d日') as supply_date_name" ;
