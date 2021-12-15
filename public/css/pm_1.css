@@ -8,6 +8,13 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 
 */
 
+/*--common--*/
+.logo_height  {height:2rem;}
+.navbar-brand {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 /*--side menu--*/
 .side-base  {
   background: #196f2e;
@@ -255,10 +262,20 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 #table_cnt1 .f_style_1 {
   border-top:3px double #dee2e6;
 }
+#table_cnt1 .str_style1 {
+  font-size:1rem;
+}
+
+
+
 #table_cnt1 .jtime  {
   padding-top:12px;
   padding-bottom:12px;
 }
+#table_cnt1 .inputnum_r {
+  text-align:right;
+}
+
 
 /*--下部コンテンツ：加工時間実績等--*/
 #table_cnt2 {
@@ -454,7 +471,8 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   max-width: 30%;
 }
 #btn_cnt2 .btncolor11  {
-	background: #bb8c60;
+	background: #80bb60;
+	/*background: #bb8c60;*/
   border:none;
 }
 #btn_cnt2 .btncolor12  {
@@ -476,7 +494,8 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 }
 #btn_cnt2 .btncolor11:hover  {
   color: #212529;
-	background: rgba(187, 140, 96, 0.7);
+	background: rgba(128, 187, 96, 0.7);
+	/*background: rgba(187, 140, 96, 0.7);*/
 }
 #btn_cnt2 .btncolor12:hover  {
   color: #212529;
@@ -526,8 +545,19 @@ background:#DDEECC;
 border-bottom:4px solid #88CC88;
 white-space: nowrap;
 }
-#table_cnt4 td {
-  font-size:1.2rem;
+#table_cnt4 .td_active {
+  background:#dd6060;
+  }
+  #table_cnt4 td {
+  font-size:2rem;
+}
+#table_cnt4 .textwrap {
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+#table_cnt4 td.w1 {
+ width:auto;
 }
 
 /*--------------------## table progress header  (TOP page) ##--------------------*/
@@ -717,6 +747,10 @@ white-space: nowrap;
     display:block;
   }
   */
+  #table_cnt1 td.w2  {width:35%;}
+  #table_cnt1 td.w4  {width:12%;}
+  #table_cnt1 .ws1 {width:5%;}
+
   #table_cnt2 tr {
     height:48px;
   }
@@ -733,7 +767,7 @@ white-space: nowrap;
   #table_cnt2 .str01{
     margin-left: 2px;
   }
-
+  
 
 }
 

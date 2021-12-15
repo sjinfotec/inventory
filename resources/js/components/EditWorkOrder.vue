@@ -24,7 +24,7 @@
                       for="target_fromdate"
                     >
                       納期日付
-                      <span class="color-red">[必須]</span>
+                      <span class="color-red print-none">[必須]</span>
                     </span>
                   </div>
                   <input-datepicker
@@ -118,7 +118,7 @@
                       class="input-area-text"
                       id="basic-addon1"
                     >受注番号
-                    <span class="color-red">[必須]</span>
+                    <span class="color-red print-none">[必須]</span>
                     </span>
                   </div>
                   <div class="form-control p-0">
@@ -614,7 +614,8 @@
                               <input
                                 type="number"
                                 step="1"
-                                class="form-control"
+                                min="0"
+                                class="form-control inputnum_r"
                                 v-model="form.process_time_h[index]"
                                 @change="processtimeHChanges()"
                               />
@@ -626,7 +627,8 @@
                               <input
                                 type="number"
                                 step="1"
-                                class="form-control"
+                                min="0"
+                                class="form-control inputnum_r"
                                 v-model="form.process_time_m[index]"
                                 @change="processtimeMChanges()"
                               />
@@ -644,15 +646,15 @@
                           </td>
                         </tr>
                         <tr>
-                          <td colspan="4" class="td-first text-right align-middle pad2 f_style_1 jtime">実績合計</td>
-                          <td class="text-center align-middle ws1 f_style_1">
+                          <td colspan="4" class="td-first text-right align-middle pad2 f_style_1 jtime str_style1">実績合計</td>
+                          <td class="text-center align-middle ws1 f_style_1 str_style1">
                             {{form.result_process_time_h}}
                           </td>
-                          <td class="td-first text-left align-middle ws2 pad1 f_style_1">H</td>
-                          <td class="td-first text-center align-middle ws1 f_style_1">
+                          <td class="td-first text-left align-middle ws2 pad1 f_style_1 str_style1">H</td>
+                          <td class="td-first text-center align-middle ws1 f_style_1 str_style1">
                             {{form.result_process_time_m}}
                           </td>
-                          <td class="td-first text-left align-middle ws2 pad1 f_style_1">M</td>
+                          <td class="td-first text-left align-middle ws2 pad1 f_style_1 str_style1">M</td>
                           <td class="text-center align-middle w6 f_style_1 ">
                           </td>
                         </tr>
@@ -664,7 +666,9 @@
                 <div id="view_off" >
                   <div id="print_view_qr" class="cnt_view_qr">
                     <div class="cnt_view_position" v-if="qrText">
-                      <vue-qrcode  :value="qrText" :options="qroption1" tag="img"></vue-qrcode>
+                      <vue-qrcode
+                        :value="qrText" :options="qroption1" tag="img">
+                      </vue-qrcode>
                       <p><span>[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}]{{qrText}}</span></p>
                     </div>
                   </div><!--end view QR code v-if="isprint_qrText"-->
@@ -1319,12 +1323,11 @@ export default {
     // QRコード作成ボタンクリック処理
     qrcodeClick() {
       if (this.checkForm()) {
-        //this.isQr = false;
         this.isQr = true;
         this.setQrText();
         this.$forceUpdate();
         print_view_qr.style.display = 'block';
-        //this.isprint_qrText = true;
+        //setTimeout(this.qr_print, 1000);
         this.qr_print();
         // 項目数が多い場合以下コメントアウト
       } else {
@@ -1627,6 +1630,7 @@ export default {
         this.refresMaterialcustomerlist();
         this.refresOutsourcingofficelist();
         this.refresOutsourcingcustomerlist();
+        this.setQrText();
         this.$forceUpdate();
       } else {
         if (res.messagedata.length > 0) {

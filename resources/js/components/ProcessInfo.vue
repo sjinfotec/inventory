@@ -194,7 +194,7 @@ const C_OUTLINE_NAME = "明細摘要";
 const C_DEVICE_NAME = "機器名";
 const C_USER_NAME = "作業者";
 const C_KIND_INI = "1";
-const C_KIND_INI_NAME = "初期（テスト表示）";
+const C_KIND_INI_NAME = "";
 const C_KIND_START = "2";
 const C_KIND_START_NAME = "作業開始";
 const C_KIND_STOP = "3";
@@ -205,7 +205,7 @@ const C_KIND_COMPLETE = "5";
 const C_KIND_COMPLETE_NAME = "作業完了";
 const C_KIND_NEXT = "6";
 const C_KIND_NEXT_NAME = "次工程";
-const kindcolorArr = {"初期（テスト表示）":"#FFF", "作業開始":"#80bb60", "作業中断":"#dd6060", "ミス中断":"#dd6060", "作業完了":"#6cb2eb", "次工程":"#eeaa00" };
+const kindcolorArr = {"":"#FFF", "作業開始":"#80bb60", "作業中断":"#dd6060", "ミス中断":"#dd6060", "作業完了":"#6cb2eb", "次工程":"#eeaa00" };
 
 export default {
   name: "ProcessInfo",
@@ -253,6 +253,7 @@ export default {
       details: [],
       maketime: false,
       kindstatus: "",
+      mode_button: ""
     };
   },
   computed: {
@@ -305,11 +306,11 @@ export default {
     	target.style.background = '#80bb60';
       table_cnt3.style.color = '#FFF';
     },
-    // 確認OK
+    // 作業開始OK
     startClickok() {
       this.storeData();
       this.isbtnctrl = 'top';
-
+      this.mode_button = '';
     },
     // 中断処理
     startClicksus() {
@@ -319,6 +320,7 @@ export default {
       this.form.item_name[this.kind_index] = this.kind_name;
       this.storeData();
       this.isbtnctrl = 'top2';
+      this.mode_button = 'sus';
     },
     // ミス処理
     startClickmiss() {
@@ -328,6 +330,7 @@ export default {
       this.form.item_name[this.kind_index] = this.kind_name;
       this.storeData();
       this.isbtnctrl = 'top2';
+      this.mode_button = 'sus';
     },
     // 完成処理
     startClickcomp() {
@@ -338,6 +341,7 @@ export default {
       this.storeData();
       this.maketime = false;
       this.isbtnctrl = 'top';
+      this.mode_button = '';
     },
     // 次工程処理
     startClicknext() {
@@ -348,10 +352,16 @@ export default {
       this.storeData();
       this.maketime = false;
       this.isbtnctrl = 'top';
+      this.mode_button = '';
     },
     // 作業キャンセル処理
     startClickcancel() {
-      this.isbtnctrl = 'top';
+      if ( this.mode_button == 'sus' ) {
+        this.isbtnctrl = 'top2';
+      } else {
+        this.isbtnctrl = 'top';
+      }
+      //this.isbtnctrl = 'top';
       //this.form.kind = this.kindstatus;
       //this.form.kind = "";
       //this.setKind();
@@ -361,6 +371,9 @@ export default {
 console.log( kindcolorArr );
 console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
   	  target.style.background = kindcolorArr[this.kindstatus];
+      if (kindcolorArr[this.kindstatus] == '#FFF') {
+        table_cnt3.style.color = '#212529';
+      }
   	  //target.style.background = '#FFF';
       //table_cnt3.style.color = '#212529';
 //document.getElementById('btn_cnt1').getElementsByClassName('btncolor2').style.color = '#8888CC';

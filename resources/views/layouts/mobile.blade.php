@@ -34,8 +34,7 @@
                 @else
                 <a class="navbar-brand mr-auto mr-lg-0" href="{{ url('/') }}">
                     <!--<img class="logo-height" src="{{ asset('images/home-solid.svg') }}" alt=>-->
-                    <!--<img class="logo-height" src="{{ asset('images/logo.png') }}" alt="受発注管理システム">-->
-                    受発注管理システム
+                    <img class="logo_height" src="{{ asset('images/order_logo2.svg') }}" alt="受発注管理システム">
                 </a>
                 @endif
                 <!-- /editable title -->

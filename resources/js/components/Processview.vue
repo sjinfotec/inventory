@@ -24,30 +24,30 @@
                     <table id="table_cnt4" class="table table-striped border-bottom font-size-sm text-nowrap">
                       <thead>
                         <tr>
-                          <td class="style1 text-center align-middle w-10">納期</td>
-                          <td class="style1 text-center align-middle w-10">客先</td>
-                          <td class="style1 text-center align-middle w-10">受注番号</td>
-                          <td class="style1 text-center align-middle w-10">行</td>
-                          <td class="style1 text-center align-middle w-10">品名</td>
-                          <td class="style1 text-center align-middle w-10">機器名</td>
-                          <td class="style1 text-center align-middle w-10">作業者名</td>
-                          <td class="style1 text-center align-middle w-10">状況</td>
+                          <td class="style1 text-center align-middle">納期</td>
+                          <td class="style1 text-center align-middle">客先</td>
+                          <td class="style1 text-center align-middle">受注番号</td>
+                          <td class="style1 text-center align-middle">行</td>
+                          <td class="style1 text-center align-middle">品名</td>
+                          <td class="style1 text-center align-middle">機器名</td>
+                          <td class="style1 text-center align-middle">作業者名</td>
+                          <td class="style1 text-center align-middle">状況</td>
                           <!--
-                          <td class="style1 text-center align-middle w-10">作業時刻</td>
-                          <td class="style1 text-center align-middle w-10">作業時間</td>
+                          <td class="style1 text-center align-middle">作業時刻</td>
+                          <td class="style1 text-center align-middle">作業時間</td>
                           -->
                         </tr>
                       </thead>
                       <tbody>
-                        <tr v-for="(item,index) in details " :key="index">
-                          <td class="text-center align-middle">{{ item.supply_date_name }}</td>
-                          <td class="text-center align-middle">{{ item.back_order_customer_name }}</td>
-                          <td class="text-center align-middle">{{ item.order_no }}</td>
-                          <td class="text-center align-middle">{{ item.row_seq }}</td>
-                          <td class="text-center align-middle">{{ item.back_order_product_name }}</td>
-                          <td class="text-center align-middle">{{ item.device_name }}</td>
-                          <td class="text-center align-middle">{{ item.user_name }}</td>
-                          <td class="text-center align-middle">{{ item.work_kind_name }}</td>
+                        <tr v-bind:class="{ 'td_active': isActiveKind }" v-for="(item,index) in details " :key="index">
+                          <td class="text-center align-middle w1">{{ item.supply_date_name }}</td>
+                          <td class="text-center align-middle w2">{{ item.back_order_customer_name }}</td>
+                          <td class="text-center align-middle w3">{{ item.order_no }}</td>
+                          <td class="text-center align-middle w4">{{ item.row_seq }}</td>
+                          <td class="text-center align-middle w5 textwrap">{{ item.back_order_product_name }}</td>
+                          <td class="text-center align-middle w6 textwrap">{{ item.device_name }}</td>
+                          <td class="text-center align-middle w7">{{ item.user_name }}</td>
+                          <td class="text-center align-middle w8">{{ item.work_kind_name }}</td>
                           <!--
                           <td class="text-center align-middle">{{ item.process_history_time_name }}</td>
                           <div v-if="item.process_time_h">
@@ -92,7 +92,8 @@ export default {
       today_date: "",
       count: 0,
       before_count: 0,
-      details: []
+      details: [],
+      isActiveKind: false
     };
   },
   computed: {
@@ -141,6 +142,7 @@ export default {
       var res = response.data;
       if (res.result) {
         this.details = res.details;
+        //this.isActiveKind = true;
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
