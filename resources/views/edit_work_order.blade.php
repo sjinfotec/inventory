@@ -41,6 +41,7 @@
 						v-bind:authusers="{{ $authusers }}"
 						v-bind:order_no="{{ $order_no }}"
 						v-bind:row_seq="{{ $row_seq }}"
+						v-bind:seq="{{ $seq }}"
 						v-bind:const_generaldatas="{{ $const_general_datas }}"
 						v-bind:indexorhome="{{ $indexorhome }}"
 					></edit-work-order>

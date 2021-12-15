@@ -1250,9 +1250,9 @@ class ApiCommonController extends Controller
                 $office_code_value = $params_product_process_data["office_code"];
             }
             if (!$result_exists) {
-                Log::debug('!$result_exists = '.$order_no);
-                Log::debug('!$result_exists = '.$seq);
+                // TODO 新規の場合out_seqをどうするか　とりあえず０で登録する
                 $array_putData = [
+                    'out_seq' => 0,
                     'order_no' => $order_no,
                     'seq' => $seq,
                     'row_seq' => $params_product_process_data["row_seq"],
@@ -1288,6 +1288,7 @@ class ApiCommonController extends Controller
             } else {
                 Log::debug('$result_exists = '.$order_no);
                 Log::debug('$result_exists = '.$seq);
+                // 'out_seq' => $params_product_process_data["out_seq"],
                 $array_putData = [
                     'order_no' => $order_no,
                     'seq' => $seq,
@@ -1330,6 +1331,7 @@ class ApiCommonController extends Controller
                 ->where('seq', '=', $seq)
                 ->delete();
             // 明細insert
+            Log::debug('putProcess count($params_product_process_data["progress_no"]) = '.count($params_product_process_data["progress_no"]));
             for ($i=0;$i<count($params_product_process_data["progress_no"]);$i++) {
                 $array_putData = array();
                 $process_time_h = $params_product_process_data["process_time_h"][$i];
@@ -1356,10 +1358,11 @@ class ApiCommonController extends Controller
                 if ($params_product_process_data["product_processes_detail_no"][$i] == "" || $params_product_process_data["product_processes_detail_no"][$i] == null) {
                     $product_processes_detail_no = 0;
                 }
+                Log::debug('putProcess [$i] = '.$i." ".$params_product_process_data['progress_no'][$i]);
                 $array_putData = [
                     'order_no' => $order_no,
                     'seq' => $seq,
-                    'progress_no' => $params_product_process_data['progress_no'][$i],
+                    'progress_no' => $i + 1,
                     'product_processes_code' => $product_processes_code,
                     'product_processes_detail_no' => $product_processes_detail_no,
                     'device_code' => $params_product_process_data["device_code"][$i],
@@ -1590,6 +1593,7 @@ class ApiCommonController extends Controller
                     $progress_header_model->setOrdernoAttribute($item->order_no);
                     $progress_header_model->setSeqAttribute($item->seq);
                     if (!$result_exists) {
+                        $progress_header_model->setOutseqAttribute($item->out_seq);
                         $progress_header_model->setRowseqAttribute($item->row_seq);
                         $progress_header_model->setDrawingnoAttribute($item->drawing_no);
                         $progress_header_model->setOrderdateAttribute($item->order_date);
@@ -1603,7 +1607,7 @@ class ApiCommonController extends Controller
                         $progress_header_model->setProductcodeAttribute($item->product_code);
                         $progress_header_model->setProcessescodeAttribute($item->processes_code);
                         $progress_header_model->setBackorderproductnameAttribute($item->product_name);
-                        $progress_header_model->setUnitpriceAttribute(0);
+                        $progress_header_model->setUnitpriceAttribute($item->unit_price);
                         $progress_header_model->setOutlinenameAttribute($item->outline_name);
                         $progress_header_model->setBackorderqualitynameAttribute(null);
                         $progress_header_model->setMaterialcostAttribute(0);
@@ -1621,6 +1625,7 @@ class ApiCommonController extends Controller
                     } else {
                         $progress_header_model->setParamOrdernoAttribute($item->order_no);
                         $progress_header_model->setParamSeqAttribute($item->seq);
+                        $progress_header_model->setOutseqAttribute($item->out_seq);
                         $progress_header_model->setRowseqAttribute($item->row_seq);
                         $progress_header_model->setDrawingnoAttribute($item->drawing_no);
                         $progress_header_model->setOrderdateAttribute($item->order_date);
@@ -1715,6 +1720,7 @@ class ApiCommonController extends Controller
             $params_customer_code = null;
             $params_order_no = null;
             $params_row_seq = null;
+            $params_seq = null;
             if (isset($request->keyparams)) {
                 $params = $request->keyparams;
                 if (isset($params['target_from_date'])) {
@@ -1735,10 +1741,14 @@ class ApiCommonController extends Controller
                 if (isset($params['row_seq'])) {
                     $params_row_seq = $params['row_seq'];
                 }
+                if (isset($params['seq'])) {
+                    $params_seq = $params['seq'];
+                }
             }
             Log::debug('getProductChart order_no = '.$params_order_no);
             Log::debug('getProductChart order_no = '.$params['order_no']);
             Log::debug('getProductChart row_seq = '.$params_row_seq);
+            Log::debug('getProductChart seq = '.$params_seq);
 
             // ログインユーザの権限取得
             $user = Auth::user();
@@ -1748,6 +1758,7 @@ class ApiCommonController extends Controller
             $sqlString .= "select ";
             $sqlString .= "  t1.order_no as order_no ";
             $sqlString .= "  , t1.seq as seq ";
+            $sqlString .= "  , t1.out_seq as out_seq ";
             $sqlString .= "  , t1.row_seq as row_seq ";
             $sqlString .= "  , t1.drawing_no as drawing_no ";
             $sqlString .= "  , t1.order_date as order_date ";
@@ -1890,6 +1901,9 @@ class ApiCommonController extends Controller
             if (!empty($params_row_seq)) {
                 $sqlString .= "    and t1.row_seq = ? ";
             }
+            if (!empty($params_seq)) {
+                $sqlString .= "    and t1.seq = ? ";
+            }
             $sqlString .= "group by ";
             $sqlString .= "  t1.supply_date ";
             $sqlString .= " , t1.order_no ";
@@ -1922,10 +1936,19 @@ class ApiCommonController extends Controller
             if (!empty($params_row_seq)) {
                 $array_setBindingsStr[] = $params_row_seq;
             }
+            if (!empty($params_seq)) {
+                $array_setBindingsStr[] = $params_seq;
+            }
             $details = DB::select($sqlString, $array_setBindingsStr);
             Log::debug('getProductChart details = '.count($details));
+            $users_details =
+                DB::table($this->table_users)
+                    ->where('out_seq', '>', 0)
+                    ->where('is_deleted', 0)
+                    ->orderby('out_seq','asc')
+                    ->get();
             return response()->json(
-                ['result' => true, 'details' => $details,
+                ['result' => true, 'details' => $details, 'users_details' => $users_details,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){

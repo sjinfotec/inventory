@@ -15,6 +15,7 @@ class ImportBackOrder extends Model
 
     //--------------- メンバー属性 -----------------------------------
     private $id;                                        // ID
+    private $out_seq;                                   // 出力順
     private $order_date;                                // 受注日
     private $row_seq;                                   // 行
     private $drawing_no;                                // 図面番号
@@ -27,6 +28,7 @@ class ImportBackOrder extends Model
     private $supply_date;                               // 納期
     private $order_kingaku;                             // 受注金額
     private $outline_name;                              // 摘要
+    private $unit_price;                                // 単価
     private $created_user;                              // 作成ユーザー
     private $updated_user;                              // 修正ユーザー
     private $created_at;                                // 作成日時
@@ -42,6 +44,16 @@ class ImportBackOrder extends Model
     public function setIdAttribute($value)
     {
         $this->id = $value;
+    }
+    //出力順
+    public function getOutseqAttribute()
+    {
+        return $this->out_seq;
+    }
+
+    public function setOutseqAttribute($value)
+    {
+        $this->out_seq = $value;
     }
     //受注日
     public function getOrderdateAttribute()
@@ -163,6 +175,16 @@ class ImportBackOrder extends Model
     {
         $this->outline_name = $value;
     }
+    //単価
+    public function getUnitpriceAttribute()
+    {
+        return $this->unit_price;
+    }
+
+    public function setUnitpriceAttribute($value)
+    {
+        $this->unit_price = $value;
+    }
     //作成ユーザー
     public function getCreateduserAttribute()
     {
@@ -207,6 +229,7 @@ class ImportBackOrder extends Model
 
     //--------------- パラメータ項目属性 -----------------------------------
     private $param_id;                              // ID
+    private $param_out_seq;                                   // 出力順
     private $param_order_date;                              // 受注日
     private $param_row_seq;                              // 行
     private $param_drawing_no;                              // 図面番号
@@ -219,6 +242,7 @@ class ImportBackOrder extends Model
     private $param_supply_date;                              // 納期
     private $param_order_kingaku;                              // 受注金額
     private $param_outline_name;                              // 摘要
+    private $param_unit_price;                                   // 単価
     private $param_created_user;                              // 作成ユーザー
     private $param_updated_user;                              // 修正ユーザー
     private $param_created_at;                              // 作成日時
@@ -234,6 +258,16 @@ class ImportBackOrder extends Model
     public function setParamIdAttribute($value)
     {
         $this->param_id = $value;
+    }
+    //出力順
+    public function getParamOutseqAttribute()
+    {
+        return $this->param_out_seq;
+    }
+    
+    public function setParamOutseqAttribute($value)
+    {
+        $this->param_out_seq = $value;
     }
     //受注日
     public function getParamOrdernoAttribute()
@@ -354,6 +388,16 @@ class ImportBackOrder extends Model
     public function setParamOrderkingakuAttribute($value)
     {
         $this->param_order_kingaku = $value;
+    }
+    //単価
+    public function getParamUnitpriceAttribute()
+    {
+        return $this->param_unit_price;
+    }
+    
+    public function setParamUnitpriceAttribute($value)
+    {
+        $this->param_unit_price = $value;
     }
     //作成ユーザー
     public function getParamOutlinenameAttribute()

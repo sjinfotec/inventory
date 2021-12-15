@@ -20,6 +20,7 @@ class BackOrder extends Model
     //--------------- メンバー属性 -----------------------------------
     private $id;                              // ID
     private $order_no;                              // 受注番号
+    private $out_seq;                                   // 出力順
     private $seq;                              // 連番
     private $order_date;                              // 受注日
     private $row_seq;                              // 行
@@ -32,6 +33,7 @@ class BackOrder extends Model
     private $supply_date;                              // 納期
     private $order_kingaku;                              // 受注金額
     private $outline_name;                              // 摘要
+    private $unit_price;                                // 単価
     private $is_update;                                 // 指示書登録フラグ
     private $is_deleted;                                // 削除フラグ
     private $created_user;                              // 作成ユーザー
@@ -48,6 +50,16 @@ class BackOrder extends Model
     public function setIdAttribute($value)
     {
         $this->id = $value;
+    }
+    //出力順
+    public function getOutseqAttribute()
+    {
+        return $this->out_seq;
+    }
+
+    public function setOutseqAttribute($value)
+    {
+        $this->out_seq = $value;
     }
     //受注番号
     public function getOrdernoAttribute()
@@ -179,6 +191,16 @@ class BackOrder extends Model
     {
         $this->outline_name = $value;
     }
+    //単価
+    public function getUnitpriceAttribute()
+    {
+        return $this->unit_price;
+    }
+
+    public function setUnitpriceAttribute($value)
+    {
+        $this->unit_price = $value;
+    }
     //指示書登録フラグ
     public function getIsUpdateAttribute()
     {
@@ -241,6 +263,7 @@ class BackOrder extends Model
 
     //--------------- パラメータ項目属性 -----------------------------------
     private $param_id;                              // ID
+    private $param_out_seq;                                   // 出力順
     private $param_order_no;                              // 受注番号
     private $param_seq;                              // 連番
     private $param_order_date;                              // 受注日
@@ -256,6 +279,7 @@ class BackOrder extends Model
     private $param_supply_date;                              // 納期
     private $param_order_kingaku;                              // 受注金額
     private $param_outline_name;                              // 摘要
+    private $param_unit_price;                                   // 単価
     private $param_is_update;                                   // 指示書登録フラグ
     private $param_is_deleted;                                  // 削除フラグ
     private $param_created_user;                              // 作成ユーザー
@@ -272,6 +296,16 @@ class BackOrder extends Model
     public function setParamIdAttribute($value)
     {
         $this->param_id = $value;
+    }
+    //出力順
+    public function getParamOutseqAttribute()
+    {
+        return $this->param_out_seq;
+    }
+    
+    public function setParamOutseqAttribute($value)
+    {
+        $this->param_out_seq = $value;
     }
     //受注番号
     public function getParamOrdernoAttribute()
@@ -418,6 +452,20 @@ class BackOrder extends Model
     {
         return $this->param_outline_name;
     }
+    public function setParamOutlinenameAttribute($value)
+    {
+        $this->param_outline_name = $value;
+    }
+    //単価
+    public function getParamUnitpriceAttribute()
+    {
+        return $this->param_unit_price;
+    }
+    
+    public function setParamUnitpriceAttribute($value)
+    {
+        $this->param_unit_price = $value;
+    }
     //指示書登録フラグ
     public function getParamIsUpdateAttribute()
     {
@@ -436,11 +484,6 @@ class BackOrder extends Model
     public function setParamIsDeletedAttribute($value)
     {
         $this->param_is_deleted = $value;
-    }
-
-    public function setParamOutlinenameAttribute($value)
-    {
-        $this->param_outline_name = $value;
     }
     //作成ユーザー
     public function getParamCreateduserAttribute()
@@ -503,7 +546,8 @@ class BackOrder extends Model
             $login_account_id = $user->account_id;
             $sqlString = "";
             $sqlString .= "select" ;
-            $sqlString .= "  t1.order_no as order_no" ;
+            $sqlString .= "  t1.out_seq as out_seq" ;
+            $sqlString .= "  , t1.order_no as order_no" ;
             $sqlString .= "  , t1.seq as seq" ;
             $sqlString .= "  , t1.order_date as order_date" ;
             $sqlString .= "  , t1.row_seq as row_seq" ;
@@ -516,6 +560,7 @@ class BackOrder extends Model
             $sqlString .= "  , t1.supply_date as supply_date" ;
             $sqlString .= "  , t1.order_kingaku as order_kingaku" ;
             $sqlString .= "  , t1.outline_name as outline_name" ;
+            $sqlString .= "  , t1.unit_price as unit_price" ;
             $sqlString .= "  , t1.is_update as is_update" ;
             $sqlString .= "  , t2.code as customer_code" ;
             $sqlString .= "  , t2.office_code as office_code" ;
@@ -597,7 +642,8 @@ class BackOrder extends Model
             $login_account_id = $user->account_id;
             $sqlString = "";
             $sqlString .= "select" ;
-            $sqlString .= "  t1.order_no as order_no" ;
+            $sqlString .= "  t1.out_seq as out_seq" ;
+            $sqlString .= "  , t1.order_no as order_no" ;
             $sqlString .= "  , t1.seq as seq" ;
             $sqlString .= "  , t1.row_seq as row_seq" ;
             $sqlString .= "  , t1.drawing_no as drawing_no" ;
@@ -613,6 +659,7 @@ class BackOrder extends Model
             $sqlString .= "  , t1.back_order_product_name as back_order_product_name" ;
             $sqlString .= "  , t1.unit_price as unit_price" ;
             $sqlString .= "  , t1.outline_name as outline_name" ;
+            $sqlString .= "  , t1.unit_price as unit_price" ;
             $sqlString .= "  , t1.back_order_quality_name as back_order_quality_name" ;
             $sqlString .= "  , t1.material_cost as material_cost" ;
             $sqlString .= "  , t1.material_office_code as material_office_code" ;
@@ -800,6 +847,7 @@ class BackOrder extends Model
         try {
             DB::table($this->table)->insert(
                 [
+                    'out_seq' => $this->out_seq,
                     'order_no' => $this->order_no,
                     'seq' => $this->seq,
                     'order_date' => $this->order_date,
@@ -813,6 +861,7 @@ class BackOrder extends Model
                     'supply_date' => $this->supply_date,
                     'order_kingaku' => $this->order_kingaku,
                     'outline_name' => $this->outline_name,
+                    'unit_price' => $this->unit_price,
                     'is_update' => $this->is_update,
                     'created_user'=>$this->created_user,
                     'created_at'=>$this->created_at

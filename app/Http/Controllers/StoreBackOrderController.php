@@ -121,24 +121,27 @@ class StoreBackOrderController extends Controller
             $details = $excelspread->getExcelRowData($array_impl_getExcelRowData);
             $item_count = 0;
             foreach($details as $item) {
-                if (!isset($item['A'])) {
+                if (!isset($item['E'])) {
                     break;
                 }
                 $item_count += 1;
+                // 見出しskip
                 if ($item_count > 1) {
                     $array_items = array(
-                        'order_date' => $item['A'],
-                        'row_seq' => $item['B'],
-                        'drawing_no' => $item['C'],
-                        'order_no' => $item['D'],
-                        'customer_name' => $item['E'],
-                        'model_number' => $item['F'],
-                        'product_name' => $item['G'],
-                        'quality_name' => $item['H'],
-                        'order_count' => $item['I'],
-                        'supply_date' => $item['J'],
-                        'order_kingaku' => $item['K'],
-                        'outline_name' => $item['L'],
+                        'out_seq' => $item['A'],
+                        'order_date' => $item['B'],
+                        'row_seq' => $item['C'],
+                        'drawing_no' => $item['D'],
+                        'order_no' => $item['E'],
+                        'customer_name' => $item['F'],
+                        'model_number' => $item['G'],
+                        'product_name' => $item['H'],
+                        'quality_name' => $item['I'],
+                        'order_count' => $item['J'],
+                        'supply_date' => $item['K'],
+                        'order_kingaku' => $item['L'],
+                        'outline_name' => $item['M'],
+                        'unit_price' => $item['N'],
                         'created_user' => $login_user_code,
                         'updated_user' => null
                     );
@@ -146,6 +149,7 @@ class StoreBackOrderController extends Controller
                 }
 
             }
+            Log::debug('insertBackorder item_count = '.$item_count);
 
             $imp_model = new ImportBackOrder();
             $imp_model->delAlldata();
@@ -207,6 +211,7 @@ class StoreBackOrderController extends Controller
                 }
                 $backorder_seq += 1;
                 Log::debug('insertBackorder $backorder_seq = '.$backorder_seq);
+                $backorder_model->setOutseqAttribute($item->out_seq);
                 $backorder_model->setOrdernoAttribute($item_backorder_order_no );
                 $backorder_model->setSeqAttribute($backorder_seq);
                 $backorder_model->setOrderdateAttribute(date('Ymd', ($item->order_date - (int)Config::get('const.SERIALDATA.excel_serial_base')) * 60 * 60 * 24));
@@ -228,6 +233,7 @@ class StoreBackOrderController extends Controller
                 }
                 $backorder_model->setOrderkingakuAttribute($item->order_kingaku);
                 $backorder_model->setOutlinenameAttribute($item->outline_name);
+                $backorder_model->setUnitpriceAttribute($item->unit_price);
                 $backorder_model->setIsUpdateAttribute(false);
                 $backorder_model->setCreateduserAttribute($login_user_code);
                 $backorder_model->setCreatedatAttribute(Carbon::now());

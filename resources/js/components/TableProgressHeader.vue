@@ -201,7 +201,7 @@
               </thead>
               <tbody>
                 <tr v-for="(item,rowIndex) in details" :key="rowIndex">
-                  <td class="text-right align-middle w1">{{ rowIndex + 1 }}</td>
+                  <td class="text-right align-middle w1">{{ item['out_seq'] }}</td>
                   <td class="text-left align-middle w2">{{ item['supply_date_name'] }}</td>
                   <td class="text-left align-middle w3" textwrap>{{ item['customer_name'] }}</td>
                   <td class="text-left align-middle w4">{{ item['order_no'] }}</td>
@@ -211,7 +211,7 @@
                   <td class="text-left align-middle w8 textwrap">{{ item['model_number'] }}</td>
                   <td class="text-left align-middle w9 textwrap">{{ item['product_name'] }}</td>
                   <td class="text-center align-middle mw-rem-5">
-                    <a :href="edtUrl(item['order_no'],item['row_seq'] )" class="btn btn-primary">編集</a>
+                    <a :href="edtUrl(item['order_no'],item['row_seq'],item['max_seq'] )" class="btn btn-primary">編集</a>
                   </td>
                   <td class="text-center align-middle mw-rem-5">
                     <button type="button" class="btn btn-danger mb-1" @click="delClick(rowIndex)">
@@ -300,8 +300,8 @@ export default {
       return C_EDIT_USER;
     },
     edtUrl: function() {
-      return function(orderno,row_seq) {
-        return "/edit_work_order/home?order_no='" + orderno + "'&row_seq= '" + row_seq + "'";
+      return function(orderno,row_seq,seq) {
+        return "/edit_work_order/home?order_no='" + orderno + "'&row_seq= '" + row_seq + "'&seq= '" + seq + "'";
       }
     }
   },
@@ -430,21 +430,34 @@ export default {
       console.log('getItem this.selectedCustomerValue = ' + this.selectedCustomerValue);
       console.log('getItem this.value_order_no = ' + this.value_order_no);
       console.log('getItem this.value_drawing_no = ' + this.value_drawing_no);
-      var arrayParams = {
-        target_from_date: value_targetFromYmd,
-        target_to_date: value_targetToYmd,
-        office_code: this.selectedOfficeValue,
-        customer_code: this.selectedCustomerValue,
-        order_no: this.value_order_no,
-        drawing_no: this.value_drawing_no
-      };
-      this.postRequest("/get_progress_header", arrayParams)
-        .then(response => {
-          this.getThen(response);
-        })
-        .catch(reason => {
-          this.serverCatch("加工指示書／工程管理書", "取得");
-        });
+      // 処理中メッセージ表示
+      this.$swal({
+        title: "処　理　中...",
+        html: "",
+        allowOutsideClick: false, //枠外をクリックしても画面を閉じない
+        showConfirmButton: false,
+        showCancelButton: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+          var arrayParams = {
+            target_from_date: value_targetFromYmd,
+            target_to_date: value_targetToYmd,
+            office_code: this.selectedOfficeValue,
+            customer_code: this.selectedCustomerValue,
+            order_no: this.value_order_no,
+            drawing_no: this.value_drawing_no
+          };
+          this.postRequest("/get_progress_header", arrayParams)
+            .then(response => {
+              this.$swal.close();
+              this.getThen(response);
+            })
+            .catch(reason => {
+              this.$swal.close();
+              this.serverCatch("加工指示書／工程管理書", "取得");
+            });
+        }
+      });
     },
     // ------------------------ 共通処理 ------------------------------------
     // 営業所選択コンポーネント取得メソッド

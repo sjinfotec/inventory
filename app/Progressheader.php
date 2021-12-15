@@ -24,6 +24,7 @@ class Progressheader extends Model
 
     //--------------- メンバー属性 -----------------------------------
     private $id;                              // ID
+    private $out_seq;                              // 出力順
     private $order_no;                              // 受注番号
     private $seq;                              // 連番
     private $row_seq;                              // 行
@@ -67,6 +68,16 @@ class Progressheader extends Model
     public function setIdAttribute($value)
     {
         $this->id = $value;
+    }
+    //出力順
+    public function getOutseqAttribute()
+    {
+        return $this->out_seq;
+    }
+
+    public function setOutseqAttribute($value)
+    {
+        $this->out_seq = $value;
     }
     //受注番号
     public function getOrdernoAttribute()
@@ -409,6 +420,7 @@ class Progressheader extends Model
 
     //--------------- パラメータ項目属性 -----------------------------------
     private $param_id;                              // ID
+    private $param_out_seq;                              // 出力順
     private $param_order_no;                              // 受注番号
     private $param_seq;                              // 連番
     private $param_row_seq;                              // 行
@@ -458,6 +470,16 @@ class Progressheader extends Model
     public function setParamIdAttribute($value)
     {
         $this->param_id = $value;
+    }
+    //出力順
+    public function getParamOutseqAttribute()
+    {
+        return $this->param_out_seq;
+    }
+    
+    public function setParamOutseqAttribute($value)
+    {
+        $this->param_out_seq = $value;
     }
     //受注番号
     public function getParamOrdernoAttribute()
@@ -860,6 +882,7 @@ class Progressheader extends Model
             $sqlString = "";
             $sqlString .= "select" ;
             $sqlString .= "  t1.order_no as order_no" ;
+            $sqlString .= "  , t1.out_seq as out_seq" ;
             $sqlString .= "  , t1.seq as max_seq" ;
             $sqlString .= "  , t1.row_seq as row_seq" ;
             $sqlString .= "  , t1.drawing_no as drawing_no" ;
@@ -937,7 +960,8 @@ class Progressheader extends Model
                 $sqlString .= "    and t1.drawing_no = ?" ;
             }
             // $sqlString .= "  group by t1.order_no, t1.order_date " ;
-            $sqlString .= "  order by t1.order_no, t1.order_date desc " ;
+            // $sqlString .= "  order by t1.order_no, t1.order_date desc " ;
+            $sqlString .= "  order by t1.out_seq " ;
             // バインド
             $array_setBindingsStr = array();
             $array_setBindingsStr[] = 1;
@@ -980,6 +1004,7 @@ class Progressheader extends Model
         try {
             DB::table($this->table)->insert(
                 [
+                    'out_seq' => $this->out_seq,
                     'order_no' => $this->order_no,
                     'seq' => $this->seq,
                     'row_seq' => $this->row_seq,
