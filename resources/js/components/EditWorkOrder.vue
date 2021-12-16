@@ -92,17 +92,28 @@
                       for="target_customer"
                     >客先</label>
                   </div>
-                  <select-customerlist
-                    ref="selectcustomerlist"
-                    v-if="showoCustomerlist"
-                    v-bind:blank-data="true"
-                    v-bind:placeholder-data="'客先を選択してください'"
-                    v-bind:selected-value="selectedCustomerValue"
-                    v-bind:add-new="false"
-                    v-bind:office-code="selectedOfficeValue"
-                    v-bind:row-index="0"
-                    v-on:change-event="customerChanges"
-                  ></select-customerlist>
+                  <div v-if="selectedOfficeValue">
+                    <select-customerlist
+                      ref="selectcustomerlist"
+                      v-if="showoCustomerlist"
+                      v-bind:blank-data="true"
+                      v-bind:placeholder-data="'客先を選択してください'"
+                      v-bind:selected-value="selectedCustomerValue"
+                      v-bind:add-new="false"
+                      v-bind:office-code="selectedOfficeValue"
+                      v-bind:row-index="0"
+                      v-on:change-event="customerChanges"
+                    ></select-customerlist>
+                  </div>
+                  <div v-else class="form-control p-0">
+                    <input
+                      type="text"
+                      title="客先"
+                      class="form-control"
+                      :value="value_back_order_customer_name"
+                      @change="backordercustomernameChanges"
+                    />
+                  </div>
                 </div>
                 <message-data
                   v-bind:message-datas="messagedatacustomer"
@@ -293,16 +304,32 @@
                       id="basic-addon1"
                     >単価</span>
                   </div>
-                  <div class="form-control p-0">
+                  <div class="form-control  p-0" v-if="unitpriceediting">
+                    <p class="inlineblock tankaatto">@</p>
                     <input
+                      ref="target"
                       type="number"
                       title="単価"
-                      max="999999999"
                       min="0"
-                      step="1"
-                      class="form-control inputnum_r"
+                      class="form-control inputnum_r inlineblock tankainput"
                       :value="value_unit_price"
                       @change="unitpriceChanges"
+                      @focusin="unitpriceFocusin"
+                      @focusout="unitpriceFocusout"
+
+                    />
+                  </div>
+                  <div class="form-control  p-0" v-else>
+                    <p class="inlineblock tankaatto">@</p>
+                    <input
+                      type="text"
+                      title="単価"
+                      class="form-control inputnum_r inlineblock tankainput"
+                      :value ="value_unit_price | localeNum"
+                      @change="unitpriceChanges"
+                      @focusin="unitpriceFocusin"
+                      @focusout="unitpriceFocusout"
+
                     />
                   </div>
                 </div>
@@ -371,16 +398,30 @@
                       id="basic-addon1"
                     >材料費</span>
                   </div>
-                  <div class="form-control p-0">
+                  <div class="form-control p-0" v-if="materialcostediting">
                     <input
+                      ref="target"
                       type="number"
                       title="材料費"
-                      max="999999999"
                       min="0"
-                      step="1"
                       class="form-control inputnum_r"
                       :value="value_material_cost"
                       @change="materialcostChanges"
+                      @focusin="materialcostFocusin"
+                      @focusout="materialcostFocusout"
+
+                    />
+                  </div>
+                  <div class="form-control p-0" v-else>
+                    <input
+                      type="text"
+                      title="材料費"
+                      class="form-control inputnum_r"
+                      :value ="value_material_cost | localeNum"
+                      @change="materialcostChanges"
+                      @focusin="materialcostFocusin"
+                      @focusout="materialcostFocusout"
+
                     />
                   </div>
                 </div>
@@ -448,16 +489,30 @@
                       id="basic-addon1"
                     >熱処理費</span>
                   </div>
-                  <div class="form-control p-0">
+                  <div class="form-control p-0" v-if="heatcostediting">
                     <input
+                      ref="target"
                       type="number"
                       title="熱処理費"
-                      max="999999999"
                       min="0"
-                      step="1"
                       class="form-control inputnum_r"
                       :value="value_heat_cost"
                       @change="heatcostChanges"
+                      @focusin="heatcostFocusin"
+                      @focusout="heatcostFocusout"
+
+                    />
+                  </div>
+                  <div class="form-control p-0" v-else>
+                    <input
+                      type="text"
+                      title="熱処理費"
+                      class="form-control inputnum_r"
+                      :value ="value_heat_cost | localeNum"
+                      @change="heatcostChanges"
+                      @focusin="heatcostFocusin"
+                      @focusout="heatcostFocusout"
+
                     />
                   </div>
                 </div>
@@ -499,16 +554,30 @@
                       id="basic-addon1"
                     >外注費</span>
                   </div>
-                  <div class="form-control p-0">
+                  <div class="form-control p-0" v-if="outsourcingcostediting">
                     <input
+                      ref="target"
                       type="number"
                       title="外注費"
-                      max="999999999"
                       min="0"
-                      step="1"
                       class="form-control inputnum_r"
                       :value="value_outsourcing_cost"
                       @change="outsourcingcostChanges"
+                      @focusin="outsourcingcostFocusin"
+                      @focusout="outsourcingcostFocusout"
+
+                    />
+                  </div>
+                  <div class="form-control p-0" v-else>
+                    <input
+                      type="text"
+                      title="外注費"
+                      class="form-control inputnum_r"
+                      :value ="value_outsourcing_cost | localeNum"
+                      @change="outsourcingcostChanges"
+                      @focusin="outsourcingcostFocusin"
+                      @focusout="outsourcingcostFocusout"
+
                     />
                   </div>
                 </div>
@@ -688,7 +757,7 @@
                   <td class="frame_wh1" v-for="(n,index1) in 4" :key="index1">
                     <div class="flex1" v-if="form.total.process_total_user_name_1[index1]">
                       <div class="cnt2_name">{{ form.total.process_total_user_name_1[index1] }}</div>
-                      <div class="cnt2_hm">
+                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_1[index1]">
                         <span class="str01">{{ form.total.process_result_process_time_h_1[index1] }}H</span>
                         <span class="str01">{{ form.total.process_result_process_time_m_1[index1] }}M</span></div>
                     </div>
@@ -718,7 +787,7 @@
                   <td class="frame_wh1" v-for="(n,index2) in 4" :key="index2">
                     <div class="flex1" v-if="form.total.process_total_user_name_2[index2]">
                       <div class="cnt2_name">{{ form.total.process_total_user_name_2[index2] }}</div>
-                      <div class="cnt2_hm">
+                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_2[index2]">
                         <span class="str01">{{ form.total.process_result_process_time_h_2[index2] }}H</span>
                         <span class="str01">{{ form.total.process_result_process_time_m_2[index2] }}M</span></div>
                     </div>
@@ -743,7 +812,7 @@
                   <td class="frame_wh1" v-for="(n,index3) in 4" :key="index3">
                     <div class="flex1" v-if="form.total.process_total_user_name_3[index3]">
                       <div class="cnt2_name">{{ form.total.process_total_user_name_3[index3] }}</div>
-                      <div class="cnt2_hm">
+                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_3[index3]">
                         <span class="str01">{{ form.total.process_result_process_time_h_3[index3] }}H</span>
                         <span class="str01">{{ form.total.process_result_process_time_m_3[index3] }}M</span></div>
                     </div>
@@ -763,7 +832,7 @@
                   <td class="frame_wh1" v-for="(n,index4) in 4" :key="index4">
                     <div class="flex1" v-if="form.total.process_total_user_name_4[index4]">
                       <div class="cnt2_name">{{ form.total.process_total_user_name_4[index4] }}</div>
-                      <div class="cnt2_hm">
+                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_4[index4]">
                         <span class="str01">{{ form.total.process_result_process_time_h_4[index4] }}H</span>
                         <span class="str01">{{ form.total.process_result_process_time_m_4[index4] }}M</span></div>
                     </div>
@@ -843,6 +912,10 @@ export default {
       type: String,
       default: ""
     },
+    seq: {
+      type: Number,
+      default: 0
+    },
     const_generaldatas: {
         type: Array,
         default: []
@@ -916,6 +989,10 @@ export default {
       index_or_home: "",
       product_processes_index: 0,
       product_processes_maxindex: 1,
+      unitpriceediting: false,
+      materialcostediting: false,
+      heatcostediting: false,
+      outsourcingcostediting: false,
       form: {
         order_no: "",
         seq: 0,
@@ -924,6 +1001,7 @@ export default {
         order_date: "",
         supply_date: "",
         office_code: "",
+        order_kingaku: "",
         customer_code: "",
         back_order_customer_name: "",
         order_count: "",
@@ -966,15 +1044,19 @@ export default {
         result_setup_time_m: 0,
         total: {
           process_total_cnt: 0,
+          process_total_user_code_1: [{}],
           process_total_user_name_1: [{}],
           process_result_process_time_h_1: [{}],
           process_result_process_time_m_1: [{}],
+          process_total_user_code_2: [{}],
           process_total_user_name_2: [{}],
           process_result_process_time_h_2: [{}],
           process_result_process_time_m_2: [{}],
+          process_total_user_code_3: [{}],
           process_total_user_name_3: [{}],
           process_result_process_time_h_3: [{}],
           process_result_process_time_m_3: [{}],
+          process_total_user_code_4: [{}],
           process_total_user_name_4: [{}],
           process_result_process_time_h_4: [{}],
           process_result_process_time_m_4: [{}],
@@ -1037,7 +1119,40 @@ export default {
       isprint_qrText: false
     };
   },
+  filters: {
+    localeNum: function(val) {
+      return Number(val).toLocaleString('ja-JP');
+    }
+  },
   computed: {
+    unitpricetype() {
+      if (this.unitpriceediting) {
+        return "number";
+      } else {
+        return "text";
+      }
+    },
+    materialcosttype() {
+      if (this.materialcostediting) {
+        return "number";
+      } else {
+        return "text";
+      }
+    },
+    heatcosttype() {
+      if (this.heatcostediting) {
+        return "number";
+      } else {
+        return "text";
+      }
+    },
+    outsourcingcosttype() {
+      if (this.outsourcingcostediting) {
+        return "number";
+      } else {
+        return "text";
+      }
+    },
     get_c009: function() {
       if (this.const_C009_data.length == 0) {
         var i = 0;
@@ -1163,6 +1278,7 @@ export default {
     // 営業所選択が変更された場合の処理
     officeChanges: function(value, arrayitem) {
       this.form.office_code = value;
+      this.selectedOfficeValue = value;
       // 客先選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
       this.getCustomerSelected(this.form.office_code);
@@ -1170,6 +1286,11 @@ export default {
     // 客先選択が変更された場合の処理
     customerChanges: function(value, arrayitem) {
       this.form.customer_code = value;
+    },
+    // 客先選択が変更された場合の処理
+    backordercustomernameChanges: function(event) {
+      this.form.order_no = event.target.value;
+      this.value_order_no = event.target.value;
     },
 
     // 受注番号が変更された場合の処理
@@ -1213,6 +1334,14 @@ export default {
       this.form.unit_price = event.target.value;
       this.value_unit_price = event.target.value;
     },
+    // 単価がfocusinの処理
+    unitpriceFocusin(event) {
+      this.unitpriceediting = true;
+    },
+    // 単価がfocusoutの処理
+    unitpriceFocusout(event) {
+      this.unitpriceediting = false;
+    },
     // 明細摘要が変更された場合の処理
     outlinenameChanges: function(event) {
       this.form.outline_name = event.target.value;
@@ -1227,6 +1356,14 @@ export default {
     materialcostChanges: function(event) {
       this.form.material_cost = event.target.value;
       this.value_material_cost = event.target.value;
+    },
+    // 材料費がfocusinの処理
+    materialcostFocusin(event) {
+      this.materialcostediting = true;
+    },
+    // 材料費がfocusoutの処理
+    materialcostFocusout(event) {
+      this.materialcostediting = false;
     },
     // 素材納入営業所が変更された場合の処理
     materialofficeChanges: function(value, arrayitem) {
@@ -1251,20 +1388,39 @@ export default {
       this.form.heat_cost = event.target.value;
       this.value_heat_cost = event.target.value;
     },
+    // 熱処理費がfocusinの処理
+    heatcostFocusin(event) {
+      this.heatcostediting = true;
+    },
+    // 熱処理費がfocusoutの処理
+    heatcostFocusout(event) {
+      this.heatcostediting = false;
+    },
     // 外注先が変更された場合の処理
     outsourcingcustomerChanges: function(value, arrayitem) {
       this.form.outsourcing_customer_code = value;
+      selectedOutsourcingCustomerValue = value;
     },
     // 外注費が変更された場合の処理
     outsourcingcostChanges: function(event) {
       this.form.outsourcing_cost = event.target.value;
       this.value_outsourcing_cost = event.target.value;
     },
+    // 外注費がfocusinの処理
+    outsourcingcostFocusin(event) {
+      this.outsourcingcostediting = true;
+    },
+    // 外注費がfocusoutの処理
+    outsourcingcostFocusout(event) {
+      this.outsourcingcostediting = false;
+    },
     // 機器名が変更された場合の処理
     devicecodeChanges: function(value , index) {
     },
     // 加工者が変更された場合の処理
     usercodeChanges: function(value , index) {
+      console.log('usercodeChanges = value = ' + value);
+      this.form.process_user_name[index] = value;
     },
     // 加工時間が変更された場合の処理
     processtimeHChanges: function() {
@@ -1415,10 +1571,9 @@ export default {
         office_code : null ,
         customer_code : null ,
         order_no : this.order_no ,
-        row_seq : this.row_seq
+        row_seq : this.row_seq,
+        seq : this.seq
         };
-        console.log('getItem this.order_no = ' + this.order_no);
-        console.log('getItem this.row_seq = ' + this.row_seq);
       this.postRequest("/get_product_chart", arrayParams)
         .then(response  => {
           this.getThen(response);
@@ -1506,6 +1661,7 @@ export default {
       var res = response.data;
       if (res.result) {
         this.details = res.details;
+        this.users_details = res.users_details;
         this.count = this.details.length;
         this.before_count = this.count;
         if ( this.details.length > 0) {
@@ -1516,6 +1672,7 @@ export default {
           this.form.order_no = this.details[0]['order_no'];
           this.form.seq = this.details[0]['seq'];
           this.form.order_date = this.details[0]['order_date'];
+          this.form.order_kingaku = this.details[0]['order_kingaku'];
           this.form.processes_code = this.details[0]['processes_code'];
           this.form.back_order_customer_name = this.details[0]['back_order_customer_name'];
           this.form.drawing_no = this.details[0]['drawing_no'];
@@ -1621,6 +1778,27 @@ export default {
             }
           });
         }
+        if ( this.users_details.length > 0) {
+          this.users_details.forEach((detail, index) => {
+            if (index < 4) {
+              this.form.total.process_total_user_code_1[index] = detail.code;
+              this.form.total.process_total_user_name_1[index] = detail.name;
+            } else {
+              if (index < 8) {
+                this.form.total.process_total_user_code_2[index - 4] = detail.code;
+                this.form.total.process_total_user_name_2[index - 4] = detail.name;
+              } else {
+                if (index < 12) {
+                  this.form.total.process_total_user_code_3[index - 8] = detail.code;
+                  this.form.total.process_total_user_name_3[index - 8] = detail.name;
+                } else {
+                  this.form.total.process_total_user_code_4[index - 12] = detail.code;
+                  this.form.total.process_total_user_name_4[index - 12] = detail.name;
+                }
+              }
+            }
+          });
+        }
         this.calcTimes();
         this.setValue();
         this.refresOfficeList();
@@ -1706,6 +1884,7 @@ export default {
       this.form.back_order_customer_name = "";
       this.form.back_order_product_name = "";
       this.form.order_date = "";
+      this.form.order_kingaku = "";
       this.form.drawing_no = "";
       this.form.order_count = "";
       this.form.model_number = "";
@@ -1744,15 +1923,19 @@ export default {
 
       this.form.total.process_total_cnt = 0;
       for (let index = 0; index < 4; index++) {
+        this.form.total.process_total_user_code_1[index] = "";
         this.form.total.process_total_user_name_1[index] = "";
         this.form.total.process_result_process_time_h_1[index] = 0;
         this.form.total.process_result_process_time_m_1[index] = 0;
+        this.form.total.process_total_user_code_2[index] = "";
         this.form.total.process_total_user_name_2[index] = "";
         this.form.total.process_result_process_time_h_2[index] = 0;
         this.form.total.process_result_process_time_m_2[index] = 0;
+        this.form.total.process_total_user_code_3[index] = "";
         this.form.total.process_total_user_name_3[index] = "";
         this.form.total.process_result_process_time_h_3[index] = 0;
         this.form.total.process_result_process_time_m_3[index] = 0;
+        this.form.total.process_total_user_code_4[index] = "";
         this.form.total.process_total_user_name_4[index] = "";
         this.form.total.process_result_process_time_h_4[index] = 0;
         this.form.total.process_result_process_time_m_4[index] = 0;
@@ -1811,10 +1994,6 @@ export default {
       this.form.result_process_time_h = 0;
       this.form.result_process_time_m = 0;
       for (let index = 0; index < 12; index++) {
-        console.log('calcTimes this.form.process_time_h[index] = ' + this.form.process_time_h[index]);
-        console.log('calcTimes this.form.process_time_m[index] = ' + this.form.process_time_m[index]);
-        console.log('calcTimes this.form.result_process_time_h = ' + this.form.result_process_time_h);
-        console.log('calcTimes this.form.result_process_time_m = ' + this.form.result_process_time_m);
         if (this.form.process_time_h[index] != "" && this.form.process_time_h[index] != null) {
           this.form.result_process_time_h += Number(this.form.process_time_h[index]);
         }
@@ -1822,8 +2001,6 @@ export default {
           this.form.result_process_time_m += Number(this.form.process_time_m[index]);
         }
       }
-      console.log('calcTimes this.form.result_process_time_h = ' + this.form.result_process_time_h);
-      console.log('calcTimes this.form.result_process_time_m = ' + this.form.result_process_time_m);
       if (this.form.result_process_time_m > 59) {
         temp_calc_h = Math.floor(this.form.result_process_time_m / 60);
         this.form.result_process_time_h += temp_calc_h;
@@ -1886,28 +2063,39 @@ export default {
             }
           }
           if (!isSet) {
+            console.log('calcTimes this.form.total.process_total_cnt ' + this.form.total.process_total_cnt);
             if (this.form.total.process_total_cnt < 4) {
-              this.form.total.process_total_user_name_1[this.form.total.process_total_cnt] = this.form.process_user_name[index1];
-              this.form.total.process_result_process_time_h_1[this.form.total.process_total_cnt] += Number(this.form.process_time_h[index1]);
-              this.form.total.process_result_process_time_m_1[this.form.total.process_total_cnt] += Number(this.form.process_time_m[index1]);
+              if (this.form.process_user_name[index1] != null && this.form.process_user_name[index1] != "") {
+                this.form.total.process_total_user_name_1[this.form.total.process_total_cnt] = this.form.process_user_name[index1];
+                this.form.total.process_result_process_time_h_1[this.form.total.process_total_cnt] += Number(this.form.process_time_h[index1]);
+                this.form.total.process_result_process_time_m_1[this.form.total.process_total_cnt] += Number(this.form.process_time_m[index1]);
+              }
               this.form.total.process_total_cnt +=1;
             } else {
               if (this.form.total.process_total_cnt < 8) {
-                this.form.total.process_total_user_name_2[this.form.total.process_total_cnt - 4] = this.form.process_user_name[index1];
-                this.form.total.process_result_process_time_h_2[this.form.total.process_total_cnt - 4] += Number(this.form.process_time_h[index1]);
-                this.form.total.process_result_process_time_m_2[this.form.total.process_total_cnt - 4] += Number(this.form.process_time_m[index1]);
+                console.log('calcTimes this.form.process_user_name[index1] ' + this.form.process_user_name[index1]);
+                if (this.form.process_user_name[index1] != null && this.form.process_user_name[index1] != "") {
+                  this.form.total.process_total_user_name_2[this.form.total.process_total_cnt - 4] = this.form.process_user_name[index1];
+                  this.form.total.process_result_process_time_h_2[this.form.total.process_total_cnt - 4] += Number(this.form.process_time_h[index1]);
+                  this.form.total.process_result_process_time_m_2[this.form.total.process_total_cnt - 4] += Number(this.form.process_time_m[index1]);
+                  console.log('calcTimes this.form.total.process_total_user_name_2[this.form.total.process_total_cnt - 4] ' + this.form.total.process_total_user_name_2[this.form.total.process_total_cnt - 4]);
+                }
                 this.form.total.process_total_cnt +=1;
               } else {
                 if (this.form.total.process_total_cnt < 12) {
-                  this.form.total.process_total_user_name_3[this.form.total.process_total_cnt - 8] = this.form.process_user_name[index1];
-                  this.form.total.process_result_process_time_h_3[this.form.total.process_total_cnt - 8] += Number(this.form.process_time_h[index1]);
-                  this.form.total.process_result_process_time_m_3[this.form.total.process_total_cnt - 8] += Number(this.form.process_time_m[index1]);
+                  if (this.form.process_user_name[index1] != null && this.form.process_user_name[index1] != "") {
+                    this.form.total.process_total_user_name_3[this.form.total.process_total_cnt - 8] = this.form.process_user_name[index1];
+                    this.form.total.process_result_process_time_h_3[this.form.total.process_total_cnt - 8] += Number(this.form.process_time_h[index1]);
+                    this.form.total.process_result_process_time_m_3[this.form.total.process_total_cnt - 8] += Number(this.form.process_time_m[index1]);
+                  }
                   this.form.total.process_total_cnt +=1;
                 } else {
                   if (this.form.total.process_total_cnt < 16) {
-                    this.form.total.process_total_user_name_4[this.form.total.process_total_cnt - 12] = this.form.process_user_name[index1];
-                    this.form.total.process_result_process_time_h_4[this.form.total.process_total_cnt - 12] += Number(this.form.process_time_h[index1]);
-                    this.form.total.process_result_process_time_m_4[this.form.total.process_total_cnt - 12] += Number(this.form.process_time_m[index1]);
+                    if (this.form.process_user_name[index1] != null && this.form.process_user_name[index1] != "") {
+                      this.form.total.process_total_user_name_4[this.form.total.process_total_cnt - 12] = this.form.process_user_name[index1];
+                      this.form.total.process_result_process_time_h_4[this.form.total.process_total_cnt - 12] += Number(this.form.process_time_h[index1]);
+                      this.form.total.process_result_process_time_m_4[this.form.total.process_total_cnt - 12] += Number(this.form.process_time_m[index1]);
+                    }
                     this.form.total.process_total_cnt +=1;
                   }
                 }
@@ -2001,9 +2189,10 @@ export default {
     refresOutsourcingcustomerlist() {
       this.showoOutsourcingcustomerlist = false;
       this.$nextTick(() => (this.showoOutsourcingcustomerlist = true));
-    }
+    },
   }
-};
+}
+
 </script>
 <style scoped>
 .mw-rem-2 {

@@ -24,6 +24,7 @@ class EditWorkOrderController extends Controller
         $accountid = $authusers->account_id;
         $order_no = "$";
         $row_seq = "$";
+        $seq = "$";
 
         $indexorhome = 1;       // メニューより起動
         return view('edit_work_order',
@@ -31,6 +32,7 @@ class EditWorkOrderController extends Controller
                 'authusers',
                 'order_no',
                 'row_seq',
+                'seq',
                 'indexorhome'
             ));
     }
@@ -45,7 +47,8 @@ class EditWorkOrderController extends Controller
         // 日次警告アラートリダイレクト
         return redirect()->route('edit_work_order.edithome', [
             'order_no' => $_GET["order_no"],
-            'row_seq' => $_GET["row_seq"]
+            'row_seq' => $_GET["row_seq"],
+            'seq' => $_GET["seq"]
         ]);
     }
 
@@ -58,12 +61,18 @@ class EditWorkOrderController extends Controller
     {
         $order_no = null;
         $row_seq = null;
+        $seq = null;
         if (isset($request->order_no)) {
             $order_no = $request->order_no;
         }
         if (isset($request->row_seq)) {
             $row_seq = $request->row_seq;
         }
+        if (isset($request->seq)) {
+            $seq = $request->seq;
+        }
+        Log::debug('edithome $request->seq = '.$request->seq);
+        Log::debug('edithome $seq = '.$seq);
         $authusers = Auth::user();
         $login_user_code = $authusers->code;
         $accountid = $authusers->account_id;
@@ -73,6 +82,7 @@ class EditWorkOrderController extends Controller
                 'authusers',
                 'order_no',
                 'row_seq',
+                'seq',
                 'indexorhome'
             ));
     }

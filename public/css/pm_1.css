@@ -86,6 +86,9 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   border: 0px solid #ced4da;
   color: #495057;
 }
+#input-area_1 .inlineblock  {display:inline-block;}
+#input-area_1 .tankaatto  {width:8%; text-align:right;}
+#input-area_1 .tankainput  {width:90%;}
 #input-area_1 .inputnum_r {
   text-align:right;
 }
