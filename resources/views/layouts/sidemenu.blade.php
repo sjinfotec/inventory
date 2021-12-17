@@ -39,7 +39,7 @@
                                 <ul class="collapse show list-unstyled" id="collapseAggregate">
                                     @if($menu_selections[Config::get('const.MENUITEM.check_progress') - 1]->is_select)
                                         @cannot('system-only')
-                                            <li><a class="px-3 py-1 text-white d-block" href="{{ url('/working_status') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">{{ $menu_selections[Config::get('const.MENUITEM.check_progress') - 1]->item_kanji_name }}</a></li>
+                                            <li><a class="px-3 py-1 text-white d-block" href="{{ url('/process_view') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">{{ $menu_selections[Config::get('const.MENUITEM.check_progress') - 1]->item_kanji_name }}</a></li>
                                         @endcannot
                                     @endif
                                 </ul>

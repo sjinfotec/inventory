@@ -415,7 +415,6 @@ console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
     // 取得正常処理
     getThen(response) {
       console.log('getThen in');
-      this.setKind();
       var res = response.data;
       this.details = res.details;
       this.count = this.details.length;
@@ -428,6 +427,8 @@ console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
         let $this = this;
         this.details.forEach((detail, i) => {
           $this.form.row_seq = detail.row_seq;
+          $this.form.kind = detail.work_kind;
+          console.log('getThen in detail.work_kind = ' + detail.work_kind);
           // progress_noは廃止する方向
           $this.form.progress_no = null;
           $this.form.item_name[set_index] = C_SUPPLY_DATE_NAME;
@@ -467,6 +468,7 @@ console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
           $this.kindstatus = $this.kind_name;
         });
         this.form_count = set_index + 1;
+        this.setKind();
         console.log('getThen in form_count = ' + this.form_count);
       } else {
         if (res.messagedata.length > 0) {

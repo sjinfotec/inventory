@@ -27,7 +27,7 @@
                           <td class="style1 text-center align-middle">納期</td>
                           <td class="style1 text-center align-middle">客先</td>
                           <td class="style1 text-center align-middle">受注番号</td>
-                          <td class="style1 text-center align-middle">行</td>
+                          <!--<td class="style1 text-center align-middle">行</td>-->
                           <td class="style1 text-center align-middle">品名</td>
                           <td class="style1 text-center align-middle">機器名</td>
                           <td class="style1 text-center align-middle">作業者名</td>
@@ -43,7 +43,7 @@
                           <td class="text-center align-middle w1" v-bind:class="{ 'td_active': isActiveKind }">{{ item.supply_date_name }}</td>
                           <td class="text-center align-middle w2">{{ item.back_order_customer_name }}</td>
                           <td class="text-center align-middle w3">{{ item.order_no }}</td>
-                          <td class="text-center align-middle w4">{{ item.row_seq }}</td>
+                          <!--<td class="text-center align-middle w4">{{ item.row_seq }}</td>-->
                           <td class="text-center align-middle w5 textwrap">{{ item.back_order_product_name }}</td>
                           <td class="text-center align-middle w6 textwrap">{{ item.device_name }}</td>
                           <td class="text-center align-middle w7">{{ item.user_name }}</td>

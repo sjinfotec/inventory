@@ -178,6 +178,11 @@
         </div>
       </div>
       <!-- /.row -->
+<form name="moveform">
+  <input type="text" name="urlname">
+  <input type="button" value="移動"
+    onclick="location.hash = document.moveform.urlname.value; return false;">
+</form>
 
       <!-- .row -->
       <div class="row">
@@ -201,7 +206,7 @@
               </thead>
               <tbody>
                 <tr v-for="(item,rowIndex) in details" :key="rowIndex">
-                  <td class="text-right align-middle w1">{{ item['out_seq'] }}</td>
+                  <td v-bind:id="item['out_seq']" class="text-right align-middle w1">{{ item['out_seq'] }}</td>
                   <td class="text-left align-middle w2">{{ item['supply_date_name'] }}</td>
                   <td class="text-left align-middle w3" textwrap>{{ item['customer_name'] }}</td>
                   <td class="text-left align-middle w4">{{ item['order_no'] }}</td>
@@ -416,6 +421,14 @@ export default {
     searchClick1() {
       this.getItem();
     },
+    urljump() {
+    location.href = document.my.u.value;
+    return;
+    },
+m(){
+location.href = document.my.u.value;
+return;
+},
 
     // ------------------------ サーバー処理 ------------------------------------
     //

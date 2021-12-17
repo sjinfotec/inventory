@@ -6,12 +6,12 @@
 					<!-- main contentns row -->
 					<div class="row justify-content-between">
 						<!-- .panel -->
-						<div class="col-md">
+						<div class="col-md print-none">
 							<div class="card bg-secondary text-white pt-2 border-0 shadow-pl">
 								<!-- panel header -->
 								<div class="card-header bg-transparent pt-2 border-0">
-									<h1 class="font-size-xl">
-										<img class="icon-size-rg mr-3" src="{{ asset('images/round-laptop-chromebook-w.svg') }}" alt="">加工指示書／工程管理書
+									<h1 class="title_editworkorder">
+										<!--<img class="icon-size-rg mr-3" src="{{ asset('images/round-laptop-chromebook-w.svg') }}" alt="">-->加工指示書／工程管理書
 									</h1>
 								</div>
 								<!-- /.panel header -->

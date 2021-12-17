@@ -13,8 +13,44 @@
           <!-- /.panel header -->
           <div class="card-body pt-2">
             <!-- panel contents -->
+
             <!-- .row -->
             <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-cnt_22 pb-2 print_view">
+                <div id="input-area_1">
+                  <h2>加工指示書／工程管理書</h2>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-cnt_21 pb-2">
+                <div id="input-area_1">
+                  <div class="input-area-prepend">
+                    <span
+                      class="input-area-text"
+                      id="basic-addon1"
+                    >保存シート
+                    </span>
+                  </div>
+                  <div class="form-control p-0">
+                    <input
+                      type="text"
+                      title="保存シート"
+                      class="inlineblock form-control storage_sheet_input"
+                      :value="value_storage_sheet"
+                      @change="storagesheetChanges"
+                    />
+                    <p class="inlineblock storage_sheet_text">で渡し済</p>
+                  </div>
+                </div>
+                <span class="print-none"><message-data v-bind:message-datas="messagedataorderno" v-bind:message-class="'warning'"></message-data></span>
+              </div>
+              <!-- /.col -->
               <!-- .col -->
               <div class="col-cnt_01 pb-2">
                 <div id="input-area_1">
@@ -304,7 +340,7 @@
                       id="basic-addon1"
                     >単価</span>
                   </div>
-                  <div class="form-control  p-0" v-if="unitpriceediting">
+                  <div class="form-control fontsize0  p-0" v-if="unitpriceediting">
                     <p class="inlineblock tankaatto">@</p>
                     <input
                       ref="target"
@@ -319,7 +355,7 @@
 
                     />
                   </div>
-                  <div class="form-control  p-0" v-else>
+                  <div class="form-control fontsize0 p-0" v-else>
                     <p class="inlineblock tankaatto">@</p>
                     <input
                       type="text"
@@ -592,21 +628,21 @@
 
 
 
-          <div class="card-body mb-3 p-0 border-top" v-if="isQr">
+          <div class="card-body mb-3 p-0 border-top print-none" v-if="isQr">
             <!-- panel contents -->
             <!-- .row -->
             <div id="btn_cnt4">
               <!-- .col -->
               <div class="btn_col_1">
                 <div class="input-group btn_sty_1">
-                  <a @click="no_qrcodeClick" class="btn btn-primary print-none">印刷</a>
+                  <a @click="no_qrcodeClick" class="btn btn-primary">印刷</a>
                 </div>
               </div>
               <!-- /.col -->
               <!-- .col -->
               <div class="btn_col_1">
                 <div class="input-group btn_sty_1">
-                  <a @click="qrcodeClick" class="btn btn-primary print-none">QRコード付き印刷</a>
+                  <a @click="qrcodeClick" class="btn btn-primary">QRコード付き印刷</a>
                 </div>
               </div>
               <!-- /.col -->
@@ -624,7 +660,7 @@
             <!-- .row -->
             <div class="row justify-content-between px-3">
               <!-- panel header -->
-              <div class="card-header col-12 bg-transparent pb-2 border-0">
+              <div class="card-header col-12 bg-transparent pb-2 border-0 print-none">
                 <h1 class="float-sm-left font-size-rg">◆工程管理書入力</h1>
                 <span class="float-sm-right font-size-sm"></span>
               </div>
@@ -769,6 +805,9 @@
                     </div>
                   </td>
                   <td class="border_off"><div class="flex2"><p class="str03">前回実績<br>月日＆時間</p></div></td>
+                  <td class="frame_wh2"></td>
+                  <td class="frame_wh2"></td>
+                  <!--
                           <td class="text-center align-middle ws1 border_off_r">
                           </td>
                           <td class="text-left align-middle ws2 pad1 border_off_l border_off_r">月</td>
@@ -781,6 +820,7 @@
                           <td class="text-center align-middle ws1 border_off_l border_off_r">
                           </td>
                           <td class="text-left align-middle ws2 pad1 border_off_l">M</td>
+                  -->
                 </tr>
 
                 <tr>
@@ -799,13 +839,16 @@
                     </div>
                   </td>
                   <td class="border_off"></td>
-                  <td colspan="4" class="textalign1 border_off">目標加工時間</td>
+                  <td class="textalign1 border_off">目標加工時間</td>
+                  <td></td>
+                  <!--
                           <td class="text-center align-middle ws1 border_off_r">
                           </td>
                           <td class="text-left align-middle ws2 pad1 border_off_l border_off_r">H</td>
                           <td class="text-center align-middle ws1 border_off_l border_off_r">
                           </td>
                           <td class="text-left align-middle ws2 pad1 border_off_l">M</td>
+                  -->
                 </tr>
 
                 <tr>
@@ -824,8 +867,8 @@
                     </div>
                   </td>
                   <td class="border_off"></td>
-                  <td colspan="4" class="textalign1 border_off">目標金額</td>
-                  <td colspan="4" class="textalign1"></td>
+                  <td class="textalign1 border_off">目標金額</td>
+                  <td class="textalign1"></td>
                 </tr>
 
                 <tr>
@@ -844,8 +887,8 @@
                     </div>
                   </td>
                   <td class="frame_wh1"></td>
-                  <td colspan="4" class="textalign1 border_off">時間単価</td>
-                  <td colspan="4" class="textalign1"></td>
+                  <td class="textalign1 border_off">時間単価</td>
+                  <td class="textalign1"></td>
                 </tr>
               </table>
               </div>
@@ -940,6 +983,7 @@ export default {
       selectedMaterialCustomerValue: "",
       selectedOutsourcingOfficeValue: "",
       selectedOutsourcingCustomerValue: "",
+      value_storage_sheet: "",
       value_order_no: "",
       value_drawing_no: "",
       value_order_count: "",
@@ -994,6 +1038,7 @@ export default {
       heatcostediting: false,
       outsourcingcostediting: false,
       form: {
+        storage_sheet: "",
         order_no: "",
         seq: 0,
         row_seq: "",
@@ -1256,6 +1301,11 @@ export default {
       return flag;
     },
     // ------------------------ イベント処理 ------------------------------------
+    // 保存シートが変更された場合の処理
+    storagesheetChanges: function(event) {
+      this.form.storage_sheet = event.target.value;
+      this.value_storage_sheet = event.target.value;
+    },
     // 指定日付が変更された場合の処理
     supplydateChanges: function(value) {
       moment.locale("ja");
@@ -1292,6 +1342,7 @@ export default {
       this.form.order_no = event.target.value;
       this.value_order_no = event.target.value;
     },
+
 
     // 受注番号が変更された場合の処理
     ordernoChanges: function(event) {

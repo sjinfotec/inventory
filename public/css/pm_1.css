@@ -34,8 +34,16 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 }
 
 /*--------------------## EDIT WORK ORDER ##--------------------*/
+.print_view {display:none;}
+.title_editworkorder  {font-size:1.4rem; text-align:center;}
 #input-area_1 {
   border: 1px solid #ccd4dd;
+}
+#input-area_1 h2 {
+  font-size:1.8rem; text-align:center;
+  /*border-top: 1px solid #ccd4dd;*/
+  padding-top:8px;
+  padding-bottom:4px;
 }
 #input-area_1 .input-area-prepend  {
   color:#000;
@@ -61,7 +69,8 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 #input-area_1 .form-control {
   display: block;
   width: 100%;
-  height: calc(1.6em + 0.75rem + 2px);
+  /*height: calc(1.6em + 0.75rem + 2px);*/
+  height: 36px;
   padding: 0.375rem 0.75rem;
   font-size: 0.9rem;
   font-weight: 400;
@@ -77,6 +86,7 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 #input-area_1 .vdp-datepicker div input {
   display: flex;
   flex: 1 1 auto;
+  height:36px;
   padding-left: 12px;
   padding-top: 4px;
   padding-bottom: 5px;
@@ -86,17 +96,31 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   border: 0px solid #ced4da;
   color: #495057;
 }
+#input-area_1 .fontsize0 {font-size:0;}
 #input-area_1 .inlineblock  {display:inline-block;}
-#input-area_1 .tankaatto  {width:8%; text-align:right;}
-#input-area_1 .tankainput  {width:90%;}
+#input-area_1 .tankaatto  {width:15%; text-align:right; font-size:0.9rem;}
+#input-area_1 .tankainput  {width:85%; font-size:0.9rem;}
 #input-area_1 .inputnum_r {
   text-align:right;
 }
 
-/*--各項目の横幅 1段目--*/
-.col-cnt_01 {
+#input-area_1 .storage_sheet_input  {width:auto;}
+#input-area_1 .storage_sheet_text  {width:4em;}
+
+
+
+.col-cnt_22 {
   flex: 0 0 100%;
   max-width: 100%;
+}
+/*--各項目の横幅 1段目--*/
+.col-cnt_01 {
+  flex: 0 0 70%;
+  max-width: 70%;
+}
+.col-cnt_21 {
+  flex: 0 0 30%;
+  max-width: 30%;
 }
 /*--各項目の横幅 2段目--*/
 .col-cnt_02 {
@@ -116,12 +140,12 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   max-width: 10%;
 }
 .col-cnt_06 {
-  flex: 0 0 25%;
-  max-width: 25%;
+  flex: 0 0 23%;
+  max-width: 23%;
 }
 .col-cnt_07 {
-  flex: 0 0 5%;
-  max-width: 5%;
+  flex: 0 0 7%;
+  max-width: 7%;
 }
 /*--各項目の横幅 3段目--*/
 .col-cnt_08 {
@@ -129,12 +153,12 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   max-width: 20%;
 }
 .col-cnt_09 {
-  flex: 0 0 30%;
-  max-width: 30%;
+  flex: 0 0 40%;
+  max-width: 40%;
 }
 .col-cnt_10 {
-  flex: 0 0 20%;
-  max-width: 20%;
+  flex: 0 0 10%;
+  max-width: 10%;
 }
 .col-cnt_11 {
   flex: 0 0 30%;
@@ -142,12 +166,12 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 }
 /*--各項目の横幅 4段目--*/
 .col-cnt_12 {
-  flex: 0 0 50%;
-  max-width: 50%;
+  flex: 0 0 70%;
+  max-width: 70%;
 }
 .col-cnt_13 {
-  flex: 0 0 15%;
-  max-width: 15%;
+  flex: 0 0 10%;
+  max-width: 10%;
 }
 .col-cnt_14 {
   /*未使用*/
@@ -155,17 +179,17 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   max-width: 15%;
 }
 .col-cnt_15 {
-  flex: 0 0 35%;
-  max-width: 35%;
+  flex: 0 0 20%;
+  max-width: 20%;
 }
 /*--各項目の横幅 5段目--*/
 .col-cnt_16 {
-  flex: 0 0 45%;
-  max-width: 45%;
+  flex: 0 0 50%;
+  max-width: 50%;
 }
 .col-cnt_17 {
-  flex: 0 0 15%;
-  max-width: 15%;
+  flex: 0 0 10%;
+  max-width: 10%;
 }
 .col-cnt_18 {
   /*未使用*/
@@ -173,12 +197,12 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   max-width: 10%;
 }
 .col-cnt_19 {
-  flex: 0 0 25%;
-  max-width: 25%;
+  flex: 0 0 30%;
+  max-width: 30%;
 }
 .col-cnt_20 {
-  flex: 0 0 15%;
-  max-width: 15%;
+  flex: 0 0 10%;
+  max-width: 10%;
 }
 
 /*--項目のパディング--*/
@@ -357,7 +381,10 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 }
 #table_cnt2 .frame_wh1  {
   height:48px;
-  width:16%;
+  width:15%;
+}
+#table_cnt2 .frame_wh2  {
+  width:10%;
 }
 #table_cnt2 .ws1 {
   width:2rem;
@@ -739,6 +766,7 @@ white-space: nowrap;
 
 /*--print out--*/
 @media print {
+  .print_view {display:block;}
   .col-cnt_04 {
     flex: 0 0 35%;
     max-width: 35%;
