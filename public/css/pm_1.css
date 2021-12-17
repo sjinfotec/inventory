@@ -550,6 +550,7 @@ white-space: nowrap;
 }
 #table_cnt4 .td_active {
   background:#dd6060;
+  color:#FFF;
   }
   #table_cnt4 td {
   font-size:2rem;
