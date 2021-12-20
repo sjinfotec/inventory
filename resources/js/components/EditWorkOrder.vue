@@ -753,11 +753,11 @@
                         <tr>
                           <td colspan="4" class="td-first text-right align-middle pad2 f_style_1 jtime str_style1">実績合計</td>
                           <td class="text-center align-middle ws1 f_style_1 str_style1">
-                            {{form.result_process_time_h}}
+                            <div v-if="form.result_process_time_h !== 0">{{form.result_process_time_h}}</div>
                           </td>
                           <td class="td-first text-left align-middle ws2 pad1 f_style_1 str_style1">H</td>
                           <td class="td-first text-center align-middle ws1 f_style_1 str_style1">
-                            {{form.result_process_time_m}}
+                            <div v-if="form.result_process_time_m !== 0">{{form.result_process_time_m}}</div>
                           </td>
                           <td class="td-first text-left align-middle ws2 pad1 f_style_1 str_style1">M</td>
                           <td class="text-center align-middle w6 f_style_1 ">
