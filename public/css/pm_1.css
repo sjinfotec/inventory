@@ -588,9 +588,15 @@ white-space: nowrap;
 }
 
 #table_cnt4 td.w1 {
- width:auto;
+ width:6em;
 }
-
+#table_cnt4 td.w7 {
+  width:5em;
+}
+#table_cnt4 td.w8 {
+  width:3em;
+}
+ 
 /*--------------------## table progress header  (TOP page) ##--------------------*/
 #search_btn_cnt {
   display:flex;
@@ -756,6 +762,25 @@ white-space: nowrap;
   max-width: 90%;
 }
 
+#btn_cnt5 {
+  display:-webkit-flex;
+  display:flex;
+  /*align-items: stretch;*/
+  align-items: center;
+  justify-content: flex-start;
+  width:100%;
+  padding:0px 0px 10px 0px;
+  background:#FFF;
+}
+#btn_cnt5 .btn_col_1  {width:10em;}
+#btn_cnt5 .btn_col_2 input  {
+  color:#495057;
+  padding-top: 5px;
+  padding-bottom: 4px;
+  background-color: #e9ecef;
+  border:1px solid #ced4da;
+  border-bottom: 4px solid #ced4da;
+}
 
 
 

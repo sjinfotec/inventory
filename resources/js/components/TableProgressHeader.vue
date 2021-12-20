@@ -178,10 +178,15 @@
         </div>
       </div>
       <!-- /.row -->
-<form name="moveform">
-  <input type="text" name="urlname">
-  <input type="button" value="移動"
-    onclick="location.hash = document.moveform.urlname.value; return false;">
+<form name="moveform" id="btn_cnt5">
+  <div class="btn_col_1">
+    <input type="text" name="urlname" class="form-control">
+    <input type="text" name="dummy" style="display:none;">
+  </div>
+  <div class="btn_col_2">
+    <input type="button" value="No.移動" 
+     onclick="location.hash = document.moveform.urlname.value; return false;">
+   </div>
 </form>
 
       <!-- .row -->
