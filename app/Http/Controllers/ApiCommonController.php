@@ -1259,6 +1259,7 @@ class ApiCommonController extends Controller
                     'drawing_no' => $params_product_process_data["drawing_no"],
                     'order_date' => $params_product_process_data["order_date"],
                     'order_kingaku' => $params_product_process_data["order_kingaku"],
+                    'save_sheet' => $params_product_process_data["save_sheet"],
                     'supply_date' => $params_product_process_data["supply_date"],
                     'office_code' => $office_code_value,
                     'customer_code' => $params_product_process_data["customer_code"],
@@ -1296,6 +1297,7 @@ class ApiCommonController extends Controller
                     'drawing_no' => $params_product_process_data["drawing_no"],
                     'order_date' => $params_product_process_data["order_date"],
                     'order_kingaku' => $params_product_process_data["order_kingaku"],
+                    'save_sheet' => $params_product_process_data["save_sheet"],
                     'supply_date' => $params_product_process_data["supply_date"],
                     'office_code' => $office_code_value,
                     'customer_code' => $params_product_process_data["customer_code"],
@@ -1767,6 +1769,7 @@ class ApiCommonController extends Controller
             $sqlString .= "  , date_format(t1.supply_date,'%Y年%m月%d日') as supply_date_name ";
             $sqlString .= "  , t1.drawing_no as drawing_no ";
             $sqlString .= "  , t1.order_kingaku as order_kingaku ";
+            $sqlString .= "  , t1.save_sheet as save_sheet ";
             $sqlString .= "  , t1.customer_code as customer_code ";
             $sqlString .= "  , t1.back_order_customer_name as back_order_customer_name ";
             $sqlString .= "  , t1.order_count as order_count ";
@@ -1982,7 +1985,7 @@ class ApiCommonController extends Controller
             $sqlString = "";
             $sqlString .= "select ";
             $sqlString .= "  date_format(t3.supply_date,'%m月%d日') as supply_date_name ";
-            $sqlString .= "  , t3.back_order_customer_name as back_order_customer_name ";
+            $sqlString .= "  , left(t3.back_order_customer_name,5) as back_order_customer_name ";
             $sqlString .= "  , t1.order_no as order_no ";
             $sqlString .= "  , t1.seq as seq ";
             $sqlString .= "  , t1.row_seq as row_seq ";
