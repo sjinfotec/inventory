@@ -6,10 +6,10 @@
       <div class="col-md pt-3">
         <div class="card shadow-pl">
           <!-- panel header -->
-          <daily-working-information-panel-header
+          <!-- <daily-working-information-panel-header
             v-bind:header-text1="'◆加工指示書入力'"
             v-bind:header-text2="''"
-          ></daily-working-information-panel-header>
+          ></daily-working-information-panel-header> -->
           <!-- /.panel header -->
           <div class="card-body pt-2">
             <!-- panel contents -->
@@ -42,10 +42,10 @@
                       type="text"
                       title="保存シート"
                       class="inlineblock form-control storage_sheet_input"
-                      :value="value_storage_sheet"
-                      @change="storagesheetChanges"
+                      :value="value_save_sheet"
+                      @change="savesheetChanges"
                     />
-                    <p class="inlineblock storage_sheet_text">で渡し済</p>
+                    <p class="inlineblock storage_sheet_text">{{ save_sheet_name }}</p>
                   </div>
                 </div>
                 <span class="print-none"><message-data v-bind:message-datas="messagedataorderno" v-bind:message-class="'warning'"></message-data></span>
@@ -660,9 +660,9 @@
             <!-- .row -->
             <div class="row justify-content-between px-3">
               <!-- panel header -->
-              <div class="card-header col-12 bg-transparent pb-2 border-0 print-none">
+              <!-- <div class="card-header col-12 bg-transparent pb-2 border-0 print-none">
                 <h1 class="float-sm-left font-size-rg">◆工程管理書入力</h1>
-                <span class="float-sm-right font-size-sm"></span>
+                <span class="float-sm-right font-size-sm"></span> -->
               </div>
               <!-- /.panel header -->
               <message-data v-bind:message-datas="messagedataclosing" v-bind:message-class="'warning'"></message-data>
@@ -700,7 +700,7 @@
                                 v-for="tlist in progress_details_deviceList"
                                 :value="tlist.code"
                                 v-bind:key="tlist.code"
-                              >{{ tlist.name }}</option>
+                              >{{ tlist.code }}：{{ tlist.name }}</option>
                             </select>
                           </td>
                           <td class="text-center align-middle">
@@ -715,7 +715,7 @@
                             </select>
                           </td>
                           <td class="text-center align-middle ws1">
-                            <div class>
+                            <div class v-if="form.process_time_h[index] && form.process_time_h[index]>0">
                               <input
                                 type="number"
                                 step="1"
@@ -728,7 +728,7 @@
                           </td>
                           <td class="td-first text-left align-middle ws2 pad1">H</td>
                           <td class="td-first text-center align-middle ws1">
-                            <div class>
+                            <div class v-if="form.process_time_h[index] && form.process_time_m[index]>0">
                               <input
                                 type="number"
                                 step="1"
@@ -774,7 +774,7 @@
                       <vue-qrcode
                         :value="qrText" :options="qroption1" tag="img">
                       </vue-qrcode>
-                      <p><span>[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}]{{qrText}}</span></p>
+                      <p><span>[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}]</span></p>
                     </div>
                   </div><!--end view QR code v-if="isprint_qrText"-->
                 </div>
@@ -791,8 +791,8 @@
                 <tr>
                   <td rowspan="4" class="wrmode">加<br>工<br>時<br>間<br>合<br>計</td>
                   <td class="frame_wh1" v-for="(n,index1) in 4" :key="index1">
-                    <div class="flex1" v-if="form.total.process_total_user_name_1[index1]">
-                      <div class="cnt2_name">{{ form.total.process_total_user_name_1[index1] }}</div>
+                    <div class="flex1" v-if="form.total.process_total_short_name_1[index1]">
+                      <div class="cnt2_name">{{ form.total.process_total_short_name_1[index1] }}</div>
                       <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_1[index1]">
                         <span class="str01">{{ form.total.process_result_process_time_h_1[index1] }}H</span>
                         <span class="str01">{{ form.total.process_result_process_time_m_1[index1] }}M</span></div>
@@ -825,8 +825,8 @@
 
                 <tr>
                   <td class="frame_wh1" v-for="(n,index2) in 4" :key="index2">
-                    <div class="flex1" v-if="form.total.process_total_user_name_2[index2]">
-                      <div class="cnt2_name">{{ form.total.process_total_user_name_2[index2] }}</div>
+                    <div class="flex1" v-if="form.total.process_total_short_name_2[index2]">
+                      <div class="cnt2_name">{{ form.total.process_total_short_name_2[index2] }}</div>
                       <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_2[index2]">
                         <span class="str01">{{ form.total.process_result_process_time_h_2[index2] }}H</span>
                         <span class="str01">{{ form.total.process_result_process_time_m_2[index2] }}M</span></div>
@@ -853,8 +853,8 @@
 
                 <tr>
                   <td class="frame_wh1" v-for="(n,index3) in 4" :key="index3">
-                    <div class="flex1" v-if="form.total.process_total_user_name_3[index3]">
-                      <div class="cnt2_name">{{ form.total.process_total_user_name_3[index3] }}</div>
+                    <div class="flex1" v-if="form.total.process_total_short_name_3[index3]">
+                      <div class="cnt2_name">{{ form.total.process_total_short_name_3[index3] }}</div>
                       <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_3[index3]">
                         <span class="str01">{{ form.total.process_result_process_time_h_3[index3] }}H</span>
                         <span class="str01">{{ form.total.process_result_process_time_m_3[index3] }}M</span></div>
@@ -873,8 +873,8 @@
 
                 <tr>
                   <td class="frame_wh1" v-for="(n,index4) in 4" :key="index4">
-                    <div class="flex1" v-if="form.total.process_total_user_name_4[index4]">
-                      <div class="cnt2_name">{{ form.total.process_total_user_name_4[index4] }}</div>
+                    <div class="flex1" v-if="form.total.process_total_short_name_4[index4]">
+                      <div class="cnt2_name">{{ form.total.process_total_short_name_4[index4] }}</div>
                       <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_4[index4]">
                         <span class="str01">{{ form.total.process_result_process_time_h_4[index4] }}H</span>
                         <span class="str01">{{ form.total.process_result_process_time_m_4[index4] }}M</span></div>
@@ -938,6 +938,8 @@ const CONST_KBNNAME_UPD = "更新"
 const CONST_KBNNAME_DEL = "削除"
 const CONST_KBNNAME_REL = "解除"
 const CONST_KBNNAME_REG = "登録"
+const CONST_SAVE_SHEET_NAME = "で渡し済"
+
 
 export default {
   name: "EditWorkOrder",
@@ -983,7 +985,7 @@ export default {
       selectedMaterialCustomerValue: "",
       selectedOutsourcingOfficeValue: "",
       selectedOutsourcingCustomerValue: "",
-      value_storage_sheet: "",
+      value_save_sheet: "",
       value_order_no: "",
       value_drawing_no: "",
       value_order_count: "",
@@ -1038,7 +1040,7 @@ export default {
       heatcostediting: false,
       outsourcingcostediting: false,
       form: {
-        storage_sheet: "",
+        save_sheet: "",
         order_no: "",
         seq: 0,
         row_seq: "",
@@ -1047,6 +1049,7 @@ export default {
         supply_date: "",
         office_code: "",
         order_kingaku: "",
+        save_sheet: "",
         customer_code: "",
         back_order_customer_name: "",
         order_count: "",
@@ -1091,18 +1094,22 @@ export default {
           process_total_cnt: 0,
           process_total_user_code_1: [{}],
           process_total_user_name_1: [{}],
+          process_total_short_name_1: [{}],
           process_result_process_time_h_1: [{}],
           process_result_process_time_m_1: [{}],
           process_total_user_code_2: [{}],
           process_total_user_name_2: [{}],
+          process_total_short_name_2: [{}],
           process_result_process_time_h_2: [{}],
           process_result_process_time_m_2: [{}],
           process_total_user_code_3: [{}],
           process_total_user_name_3: [{}],
+          process_total_short_name_3: [{}],
           process_result_process_time_h_3: [{}],
           process_result_process_time_m_3: [{}],
           process_total_user_code_4: [{}],
           process_total_user_name_4: [{}],
+          process_total_short_name_4: [{}],
           process_result_process_time_h_4: [{}],
           process_result_process_time_m_4: [{}],
         }
@@ -1128,6 +1135,7 @@ export default {
       showoMaterialcustomerlist: true,
       showoOutsourcingofficelist: true,
       showoOutsourcingcustomerlist: true,
+      save_sheet_name: "",
       year: "",
       bMonth: "",
       valueymd: "",
@@ -1257,6 +1265,7 @@ export default {
     this.index_or_home = this.indexorhome;
     // 1:index 2:homeindex
     if (this.index_or_home == CONST_INDEXORHOME_HOME) {
+      console.log('EditWorkOrder getItem ');
       this.getItem();
     }
     this.getDeviceList();
@@ -1302,9 +1311,14 @@ export default {
     },
     // ------------------------ イベント処理 ------------------------------------
     // 保存シートが変更された場合の処理
-    storagesheetChanges: function(event) {
-      this.form.storage_sheet = event.target.value;
-      this.value_storage_sheet = event.target.value;
+    savesheetChanges: function(event) {
+      this.form.save_sheet = event.target.value;
+      this.value_save_sheet = event.target.value;
+      if (this.value_save_sheet == null || this.value_save_sheet == "") {
+        this.save_sheet_name = "";
+      } else {
+        this.save_sheet_name = CONST_SAVE_SHEET_NAME;
+      }
     },
     // 指定日付が変更された場合の処理
     supplydateChanges: function(value) {
@@ -1697,7 +1711,6 @@ export default {
           this.product_resresults = res.details;
           this.product_processes_index = 0;
           this.setProductProcessTable();
-          console.log('getThenprocess this.form.processes_code = ' + this.form.processes_code);
         }
       } else {
         if (res.messagedata.length > 0) {
@@ -1724,6 +1737,8 @@ export default {
           this.form.seq = this.details[0]['seq'];
           this.form.order_date = this.details[0]['order_date'];
           this.form.order_kingaku = this.details[0]['order_kingaku'];
+          console.log('getThen this.details[0][save_sheet] = ' + this.details[0]['save_sheet']);
+          this.form.save_sheet = this.details[0]['save_sheet'];
           this.form.processes_code = this.details[0]['processes_code'];
           this.form.back_order_customer_name = this.details[0]['back_order_customer_name'];
           this.form.drawing_no = this.details[0]['drawing_no'];
@@ -1834,17 +1849,21 @@ export default {
             if (index < 4) {
               this.form.total.process_total_user_code_1[index] = detail.code;
               this.form.total.process_total_user_name_1[index] = detail.name;
+              this.form.total.process_total_short_name_1[index] = detail.short_name;
             } else {
               if (index < 8) {
                 this.form.total.process_total_user_code_2[index - 4] = detail.code;
                 this.form.total.process_total_user_name_2[index - 4] = detail.name;
+                this.form.total.process_total_short_name_2[index - 4] = detail.short_name;
               } else {
                 if (index < 12) {
                   this.form.total.process_total_user_code_3[index - 8] = detail.code;
                   this.form.total.process_total_user_name_3[index - 8] = detail.name;
+                  this.form.total.process_total_short_name_3[index - 8] = detail.short_name;
                 } else {
                   this.form.total.process_total_user_code_4[index - 12] = detail.code;
                   this.form.total.process_total_user_name_4[index - 12] = detail.name;
+                  this.form.total.process_total_short_name_4[index - 12] = detail.short_name;
                 }
               }
             }
@@ -1904,6 +1923,12 @@ export default {
       this.selectedOutsourcingCustomerValue = this.form.outsourcing_customer_code;
       this.value_order_no = this.form.order_no;
       this.value_seq = this.form.seq;
+      this.value_save_sheet = this.form.save_sheet;
+      if (this.value_save_sheet == null || this.value_save_sheet == "") {
+        this.save_sheet_name = "";
+      } else {
+        this.save_sheet_name = CONST_SAVE_SHEET_NAME;
+      }
       this.value_back_order_customer_name = this.form.back_order_customer_name;
       this.value_order_date = this.form.order_date;
       this.value_processes_code = this.form.processes_code;
@@ -1936,6 +1961,7 @@ export default {
       this.form.back_order_product_name = "";
       this.form.order_date = "";
       this.form.order_kingaku = "";
+      this.form.save_sheet = "";
       this.form.drawing_no = "";
       this.form.order_count = "";
       this.form.model_number = "";
@@ -1976,18 +2002,22 @@ export default {
       for (let index = 0; index < 4; index++) {
         this.form.total.process_total_user_code_1[index] = "";
         this.form.total.process_total_user_name_1[index] = "";
+        this.form.total.process_total_short_name_1[index] = "";
         this.form.total.process_result_process_time_h_1[index] = 0;
         this.form.total.process_result_process_time_m_1[index] = 0;
         this.form.total.process_total_user_code_2[index] = "";
         this.form.total.process_total_user_name_2[index] = "";
+        this.form.total.process_total_short_name_2[index] = "";
         this.form.total.process_result_process_time_h_2[index] = 0;
         this.form.total.process_result_process_time_m_2[index] = 0;
         this.form.total.process_total_user_code_3[index] = "";
         this.form.total.process_total_user_name_3[index] = "";
+        this.form.total.process_total_short_name_3[index] = "";
         this.form.total.process_result_process_time_h_3[index] = 0;
         this.form.total.process_result_process_time_m_3[index] = 0;
         this.form.total.process_total_user_code_4[index] = "";
         this.form.total.process_total_user_name_4[index] = "";
+        this.form.total.process_total_short_name_4[index] = "";
         this.form.total.process_result_process_time_h_4[index] = 0;
         this.form.total.process_result_process_time_m_4[index] = 0;
       }
@@ -2032,8 +2062,6 @@ export default {
       } else {
         this.qrText = 'A' + "order_no='" + this.form.order_no + "'&seq='" + this.form.seq + "'";
       }
-      console.log('setQrText this.qrText = ' + this.form.order_no);
-      console.log('setQrText this.qrText = ' + this.qrText);
       // for (let index = 0; index < 12; index++) {
         // this.form.qrText[index] = this.form.order_no + this.form.row_seq + this.form.drawing_no + ('00' + (index+1)).slice(-2);
       // }
