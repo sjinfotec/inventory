@@ -39,10 +39,10 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <tr v-for="(item,index) in details " :key="index">
+                        <tr v-for="(item,index) in details " :key="index" v-bind:class="item.work_kind==3 || item.work_kind==4 ? 'td_active':''">
                           <td class="text-center align-middle w1" v-bind:class="{ 'td_active': isActiveKind }">{{ item.supply_date_name }}</td>
-                          <td class="text-center align-middle w2">{{ item.back_order_customer_name }}</td>
-                          <td class="text-center align-middle w3">{{ item.order_no }}</td>
+                          <td class="text-center align-middle w2" >{{ item.back_order_customer_name }}</td>
+                          <td class="text-center align-middle w3" >{{ item.order_no }}</td>
                           <!--<td class="text-center align-middle w4">{{ item.row_seq }}</td>-->
                           <td class="text-center align-middle w5 textwrap">{{ item.back_order_product_name }}</td>
                           <td class="text-center align-middle w6 textwrap">{{ item.device_name }}</td>
@@ -93,10 +93,14 @@ export default {
       count: 0,
       before_count: 0,
       details: [],
-      isActiveKind: false
+      isActiveKind: false,
+      work_kind: ""
     };
   },
   computed: {
+
+
+
   },
   // マウント時
   mounted() {

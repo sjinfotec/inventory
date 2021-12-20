@@ -182,7 +182,7 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-cnt_05 pb-2">
+              <div class="col-cnt_05 pb-2 print-none">
                 <div id="input-area_1">
                   <div class="input-area-prepend">
                     <span

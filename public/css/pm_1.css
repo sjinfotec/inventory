@@ -768,8 +768,12 @@ white-space: nowrap;
 @media print {
   .print_view {display:block;}
   .col-cnt_04 {
-    flex: 0 0 35%;
-    max-width: 35%;
+    flex: 0 0 40%;
+    max-width: 40%;
+  }
+  .col-cnt_06 {
+    flex: 0 0 28%;
+    max-width: 28%;
   }
   #view_off {
     display:block;

@@ -275,6 +275,8 @@ export default {
       this.form.item_name[this.kind_index] = this.kind_name;
     	target.style.background = '#80bb60';
       table_cnt3.style.color = '#FFF';
+      this.form.process_time_h = "";
+      this.form.process_time_m = "";
     },
     // 作業中断処理
     startClick2() {
@@ -284,6 +286,8 @@ export default {
       this.form.item_name[this.kind_index] = this.kind_name;
   	  target.style.background = '#dd6060';
       table_cnt3.style.color = '#FFF';
+      this.form.process_time_h = "";
+      this.form.process_time_m = "";
     },
     // 作業完了処理
     startClick3() {
