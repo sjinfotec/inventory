@@ -32,6 +32,7 @@ class Progressheader extends Model
     private $drawing_no;                              // 図面番号
     private $order_date;                              // 受注日
     private $order_kingaku;                              // 受注金額
+    private $save_sheet;                              // 保存シート
     private $supply_date;                              // 納期
     private $office_code;                              // 営業所コード
     private $customer_code;                              // 顧客コード
@@ -139,6 +140,16 @@ class Progressheader extends Model
     public function setOrderkingakuAttribute($value)
     {
         $this->order_kingaku = $value;
+    }
+    //保存シート
+    public function getSavesheetAttribute()
+    {
+        return $this->save_sheet;
+    }
+
+    public function setSavesheetAttribute($value)
+    {
+        $this->save_sheet = $value;
     }
 
     //納期
@@ -430,6 +441,7 @@ class Progressheader extends Model
     private $param_order_date_from;                         // 受注日（開始）
     private $param_order_date_to;                           // 受注日（終了）
     private $param_order_kingaku;                              // 受注金額
+    private $param_save_sheet;                              // 保存シート
     private $param_supply_date;                              // 納期
     private $param_supply_date_from;                         // 納期（開始）
     private $param_supply_date_to;                           // 納期（終了）
@@ -501,6 +513,16 @@ class Progressheader extends Model
     public function setParamOrderkingakuAttribute($value)
     {
         $this->param_order_kingaku = $value;
+    }
+    //保存シート
+    public function getParamSavesheetAttribute()
+    {
+        return $this->param_save_sheet;
+    }
+
+    public function setParamSavesheetAttribute($value)
+    {
+        $this->param_save_sheet = $value;
     }
     //連番
     public function getParamSeqAttribute()
@@ -889,6 +911,7 @@ class Progressheader extends Model
             $sqlString .= "  , t1.drawing_no as drawing_no" ;
             $sqlString .= "  , t1.order_date as order_date" ;
             $sqlString .= "  , t1.order_kingaku as order_kingaku" ;
+            $sqlString .= "  , t1.save_sheet as save_sheet" ;
             $sqlString .= "  , t1.supply_date as supply_date" ;
             $sqlString .= "  , date_format(t1.order_date,'%Y年%m月%d日') as order_date_name" ;
             $sqlString .= "  , date_format(t1.supply_date,'%Y年%m月%d日') as supply_date_name" ;
@@ -1012,6 +1035,7 @@ class Progressheader extends Model
                     'drawing_no' => $this->drawing_no,
                     'order_date' => $this->order_date,
                     'order_kingaku' => $this->order_kingaku,
+                    'save_sheet' => $this->save_sheet,
                     'supply_date' => $this->supply_date,
                     'office_code' => $this->office_code,
                     'customer_code' => $this->customer_code,
@@ -1061,6 +1085,7 @@ class Progressheader extends Model
                 'drawing_no' => $this->drawing_no,
                 'order_date' => $this->order_date,
                 'order_kingaku' => $this->order_kingaku,
+                'save_sheet' => $this->save_sheet,
                 'supply_date' => $this->supply_date,
                 'office_code' => $this->office_code,
                 'customer_code' => $this->customer_code,
@@ -1105,6 +1130,7 @@ class Progressheader extends Model
             $sqlString .= "  , t1.drawing_no as drawing_no" ;
             $sqlString .= "  , t1.order_date as order_date" ;
             $sqlString .= "  , t1.order_kingaku as order_kingaku" ;
+            $sqlString .= "  , t1.save_sheet as save_sheet" ;
             $sqlString .= "  , t1.supply_date as supply_date" ;
             $sqlString .= "  , date_format(t1.order_date,'%Y年%m月%d日') as order_date_name" ;
             $sqlString .= "  , date_format(t1.supply_date,'%Y年%m月%d日') as supply_date_name" ;
