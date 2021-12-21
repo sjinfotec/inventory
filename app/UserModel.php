@@ -27,6 +27,7 @@ class UserModel extends Model
     private $department_code;                  
     private $name;                  
     private $kana;
+    private $short_name;
     private $official_position;
     private $password;                  
     private $email;                  
@@ -113,6 +114,16 @@ class UserModel extends Model
     public function setKanaAttribute($value)
     {
         $this->kana = $value;
+    }
+     
+    public function getShortNameAttribute()
+    {
+        return $this->short_name;
+    }
+
+    public function setShortNameAttribute($value)
+    {
+        $this->short_name = $value;
     }
  
     public function getOfficialpositionAttribute()
@@ -379,6 +390,7 @@ class UserModel extends Model
                         'department_code' => $this->department_code,
                         'name' => $this->name,
                         'kana' => $this->kana,
+                        'short_name' => $this->short_name,
                         'official_position' => $this->official_position,
                         'kill_from_date' => $this->kill_from_date,
                         'working_timetable_no' => $this->working_timetable_no,
@@ -401,6 +413,7 @@ class UserModel extends Model
                         'department_code' => $this->department_code,
                         'name' => $this->name,
                         'kana' => $this->kana,
+                        'short_name' => $this->short_name,
                         'official_position' => $this->official_position,
                         'kill_from_date' => $this->kill_from_date,
                         'working_timetable_no' => $this->working_timetable_no,
@@ -446,6 +459,7 @@ class UserModel extends Model
                 'employment_status' => $this->employment_status,
                 'name' => $this->name,
                 'kana' => $this->kana,
+                'short_name' => $this->short_name,
                 'official_position' => $this->official_position,
                 'kill_from_date' => $this->kill_from_date,
                 'working_timetable_no' => $this->working_timetable_no,
@@ -519,6 +533,7 @@ class UserModel extends Model
                     't1.employment_status',
                     't1.name',
                     't1.kana',
+                    't1.short_name',
                     't1.official_position',
                     't1.working_timetable_no',
                     't1.email',
@@ -608,6 +623,7 @@ class UserModel extends Model
                     't1.employment_status',
                     't1.name',
                     't1.kana',
+                    't1.short_name',
                     't1.official_position',
                     't1.working_timetable_no',
                     't1.email',
@@ -663,6 +679,7 @@ class UserModel extends Model
             $sqlString .= "   ,ifnull(t1.employment_status,'') as employment_status ";
             $sqlString .= "   ,ifnull(t1.name,'') as user_name ";
             $sqlString .= "   ,ifnull(t1.kana,'') as user_kana ";
+            $sqlString .= "   ,ifnull(t1.short_name,'') as short_name ";
             $sqlString .= "   ,ifnull(t1.apply_term_from,'') as apply_term_from ";
             $sqlString .= "   ,ifnull(t1.official_position,'') as official_position ";
             $sqlString .= "   ,case ifnull(t1.kill_from_date,'') ";

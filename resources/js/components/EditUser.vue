@@ -106,80 +106,8 @@
             </div>
             <!-- /.row -->
           </div>
-          <!-- panel contents -->
             <!-- ----------- ボタン部 START ---------------- -->
-            <!-- .row -->
-            <!-- <div class="row justify-content-between"> -->
-              <!-- col -->
-              <!-- <div class="col-md-12 pb-2">
-                <btn-work-time
-                  v-on:searchclick-event="searchclick"
-                  v-bind:btn-mode="'search'"
-                  v-bind:is-push="false"
-                ></btn-work-time>
-              </div> -->
-              <!-- /.col -->
-            <!-- </div> -->
-            <!-- /.row -->
-            <!-- .row -->
-            <!-- <div class="row justify-content-between"> -->
-              <!-- col -->
-              <!-- <div class="col-md-12 pb-2">
-                <btn-work-time
-                  v-on:timetableedit-event="timetableeditclick"
-                  v-bind:btn-mode="'timetableedit'"
-                  v-bind:is-push="false"
-                ></btn-work-time>
-              </div> -->
-              <!-- /.col -->
-            <!-- </div> -->
-            <!-- /.row -->
-            <!-- .row -->
-          <div class="card-body pt-2">
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- col -->
-              <div class="col-md-3 pb-2">
-                <btn-work-time
-                  v-bind:btn-mode="'dummy'"
-                  v-bind:is-push="false"
-                ></btn-work-time>
-              </div>
-              <!-- /.col -->
-              <!-- col -->
-              <div class="col-md-3 pb-2">
-                <btn-work-time
-                  v-bind:btn-mode="'dummy'"
-                  v-bind:is-push="false"
-                ></btn-work-time>
-              </div>
-              <!-- /.col -->
-              <!-- col -->
-              <div class="col-md-3 pb-2">
-                <btn-work-time
-                  v-on:usersupload-event="usersuploadclick"
-                  v-bind:btn-mode="'usersupload'"
-                  v-bind:is-push="false"
-                ></btn-work-time>
-              </div>
-              <!-- /.col -->
-              <div class="col-md-3 pb-2" v-for="(item) in get_C037TARGET" v-bind:key="item['code']">
-                <!-- col -->
-                <btn-csv-download
-                  v-bind:btn-mode="item['code']"
-                  v-bind:general-data="get_C037"
-                  v-bind:general-physicalname="item['physical_name']"
-                  v-bind:is-csvbutton="iscsvbutton"
-                  v-bind:csv-date="''"
-                >
-                </btn-csv-download>
-                <!-- /.col -->
-              </div>
-            </div>
-            <!-- /.row -->
             <!-- ----------- ボタン部 END ---------------- -->
-          </div>
-          <!-- panel contents -->
         </div>
       </div>
       <!-- /.panel -->
@@ -601,10 +529,6 @@
                 </div>
               </div>
               <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
@@ -612,42 +536,26 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
-                    >
-                      メールアドレス
+                    >略称
                       <span class="color-red">[必須]</span>
                     </span>
                   </div>
                   <input
                     type="text"
                     class="form-control"
-                    v-model="form.email"
-                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$"
-                    name="email"
+                    v-model="form.short_name"
+                    name="short_name"
                   />
                 </div>
               </div>
               <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
               <!-- .col -->
-              <div class="col-md-6 pb-2">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span
-                      class="input-group-text font-size-sm line-height-xs label-width-150"
-                      id="basic-addon1"
-                    >
-                      モバイル用アドレス
-                      <!-- <span class="color-red">[必須]</span> -->
-                    </span>
-                  </div>
-                  <input
-                    type="text"
-                    class="form-control"
-                    v-model="form.mobile_email"
-                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$"
-                    name="mobile_email"
-                  />
-                </div>
-              </div>
+              <!-- /.col -->
+              <!-- .col -->
               <!-- /.col -->
             </div>
             <!-- /.row -->
@@ -707,83 +615,12 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between">
-              <!-- .col -->
-              <div class="col-md-6 pb-2">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <label
-                      class="input-group-text font-size-sm line-height-xs label-width-150"
-                      for="inputGroupSelect01"
-                    >
-                      勤怠管理
-                      <span class="color-red">[必須]</span>
-                    </label>
-                  </div>
-                  <select-generallist
-                    v-bind:blank-data="false"
-                    v-bind:placeholder-data="'勤怠管理の有無を選択してください'"
-                    v-bind:selected-value="form.management"
-                    v-bind:identification-id="'C017'"
-                    v-on:change-event="adddisplayChange"
-                  ></select-generallist>
-                </div>
-              </div>
-              <!-- /.col -->
-              <!-- .col -->
-              <div class="col-md-6 pb-2">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <label
-                      class="input-group-text font-size-sm line-height-xs label-width-150"
-                      for="inputGroupSelect02"
-                    >
-                      権限
-                      <span class="color-red">[必須]</span>
-                    </label>
-                  </div>
-                  <select-generallist
-                    v-bind:blank-data="false"
-                    v-bind:placeholder-data="'勤怠管理の権限を選択してください'"
-                    v-bind:selected-value="form.role"
-                    v-bind:identification-id="'C025'"
-                    v-on:change-event="addroleChange"
-                  ></select-generallist>
-                </div>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- .col -->
-              <div class="col-md-6 pb-2">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span
-                      class="input-group-text font-size-sm line-height-xs label-width-150"
-                      id="basic-addon1"
-                      data-toggle="tooltip"
-                      data-placement="top"
-                      v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
-                    >
-                      タイムテーブル
-                      <span class="color-red">[必須]</span>
-                    </span>
-                  </div>
-                  <select-timetablelist
-                    :blank-data="true"
-                    :selected-value="form.working_timetable_no"
-                    v-on:change-event="addtimetableChanges"
-                  ></select-timetablelist>
-                </div>
-              </div>
-              <!-- /.col -->
             </div>
             <!-- /.row -->
             <!-- ----------- 項目部 END ---------------- -->
             <!-- ----------- ボタン部 START ---------------- -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div id="btn_cnt6" class="row justify-content-between">
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time
@@ -1042,6 +879,8 @@
                         </div>
                       </div>
                       <!-- /.col -->
+
+
                       <!-- .col -->
                       <div class="col-md-6 pb-2">
                         <div class="input-group">
@@ -1049,20 +888,19 @@
                             <span
                               class="input-group-text font-size-sm line-height-xs label-width-180"
                               id="basic-addon1"
-                            >
-                              メールアドレス
+                            >略称
                               <span class="color-red">[必須]</span>
                             </span>
                           </div>
                           <input
-                            type="email"
-                            maxlength="191"
+                            type="text"
                             class="form-control"
-                            v-model="item.email"
+                            maxlength="4"
+                            v-model="item.short_name"
                             data-toggle="tooltip"
                             data-placement="top"
-                            v-bind:title="'メールアドレスを191文字以内で入力します'"
-                            name="email"
+                            v-bind:title="'略称を4文字以内で入力します'"
+                            name="short_name"
                           />
                         </div>
                       </div>
@@ -1095,28 +933,6 @@
                             <span
                               class="input-group-text font-size-sm line-height-xs label-width-180"
                               id="basic-addon1"
-                            >モバイル用アドレス</span>
-                          </div>
-                          <input
-                            type="email"
-                            maxlength="191"
-                            class="form-control"
-                            v-model="item.mobile_email"
-                            data-toggle="tooltip"
-                            data-placement="top"
-                            v-bind:title="'モバイル用メールアドレスを191文字以内で入力します'"
-                            name="mobile_email"
-                          />
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
                             >パスワード</span>
                           </div>
                           <input
@@ -1130,86 +946,11 @@
                         </div>
                       </div>
                       <!-- /.col -->
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >
-                              勤怠管理
-                              <span class="color-red">[必須]</span>
-                            </span>
-                          </div>
-                          <select class="custom-select" v-model="item.management">
-                            <option value></option>
-                            <option
-                              v-for="mlist in get_C017"
-                              :value="mlist.code"
-                              v-bind:key="mlist.code"
-                            >{{ mlist.code_name }}</option>
-                          </select>
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >
-                              タイムテーブル
-                              <span class="color-red">[必須]</span>
-                            </span>
-                          </div>
-                          <select
-                            class="custom-select"
-                            v-model="item.working_timetable_no"
-                            data-toggle="tooltip"
-                            data-placement="top"
-                            v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
-                          >
-                            <option value></option>
-                            <option
-                              v-for="tlist in timetableList"
-                              :value="tlist.no"
-                              v-bind:key="tlist.no"
-                            >{{ tlist.name }}</option>
-                          </select>
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >
-                              権限
-                              <span class="color-red">[必須]</span>
-                            </span>
-                          </div>
-                          <select class="custom-select" v-model="item.role">
-                            <option value></option>
-                            <option
-                              v-for="rlist in get_C025"
-                              :value="rlist.code"
-                              v-bind:key="rlist.code"
-                            >{{ rlist.code_name }}</option>
-                          </select>
-                        </div>
-                      </div>
-                      <!-- /.col -->
                     </div>
                     <!-- /row -->
                     <!-- .row -->
                     <!-- ----------- ボタン部 START ---------------- -->
-                    <div class="row justify-content-between">
+                    <div id="btn_cnt6" class="row justify-content-between">
                       <div class="col-md-12 pb-2">
                         <div class="btn-group float-left">
                           <button
@@ -1230,12 +971,14 @@
                             class="btn btn-danger"
                             @click="delClick(index)"
                           >この内容を削除する</button>
+                          <!--
                           <button
                             v-if="item.result != 0 && item.id != ''"
                             type="button"
                             class="btn btn-warning"
                             @click="sendUrl()"
                           >モバイル打刻URLを送信する</button>
+                          -->
                           <button
                             v-if="item.id == ''"
                             type="button"
@@ -1824,6 +1567,7 @@ export default {
         department_code: "",
         employment_status: "",
         name: "",
+        short_name: "",
         kana: "",
         kill_from_date: "",
         official_position: "",
@@ -3262,7 +3006,7 @@ export default {
         );
         this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
         this.refreshUserList();
-        this.getNotSetting();
+        //this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -3279,7 +3023,7 @@ export default {
         this.$toasted.show("ユーザーを" + eventtext + "しました");
         this.refreshUserList();
         this.getItem();
-        this.getNotSetting();
+        //this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -3308,7 +3052,7 @@ export default {
       var res = response.data;
       if (res.result) {
         this.$toasted.show("ユーザーを" + eventtext + "しました");
-        this.getNotSetting();
+        //this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -3354,6 +3098,7 @@ export default {
       this.form.code = "";
       this.form.name = "";
       this.form.kana = "";
+      this.form.short_name = "";
       this.form.kill_from_date = "";
       this.form.official_position = "";
       this.form.email = "";
@@ -3377,6 +3122,9 @@ export default {
         return true;
       }
       if (this.details[index].kana != "" && this.details[index].kana != null) {
+        return true;
+      }
+      if (this.details[index].short_name != "" && this.details[index].short_name != null) {
         return true;
       }
       if (

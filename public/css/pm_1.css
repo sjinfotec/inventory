@@ -588,10 +588,13 @@ white-space: nowrap;
 }
 
 #table_cnt4 td.w1 {
- width:6em;
+ width:5em;
 }
-#table_cnt4 td.w7 {
-  width:5em;
+#table_cnt4 td.w2 {
+  width:5.2em;
+ }
+ #table_cnt4 td.w7 {
+  width:4em;
 }
 #table_cnt4 td.w8 {
   width:3em;
@@ -768,7 +771,7 @@ white-space: nowrap;
   /*align-items: stretch;*/
   align-items: center;
   justify-content: flex-start;
-  width:100%;
+  /*width:100%;*/
   padding:0px 0px 10px 0px;
   background:#FFF;
 }
@@ -781,7 +784,15 @@ white-space: nowrap;
   border:1px solid #ced4da;
   border-bottom: 4px solid #ced4da;
 }
+#btn_cnt5 .btn_col_2 input:hover {
+  color:#FFF;
+  background-color: #818f9c;
+}
 
+/*----------------------------------------------------## edit_user ##---------------------*/
+#btn_cnt6 {
+  padding:10px 0 0 0;
+}
 
 
 
