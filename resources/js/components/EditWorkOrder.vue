@@ -715,7 +715,7 @@
                             </select>
                           </td>
                           <td class="text-center align-middle ws1">
-                            <div class v-if="form.process_time_h[index] && form.process_time_h[index]>0">
+                            <div class>
                               <input
                                 type="number"
                                 step="1"
@@ -728,7 +728,7 @@
                           </td>
                           <td class="td-first text-left align-middle ws2 pad1">H</td>
                           <td class="td-first text-center align-middle ws1">
-                            <div class v-if="form.process_time_h[index] && form.process_time_m[index]>0">
+                            <div class>
                               <input
                                 type="number"
                                 step="1"

@@ -253,7 +253,8 @@ export default {
       details: [],
       maketime: false,
       kindstatus: "",
-      mode_button: ""
+      mode_button: "",
+      work_kind: ""
     };
   },
   computed: {
@@ -262,6 +263,14 @@ export default {
   mounted() {
     console.log('ProcessInfo mounted ');
     this.getItem();
+//    this.setKind();
+console.log('mounted->kinds = ' + this.kindstatus);
+console.log('mounted->kindf = ' + this.work_kind);
+console.log(this.details);
+//console.log('mounted->detail = ' + this.detail.work_kind);
+
+
+
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -439,6 +448,9 @@ console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
           $this.form.row_seq = detail.row_seq;
           $this.form.kind = detail.work_kind;
           console.log('getThen in detail.work_kind = ' + detail.work_kind);
+          console.log('getThen in detail.user_name = ' + detail.user_name);
+          // progress_noは廃止する方向
+          $this.form.progress_no = null;
           $this.form.item_name[set_index] = C_SUPPLY_DATE_NAME;
           $this.form.item_data[set_index] = detail.supply_date_name;
           console.log('getThen detail.supply_date_name = ' + $this.form.item_data[set_index]);
@@ -474,6 +486,7 @@ console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
           $this.form.item_data[set_index] = "";
           $this.kind_index = set_index;
           $this.kindstatus = $this.kind_name;
+          $this.work_kind = detail.work_kind;
         });
         this.form_count = set_index + 1;
         this.setKind();
@@ -534,26 +547,27 @@ console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
       switch (this.form.kind) {
         case C_KIND_START:
           this.kind_name = C_KIND_START_NAME;
+         	//target.style.background = '#80bb60';
           break;
         case C_KIND_STOP:
           this.kind_name = C_KIND_STOP_NAME;
-          //this.isbtnctrl = 'top2';
+      	  //target.style.background = '#dd6060';
           break;
         case C_KIND_MSTOP:
           this.kind_name = C_KIND_MSTOP_NAME;
-          //this.isbtnctrl = 'top2';
+      	  //target.style.background = '#dd6060';
           break;
         case C_KIND_COMPLETE:
           this.kind_name = C_KIND_COMPLETE_NAME;
-          //this.isbtnctrl = 'top';
+      	  //target.style.background = '#6cb2eb';
           break;
         case C_KIND_NEXT:
           this.kind_name = C_KIND_NEXT_NAME;
-          //this.isbtnctrl = 'top';
       	  target.style.background = '#eeaa00';
           break;
         default:
           this.kind_name = C_KIND_INI_NAME;
+      	  //target.style.background = '#FFF';
           break;
       }
       console.log('setKind out = ' + this.kind_name);

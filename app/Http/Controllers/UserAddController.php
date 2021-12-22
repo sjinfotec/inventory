@@ -163,6 +163,7 @@ class UserAddController extends Controller
             $users->setDepartmentcodeAttribute($data['department_code']);
             $users->setEmploymentstatusAttribute($data['employment_status']);
             $users->setNameAttribute($data['name']);
+            $users->setShortNameAttribute($data['short_name']);
             $users->setKanaAttribute($data['kana']);
             $users->setOfficialpositionAttribute($data['official_position']);
             $users->setKillfromdateAttribute(Config::get('const.INIT_DATE.maxdate'));
@@ -430,6 +431,7 @@ class UserAddController extends Controller
             $user_model->setDepartmentcodeAttribute($data['department_code']);
             $user_model->setEmploymentstatusAttribute($data['employment_status']);
             $user_model->setNameAttribute($data['name']);
+            $user_model->setShortNameAttribute($data['short_name']);
             $user_model->setKanaAttribute($data['kana']);
             $user_model->setOfficialpositionAttribute($data['official_position']);
             $temp_from = Config::get('const.INIT_DATE.maxdate');
@@ -874,6 +876,7 @@ class UserAddController extends Controller
                     }
                     $user_model->setEmploymentstatusAttribute($employment_status);
                     $user_model->setNameAttribute($item['user_name']);
+                    $user_model->setShortNameAttribute($item['user_short_name']);
                     $user_model->setKanaAttribute($item['user_kana']);
                     $user_model->setOfficialpositionAttribute($item['user_official_position']);
                     if (isset($item['user_apply_term_from'])) {
