@@ -72,39 +72,6 @@
             </div>
             <!-- /.row -->
             <!-- ----------- 選択リスト END ---------------- -->
-            <!-- ----------- 選択ボタン類 START ---------------- -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- .col -->
-              <div class="col-md-6 pb-2">
-                <div class="form-check form-check-inline float-right">
-                  <input
-                    class="form-check-input"
-                    type="checkbox"
-                    id="inlineCheckbox1"
-                    v-model="valueDepartmentkillcheck"
-                    @change="checkboxChangeDepartment"
-                  />
-                  <label class="form-check-label" for="inlineCheckbox1">※所属部署選択リストに廃止した部署も含める</label>
-                </div>
-              </div>
-              <!-- /.col -->
-              <!-- .col -->
-              <div class="col-md-6 pb-2">
-                <div class="form-check form-check-inline float-right">
-                  <input
-                    class="form-check-input"
-                    type="checkbox"
-                    id="inlineCheckbox2"
-                    v-model="valueUserkillcheck"
-                    @change="checkboxChangeUser"
-                  />
-                  <label class="form-check-label" for="inlineCheckbox1">※氏名選択リストに退職した氏名も含める</label>
-                </div>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
           </div>
             <!-- ----------- ボタン部 START ---------------- -->
             <!-- ----------- ボタン部 END ---------------- -->
@@ -114,243 +81,6 @@
       <!-- ========================== 検索部 END ========================== -->
     </div>
     <div class="row justify-content-between">
-      <!-- ========================== アップロード部 START ========================== -->
-      <!-- .panel -->
-      <div class="col-md pt-3 print-none" v-if="selectMode==='UPL'">
-        <div class="card shadow-pl">
-          <!-- panel header -->
-          <daily-working-information-panel-header
-            v-bind:header-text1="'以下のアップロードアイコンでユーザーを登録します。'"
-            v-bind:header-text2="''"
-          ></daily-working-information-panel-header>
-          <!-- /.panel header -->
-          <div class="card-body pt-2">
-            <!-- ----------- ファイル選択 START ---------------- -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- col -->
-              <div class="col-md-3 pb-2">
-                <button type="button" class="btn btn-lg font-size-rg" @click="upclick">
-                  <img class="icon-size-user mr-2 pb-1" src="/images/upload-icon-1.svg" alt />ユーザー登録
-                </button>
-                <input
-                  type="file"
-                  id="f1"
-                  style="display: none;"
-                  ref="uplog"
-                  @change="onFileChange"
-                  accept=".csv"
-                />
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- ----------- ファイル選択 END ---------------- -->
-          </div>
-          <!-- <div class="card-body pt-2"> -->
-            <!-- ----------- メッセージ部 START ---------------- -->
-            <!-- .row -->
-            <!-- <div class="row justify-content-between" v-if="messageUp.length"> -->
-              <!-- col -->
-              <!-- <div class="col-md-12 pb-2">
-                <ul class="error-red color-red">
-                  <li v-for="(messageup,index) in messageUp" v-bind:key="index">{{ messageup }}</li>
-                </ul>
-              </div> -->
-              <!-- /.col -->
-            <!-- </div> -->
-            <!-- /.row -->
-            <!-- ----------- メッセージ部 END ---------------- -->
-          <!-- </div> -->
-        </div>
-      </div>
-      <!-- /.panel -->
-      <!-- ========================== アップロード部 END ========================== -->
-      <!-- /.panel -->
-      <!-- ========================== タイムテーブル登録部 START ========================== -->
-      <!-- .panel -->
-      <!-- <div class="col-md pt-3 print-none" v-if="selectMode==='TMT'">
-        <div class="card shadow-pl"> -->
-          <!-- panel header -->
-          <!-- <daily-working-information-panel-header
-            v-bind:header-text1="'◆タイムテーブル設定'"
-            v-bind:header-text2="''"
-          ></daily-working-information-panel-header> -->
-          <!-- /.panel header -->
-          <!-- ----------- メッセージ部 START ---------------- -->
-          <!-- .row -->
-          <!-- <div class="row justify-content-between" v-if="messagevalidatestimetable.length"> -->
-            <!-- col -->
-            <!-- <div class="col-md-12 pb-2">
-              <ul class="error-red color-red">
-                <li v-for="(messagevalidate,index) in messagevalidatestimetable" v-bind:key="index">{{ messagevalidate }}</li>
-              </ul>
-            </div> -->
-            <!-- /.col -->
-          <!-- </div> -->
-          <!-- /.row -->
-          <!-- ----------- メッセージ部 END ---------------- -->
-          <!-- panel contents -->
-          <!-- <div class="card-body pt-2"> -->
-            <!-- ----------- 編集入力部 START ---------------- -->
-            <!-- .sub panel -->
-            <!-- <div class="card shadow-pl"> -->
-              <!-- panel header -->
-              <!-- <daily-working-information-panel-header
-                v-bind:header-text1="'設定内容指定'"
-                v-bind:header-text2="'設定内容を指定します。'"
-              ></daily-working-information-panel-header> -->
-              <!-- /.panel header -->
-              <!-- <div class="card-body pt-2"> -->
-                <!-- ----------- 日付 START ---------------- -->
-                <!-- panel contents -->
-                <!-- .row -->
-                <!-- <div class="row justify-content-between">
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-120"
-                          id="basic-addon1"
-                        >開始日付<span class="color-red">[必須]</span></span>
-                      </div>
-                      <input-datepicker
-                        v-bind:default-date="valuefromdate"
-                        v-bind:date-format="DatePickerFormat"
-                        v-bind:place-holder="'開始日付を選択してください'"
-                        v-on:change-event="fromdateChanges"
-                        v-on:clear-event="fromdateCleared"
-                      ></input-datepicker>
-                    </div>
-                  </div> -->
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <!-- <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-120"
-                          id="basic-addon1"
-                        >終了日付<span class="color-red">[必須]</span></span>
-                      </div>
-                      <input-datepicker
-                        v-bind:default-date="valuetodate"
-                        v-bind:date-format="DatePickerFormat"
-                        v-bind:place-holder="'終了日付を選択してください'"
-                        v-on:change-event="fromtoChanges"
-                        v-on:clear-event="fromtoCleared"
-                      ></input-datepicker>
-                    </div>
-                  </div> -->
-                  <!-- /.col -->
-                <!-- </div> -->
-                <!-- /.row -->
-                <!-- ----------- 日付リスト END ---------------- -->
-                <!-- <div
-                  v-for="(timetableptn, index) in get_C041"
-                  :key="timetableptn.key"
-                > -->
-                  <!-- .row -->
-                  <!-- <div class="row justify-content-between">
-                    <div class="col-md-12 pb-2">
-                      <div class="input-group">
-                        <label>
-                          <input
-                            type="radio"
-                            v-model="timetable_check.chkptn"
-                            :value="timetableptn.value"
-                            @change="timetablechkptnChanges(timetable_check.chkptn, index)"
-                          />
-                          {{ timetableptn.label }}
-                        </label>
-                      </div>
-                    </div>
-                  </div> -->
-                  <!-- /.row -->
-                  <!-- .row -->
-                  <!-- <div class="row justify-content-between">
-                    <div class="col-md-12 pb-2">
-                      <div class="form-group">
-                        <div class="form-check">
-                          <div v-if="index===0">
-                            <select
-                              v-bind:disabled="isTabledisabled[index]"
-                              class="custom-select"
-                              v-model="timetable.timeptn_timetable"
-                              data-toggle="tooltip"
-                              data-placement="top"
-                              v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
-                            >
-                              <option value></option>
-                              <option
-                                v-for="tlist in timetableList"
-                                :value="tlist.no"
-                                v-bind:key="tlist.no"
-                              >{{ tlist.name }}</option>
-                            </select>
-                          </div>
-                          <div v-if="index===1">
-                            <table
-                              class="table table-striped border-bottom font-size-sm text-nowrap">
-                              <thead>
-                                <tr>
-                                  <td class="text-center align-middle w-10">曜日</td>
-                                  <td class="text-center align-middle w-30 mw-rem-10">タイムテーブル<span class="color-red">[必須]</span></td>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                <tr v-for="(n,index1) in 7" :key="index">
-                                  <td class="text-center align-middle">{{ formweekdays[index1] }}</td>
-                                  <td class="text-center align-middle">
-                                    <div class="input-group">
-                                      <select
-                                        class="custom-select"
-                                        v-bind:disabled="isTabledisabled[index]"
-                                        v-model="timetable.timeptn_timetable_w[index1]"
-                                        data-toggle="tooltip"
-                                        data-placement="top"
-                                        v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
-                                      >
-                                        <option value></option>
-                                        <option
-                                          v-for="tlist in timetableList"
-                                          :value="tlist.no"
-                                          v-bind:key="tlist.no"
-                                        >{{ tlist.name }}</option>
-                                      </select>
-                                    </div>
-                                  </td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div> -->
-                <!-- /.row -->
-                <!-- ----------- ボタン部 START ---------------- -->
-                <!-- .row -->
-                <!-- <div class="row justify-content-between"> -->
-                  <!-- col -->
-                  <!-- <div class="col-md-12 pb-2">
-                    <btn-work-time
-                      v-on:fixclick-event="fixTimetableclick"
-                      v-bind:btn-mode="'fix'"
-                      v-bind:is-push="false"
-                    ></btn-work-time>
-                  </div> -->
-                  <!-- /.col -->
-                <!-- </div> -->
-                <!-- /.row -->
-              <!-- </div>
-            </div>
-          </div>
-        </div>
-      </div> -->
-      <!-- /.panel -->
-      <!-- ========================== タイムテーブル登録部 END ========================== -->
       <!-- ========================== 新規部 START ========================== -->
       <!-- .panel -->
       <div class="col-md-12 pt-3" v-if="selectMode==='NEW'">
@@ -363,7 +93,7 @@
           <!-- /.panel header -->
           <!-- ----------- 新規入力部 START ---------------- -->
           <!-- panel contents -->
-          <div class="card-body pt-2">
+          <div id="input-area_3" class="card-body pt-2">
             <!-- ----------- メッセージ部 START ---------------- -->
             <!-- .row -->
             <div class="row justify-content-between" v-if="messagevalidatesNew.length">
@@ -554,14 +284,6 @@
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- .col -->
-              <!-- /.col -->
-              <!-- .col -->
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
@@ -611,10 +333,6 @@
                 </div>
               </div>
               <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
             </div>
             <!-- /.row -->
             <!-- ----------- 項目部 END ---------------- -->
@@ -718,9 +436,9 @@
                     </div>
                     <!-- /.row -->
                     <!-- .row -->
-                    <div class="row justify-content-between">
+                    <div id="input-area_3" class="row justify-content-between">
                       <!-- .col -->
-                      <div class="col-md-6 pb-2">
+                      <div class="col-md-6 pb-2 ">
                         <div class="input-group">
                           <div class="input-group-prepend">
                             <span
@@ -879,8 +597,6 @@
                         </div>
                       </div>
                       <!-- /.col -->
-
-
                       <!-- .col -->
                       <div class="col-md-6 pb-2">
                         <div class="input-group">
@@ -971,14 +687,6 @@
                             class="btn btn-danger"
                             @click="delClick(index)"
                           >この内容を削除する</button>
-                          <!--
-                          <button
-                            v-if="item.result != 0 && item.id != ''"
-                            type="button"
-                            class="btn btn-warning"
-                            @click="sendUrl()"
-                          >モバイル打刻URLを送信する</button>
-                          -->
                           <button
                             v-if="item.id == ''"
                             type="button"
@@ -1647,6 +1355,25 @@ export default {
           this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
         }
       }
+      // 略称
+      required = true;
+      equalength = 0;
+      maxlength = 4;
+      itemname = "略称";
+      chkArray = this.checkHeader(
+        this.form.short_name,
+        required,
+        equalength,
+        maxlength,
+        itemname
+      );
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesNew.length == 0) {
+          this.messagevalidatesNew = chkArray;
+        } else {
+          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
+        }
+      }
       // 雇用形態
       required = true;
       equalength = 0;
@@ -1705,31 +1432,12 @@ export default {
         }
       }
       // email
-      required = true;
+      required = false;
       equalength = 0;
       maxlength = 191;
       itemname = "メールアドレス";
       chkArray = this.checkHeader(
         this.form.email,
-        required,
-        equalength,
-        maxlength,
-        itemname
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesNew.length == 0) {
-          this.messagevalidatesNew = chkArray;
-        } else {
-          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-        }
-      }
-      // mobile_email
-      required = false;
-      equalength = 0;
-      maxlength = 191;
-      itemname = "モバイル用アドレス";
-      chkArray = this.checkHeader(
-        this.form.mobile_email,
         required,
         equalength,
         maxlength,
@@ -1761,63 +1469,7 @@ export default {
           this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
         }
       }
-      // 勤怠管理対象
-      required = true;
-      equalength = 0;
-      maxlength = 0;
-      itemname = "勤怠管理対象";
-      chkArray = this.checkHeader(
-        this.form.management,
-        required,
-        equalength,
-        maxlength,
-        itemname
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesNew.length == 0) {
-          this.messagevalidatesNew = chkArray;
-        } else {
-          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-        }
-      }
-      // タイムテーブル
-      required = true;
-      equalength = 0;
-      maxlength = 0;
-      itemname = "タイムテーブル";
-      chkArray = this.checkHeader(
-        this.form.working_timetable_no,
-        required,
-        equalength,
-        maxlength,
-        itemname
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesNew.length == 0) {
-          this.messagevalidatesNew = chkArray;
-        } else {
-          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-        }
-      }
-      // 権限
-      required = true;
-      equalength = 0;
-      maxlength = 0;
-      itemname = "権限";
-      chkArray = this.checkHeader(
-        this.form.role,
-        required,
-        equalength,
-        maxlength,
-        itemname
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesNew.length == 0) {
-          this.messagevalidatesNew = chkArray;
-        } else {
-          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-        }
-      }
+
       if (this.messagevalidatesNew.length > 0) {
         flag = false;
       }
@@ -1986,6 +1638,26 @@ export default {
           this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
         }
       }
+      // 略称
+      required = true;
+      equalength = 0;
+      maxlength = 4;
+      itemname = "略称";
+      chkArray = this.checkDetail(
+        this.details[index].short_name,
+        required,
+        equalength,
+        maxlength,
+        itemname,
+        index + 1
+      );
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesEdt.length == 0) {
+          this.messagevalidatesEdt = chkArray;
+        } else {
+          this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
+        }
+      }
       // 役職
       required = false;
       equalength = 0;
@@ -2007,32 +1679,12 @@ export default {
         }
       }
       // メールアドレス
-      required = true;
+      required = false;
       equalength = 0;
       maxlength = 191;
       itemname = "メールアドレス";
       chkArray = this.checkDetail(
         this.details[index].email,
-        required,
-        equalength,
-        maxlength,
-        itemname,
-        index + 1
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesEdt.length == 0) {
-          this.messagevalidatesEdt = chkArray;
-        } else {
-          this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
-        }
-      }
-      // モバイル用アドレス
-      required = false;
-      equalength = 0;
-      maxlength = 191;
-      itemname = "モバイル用アドレス";
-      chkArray = this.checkDetail(
-        this.details[index].mobile_email,
         required,
         equalength,
         maxlength,
@@ -2066,66 +1718,7 @@ export default {
           this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
         }
       }
-      // 勤怠管理対象
-      required = true;
-      equalength = 0;
-      maxlength = 0;
-      itemname = "勤怠管理対象";
-      chkArray = this.checkDetail(
-        this.details[index].management,
-        required,
-        equalength,
-        maxlength,
-        itemname,
-        index + 1
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesEdt.length == 0) {
-          this.messagevalidatesEdt = chkArray;
-        } else {
-          this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
-        }
-      }
-      // タイムテーブルNo
-      required = true;
-      equalength = 0;
-      maxlength = 0;
-      itemname = "タイムテーブルNo";
-      chkArray = this.checkDetail(
-        this.details[index].working_timetable_no,
-        required,
-        equalength,
-        maxlength,
-        itemname,
-        index + 1
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesEdt.length == 0) {
-          this.messagevalidatesEdt = chkArray;
-        } else {
-          this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
-        }
-      }
-      // 権限
-      required = true;
-      equalength = 0;
-      maxlength = 0;
-      itemname = "権限";
-      chkArray = this.checkDetail(
-        this.details[index].role,
-        required,
-        equalength,
-        maxlength,
-        itemname,
-        index + 1
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesEdt.length == 0) {
-          this.messagevalidatesEdt = chkArray;
-        } else {
-          this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
-        }
-      }
+
       if (this.messagevalidatesEdt.length > 0) {
         flag = false;
       }
@@ -2375,6 +1968,7 @@ export default {
       this.messagevalidatesEdt = [];
       this.messagevalidatestimetable = [];
       var flag = this.checkFormStore();
+      this.form.role = 0;
       if (flag) {
         var messages = [];
         messages.push("この内容で登録しますか？");
@@ -2548,6 +2142,7 @@ export default {
         var add_employment_status = this.details[0].employment_status;
         var add_name = this.details[0].name;
         var add_kana = this.details[0].kana;
+        var add_short_name = this.details[0].short_name;
         var add_official_position = this.details[0].official_position;
         var add_working_timetable_no = this.details[0].working_timetable_no;
         var add_email = this.details[0].email;
@@ -2562,6 +2157,7 @@ export default {
           employment_status: add_employment_status,
           name: add_name,
           kana: add_kana,
+          short_name: add_short_name,
           official_position: add_official_position,
           working_timetable_no: add_working_timetable_no,
           email: add_email,
@@ -3001,9 +2597,6 @@ export default {
       var res = response.data;
       if (res.result) {
         messages.push("ユーザーを" + eventtext + "しました。");
-        messages.push(
-          "個人のカレンダー設定する場合はカレンダー設定処理をしてください。"
-        );
         this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
         this.refreshUserList();
         //this.getNotSetting();
@@ -3101,9 +2694,11 @@ export default {
       this.form.short_name = "";
       this.form.kill_from_date = "";
       this.form.official_position = "";
-      this.form.email = "";
+      this.form.email = "dummy";
       this.form.mobile_email = "";
       this.form.password = "";
+      this.form.management = 1;
+      this.form.role = 0;
     },
     checkRowData(index) {
       if (

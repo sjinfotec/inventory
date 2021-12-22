@@ -789,9 +789,40 @@ white-space: nowrap;
   background-color: #818f9c;
 }
 
-/*----------------------------------------------------## edit_user ##---------------------*/
+/*----------------------------------------------------## edit_ create_ 共通 ##---------------------*/
 #btn_cnt6 {
   padding:10px 0 0 0;
+}
+
+
+/*----------------------------------------------------## edit_ ##---------------------*/
+#input-area_3 {
+  position: relative;
+}
+#input-area_3 .input-group  {
+  padding-top:10px;
+}
+#input-area_3 .input-group-text  {
+  height: 36px !important;
+  /*background:#e0f0d0;*/
+  background:#FFF;
+  border:0;
+  border-bottom: 1px solid #bfcab1;
+  border-radius:0;
+}
+#input-area_3 .form-control  {
+  height: 36px;
+  border:0;
+  border-bottom: 1px solid #bfcab1;
+  border-left: 1px solid #bfcab1;
+  border-radius:0;
+}
+#input-area_3 .custom-select  {
+  height: 36px;
+  border:0;
+  border-bottom: 1px solid #bfcab1;
+  border-left: 1px solid #bfcab1;
+  border-radius:0;
 }
 
 
