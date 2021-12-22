@@ -19,6 +19,7 @@ class ProcessHistory extends Model
     private $id;                              // ID
     private $order_no;                              // 受注番号
     private $seq;                              // 連番
+    private $process_seq;                              // 工程順番
     private $process_history_no;                              // 加工履歴No
     private $work_kind;                              // 作業種別
     private $device_code;                              // 機器コード
@@ -63,6 +64,16 @@ class ProcessHistory extends Model
     public function setSeqAttribute($value)
     {
         $this->seq = $value;
+    }
+    //工程順番
+    public function getProcessseqAttribute()
+    {
+        return $this->process_seq;
+    }
+
+    public function setProcessseqAttribute($value)
+    {
+        $this->process_seq = $value;
     }
     //加工履歴No
     public function getProcesshistorynoAttribute()
@@ -208,6 +219,7 @@ class ProcessHistory extends Model
     private $param_id;                              // ID
     private $param_order_no;                              // 受注番号
     private $param_seq;                              // 連番
+    private $param_process_seq;                              // 工程順番
     private $param_process_history_no;                              // 加工履歴No
     private $param_work_kind;                              // 作業種別
     private $param_device_code;                              // 機器コード
@@ -252,6 +264,16 @@ class ProcessHistory extends Model
     public function setParamSeqAttribute($value)
     {
         $this->param_seq = $value;
+    }
+    //工程順番
+    public function getParamProcesseqAttribute()
+    {
+        return $this->param_process_seq;
+    }
+
+    public function setParamProcesseqAttribute($value)
+    {
+        $this->param_process_seq = $value;
     }
     //加工履歴No
     public function getParamProcesshistorynoAttribute()
@@ -411,6 +433,7 @@ class ProcessHistory extends Model
             $sqlString .= "select" ;
             $sqlString .= "  t1.order_no as order_no" ;
             $sqlString .= "  , t1.seq as seq" ;
+            $sqlString .= "  , t1.process_seq as process_seq" ;
             $sqlString .= "  , t1.process_history_no as process_history_no" ;
             $sqlString .= "  , t1.work_kind as work_kind" ;
             $sqlString .= "  , t1.device_code as device_code" ;
@@ -491,6 +514,7 @@ class ProcessHistory extends Model
                 [
                     'order_no' => $this->order_no,
                     'seq' => $this->seq,
+                    'process_seq' => $this->process_seq,
                     'process_history_no' => $this->process_history_no,
                     'work_kind' => $this->work_kind,
                     'device_code' => $this->device_code,

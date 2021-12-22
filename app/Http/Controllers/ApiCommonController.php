@@ -1335,54 +1335,56 @@ class ApiCommonController extends Controller
             // 明細insert
             Log::debug('putProcess count($params_product_process_data["progress_no"]) = '.count($params_product_process_data["progress_no"]));
             for ($i=0;$i<count($params_product_process_data["progress_no"]);$i++) {
-                $array_putData = array();
-                $process_time_h = $params_product_process_data["process_time_h"][$i];
-                if ($params_product_process_data["process_time_h"][$i] == "" || $params_product_process_data["process_time_h"][$i] == null) {
-                    $process_time_h = 0;
+                if ($params_product_process_data["device_code"][$i] != null && $params_product_process_data["device_code"][$i] == "") {
+                    $array_putData = array();
+                    $process_time_h = $params_product_process_data["process_time_h"][$i];
+                    if ($params_product_process_data["process_time_h"][$i] == "" || $params_product_process_data["process_time_h"][$i] == null) {
+                        $process_time_h = 0;
+                    }
+                    $process_time_m = $params_product_process_data["process_time_m"][$i];
+                    if ($params_product_process_data["process_time_m"][$i] == "" || $params_product_process_data["process_time_m"][$i] == null) {
+                        $process_time_m = 0;
+                    }
+                    $setup_time_h = $params_product_process_data["setup_time_h"][$i];
+                    if ($params_product_process_data["setup_time_h"][$i] == "" || $params_product_process_data["setup_time_h"][$i] == null) {
+                        $setup_time_h = 0;
+                    }
+                    $setup_time_m = $params_product_process_data["setup_time_m"][$i];
+                    if ($params_product_process_data["setup_time_m"][$i] == "" || $params_product_process_data["setup_time_m"][$i] == null) {
+                        $setup_time_m = 0;
+                    }
+                    $product_processes_code = $params_product_process_data["product_processes_code"][$i];
+                    if ($params_product_process_data["product_processes_code"][$i] == "" || $params_product_process_data["product_processes_code"][$i] == null) {
+                        $product_processes_code = '00';
+                    }
+                    $product_processes_detail_no = $params_product_process_data["product_processes_detail_no"][$i];
+                    if ($params_product_process_data["product_processes_detail_no"][$i] == "" || $params_product_process_data["product_processes_detail_no"][$i] == null) {
+                        $product_processes_detail_no = 0;
+                    }
+                    Log::debug('putProcess [$i] = '.$i." ".$params_product_process_data['progress_no'][$i]);
+                    $array_putData = [
+                        'order_no' => $order_no,
+                        'seq' => $seq,
+                        'progress_no' => $i + 1,
+                        'product_processes_code' => $product_processes_code,
+                        'product_processes_detail_no' => $product_processes_detail_no,
+                        'device_code' => $params_product_process_data["device_code"][$i],
+                        'department_code' => $params_product_process_data["process_department_code"][$i],
+                        'users_code' => $params_product_process_data["process_user_code"][$i],
+                        'process_history_no' => $params_product_process_data["process_history_no"][$i],
+                        'process_time_h' => $process_time_h,
+                        'process_time_m' => $process_time_m,
+                        'setup_history_no' => $params_product_process_data["setup_history_no"][$i],
+                        'setup_time_h' => $setup_time_h,
+                        'setup_time_m' => $setup_time_m,
+                        'complete_date' => $params_product_process_data["complete_date"][$i],
+                        'qr_code' => $params_product_process_data["qrText"][$i],
+                        'created_user' => $login_user_code,
+                        'created_at' => $systemdate
+                    ];
+                    DB::table($this->table_progress_details)
+                    ->insert($array_putData);
                 }
-                $process_time_m = $params_product_process_data["process_time_m"][$i];
-                if ($params_product_process_data["process_time_m"][$i] == "" || $params_product_process_data["process_time_m"][$i] == null) {
-                    $process_time_m = 0;
-                }
-                $setup_time_h = $params_product_process_data["setup_time_h"][$i];
-                if ($params_product_process_data["setup_time_h"][$i] == "" || $params_product_process_data["setup_time_h"][$i] == null) {
-                    $setup_time_h = 0;
-                }
-                $setup_time_m = $params_product_process_data["setup_time_m"][$i];
-                if ($params_product_process_data["setup_time_m"][$i] == "" || $params_product_process_data["setup_time_m"][$i] == null) {
-                    $setup_time_m = 0;
-                }
-                $product_processes_code = $params_product_process_data["product_processes_code"][$i];
-                if ($params_product_process_data["product_processes_code"][$i] == "" || $params_product_process_data["product_processes_code"][$i] == null) {
-                    $product_processes_code = '00';
-                }
-                $product_processes_detail_no = $params_product_process_data["product_processes_detail_no"][$i];
-                if ($params_product_process_data["product_processes_detail_no"][$i] == "" || $params_product_process_data["product_processes_detail_no"][$i] == null) {
-                    $product_processes_detail_no = 0;
-                }
-                Log::debug('putProcess [$i] = '.$i." ".$params_product_process_data['progress_no'][$i]);
-                $array_putData = [
-                    'order_no' => $order_no,
-                    'seq' => $seq,
-                    'progress_no' => $i + 1,
-                    'product_processes_code' => $product_processes_code,
-                    'product_processes_detail_no' => $product_processes_detail_no,
-                    'device_code' => $params_product_process_data["device_code"][$i],
-                    'department_code' => $params_product_process_data["process_department_code"][$i],
-                    'users_code' => $params_product_process_data["process_user_code"][$i],
-                    'process_history_no' => $params_product_process_data["process_history_no"][$i],
-                    'process_time_h' => $process_time_h,
-                    'process_time_m' => $process_time_m,
-                    'setup_history_no' => $params_product_process_data["setup_history_no"][$i],
-                    'setup_time_h' => $setup_time_h,
-                    'setup_time_m' => $setup_time_m,
-                    'complete_date' => $params_product_process_data["complete_date"][$i],
-                    'qr_code' => $params_product_process_data["qrText"][$i],
-                    'created_user' => $login_user_code,
-                    'created_at' => $systemdate
-                ];
-                DB::table($this->table_progress_details)
-                ->insert($array_putData);
             }
             DB::commit();
             return response()->json(
@@ -1970,7 +1972,6 @@ class ApiCommonController extends Controller
      * @return list customer
      */
     public function getProcessView(Request $request){
-        Log::debug('getProcessView in ');
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
@@ -2025,7 +2026,7 @@ class ApiCommonController extends Controller
             $sqlString .= "      (select order_no, seq, max(process_history_no) as max_process_history_no ";
             $sqlString .= "       from ".$this->table_process_histories;
             $sqlString .= "       where is_deleted = 0 ";
-            $sqlString .= "       group by order_no, seq) as t2 ";
+            $sqlString .= "       group by order_no, seq, progress_no) as t2 ";
             $sqlString .= "    on ";
             $sqlString .= "      t1.order_no = t2.order_no";
             $sqlString .= "      and t1.seq = t2.seq";
@@ -2054,6 +2055,7 @@ class ApiCommonController extends Controller
             $sqlString .= "order by ";
             $sqlString .= "  t1.order_no asc ";
             $sqlString .= " , t1.seq asc ";
+            $sqlString .= " , t1.progress_no asc ";
             // バインド
             $array_setBindingsStr = array();
             $array_setBindingsStr[] = 1;

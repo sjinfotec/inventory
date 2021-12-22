@@ -237,7 +237,6 @@ export default {
         device_code: "",
         user_code: "",
         row_seq: "",
-        progress_no: "",
         item_name: [{}],
         item_data: [{}],
         process_time_h: "",
@@ -247,6 +246,7 @@ export default {
       isbtnctrl: 'top',
       kind_index: 0,
       kind_name: "",
+      before_kind: "",
       count: 0,
       before_count: 0,
       form_count: 0,
@@ -407,6 +407,12 @@ console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
     storeData() {
       var arrayParams = { form : this.form };
       console.log('storeData this.form.kind = ' + this.form.kind);
+      // 次工程の場合はじめはcompleteで登録
+      this.before_kind = "";
+      if (this.form.kind == C_KIND_NEXT) {
+        this.form.kind = C_KIND_COMPLETE;
+        this.before_kind = C_KIND_NEXT;
+      }
       this.postRequest("/process_history/put", arrayParams)
         .then(response => {
           this.putThen(response, "登録");
@@ -433,8 +439,6 @@ console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
           $this.form.row_seq = detail.row_seq;
           $this.form.kind = detail.work_kind;
           console.log('getThen in detail.work_kind = ' + detail.work_kind);
-          // progress_noは廃止する方向
-          $this.form.progress_no = null;
           $this.form.item_name[set_index] = C_SUPPLY_DATE_NAME;
           $this.form.item_data[set_index] = detail.supply_date_name;
           console.log('getThen detail.supply_date_name = ' + $this.form.item_data[set_index]);
@@ -486,10 +490,27 @@ console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
     putThen(response, eventtext) {
       var messages = [];
       var res = response.data;
+      console.log('putThen res.result = ' + res.result);
       if (res.result) {
-        messages.push("作業工程を" + eventtext + "しました。");
-        this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
-        this.getItem();
+        console.log('putThen this.before_kind = ' + this.before_kind);
+        if (this.before_kind == C_KIND_NEXT) {
+          // 次工程の場合はcompleteで登録
+          this.before_kind = "";
+          this.form.kind = C_KIND_NEXT;
+          var arrayParams = { form : this.form };
+          console.log('putThen 2回目 ' + this.form.kind);
+          this.postRequest("/process_history/put", arrayParams)
+            .then(response => {
+              this.putThen(response, "登録");
+            })
+            .catch(reason => {
+              this.serverCatch("作業工程", "登録");
+            });
+        } else {
+          messages.push("作業工程を" + eventtext + "しました。");
+          this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
+          this.getItem();
+        }
         //this.isbtnctrl = 'top';
 
       } else {
