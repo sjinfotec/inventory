@@ -237,21 +237,22 @@ export default {
         device_code: "",
         user_code: "",
         row_seq: "",
-        progress_no: "",
         item_name: [{}],
         item_data: [{}],
         process_time_h: "",
         process_time_m: "",
         statusText: ""
       },
-      isbtnctrl: 'top',
+      isbtnctrl: '',
       kind_index: 0,
       kind_name: "",
+      before_kind: "",
       count: 0,
       before_count: 0,
       form_count: 0,
       details: [],
       maketime: false,
+      before_kindstatus: "",
       kindstatus: "",
       mode_button: "",
       work_kind: "",
@@ -288,6 +289,7 @@ console.log(this.details);
     // ------------------------ イベント処理 ------------------------------------
     // 作業開始処理
     startClick1() {
+      this.before_kindstatus = this.kindstatus;
       this.isbtnctrl = false;
       this.form.kind = C_KIND_START;
       this.setKind();
@@ -299,6 +301,7 @@ console.log(this.details);
     },
     // 作業中断処理
     startClick2() {
+      this.before_kindstatus = this.kindstatus;
       this.isbtnctrl = 'suspen';
       this.form.kind = C_KIND_STOP;
       this.setKind();
@@ -310,6 +313,7 @@ console.log(this.details);
     },
     // 作業完了処理
     startClick3() {
+      this.before_kindstatus = this.kindstatus;
       this.isbtnctrl = 'comple';
       this.form.kind = C_KIND_COMPLETE;
       this.setKind();
@@ -322,6 +326,7 @@ console.log(this.details);
     },
     // 作業再開処理
     startClick4() {
+      this.before_kindstatus = this.kindstatus;
       this.isbtnctrl = false;
       this.form.kind = C_KIND_START;
       this.setKind();
@@ -357,6 +362,7 @@ console.log(this.details);
     },
     // 完成処理
     startClickcomp() {
+      console.log('startClickcomp in');
       //this.kindstatus = C_KIND_COMPLETE;
       this.form.kind = C_KIND_COMPLETE;
       this.setKind();
@@ -389,21 +395,19 @@ console.log(this.details);
       //this.form.kind = "";
       //this.setKind();
       //this.form.item_name[this.kind_index] = this.kind_name;
-      this.form.item_name[this.kind_index] = this.kindstatus;
+      this.form.item_name[this.kind_index] = this.before_kindstatus;
       this.maketime = false;
 console.log( kindcolorArr );
-console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
-  	  target.style.background = kindcolorArr[this.kindstatus];
-      if (kindcolorArr[this.kindstatus] == '#FFF') {
+console.log('kindcolorArr = ' + this.before_kindstatus);
+console.log('kindcolorArr = ' + kindcolorArr[this.before_kindstatus]);
+  	  target.style.background = kindcolorArr[this.before_kindstatus];
+      if (kindcolorArr[this.before_kindstatus] == '#FFF') {
         table_cnt3.style.color = '#212529';
       }
+      this.kindstatus = this.before_kindstatus;
   	  //target.style.background = '#FFF';
       //table_cnt3.style.color = '#212529';
 //document.getElementById('btn_cnt1').getElementsByClassName('btncolor2').style.color = '#8888CC';
-    },
-    // キャンセル
-    cancelclick() {
-      window.close();
     },
     // -------------------- サーバー処理 ----------------------------
     // 指示書／管理書取得
@@ -426,6 +430,12 @@ console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
     storeData() {
       var arrayParams = { form : this.form };
       console.log('storeData this.form.kind = ' + this.form.kind);
+      // 次工程の場合はじめはcompleteで登録
+      this.before_kind = "";
+      if (this.form.kind == C_KIND_NEXT) {
+        this.form.kind = C_KIND_COMPLETE;
+        this.before_kind = C_KIND_NEXT;
+      }
       this.postRequest("/process_history/put", arrayParams)
         .then(response => {
           this.putThen(response, "登録");
@@ -489,11 +499,15 @@ console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
           $this.form.item_name[set_index] = $this.kind_name;
           $this.form.item_data[set_index] = "";
           $this.kind_index = set_index;
-          $this.kindstatus = $this.kind_name;
+          // $this.kindstatus = $this.kind_name;
           $this.work_kind = detail.work_kind;
         });
         this.form_count = set_index + 1;
         this.setKind();
+        if (this.isbtnctrl == '') {
+          this.setKindBackColorBottun();
+          // this.isbtnctrl = 'top';
+        }
         console.log('getThen in form_count = ' + this.form_count);
       } else {
         if (res.messagedata.length > 0) {
@@ -507,10 +521,27 @@ console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
     putThen(response, eventtext) {
       var messages = [];
       var res = response.data;
+      console.log('putThen res.result = ' + res.result);
       if (res.result) {
-        messages.push("作業工程を" + eventtext + "しました。");
-        this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
-        this.getItem();
+        console.log('putThen this.before_kind = ' + this.before_kind);
+        if (this.before_kind == C_KIND_NEXT) {
+          // 次工程の場合はcompleteで登録
+          this.before_kind = "";
+          this.form.kind = C_KIND_NEXT;
+          var arrayParams = { form : this.form };
+          console.log('putThen 2回目 ' + this.form.kind);
+          this.postRequest("/process_history/put", arrayParams)
+            .then(response => {
+              this.putThen(response, "登録");
+            })
+            .catch(reason => {
+              this.serverCatch("作業工程", "登録");
+            });
+        } else {
+          messages.push("作業工程を" + eventtext + "しました。");
+          this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
+          this.getItem();
+        }
         //this.isbtnctrl = 'top';
 
       } else {
@@ -528,36 +559,74 @@ console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
       this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
     // 作業ステータス設定
-    setKind(eventtext) {
-      console.log('setKind in = ' + this.form.kind);
+    setKind() {
       this.kind_name = "";
+      console.log('setKind this.form.kind = ' + this.form.kind);
       switch (this.form.kind) {
         case C_KIND_START:
           this.kind_name = C_KIND_START_NAME;
-         	//target.style.background = '#80bb60';
+          this.kindstatus = this.kind_name;
+          this.form.item_name[this.kind_index] = this.kind_name;
           break;
         case C_KIND_STOP:
           this.kind_name = C_KIND_STOP_NAME;
-      	  //target.style.background = '#dd6060';
+          this.kindstatus = this.kind_name;
+          this.form.item_name[this.kind_index] = this.kind_name;
           break;
         case C_KIND_MSTOP:
           this.kind_name = C_KIND_MSTOP_NAME;
-      	  //target.style.background = '#dd6060';
+          this.kindstatus = this.kind_name;
+          this.form.item_name[this.kind_index] = this.kind_name;
           break;
         case C_KIND_COMPLETE:
           this.kind_name = C_KIND_COMPLETE_NAME;
-      	  //target.style.background = '#6cb2eb';
+          this.kindstatus = this.kind_name;
+          this.form.item_name[this.kind_index] = this.kind_name;
           break;
         case C_KIND_NEXT:
           this.kind_name = C_KIND_NEXT_NAME;
-      	  target.style.background = '#eeaa00';
+          this.kindstatus = this.kind_name;
+      	  target.style.background = '#EEAA00';
           break;
         default:
           this.kind_name = C_KIND_INI_NAME;
+          this.kindstatus = this.kind_name;
       	  //target.style.background = '#FFF';
           break;
       }
       console.log('setKind out = ' + this.kind_name);
+    },
+    // 作業ステータス設定
+    setKindBackColorBottun(eventtext) {
+      console.log('setKind this.form.kind = ' + this.form.kind);
+      switch (this.form.kind) {
+        case C_KIND_START:
+          this.isbtnctrl = 'top';
+          target.style.background = '#80bb60';
+          table_cnt3.style.color = '#FFF';
+          break;
+        case C_KIND_STOP:
+          this.isbtnctrl = 'top2';
+          target.style.background = '#dd6060';
+          table_cnt3.style.color = '#FFF';
+          break;
+        case C_KIND_MSTOP:
+          this.isbtnctrl = 'top2';
+      	  target.style.background = '#dd6060';
+          break;
+        case C_KIND_COMPLETE:
+          this.isbtnctrl = 'comple';
+          table_cnt3.style.color = '#FFF';
+      	  target.style.background = '#6cb2eb';
+          break;
+        case C_KIND_NEXT:
+          this.isbtnctrl = 'top';
+          break;
+        default:
+          this.isbtnctrl = 'top';
+      	  //target.style.background = '#FFF';
+          break;
+      }
     },
   }
 };

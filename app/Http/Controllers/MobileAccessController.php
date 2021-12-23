@@ -162,7 +162,6 @@ class MobileAccessController extends Controller
             $device_code = $data["device_code"];
             $user_code = $data["user_code"];
             $row_seq = $data["row_seq"];
-            $progress_no = $data["progress_no"];
             $process_time_h = 0;
             $process_time_m = 0;
             if ($data["process_time_h"] == null || $data["process_time_h"] == "") {
@@ -183,13 +182,28 @@ class MobileAccessController extends Controller
             $device_code = $data["device_code"];
             // 新規の場合加工履歴No=1に、既存はMAX番号+1を設定
             // データが存在するか
+            $process_seq = 1;
             $process_history_no = 1;
             $result_exists = DB::table($this->table_process_histories)
                 ->where('order_no', $order_no)
                 ->where('seq', $seq)
                 ->exists(); 
             if ($result_exists) {
-                // MAX番号+1を設定
+                $result_maxseq = DB::table($this->table_process_histories)
+                    ->where('order_no', $order_no)
+                    ->where('seq', $seq)
+                    ->where('device_code', $device_code)
+                    ->where('user_code', $user_code)
+                    ->max('process_seq');
+                    if (isset($result_maxseq)) {
+                        // 次工程の場合は工程順番をMAX番号+1を設定
+                        if ($work_kind == Config::get('const.WORKKINDS.next')) {
+                            $process_seq = $result_maxseq + 1;
+                        } else {
+                            $process_seq = $result_maxseq;
+                        }
+                    }
+                // 加工履歴No=1にMAX番号+1を設定
                 $result_maxseq = DB::table($this->table_process_histories)
                 ->where('order_no', $order_no)
                 ->where('seq', $seq)
@@ -218,6 +232,7 @@ class MobileAccessController extends Controller
             $progress_details_model->setParamSeqAttribute($seq);
             $progress_details_model->setParamDevicecodeAttribute($device_code);
             $progress_details_model->setParamUserscodeAttribute($user_code);
+            $progress_details_model->setParamProcessseqAttribute($process_seq);
             $progress_details_items = new Collection();
             $progress_details_items = $progress_details_model->getProductdetaile();
             foreach($progress_details_items as $item) {
@@ -240,18 +255,41 @@ class MobileAccessController extends Controller
                 break;
             }
             // 存在しない場合
+            Log::debug('mobile putProcessHistory process_histories_model $progress_details_cnt = '.$progress_details_cnt);
             if ($progress_details_cnt == 0) {
                 $result_order_exists = DB::table($this->table_progress_details)
                     ->where('order_no', $order_no)
                     ->where('seq', $seq)
                     ->exists(); 
                 if ($result_order_exists) {
-                    // MAX番号+1を設定
+                    // 工程NOにMAX番号+1を設定
                     $result_maxseq = DB::table($this->table_progress_details)
                         ->where('order_no', $order_no)
                         ->where('seq', $seq)
                         ->max('progress_no');
                     $progress_no = $result_maxseq + 1;
+                }
+            } else {
+                Log::debug('mobile putProcessHistory process_histories_model $work_kind = '.$work_kind);
+                if ($work_kind == Config::get('const.WORKKINDS.next')) {
+                    // 次工程の場合は工程NOにMAX番号+1を設定
+                    $result_maxseq = DB::table($this->table_process_histories)
+                        ->where('order_no', $order_no)
+                        ->where('seq', $seq)
+                        ->max('progress_no');
+                    $progress_no = $result_maxseq + 1;
+                } else {
+                    // todo 
+                    Log::debug('mobile putProcessHistory process_histories_model $device_code = '.$device_code);
+                    Log::debug('mobile putProcessHistory process_histories_model $user_code = '.$user_code);
+                    $result_maxseq = DB::table($this->table_process_histories)
+                        ->where('order_no', $order_no)
+                        ->where('seq', $seq)
+                        ->where('device_code', $device_code)
+                        ->where('user_code', $user_code)
+                        ->max('progress_no');
+                    $progress_no = $result_maxseq;
+                    Log::debug('mobile putProcessHistory process_histories_model $result_maxseq = '.$progress_no);
                 }
             }
 
@@ -259,6 +297,7 @@ class MobileAccessController extends Controller
             $process_histories_model = new ProcessHistory();
             $process_histories_model->setOrdernoAttribute($order_no);
             $process_histories_model->setSeqAttribute($seq);
+            $process_histories_model->setProcessseqAttribute($process_seq);
             $process_histories_model->setProcesshistorynoAttribute($process_history_no);
             $process_histories_model->setWorkkindAttribute($work_kind);
             $process_histories_model->setDevicecodeAttribute($device_code);
@@ -277,6 +316,7 @@ class MobileAccessController extends Controller
             $progress_details_model->setSeqAttribute($seq);
             Log::debug('mobile putProcessHistory progress_details_model $progress_no = '.$progress_no);
             $progress_details_model->setProgressnoAttribute($progress_no);
+            $progress_details_model->setProcessseqAttribute($process_seq);
             $progress_details_model->setProductprocessescodeAttribute($product_processes_code);
             $progress_details_model->setProductprocessesdetailnoAttribute($product_processes_detail_no);
             $progress_details_model->setDevicecodeAttribute($device_code);
@@ -328,6 +368,7 @@ class MobileAccessController extends Controller
                 $progress_details_model->setParamSeqAttribute($seq);
                 $progress_details_model->setParamDevicecodeAttribute($device_code);
                 $progress_details_model->setParamUserscodeAttribute($user_code);
+                $progress_details_model->setParamProcessseqAttribute($process_seq);
                 $progress_details_model->setCreateduserAttribute($created_user);
                 $progress_details_model->setUpdateduserAttribute($created_at);
                 $progress_details_model->setCreatedatAttribute(Carbon::now());

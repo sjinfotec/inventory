@@ -20,6 +20,7 @@ class Progressdetaile extends Model
     private $order_no;                              // 受注番号
     private $seq;                              // 連番
     private $progress_no;                              // 工程NO
+    private $process_seq;                              // 工程順番
     private $product_processes_code;                              // 工程コード
     private $product_processes_detail_no;                              // 工程行NO
     private $device_code;                              // 機器コード
@@ -80,6 +81,16 @@ class Progressdetaile extends Model
     public function setProgressnoAttribute($value)
     {
         $this->progress_no = $value;
+    }
+    //工程順番
+    public function getProcessseqAttribute()
+    {
+        return $this->process_seq;
+    }
+
+    public function setProcessseqAttribute($value)
+    {
+        $this->process_seq = $value;
     }
     //工程コード
     public function getProductprocessescodeAttribute()
@@ -277,6 +288,7 @@ class Progressdetaile extends Model
     private $param_order_no;                              // 受注番号
     private $param_seq;                              // 連番
     private $param_progress_no;                              // 工程NO
+    private $param_process_seq;                              // 工程順番
     private $param_product_processes_code;                              // 工程コード
     private $param_product_processes_detail_no;                              // 工程行NO
     private $param_device_code;                              // 機器コード
@@ -337,6 +349,16 @@ class Progressdetaile extends Model
     public function setParamProgressnoAttribute($value)
     {
         $this->param_progress_no = $value;
+    }
+    //工程順番
+    public function getParamProcessseqAttribute()
+    {
+        return $this->param_process_seq;
+    }
+
+    public function setParamProcessseqAttribute($value)
+    {
+        $this->param_process_seq = $value;
     }
     //工程コード
     public function getParamProductprocessescodeAttribute()
@@ -550,6 +572,7 @@ class Progressdetaile extends Model
             $sqlString .= "  t1.order_no as order_no" ;
             $sqlString .= "  , t1.seq as seq" ;
             $sqlString .= "  , t1.progress_no as progress_no" ;
+            $sqlString .= "  , t1.process_seq as process_seq" ;
             $sqlString .= "  , t1.product_processes_code as product_processes_code" ;
             $sqlString .= "  , t1.product_processes_detail_no as product_processes_detail_no" ;
             $sqlString .= "  , t1.device_code as device_code" ;
@@ -587,6 +610,9 @@ class Progressdetaile extends Model
             if (!empty($this->param_progress_no)) {
                 $sqlString .= "    and t1.progress_no = ?" ;
             }
+            if (!empty($this->param_process_seq)) {
+                $sqlString .= "    and t1.process_seq = ?" ;
+            }
             // バインド
             $array_setBindingsStr = array();
             $array_setBindingsStr[] = 1;
@@ -605,6 +631,9 @@ class Progressdetaile extends Model
             }
             if (!empty($this->param_progress_no)) {
                 $array_setBindingsStr[] = $this->param_progress_no;
+            }
+            if (!empty($this->param_process_seq)) {
+                $array_setBindingsStr[] = $this->param_process_seq;
             }
             $details = DB::select($sqlString, $array_setBindingsStr);
             return $details;
@@ -629,6 +658,7 @@ class Progressdetaile extends Model
                     'order_no' => $this->order_no,
                     'seq' => $this->seq,
                     'progress_no' => $this->progress_no,
+                    'process_seq' => $this->process_seq,
                     'product_processes_code' => $this->product_processes_code,
                     'product_processes_detail_no' => $this->product_processes_detail_no,
                     'device_code' => $this->device_code,
@@ -670,8 +700,10 @@ class Progressdetaile extends Model
             ->where('seq', $this->param_seq)
             ->where('device_code', $this->param_device_code)
             ->where('users_code', $this->param_users_code)
+            ->where('process_seq', $this->param_process_seq)
             ->update([
                 'progress_no' => $this->progress_no,
+                'process_seq' => $this->process_seq,
                 'product_processes_code' => $this->product_processes_code,
                 'product_processes_detail_no' => $this->product_processes_detail_no,
                 'department_code' => $this->department_code,
