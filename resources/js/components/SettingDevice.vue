@@ -14,7 +14,7 @@
           <div class="card-body pt-2">
             <!-- panel contents -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div id="input-area_3" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">

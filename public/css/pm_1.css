@@ -791,11 +791,11 @@ white-space: nowrap;
 
 /*----------------------------------------------------## edit_ create_ 共通 ##---------------------*/
 #btn_cnt6 {
-  padding:10px 0 0 0;
+  padding:20px 0 0 0;
 }
 
 
-/*----------------------------------------------------## edit_ ##---------------------*/
+/*----------------------------------------------------##  create_company_information create_department setting_device edit_user setting_calendar  ##---------------------*/
 #input-area_3 {
   position: relative;
 }
@@ -825,6 +825,22 @@ white-space: nowrap;
   border-radius:0;
 }
 
+#table_cnt6 {
+  width:100%;
+  border-collapse: collapse;
+  margin-bottom:0px;
+}
+#table_cnt6 td{
+  border:0;
+  border-left: 1px solid #bfcab1;
+}
+#table_cnt6 .form-control {
+  border:0;
+}
+#table_cnt6 .table-striped tbody tr:nth-of-type(odd) {
+  background:rgba(224, 240, 224, 0.5);
+  /*background:#E0F0E0;*/
+}
 
 
 .transition1  {

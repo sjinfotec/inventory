@@ -16,7 +16,7 @@
             <!-- ----------- 選択リスト START ---------------- -->
             <!-- panel contents -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div id="input-area_3" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">

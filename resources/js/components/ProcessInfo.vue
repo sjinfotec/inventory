@@ -264,24 +264,7 @@ export default {
   mounted() {
     console.log('ProcessInfo mounted ');
     this.getItem();
-
-console.log('mount>>getthen in detail.work_kind = ' + this.details.work_kind);
-console.log('mount>>getThen in detail.user_name = ' + this.details.user_name);
-console.log('mount>>getthen in work_kind = ' + this.work_kind);
-console.log('mount>>getThen in user_name = ' + this.user_name);
-
-
-    this.setKind();
-
-
-
-console.log('mounted->kinds = ' + this.kindstatus);
-console.log('mounted->kindf = ' + this.work_kind);
-console.log(this.details);
-//console.log('mounted->detail = ' + this.detail.work_kind);
-
-
-
+    //this.setKind();
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -290,6 +273,7 @@ console.log(this.details);
     // 作業開始処理
     startClick1() {
       this.before_kindstatus = this.kindstatus;
+      console.log('作業開始ボタンbefore_kindstatus = ' + this.kindstatus);
       this.isbtnctrl = false;
       this.form.kind = C_KIND_START;
       this.setKind();
@@ -321,8 +305,6 @@ console.log(this.details);
       this.maketime = true;
   	  target.style.background = '#6cb2eb';
       table_cnt3.style.color = '#FFF';
-      //btn_cnt2.style.display = 'flex';
-      //btn_cnt1.style.display = 'none';
     },
     // 作業再開処理
     startClick4() {
@@ -342,7 +324,6 @@ console.log(this.details);
     },
     // 中断処理
     startClicksus() {
-      //this.kindstatus = C_KIND_STOP;
       this.form.kind = C_KIND_STOP;
       this.setKind();
       this.form.item_name[this.kind_index] = this.kind_name;
@@ -352,7 +333,6 @@ console.log(this.details);
     },
     // ミス処理
     startClickmiss() {
-      //this.kindstatus = C_KIND_MSTOP;
       this.form.kind = C_KIND_MSTOP;
       this.setKind();
       this.form.item_name[this.kind_index] = this.kind_name;
@@ -363,7 +343,6 @@ console.log(this.details);
     // 完成処理
     startClickcomp() {
       console.log('startClickcomp in');
-      //this.kindstatus = C_KIND_COMPLETE;
       this.form.kind = C_KIND_COMPLETE;
       this.setKind();
       this.form.item_name[this.kind_index] = this.kind_name;
@@ -374,7 +353,6 @@ console.log(this.details);
     },
     // 次工程処理
     startClicknext() {
-      //this.kindstatus = C_KIND_NEXT;
       this.form.kind = C_KIND_NEXT;
       this.setKind();
       this.form.item_name[this.kind_index] = this.kind_name;
@@ -390,24 +368,17 @@ console.log(this.details);
       } else {
         this.isbtnctrl = 'top';
       }
-      //this.isbtnctrl = 'top';
-      //this.form.kind = this.kindstatus;
-      //this.form.kind = "";
-      //this.setKind();
       //this.form.item_name[this.kind_index] = this.kind_name;
       this.form.item_name[this.kind_index] = this.before_kindstatus;
       this.maketime = false;
 console.log( kindcolorArr );
-console.log('kindcolorArr = ' + this.before_kindstatus);
-console.log('kindcolorArr = ' + kindcolorArr[this.before_kindstatus]);
+console.log('before_kindstatus = ' + this.before_kindstatus);
+console.log('kindcolorArr[before_kindstatus] = ' + kindcolorArr[this.before_kindstatus]);
   	  target.style.background = kindcolorArr[this.before_kindstatus];
       if (kindcolorArr[this.before_kindstatus] == '#FFF') {
         table_cnt3.style.color = '#212529';
       }
       this.kindstatus = this.before_kindstatus;
-  	  //target.style.background = '#FFF';
-      //table_cnt3.style.color = '#212529';
-//document.getElementById('btn_cnt1').getElementsByClassName('btncolor2').style.color = '#8888CC';
     },
     // -------------------- サーバー処理 ----------------------------
     // 指示書／管理書取得
@@ -598,6 +569,7 @@ console.log('kindcolorArr = ' + kindcolorArr[this.before_kindstatus]);
     },
     // 作業ステータス設定
     setKindBackColorBottun(eventtext) {
+      console.log('作業ステータス設定setKindBackColorBottun = ' + this.form.kind);
       console.log('setKind this.form.kind = ' + this.form.kind);
       switch (this.form.kind) {
         case C_KIND_START:

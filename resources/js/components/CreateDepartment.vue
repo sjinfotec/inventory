@@ -11,7 +11,7 @@
             v-bind:header-text2="'部署の登録や変更ができます'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
-          <div class="card-body pt-2">
+          <div id="input-area_3" class="card-body pt-2">
             <!-- panel contents -->
             <!-- .row -->
             <div class="row justify-content-between">
@@ -43,6 +43,7 @@
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- .col -->
+<!--
               <div class="col-md-12 pb-2">
                 <div class="form-check form-check-inline float-right">
                   <input
@@ -55,6 +56,7 @@
                   <label class="form-check-label" for="inlineCheckbox1">※部署選択リストに廃止した部署も含める</label>
                 </div>
               </div>
+-->
               <!-- /.col -->
             </div>
             <!-- .row -->
@@ -162,7 +164,7 @@
                   <div class="row">
                     <div class="col-12">
                       <div class="table-responsive">
-                        <table class="table table-striped border-bottom font-size-sm text-nowrap">
+                        <table id="table_cnt6" class="table table-striped border-bottom font-size-sm text-nowrap">
                           <thead>
                             <tr>
                               <td class="text-center align-middle w-20 mw-rem-5">No</td>
