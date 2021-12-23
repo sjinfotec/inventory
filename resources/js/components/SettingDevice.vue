@@ -65,7 +65,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between  print-none">
+            <div id="input-area_3" class="row justify-content-between  print-none">
               <!-- .col -->
               <div class="col-md-3 pb-2">
                 <div class="input-group">
@@ -180,7 +180,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between  print-none">
+            <div id="btn_cnt6" class="row justify-content-between  print-none">
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time

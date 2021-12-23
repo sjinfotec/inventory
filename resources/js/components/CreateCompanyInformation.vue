@@ -11,7 +11,7 @@
           v-bind:header-text2="'会社所在地や連絡先を設定できます'"
         ></daily-working-information-panel-header>
         <!-- /.panel header -->
-        <div class="card-body pt-2">
+        <div id="input-area_3" class="card-body pt-2">
           <!-- panel contents -->
           <!-- .row -->
           <div class="row justify-content-between">

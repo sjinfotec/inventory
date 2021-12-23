@@ -254,7 +254,7 @@ export default {
       maketime: false,
       kindstatus: "",
       mode_button: "",
-      work_kind: ""
+      work_kind: "",
     };
   },
   computed: {
@@ -263,7 +263,17 @@ export default {
   mounted() {
     console.log('ProcessInfo mounted ');
     this.getItem();
-//    this.setKind();
+
+console.log('mount>>getthen in detail.work_kind = ' + this.details.work_kind);
+console.log('mount>>getThen in detail.user_name = ' + this.details.user_name);
+console.log('mount>>getthen in work_kind = ' + this.work_kind);
+console.log('mount>>getThen in user_name = ' + this.user_name);
+
+
+    this.setKind();
+
+
+
 console.log('mounted->kinds = ' + this.kindstatus);
 console.log('mounted->kindf = ' + this.work_kind);
 console.log(this.details);

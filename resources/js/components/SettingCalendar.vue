@@ -12,7 +12,7 @@
             v-bind:header-text2="'全従業員共通または部署ごと個人ごとに設定可能です。'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
-          <div class="card-body pt-2">
+          <div id="input-area_3" class="card-body pt-2">
             <!-- ----------- 選択リスト START ---------------- -->
             <!-- panel contents -->
             <!-- .row -->
@@ -186,7 +186,7 @@
             <!-- ----------- メッセージ部 END ---------------- -->
             <!-- ----------- 選択ボタン類 START ---------------- -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div id="btn_cnt6" class="row justify-content-between">
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time
@@ -199,7 +199,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div id="btn_cnt6" class="row justify-content-between">
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time
