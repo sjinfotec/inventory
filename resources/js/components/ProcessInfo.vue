@@ -252,6 +252,7 @@ export default {
       form_count: 0,
       details: [],
       maketime: false,
+      before_kindstatus: "",
       kindstatus: "",
       mode_button: "",
       work_kind: ""
@@ -278,6 +279,7 @@ console.log(this.details);
     // ------------------------ イベント処理 ------------------------------------
     // 作業開始処理
     startClick1() {
+      this.before_kindstatus = this.kindstatus;
       this.isbtnctrl = false;
       this.form.kind = C_KIND_START;
       this.setKind();
@@ -289,6 +291,7 @@ console.log(this.details);
     },
     // 作業中断処理
     startClick2() {
+      this.before_kindstatus = this.kindstatus;
       this.isbtnctrl = 'suspen';
       this.form.kind = C_KIND_STOP;
       this.setKind();
@@ -300,6 +303,7 @@ console.log(this.details);
     },
     // 作業完了処理
     startClick3() {
+      this.before_kindstatus = this.kindstatus;
       this.isbtnctrl = 'comple';
       this.form.kind = C_KIND_COMPLETE;
       this.setKind();
@@ -312,6 +316,7 @@ console.log(this.details);
     },
     // 作業再開処理
     startClick4() {
+      this.before_kindstatus = this.kindstatus;
       this.isbtnctrl = false;
       this.form.kind = C_KIND_START;
       this.setKind();
@@ -380,14 +385,16 @@ console.log(this.details);
       //this.form.kind = "";
       //this.setKind();
       //this.form.item_name[this.kind_index] = this.kind_name;
-      this.form.item_name[this.kind_index] = this.kindstatus;
+      this.form.item_name[this.kind_index] = this.before_kindstatus;
       this.maketime = false;
 console.log( kindcolorArr );
-console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
-  	  target.style.background = kindcolorArr[this.kindstatus];
-      if (kindcolorArr[this.kindstatus] == '#FFF') {
+console.log('kindcolorArr = ' + this.before_kindstatus);
+console.log('kindcolorArr = ' + kindcolorArr[this.before_kindstatus]);
+  	  target.style.background = kindcolorArr[this.before_kindstatus];
+      if (kindcolorArr[this.before_kindstatus] == '#FFF') {
         table_cnt3.style.color = '#212529';
       }
+      this.kindstatus = this.before_kindstatus;
   	  //target.style.background = '#FFF';
       //table_cnt3.style.color = '#212529';
 //document.getElementById('btn_cnt1').getElementsByClassName('btncolor2').style.color = '#8888CC';
