@@ -192,13 +192,17 @@ class MobileAccessController extends Controller
                 $result_maxseq = DB::table($this->table_process_histories)
                     ->where('order_no', $order_no)
                     ->where('seq', $seq)
+                    ->where('device_code', $device_code)
+                    ->where('user_code', $user_code)
                     ->max('process_seq');
-                // 次工程の場合は工程順番をMAX番号+1を設定
-                if ($work_kind == Config::get('const.WORKKINDS.next')) {
-                    $process_seq = $result_maxseq + 1;
-                } else {
-                    $process_seq = $result_maxseq;
-                }
+                    if (isset($result_maxseq)) {
+                        // 次工程の場合は工程順番をMAX番号+1を設定
+                        if ($work_kind == Config::get('const.WORKKINDS.next')) {
+                            $process_seq = $result_maxseq + 1;
+                        } else {
+                            $process_seq = $result_maxseq;
+                        }
+                    }
                 // 加工履歴No=1にMAX番号+1を設定
                 $result_maxseq = DB::table($this->table_process_histories)
                 ->where('order_no', $order_no)
@@ -251,6 +255,7 @@ class MobileAccessController extends Controller
                 break;
             }
             // 存在しない場合
+            Log::debug('mobile putProcessHistory process_histories_model $progress_details_cnt = '.$progress_details_cnt);
             if ($progress_details_cnt == 0) {
                 $result_order_exists = DB::table($this->table_progress_details)
                     ->where('order_no', $order_no)
@@ -265,6 +270,7 @@ class MobileAccessController extends Controller
                     $progress_no = $result_maxseq + 1;
                 }
             } else {
+                Log::debug('mobile putProcessHistory process_histories_model $work_kind = '.$work_kind);
                 if ($work_kind == Config::get('const.WORKKINDS.next')) {
                     // 次工程の場合は工程NOにMAX番号+1を設定
                     $result_maxseq = DB::table($this->table_process_histories)
@@ -272,6 +278,18 @@ class MobileAccessController extends Controller
                         ->where('seq', $seq)
                         ->max('progress_no');
                     $progress_no = $result_maxseq + 1;
+                } else {
+                    // todo 
+                    Log::debug('mobile putProcessHistory process_histories_model $device_code = '.$device_code);
+                    Log::debug('mobile putProcessHistory process_histories_model $user_code = '.$user_code);
+                    $result_maxseq = DB::table($this->table_process_histories)
+                        ->where('order_no', $order_no)
+                        ->where('seq', $seq)
+                        ->where('device_code', $device_code)
+                        ->where('user_code', $user_code)
+                        ->max('progress_no');
+                    $progress_no = $result_maxseq;
+                    Log::debug('mobile putProcessHistory process_histories_model $result_maxseq = '.$progress_no);
                 }
             }
 

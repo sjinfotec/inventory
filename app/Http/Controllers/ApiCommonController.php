@@ -1335,8 +1335,8 @@ class ApiCommonController extends Controller
             // 明細insert
             Log::debug('putProcess count($params_product_process_data["progress_no"]) = '.count($params_product_process_data["progress_no"]));
             for ($i=0;$i<count($params_product_process_data["progress_no"]);$i++) {
-                Log::debug('putProcess count($params_product_process_data["device_code"]) = '.count($params_product_process_data["device_code"]));
-                if ($params_product_process_data["device_code"][$i] != null && $params_product_process_data["device_code"][$i] == "") {
+                Log::debug('putProcess count($params_product_process_data["device_code"]) = '.$params_product_process_data["device_code"][$i]);
+                if ($params_product_process_data["device_code"][$i] != null && $params_product_process_data["device_code"][$i] != "") {
                     $array_putData = array();
                     $process_time_h = $params_product_process_data["process_time_h"][$i];
                     if ($params_product_process_data["process_time_h"][$i] == "" || $params_product_process_data["process_time_h"][$i] == null) {

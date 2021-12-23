@@ -243,7 +243,7 @@ export default {
         process_time_m: "",
         statusText: ""
       },
-      isbtnctrl: 'top',
+      isbtnctrl: '',
       kind_index: 0,
       kind_name: "",
       before_kind: "",
@@ -347,6 +347,7 @@ console.log(this.details);
     },
     // 完成処理
     startClickcomp() {
+      console.log('startClickcomp in');
       //this.kindstatus = C_KIND_COMPLETE;
       this.form.kind = C_KIND_COMPLETE;
       this.setKind();
@@ -390,10 +391,6 @@ console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
   	  //target.style.background = '#FFF';
       //table_cnt3.style.color = '#212529';
 //document.getElementById('btn_cnt1').getElementsByClassName('btncolor2').style.color = '#8888CC';
-    },
-    // キャンセル
-    cancelclick() {
-      window.close();
     },
     // -------------------- サーバー処理 ----------------------------
     // 指示書／管理書取得
@@ -485,11 +482,15 @@ console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
           $this.form.item_name[set_index] = $this.kind_name;
           $this.form.item_data[set_index] = "";
           $this.kind_index = set_index;
-          $this.kindstatus = $this.kind_name;
+          // $this.kindstatus = $this.kind_name;
           $this.work_kind = detail.work_kind;
         });
         this.form_count = set_index + 1;
         this.setKind();
+        if (this.isbtnctrl == '') {
+          this.setKindBackColorBottun();
+          // this.isbtnctrl = 'top';
+        }
         console.log('getThen in form_count = ' + this.form_count);
       } else {
         if (res.messagedata.length > 0) {
@@ -541,36 +542,74 @@ console.log('kindcolorArr = ' + kindcolorArr[this.kindstatus]);
       this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
     // 作業ステータス設定
-    setKind(eventtext) {
-      console.log('setKind in = ' + this.form.kind);
+    setKind() {
       this.kind_name = "";
+      console.log('setKind this.form.kind = ' + this.form.kind);
       switch (this.form.kind) {
         case C_KIND_START:
           this.kind_name = C_KIND_START_NAME;
-         	//target.style.background = '#80bb60';
+          this.kindstatus = this.kind_name;
+          this.form.item_name[this.kind_index] = this.kind_name;
           break;
         case C_KIND_STOP:
           this.kind_name = C_KIND_STOP_NAME;
-      	  //target.style.background = '#dd6060';
+          this.kindstatus = this.kind_name;
+          this.form.item_name[this.kind_index] = this.kind_name;
           break;
         case C_KIND_MSTOP:
           this.kind_name = C_KIND_MSTOP_NAME;
-      	  //target.style.background = '#dd6060';
+          this.kindstatus = this.kind_name;
+          this.form.item_name[this.kind_index] = this.kind_name;
           break;
         case C_KIND_COMPLETE:
           this.kind_name = C_KIND_COMPLETE_NAME;
-      	  //target.style.background = '#6cb2eb';
+          this.kindstatus = this.kind_name;
+          this.form.item_name[this.kind_index] = this.kind_name;
           break;
         case C_KIND_NEXT:
           this.kind_name = C_KIND_NEXT_NAME;
-      	  target.style.background = '#eeaa00';
+          this.kindstatus = this.kind_name;
+      	  target.style.background = '#EEAA00';
           break;
         default:
           this.kind_name = C_KIND_INI_NAME;
+          this.kindstatus = this.kind_name;
       	  //target.style.background = '#FFF';
           break;
       }
       console.log('setKind out = ' + this.kind_name);
+    },
+    // 作業ステータス設定
+    setKindBackColorBottun(eventtext) {
+      console.log('setKind this.form.kind = ' + this.form.kind);
+      switch (this.form.kind) {
+        case C_KIND_START:
+          this.isbtnctrl = 'top';
+          target.style.background = '#80bb60';
+          table_cnt3.style.color = '#FFF';
+          break;
+        case C_KIND_STOP:
+          this.isbtnctrl = 'top2';
+          target.style.background = '#dd6060';
+          table_cnt3.style.color = '#FFF';
+          break;
+        case C_KIND_MSTOP:
+          this.isbtnctrl = 'top2';
+      	  target.style.background = '#dd6060';
+          break;
+        case C_KIND_COMPLETE:
+          this.isbtnctrl = 'comple';
+          table_cnt3.style.color = '#FFF';
+      	  target.style.background = '#6cb2eb';
+          break;
+        case C_KIND_NEXT:
+          this.isbtnctrl = 'top';
+          break;
+        default:
+          this.isbtnctrl = 'top';
+      	  //target.style.background = '#FFF';
+          break;
+      }
     },
   }
 };
