@@ -3,7 +3,7 @@
     <!-- main contentns row -->
     <div class="row justify-content-between">
       <!-- .panel -->
-      <div class="col-md pt-3">
+      <div id="input-area_3" class="col-md pt-3">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -45,7 +45,7 @@
         </div>
       </div>
       <!-- .panel -->
-      <div class="col-md-12 pt-3" v-if="selectMode=='NEW'">
+      <div id="input-area_3" class="col-md-12 pt-3" v-if="selectMode=='NEW'">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -89,7 +89,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div id="btn_cnt6" class="row justify-content-between">
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time
@@ -134,7 +134,7 @@
                   <div class="row">
                     <div class="col-12">
                       <div class="table-responsive">
-                        <table class="table table-striped border-bottom font-size-sm text-nowrap">
+                        <table id="table_cnt6" class="table table-striped border-bottom font-size-sm text-nowrap">
                           <thead>
                             <tr>
                               <td class="text-center align-middle w-35 mw-rem-10">雇用形態名</td>

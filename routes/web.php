@@ -121,6 +121,19 @@ Route::post('/edit_attendancelog/get', 'EditAttendanceLogController@get')->middl
 Route::post('/edit_attendancelog/store', 'EditAttendanceLogController@store')->middleware('auth');
 Route::post('/edit_attendancelog/fix', 'EditAttendanceLogController@fix')->middleware('auth');
 // ------------------ 設定 --------------------------------
+
+
+// 顧客情報
+Route::get('/edit_customer', 'CustomerAddController@index')->middleware('auth');
+Route::post('/edit_customer/store', 'CustomerAddController@store')->middleware('auth');
+Route::post('/edit_customer/get', 'CustomerAddController@getUserDetails')->middleware('auth');
+Route::post('/edit_customer/del', 'CustomerAddController@del')->middleware('auth');
+Route::post('/edit_customer/edit', 'CustomerAddController@edit')->middleware('auth');
+Route::post('/edit_customer/fix', 'CustomerAddController@fixUser')->middleware('auth');
+// Route::post('/edit_customer/fixtimetable', 'CustomerAddController@fixTimetable')->middleware('auth');
+Route::post('/edit_customer/release_card_info', 'CustomerAddController@releaseCardInfo')->middleware('auth');
+Route::post('/edit_customer/up', 'CustomerAddController@up')->middleware('auth');
+
 // 機器情報
 Route::get('/setting_device', 'SettingDeviceController@index')->middleware('auth');
 Route::post('/create_company_information/get', 'CreateCompanyInformationController@getCompanyInfo')->middleware('auth');
@@ -247,4 +260,6 @@ Route::post('/get_csv_item', 'ApiCommonController@getCsvItem')->middleware('auth
 Route::get('/customer_information', 'CustomerInformationController@index')->middleware('auth');
 Route::post('/customer_information/getList', 'CustomerInformationController@getSsjjooCustomerInfoList')->middleware('auth');
 Route::post('/customer_information/getDetail', 'CustomerInformationController@getSsjjooCustomerInfo')->middleware('auth');
+
+
 

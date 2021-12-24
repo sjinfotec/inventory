@@ -87,7 +87,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div id="input-area_3" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -109,7 +109,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div id="btn_cnt6" class="row justify-content-between">
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time
@@ -176,7 +176,7 @@
                           </thead>
                           <tbody>
                             <tr v-for="(item,index) in details" v-bind:key="item.id">
-                              <td class="row justify-content-between text-center align-middle" v-if="details[index].result == 1">
+                              <td class="justify-content-between text-center align-middle" v-if="details[index].result == 1">
                                 <!-- panel header -->
                                 <col-note
                                   v-bind:item-name="'No.' + (index+1) + ' 現在適用中'"
@@ -185,7 +185,7 @@
                                 ></col-note>
                                 <!-- /.panel header -->
                               </td>
-                              <td class="row justify-content-between text-center align-middle" v-else>
+                              <td class="justify-content-between text-center align-middle" v-else>
                                 <col-note
                                   v-bind:item-name="'No.' + (index+1)"
                                   v-bind:item-control="'LIGHT'"

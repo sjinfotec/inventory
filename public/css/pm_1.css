@@ -831,8 +831,23 @@ white-space: nowrap;
   margin-bottom:0px;
 }
 #table_cnt6 td{
+  position:  relative;
   border:0;
   border-left: 1px solid #bfcab1;
+}
+#table_cnt66 td::before {
+  content: ''; /* 空の要素を作成 必要 */
+  /*display:  inline-block;*/
+  background-color: #F44336;
+  height: 36px;
+  width: 1px;
+  vertical-align:  middle;
+  /*position:  relative;*/        
+  position:  absolute;
+  top: 0px;   
+  left: 1px;
+  border-left:1px solid #0000FF;
+  z-index:100;
 }
 #table_cnt6 .form-control {
   border:0;
@@ -841,6 +856,36 @@ white-space: nowrap;
   background:rgba(224, 240, 224, 0.5);
   /*background:#E0F0E0;*/
 }
+
+/*----------------------------------------------------##  setting_employment  ##---------------------*/
+#input-area_4 {
+  position: relative;
+}
+#input-area_4 .input-group  {
+  padding-top:10px;
+}
+#input-area_4 .input-group-text  {
+  height: 36px !important;
+  /*background:#e0f0d0;*/
+  background:#E0F0E0;
+  border:0;
+  border-bottom: 1px solid #bfcab1;
+  border-radius:0;
+}
+#input-area_4 .form-control  {
+  height: 36px;
+  border:0;
+  border-radius:0;
+}
+#input-area_4 .custom-select  {
+  height: 36px;
+  border:0;
+  border-radius:0;
+}
+
+
+
+
 
 
 .transition1  {

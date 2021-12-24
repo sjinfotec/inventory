@@ -8,8 +8,8 @@
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:header-text1="'ユーザーを設定する'"
-            v-bind:header-text2="'ユーザーの登録や変更ができます'"
+            v-bind:header-text1="'社員情報を設定する'"
+            v-bind:header-text2="'社員情報の登録や変更ができます'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <div class="card-body pt-2">
