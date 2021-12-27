@@ -916,6 +916,9 @@ class ApiCommonController extends Controller
             $login_user_code = $user->code;
             $login_account_id = $user->account_id;
 
+log::debug('luc = '.$login_user_code);
+log::debug('lai = '.$login_account_id);
+    
             $mainQuery = DB::table($this->table_customers)
                 ->select($this->table_customers.'.code',$this->table_customers.'.name');
             Log::debug('getCustomerList office_code = '.$office_code);

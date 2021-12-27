@@ -16,16 +16,15 @@ class Department extends Model
     protected $table_offices = 'offices';
     protected $guarded = array('id');
 
-
-    private $id;    //
-    private $code;  // 営業所コード
-    private $name;  // 営業所名
+    private $id;            //
+    private $office_code;   // 営業所コード
+    private $code;          // 顧客コード
+    private $name;          // 顧客名
     private $created_user;  // 作成ユーザー
     private $updated_user;  // 修正ユーザー
     private $created_at;    // 作成日時
     private $updated_at;    // 修正日時
     private $is_deleted;    // 削除フラグ
-
 
     //private $id;
     //private $account_id;                    // ログインユーザーのアカウント
@@ -51,29 +50,18 @@ class Department extends Model
         $this->id = $value;
     }
 
-    // ログインユーザーのアカウント
-    public function getAccountidAttribute()
+    // 営業所コード
+    public function getOfficecodeAttribute()
     {
-        return $this->account_id;
+        return $this->office_code;
     }
 
-    public function setAccountidAttribute($value)
+    public function setOfficecodeAttribute($value)
     {
-        $this->account_id = $value;
+        $this->office_code = $value;
     }
 
-    // 適用期間開始
-    public function getApplytermfromAttribute()
-    {
-        return $this->apply_term_from;
-    }
-
-    public function setApplytermfromAttribute($value)
-    {
-        $this->apply_term_from = $value;
-    }
-
-    // 部署コード
+    // 顧客コード
     public function getCodeAttribute()
     {
         return $this->code;
@@ -84,7 +72,7 @@ class Department extends Model
         $this->code = $value;
     }
 
-    // 部署名
+    // 顧客名
     public function getNameAttribute()
     {
         return $this->name;
@@ -93,28 +81,6 @@ class Department extends Model
     public function setNameAttribute($value)
     {
         $this->name = $value;
-    }
-
-    // 廃止年月日
-    public function getKillfromdateAttribute()
-    {
-        return $this->kill_from_date;
-    }
-
-    public function setKillfromdateAttribute($value)
-    {
-        $this->kill_from_date = $value;
-    }
-
-    // 削除フラグ
-    public function getIsdeletedAttribute()
-    {
-        return $this->is_deleted;
-    }
-
-    public function setIsdeletedAttribute($value)
-    {
-        $this->is_deleted = $value;
     }
 
     // 作成ユーザー
@@ -161,35 +127,38 @@ class Department extends Model
         $this->updated_at = $value;
     }
 
+    // 削除フラグ
+    public function getIsdeletedAttribute()
+    {
+        return $this->is_deleted;
+    }
+
+    public function setIsdeletedAttribute($value)
+    {
+        $this->is_deleted = $value;
+    }
+
+
+
     // ---------------- param --------------------------------
-    private $param_account_id;                    // ログインユーザーのアカウント
-    private $param_apply_term_from;               // 適用期間開始
-    private $param_code;                          // 部署コード
-    private $param_killvalue;                     // 廃止開始日を条件に含む(true)
+    private $param_office_code;   // 営業所コード
+    private $param_code;          // 顧客コード
+    private $param_name;          // 顧客名
 
-    // ログインユーザーのアカウント
-    public function getParamAccountidAttribute()
+
+    // 営業所コード
+    public function getParamofficecodeAttribute()
     {
-        return $this->param_account_id;
+        return $this->param_office_code;
     }
 
-    public function setParamAccountidAttribute($value)
+    public function setParamofficecodeAttribute($value)
     {
-        $this->param_account_id = $value;
+        $this->param_office_code = $value;
     }
 
-    // 適用期間開始
-    public function getParamapplytermfromAttribute()
-    {
-        return $this->param_apply_term_from;
-    }
 
-    public function setParamapplytermfromAttribute($value)
-    {
-        $this->param_apply_term_from = $value;
-    }
-
-    // 部署コード
+    // 顧客コード
     public function getParamcodeAttribute()
     {
         return $this->param_code;
@@ -200,40 +169,172 @@ class Department extends Model
         $this->param_code = $value;
     }
 
-    // 廃止開始日を条件に含む
-    public function getKillvalueAttribute()
+    // 顧客名
+    public function getParamnameAttribute()
     {
-        return $this->param_killvalue;
+        return $this->param_name;
     }
-
-    public function setKillvalueAttribute($value)
+    
+    public function setParamnameAttribute($value)
     {
-        $this->param_killvalue = $value;
+        $this->param_name = $value;
     }
     
 
+/*
+    private $id;            //
+    private $office_code;   // 営業所コード
+    private $code;          // 顧客コード
+    private $name;          // 顧客名
+    private $created_user;  // 作成ユーザー
+    private $updated_user;  // 修正ユーザー
+    private $created_at;    // 作成日時
+    private $updated_at;    // 修正日時
+    private $is_deleted;    // 削除フラグ
+*/
+
     /**
-     * 部署取得
+     * 顧客新規登録
      *
      * @return void
      */
-    public function getDetails(){
-        $details = new Collection();
+    public function insertNewCustomer(){
         try {
-            // 最大適用開始日付subquery
+                DB::table($this->table)->insert(
+                    [
+                        'id' => $this->id,
+                        'office_code' => $this->office_code,
+                        'code' => $this->code,
+                        'name' => $this->name,
+                        'created_user'=>$this->created_user,
+                        'created_at'=>$this->created_at
+                                        ]
+                );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+
+    /**
+     * 顧客編集
+     *
+     * @return void
+     */
+    public function updateCustomer(){
+        try {
+            Log::debug('Customer updateCustomer office_code = '.$this->office_code);
+            Log::debug('Customer updateCustomer code = '.$this->code);
+            Log::debug('Customer updateCustomer id = '.$this->id);
+            DB::table($this->table)
+            ->where('id', $this->id)
+            ->update([
+                'id' => $this->id,
+                'office_code' => $this->office_code,
+                'code' => $this->code,
+                'name' => $this->name,
+                'updated_user'=>$this->updated_user,
+                'updated_at'=>$this->updated_at
+        ]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * 取得
+     *
+     * @return void
+     */
+    public function getCustomerDetails(){
+        $dt = new Carbon();
+        $target_date = $dt->format('Ymd');
+        try {
+
+            $subquery1
+                ->where('is_deleted', '=', 0)
+                ->groupBy('code');
+            $case_sql1 = "";
+            $case_sql2 = "";
+            $mainquery = DB::table($this->table.' AS t1')
+                ->select(
+                    't1.id',
+                    't1.office_code',
+                    't1.code',
+                    't1.name'
+                    )
+                ->selectRaw($case_sql1)
+                ->selectRaw($case_sql2);
+            if (!empty($this->code)) {
+                $mainquery
+                    ->where('t1.code', $this->code);
+            }
+            $results = $mainquery
+                ->where('t1.office_code', $this->param_office_code)
+                ->where('t1.code', $this->param_code)
+                ->where('t1.is_deleted', 0)
+                ->orderBy('t1.code', 'desc')
+                ->get();
+
+            return $results;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+     public function getDetails(){
+        $details = new Collection();    //リスト形式でデータを格納
+        try {
             $subquery = DB::table($this->table)
                 ->select('code as code')
-                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->where('apply_term_from', '<=',$this->param_apply_term_from);
-            if(!empty($this->param_killvalue)){
-                if (!$this->param_killvalue) {
-                    $subquery->where('kill_from_date', '>',$this->param_apply_term_from);
-                }
-            } else {
-                $subquery->where('kill_from_date', '>',$this->param_apply_term_from);
-            }
             $subquery
-                ->where('account_id', '=', $this->param_account_id)
+                ->where('office_code', '=', $this->param_office_code)
+                ->where('code', '=', $this->param_code)
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code');
 
@@ -244,20 +345,19 @@ class Department extends Model
             $case_sql2 = $case_sql2." ELSE CASE t2.max_apply_term_from < t1.apply_term_from ";
             $case_sql2 = $case_sql2."      WHEN TRUE THEN 2 ELSE 0 END ";
             $case_sql2 = $case_sql2." END  as result";
+            $case_sql1 = "";
+            $case_sql2 = "";
             $mainquery = DB::table($this->table.' AS t1')
                 ->select(
-                    't1.id as id', 't1.account_id as account_id', 't1.code as code', 't1.name as name')
-                ->selectRaw("DATE_FORMAT(t1.apply_term_from, '%Y-%m-%d') as apply_term_from")
+                    't1.id as id', 't1.office_code as office_code', 't1.code as code', 't1.name as name')
                 ->selectRaw($case_sql1)
                 ->selectRaw($case_sql2)
-                ->JoinSub($subquery, 't2', function ($join) { 
-                    $join->on('t2.code', '=', 't1.code');
-                });
             if(!empty($this->param_code)){
                 $mainquery->where('t1.code', $this->param_code);
             }
             $details = $mainquery
-                ->where('t1.account_id', '=', $this->param_account_id)
+                ->where('office_code', '=', $this->param_office_code)
+                ->where('code', '=', $this->param_code)
                 ->where('t1.is_deleted', 0)
                 ->orderBy('t1.apply_term_from', 'desc')
                 ->get();
@@ -386,9 +486,9 @@ class Department extends Model
         $sql = "select";
         $sql .= " max(code) as max_code";
         $sql .= " from";
-        $sql .= " departments";
+        $sql .= " customers";
         $sql .= " where";
-        $sql .= " account_id = '".$this->param_account_id."'";
+        $sql .= " office_code = '".$this->param_office_code."'";
         $sql .= " and is_deleted = 0";
 
         return $sql;

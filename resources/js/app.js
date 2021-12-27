@@ -212,7 +212,10 @@
      "setting-device-information",
      require("./components/SettingDevice.vue").default
  );
- 
+ // 顧客情報設定
+ Vue.component("edit-customer", require("./components/EditCustomer.vue").default);
+
+
  // タイムテーブル設定
  Vue.component(
      "create-time-table",
