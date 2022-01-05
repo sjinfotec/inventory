@@ -7,9 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
+use App\Http\Controllers\ApiCommonController;
+use Carbon\Carbon;
 
-
-class Department extends Model
+class Customer extends Model
 {
     protected $table = 'customers';
     //protected $table_users = 'users';
@@ -279,10 +280,11 @@ class Department extends Model
         $dt = new Carbon();
         $target_date = $dt->format('Ymd');
         try {
-
-            $subquery1
+/*
+            $subquery
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code');
+*/                
             $case_sql1 = "";
             $case_sql2 = "";
             $mainquery = DB::table($this->table.' AS t1')
@@ -330,14 +332,15 @@ class Department extends Model
      public function getDetails(){
         $details = new Collection();    //リスト形式でデータを格納
         try {
+/*
             $subquery = DB::table($this->table)
-                ->select('code as code')
+                ->select('code as code');
             $subquery
                 ->where('office_code', '=', $this->param_office_code)
                 ->where('code', '=', $this->param_code)
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code');
-
+*/
             $case_sql1 = "CASE t1.kill_from_date = ".Config::get('const.INIT_DATE.maxdate');
             $case_sql1 = $case_sql1." WHEN TRUE THEN NULL ELSE DATE_FORMAT(t1.kill_from_date, '%Y-%m-%d') END as kill_from_date";
             $case_sql2 = "CASE t2.max_apply_term_from = t1.apply_term_from ";
@@ -351,7 +354,7 @@ class Department extends Model
                 ->select(
                     't1.id as id', 't1.office_code as office_code', 't1.code as code', 't1.name as name')
                 ->selectRaw($case_sql1)
-                ->selectRaw($case_sql2)
+                ->selectRaw($case_sql2);
             if(!empty($this->param_code)){
                 $mainquery->where('t1.code', $this->param_code);
             }
@@ -359,7 +362,6 @@ class Department extends Model
                 ->where('office_code', '=', $this->param_office_code)
                 ->where('code', '=', $this->param_code)
                 ->where('t1.is_deleted', 0)
-                ->orderBy('t1.apply_term_from', 'desc')
                 ->get();
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');

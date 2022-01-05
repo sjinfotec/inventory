@@ -126,7 +126,7 @@ Route::post('/edit_attendancelog/fix', 'EditAttendanceLogController@fix')->middl
 // 顧客情報
 Route::get('/edit_customer', 'CustomerAddController@index')->middleware('auth');
 Route::post('/edit_customer/store', 'CustomerAddController@store')->middleware('auth');
-Route::post('/edit_customer/get', 'CustomerAddController@getUserDetails')->middleware('auth');
+Route::post('/edit_customer/get', 'CustomerAddController@getCustomerDetails')->middleware('auth');
 Route::post('/edit_customer/del', 'CustomerAddController@del')->middleware('auth');
 Route::post('/edit_customer/edit', 'CustomerAddController@edit')->middleware('auth');
 Route::post('/edit_customer/fix', 'CustomerAddController@fixUser')->middleware('auth');

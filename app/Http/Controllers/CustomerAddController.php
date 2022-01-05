@@ -522,7 +522,51 @@ class CustomerAddController extends Controller
      *
      * @return list results
      */
+
     public function getCustomerDetails(Request $request){
+        $this->array_messagedata = array();
+        $code = "";
+        $result = true;
+        $params = array();
+        if (!isset($request->keyparams)) {
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+            $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+            return response()->json(
+                ['result' => false, 'details' => null,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }
+        $params = $request->keyparams;
+        if (!isset($params['code'])) {
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "code", Config::get('const.LOG_MSG.parameter_illegal')));
+            $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+            return response()->json(
+                ['result' => false, 'details' => null,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }
+        $code = $params['code'];
+
+
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_account_id = $user->account_id;
+
+
+        $customers = new Customer();
+        $customers->setCodeAttribute($code);
+        $details = $customers->getCustomerDetails();
+
+        return response()->json('hello');
+
+
+    }
+
+
+    public function getCustomerDetails_test(Request $request){
+
+        //echo "<br><br><br><br>echo_getcustomerDetails = ".$request;
+
         $this->array_messagedata = array();
         $code = "";
         $result = true;
@@ -550,9 +594,58 @@ class CustomerAddController extends Controller
             $user = Auth::user();
             $login_user_code = $user->code;
             $login_account_id = $user->account_id;
-            $users = new Customer();
-            $users->setCodeAttribute($code);
-            $details = $users->getCustomerDetails();
+            $customers = new Customer();
+            $customers->setCodeAttribute($code);
+            $details = $customers->getCustomerDetails();
+    
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+
+    }
+
+
+
+     public function getCustomerDetails_bak(Request $request){
+        $this->array_messagedata = array();
+        $code = "";
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => null,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['code'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "code", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => null,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $code = $params['code'];
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_account_id = $user->account_id;
+            $customers = new Customer();
+            $customers->setCodeAttribute($code);
+            $details = $customers->getCustomerDetails();
     
             return response()->json(
                 ['result' => $result, 'details' => $details,

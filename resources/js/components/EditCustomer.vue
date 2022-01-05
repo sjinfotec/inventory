@@ -981,11 +981,11 @@ export default {
       this.messagevalidatesNew = [];
       var chkArray = [];
       var flag = true;
-      // 氏名
+      // 顧客
       var required = true;
       var equalength = 0;
       var maxlength = 191;
-      var itemname = "氏名";
+      var itemname = "顧客名";
       chkArray = this.checkHeader(
         this.form.name,
         required,
@@ -1000,121 +1000,7 @@ export default {
           this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
         }
       }
-      // フリガナ
-      required = false;
-      equalength = 0;
-      maxlength = 30;
-      itemname = "フリガナ";
-      chkArray = this.checkHeader(
-        this.form.kana,
-        required,
-        equalength,
-        maxlength,
-        itemname
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesNew.length == 0) {
-          this.messagevalidatesNew = chkArray;
-        } else {
-          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-        }
-      }
-      // 略称
-      required = true;
-      equalength = 0;
-      maxlength = 4;
-      itemname = "略称";
-      chkArray = this.checkHeader(
-        this.form.short_name,
-        required,
-        equalength,
-        maxlength,
-        itemname
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesNew.length == 0) {
-          this.messagevalidatesNew = chkArray;
-        } else {
-          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-        }
-      }
-      // 雇用形態
-      required = true;
-      equalength = 0;
-      maxlength = 0;
-      itemname = "雇用形態";
-      chkArray = this.checkHeader(
-        this.form.employment_status,
-        required,
-        equalength,
-        maxlength,
-        itemname
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesNew.length == 0) {
-          this.messagevalidatesNew = chkArray;
-        } else {
-          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-        }
-      }
-      // 役職
-      required = false;
-      equalength = 0;
-      maxlength = 191;
-      itemname = "役職";
-      chkArray = this.checkHeader(
-        this.form.official_position,
-        required,
-        equalength,
-        maxlength,
-        itemname
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesNew.length == 0) {
-          this.messagevalidatesNew = chkArray;
-        } else {
-          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-        }
-      }
-      // 所属部署
-      required = true;
-      equalength = 0;
-      maxlength = 0;
-      itemname = "所属部署";
-      chkArray = this.checkHeader(
-        this.form.department_code,
-        required,
-        equalength,
-        maxlength,
-        itemname
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesNew.length == 0) {
-          this.messagevalidatesNew = chkArray;
-        } else {
-          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-        }
-      }
-      // email
-      required = false;
-      equalength = 0;
-      maxlength = 191;
-      itemname = "メールアドレス";
-      chkArray = this.checkHeader(
-        this.form.email,
-        required,
-        equalength,
-        maxlength,
-        itemname
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesNew.length == 0) {
-          this.messagevalidatesNew = chkArray;
-        } else {
-          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-        }
-      }
-      // ユーザーCODE
+      // 顧客CODE
       required = true;
       equalength = 0;
       maxlength = 10;
@@ -1144,13 +1030,14 @@ export default {
       this.messagevalidatesEdt = [];
       var chkArray = [];
       var flag = true;
-      // 適用開始日
+
+      // 顧客名
       var required = true;
       var equalength = 0;
-      var maxlength = 0;
-      var itemname = "適用開始日";
+      var maxlength = 191;
+      var itemname = "顧客名";
       chkArray = this.checkDetail(
-        this.details[index].apply_term_from,
+        this.details[index].name,
         required,
         equalength,
         maxlength,
@@ -1163,32 +1050,15 @@ export default {
         } else {
           this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
         }
-      } else {
-        // 適用中と比較
-        var chkdt = moment(this.details[index].apply_term_from).format(
-          "YYYYMMDD"
-        );
-        var chksourcedt = "";
-        if (this.details[index].result == "2") {
-          for (var i = index + 1; i < this.count; i++) {
-            chksourcedt = moment(this.details[i].apply_term_from).format(
-              "YYYYMMDD"
-            );
-            if (chkdt <= chksourcedt) {
-              this.messagevalidatesEdt.push(
-                "現在適用中の適用開始日付以前の日付は登録できません"
-              );
-            }
-          }
-        }
       }
-      // 退職開始日
-      required = false;
+
+      // 営業所コード
+      required = true;
       equalength = 0;
-      maxlength = 0;
-      itemname = "退職開始日";
+      maxlength = 16;
+      itemname = "営業所コード";
       chkArray = this.checkDetail(
-        this.details[index].kill_from_date,
+        this.details[index].office_code,
         required,
         equalength,
         maxlength,
@@ -1202,6 +1072,12 @@ export default {
           this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
         }
       }
+
+
+
+
+
+
       // ログインＩＤ
       required = true;
       equalength = 0;
@@ -1222,234 +1098,8 @@ export default {
           this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
         }
       }
-      // 部署コード
-      required = true;
-      equalength = 0;
-      maxlength = 8;
-      itemname = "部署コード";
-      chkArray = this.checkDetail(
-        this.details[index].department_code,
-        required,
-        equalength,
-        maxlength,
-        itemname,
-        index + 1
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesEdt.length == 0) {
-          this.messagevalidatesEdt = chkArray;
-        } else {
-          this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
-        }
-      }
-      // 雇用形態
-      required = true;
-      equalength = 0;
-      maxlength = 0;
-      itemname = "雇用形態";
-      chkArray = this.checkDetail(
-        this.details[index].employment_status,
-        required,
-        equalength,
-        maxlength,
-        itemname,
-        index + 1
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesEdt.length == 0) {
-          this.messagevalidatesEdt = chkArray;
-        } else {
-          this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
-        }
-      }
-      // 氏名
-      required = true;
-      equalength = 0;
-      maxlength = 191;
-      itemname = "氏名";
-      chkArray = this.checkDetail(
-        this.details[index].name,
-        required,
-        equalength,
-        maxlength,
-        itemname,
-        index + 1
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesEdt.length == 0) {
-          this.messagevalidatesEdt = chkArray;
-        } else {
-          this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
-        }
-      }
-      // フリガナ
-      required = false;
-      equalength = 0;
-      maxlength = 30;
-      itemname = "フリガナ";
-      chkArray = this.checkDetail(
-        this.details[index].kana,
-        required,
-        equalength,
-        maxlength,
-        itemname,
-        index + 1
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesEdt.length == 0) {
-          this.messagevalidatesEdt = chkArray;
-        } else {
-          this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
-        }
-      }
-      // 略称
-      required = true;
-      equalength = 0;
-      maxlength = 4;
-      itemname = "略称";
-      chkArray = this.checkDetail(
-        this.details[index].short_name,
-        required,
-        equalength,
-        maxlength,
-        itemname,
-        index + 1
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesEdt.length == 0) {
-          this.messagevalidatesEdt = chkArray;
-        } else {
-          this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
-        }
-      }
-      // 役職
-      required = false;
-      equalength = 0;
-      maxlength = 191;
-      itemname = "役職";
-      chkArray = this.checkDetail(
-        this.details[index].official_position,
-        required,
-        equalength,
-        maxlength,
-        itemname,
-        index + 1
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesEdt.length == 0) {
-          this.messagevalidatesEdt = chkArray;
-        } else {
-          this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
-        }
-      }
-      // メールアドレス
-      required = false;
-      equalength = 0;
-      maxlength = 191;
-      itemname = "メールアドレス";
-      chkArray = this.checkDetail(
-        this.details[index].email,
-        required,
-        equalength,
-        maxlength,
-        itemname,
-        index + 1
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesEdt.length == 0) {
-          this.messagevalidatesEdt = chkArray;
-        } else {
-          this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
-        }
-      }
-      // パスワード
-      required = true;
-      equalength = 0;
-      maxlength = 191;
-      itemname = "パスワード";
-      chkArray = this.checkDetail(
-        this.details[index].password,
-        required,
-        equalength,
-        maxlength,
-        itemname,
-        index + 1
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesEdt.length == 0) {
-          this.messagevalidatesEdt = chkArray;
-        } else {
-          this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
-        }
-      }
 
       if (this.messagevalidatesEdt.length > 0) {
-        flag = false;
-      }
-      return flag;
-    },
-    // バリデーション
-    checkFormTimetable: function() {
-      this.messagevalidatestimetable = [];
-      var flag = true;
-      var chkArray = [];
-      // 開始日付
-      var required = true;
-      var equalength = 0;
-      var maxlength = 0;
-      var itemname = '開始日付';
-      chkArray = 
-        this.checkHeader(this.valuefromdate, required, equalength, maxlength, itemname);
-      if (chkArray.length > 0) {
-        if (this.messagevalidatestimetable.length == 0) {
-          this.messagevalidatestimetable = chkArray;
-        } else {
-          this.messagevalidatestimetable = this.messagevalidatestimetable.concat(chkArray);
-        }
-      }
-      // 終了日付
-      required = true;
-      equalength = 0;
-      maxlength = 0;
-      itemname = '終了日付';
-      chkArray = 
-        this.checkHeader(this.valuetodate, required, equalength, maxlength, itemname);
-      if (chkArray.length > 0) {
-        if (this.messagevalidatestimetable.length == 0) {
-          this.messagevalidatestimetable = chkArray;
-        } else {
-          this.messagevalidatestimetable = this.messagevalidatestimetable.concat(chkArray);
-        }
-      }
-
-      if (this.timetable_check.chkptn == this.const_C041_data[CONST_TIMETABLE_EQUALITY]['value']) {
-        // タイムテーブルリスト
-        itemname = 'タイムテーブルリスト';
-        chkArray = 
-          this.checkHeader(this.timetable.timeptn_timetable, required, equalength, maxlength, itemname);
-        if (chkArray.length > 0) {
-          if (this.messagevalidatestimetable.length == 0) {
-            this.messagevalidatestimetable = chkArray;
-          } else {
-            this.messagevalidatestimetable = this.messagevalidatestimetable.concat(chkArray);
-          }
-        }
-      }else {
-        // バリデーション
-        for(var i=0;i<7;i++) {
-          itemname = this.formweekdays[i] + 'のタイムテーブルリスト';
-          chkArray = 
-            this.checkHeader(this.timetable.timeptn_timetable_w[i], required, equalength, maxlength, itemname);
-          if (chkArray.length > 0) {
-            if (this.messagevalidatestimetable.length == 0) {
-              this.messagevalidatestimetable = chkArray;
-            } else {
-              this.messagevalidatestimetable = this.messagevalidatestimetable.concat(chkArray);
-            }
-          }
-        }
-      }
-      if (this.messagevalidatestimetable.length > 0) {
         flag = false;
       }
       return flag;
@@ -1465,8 +1115,10 @@ export default {
     },
     // 客先選択が変更された場合の処理
     customerChanges: function(value, arrayitem) {
-      this.form.customer_code = value;
+      this.form.code = value;
+      this.selectedCustomerValue = value;
       this.selectedCustomerName = arrayitem["name"];
+      console.log('customerChanges_selectedCustomerValue = ' + this.selectedCustomerValue);
       this.searchclick();
 
     },
@@ -1526,6 +1178,7 @@ export default {
       this.messagevalidatestimetable = [];
 
 
+
 //      this.searchedUserValue = this.selectedCustomerValue;
 //      this.searchedUserName = this.selectedCustomerName;
       this.searchedCustomerValue = this.selectedCustomerValue;
@@ -1534,11 +1187,15 @@ export default {
 //      this.searchedDepartmentValue = this.selectedOfficeValue;
       this.searchedOfficeValue = this.selectedOfficeValue;
 
+        console.log('selectedCustomerValue = ' + this.selectedCustomerValue);
+
 
       if (this.selectedCustomerValue == "" || this.selectedCustomerValue == null) {
         this.selectMode = 'NEW';
         this.newItemClear();
         this.form.office_code = this.searchedOfficeValue;
+        console.log('selectmode = ' + this.selectMode);
+        console.log('office_code = ' + this.searchedOfficeValue);
         this.refresOfficeList();
       } else {
         this.selectMode = 'EDT';
@@ -1837,15 +1494,15 @@ export default {
     // 顧客取得処理
     getItem() {
       var arrayParams = {
-        code: this.searchedUserValue,
-        killvalue: this.isUsermanagement
+        //code: this.searchedUserValue,
+        code: this.searchedCustomerValue,
       };
       this.postRequest("/edit_customer/get", arrayParams)
         .then(response => {
           this.getThen(response);
         })
         .catch(reason => {
-          this.serverCatch("顧客", "取得");
+          this.serverCatch("顧客", "取得getitem");
         });
     },
     // 顧客登録処理
@@ -2068,7 +1725,7 @@ export default {
         this.before_count = this.before_details.length;
       } else {
         if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
+          this.htmlMessageSwal("getThenエラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("氏名", "取得");
         }
@@ -2215,7 +1872,7 @@ export default {
     serverCatch(kbn, eventtext) {
       var messages = [];
       messages.push(kbn + "情報" + eventtext + "に失敗しました");
-      this.htmlMessageSwal("エラー", messages, "error", true, false);
+      this.htmlMessageSwal("異常処理エラー", messages, "error", true, false);
     },
     inputClear() {
       this.details = [];
@@ -2240,63 +1897,15 @@ export default {
     },
     checkRowData(index) {
       if (
-        this.details[index].department_code != "" &&
-        this.details[index].department_code != null
+        this.details[index].office_code != "" &&
+        this.details[index].office_code != null
       ) {
         return true;
       }
-      if (
-        this.details[index].employment_status != "" &&
-        this.details[index].employment_status != null
-      ) {
+      if (this.details[index].code != "" && this.details[index].code != null) {
         return true;
       }
       if (this.details[index].name != "" && this.details[index].name != null) {
-        return true;
-      }
-      if (this.details[index].kana != "" && this.details[index].kana != null) {
-        return true;
-      }
-      if (this.details[index].short_name != "" && this.details[index].short_name != null) {
-        return true;
-      }
-      if (
-        this.details[index].official_position != "" &&
-        this.details[index].official_position != null
-      ) {
-        return true;
-      }
-      if (
-        this.details[index].working_timetable_no != "" &&
-        this.details[index].working_timetable_no != null
-      ) {
-        return true;
-      }
-      if (
-        this.details[index].email != "" &&
-        this.details[index].email != null
-      ) {
-        return true;
-      }
-      if (
-        this.details[index].password != "" &&
-        this.details[index].password != null
-      ) {
-        return true;
-      }
-      if (
-        this.details[index].management != "" &&
-        this.details[index].management != null
-      ) {
-        return true;
-      }
-      if (this.details[index].role != "" && this.details[index].role != null) {
-        return true;
-      }
-      if (
-        this.details[index].kill_from_date != "" &&
-        this.details[index].kill_from_date != null
-      ) {
         return true;
       }
       return false;
