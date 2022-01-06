@@ -523,10 +523,11 @@ class CustomerAddController extends Controller
      * @return list results
      */
 
-    public function getCustomerDetails(Request $request){
+    public function getCustomerDetails_test(Request $request){
         $this->array_messagedata = array();
         $code = "";
         $result = true;
+        try {
         $params = array();
         if (!isset($request->keyparams)) {
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
@@ -557,15 +558,25 @@ class CustomerAddController extends Controller
         $customers->setCodeAttribute($code);
         $details = $customers->getCustomerDetails();
 
-        return response()->json('hello');
+        //return response()->json('hello');
+        return response()->json(
+            ['result' => $result, 'details' => $details,
+            Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+        );
 
+
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
 
     }
 
 
-    public function getCustomerDetails_test(Request $request){
-
-        //echo "<br><br><br><br>echo_getcustomerDetails = ".$request;
+    public function getCustomerDetails(Request $request){
 
         $this->array_messagedata = array();
         $code = "";
@@ -609,8 +620,6 @@ class CustomerAddController extends Controller
             Log::error($e->getMessage());
             throw $e;
         }
-
-
     }
 
 
