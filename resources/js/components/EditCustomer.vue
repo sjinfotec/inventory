@@ -395,292 +395,6 @@
                       <!-- /.panel header -->
                     </div>
                     <!-- /.row -->
-                    <!-- .row -->
-                    <div class="row justify-content-between">
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >適用開始日</span>
-                          </div>
-                          <input
-                            type="date"
-                            class="form-control"
-                            v-model="item.apply_term_from"
-                            name="applytermfrom"
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >退職日</span>
-                          </div>
-                          <input
-                            type="date"
-                            class="form-control"
-                            v-model="item.kill_from_date"
-                            name="killfromdate"
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >氏名</span>
-                          </div>
-                          <input
-                            type="text"
-                            class="form-control"
-                            maxlength="191"
-                            v-model="item.name"
-                            name="name"
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >フリガナ</span>
-                          </div>
-                          <input
-                            type="text"
-                            class="form-control"
-                            maxlength="30"
-                            v-model="item.kana"
-                            name="kana"
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >雇用形態</span>
-                          </div>
-                          <select disabled class="custom-select" v-model="item.employment_status">
-                            <option value></option>
-                            <option
-                              v-for="elist in get_C001"
-                              :value="elist.code"
-                              v-bind:key="elist.code"
-                            >{{ elist.code_name }}</option>
-                          </select>
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >役職</span>
-                          </div>
-                          <input
-                            type="text"
-                            class="form-control"
-                            maxlength="191"
-                            v-model="item.official_position"
-                            name="officialposition"
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >所属部署</span>
-                          </div>
-                          <select disabled class="custom-select" v-model="item.department_code">
-                            <option value></option>
-                            <option
-                              v-for="dlist in departmentList"
-                              :value="dlist.code"
-                              v-bind:key="dlist.code"
-                            >{{ dlist.name }}</option>
-                          </select>
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >メールアドレス</span>
-                          </div>
-                          <input
-                            type="email"
-                            maxlength="191"
-                            class="form-control"
-                            v-model="item.email"
-                            name="email"
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >ログインID</span>
-                          </div>
-                          <input
-                            type="text"
-                            class="form-control"
-                            v-model="item.code"
-                            name="code"
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >モバイル用アドレス</span>
-                          </div>
-                          <input
-                            type="email"
-                            maxlength="191"
-                            class="form-control"
-                            v-model="item.mobile_email"
-                            name="mobile_email"
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >パスワード</span>
-                          </div>
-                          <input
-                            type="password"
-                            class="form-control"
-                            v-model="item.password"
-                            name="password"
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >勤怠管理</span>
-                          </div>
-                          <select disabled class="custom-select" v-model="item.management">
-                            <option value></option>
-                            <option
-                              v-for="mlist in get_C017"
-                              :value="mlist.code"
-                              v-bind:key="mlist.code"
-                            >{{ mlist.code_name }}</option>
-                          </select>
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >タイムテーブル</span>
-                          </div>
-                          <select
-                            disabled
-                            class="custom-select"
-                            v-model="item.working_timetable_no"
-                            data-toggle="tooltip"
-                            data-placement="top"
-                            v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
-                          >
-                            <option value></option>
-                            <option
-                              v-for="tlist in timetableList"
-                              :value="tlist.no"
-                              v-bind:key="tlist.no"
-                            >{{ tlist.name }}</option>
-                          </select>
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >権限</span>
-                          </div>
-                          <select disabled class="custom-select" v-model="item.role">
-                            <option value></option>
-                            <option
-                              v-for="rlist in get_C025"
-                              :value="rlist.code"
-                              v-bind:key="rlist.code"
-                            >{{ rlist.code_name }}</option>
-                          </select>
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                    </div>
-                    <!-- /row -->
                   </div>
                 </div>
               </div>
@@ -1073,16 +787,11 @@ export default {
         }
       }
 
-
-
-
-
-
-      // ログインＩＤ
+      // 顧客コード
       required = true;
       equalength = 0;
       maxlength = 10;
-      itemname = "ログインＩＤ";
+      itemname = "顧客コード";
       chkArray = this.checkDetail(
         this.details[index].code,
         required,
@@ -1118,6 +827,7 @@ export default {
       this.form.code = value;
       this.selectedCustomerValue = value;
       this.selectedCustomerName = arrayitem["name"];
+      console.log('customerChanges_selectedOfficeValue = ' + this.selectedOfficeValue);
       console.log('customerChanges_selectedCustomerValue = ' + this.selectedCustomerValue);
       this.searchclick();
 
@@ -1129,35 +839,9 @@ export default {
     },
 
 
-
-
-
-
-
-
-    // 新規作成部署選択が変更された場合の処理
-    adddepartmentChanges: function(value, arrayitem) {
-      this.form.department_code = value;
-    },
-    // 新規作成雇用形態選択が変更された場合の処理
-    addemploymentChanges: function(value, arrayitem) {
-      this.form.employment_status = value;
-    },
-    // 新規作成ログインＩＤが変更された場合の処理
-    addcodeChange: function() {
-      this.form.password = this.form.code;
-    },
-    // 新規作成勤怠管理が変更された場合の処理
-    adddisplayChange: function(value, arrayitem) {
-      this.form.management = value;
-    },
-    // 新規作成タイムテーブルが変更された場合の処理
-    addtimetableChanges: function(value, arrayitem) {
-      this.form.working_timetable_no = value;
-    },
-    // 新規作成権限が変更された場合の処理
-    addroleChange: function(value, arrayitem) {
-      this.form.role = value;
+    // 新規作成営業所選択が変更された場合の処理
+    addofficeChanges: function(value, arrayitem) {
+      this.form.office_code = value;
     },
     // 選択が変更された場合の処理
     timetablechkptnChanges: function(value, index) {
@@ -1177,18 +861,12 @@ export default {
       this.messagevalidatesEdt = [];
       this.messagevalidatestimetable = [];
 
-
-
-//      this.searchedUserValue = this.selectedCustomerValue;
-//      this.searchedUserName = this.selectedCustomerName;
       this.searchedCustomerValue = this.selectedCustomerValue;
       this.searchedCustomerName = this.selectedCustomerName;
-
-//      this.searchedDepartmentValue = this.selectedOfficeValue;
       this.searchedOfficeValue = this.selectedOfficeValue;
 
-        console.log('selectedCustomerValue = ' + this.selectedCustomerValue);
-
+        console.log('searchedCustomerValue = ' + this.searchedCustomerValue);
+        console.log('searchedOfficeValue = ' + this.searchedOfficeValue);
 
       if (this.selectedCustomerValue == "" || this.selectedCustomerValue == null) {
         this.selectMode = 'NEW';
@@ -1199,30 +877,11 @@ export default {
         this.refresOfficeList();
       } else {
         this.selectMode = 'EDT';
+        console.log('selectmode = ' + this.selectMode);
         this.getItem();
       }
     },
-    // 開始日付が変更された場合の処理
-    fromdateChanges: function(value) {
-      this.valuefromdate = value;
-    },
-    // 開始日付がクリアされた場合の処理
-    fromdateCleared: function() {
-      this.valuefromdate = "";
-    },
-    // 終了日付が変更された場合の処理
-    fromtoChanges: function(value, arrayitem) {
-      this.valuetodate = value;
-    },
-    // 終了日付がクリアされた場合の処理
-    fromtoCleared: function() {
-      this.valuetodate = "";
-    },
     
-    // CSVから作成するボタンクリック処理
-    usersuploadclick: function() {
-      this.selectMode = 'UPL';
-    },
     // アップロードボタンがクリックされた場合の処理
     upclick: function(e) {
       this.messagevalidatesNew = [];
@@ -1494,15 +1153,15 @@ export default {
     // 顧客取得処理
     getItem() {
       var arrayParams = {
-        //code: this.searchedUserValue,
         code: this.searchedCustomerValue,
+        office_code: this.searchedOfficeValue,
       };
       this.postRequest("/edit_customer/get", arrayParams)
         .then(response => {
           this.getThen(response);
         })
         .catch(reason => {
-          this.serverCatch("顧客", "取得getitem");
+          this.serverCatch("顧客", "取得getItem");
         });
     },
     // 顧客登録処理

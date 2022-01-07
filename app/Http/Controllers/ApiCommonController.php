@@ -29,6 +29,7 @@ use App\BackOrder;
 use App\Progressheader;
 use App\Progressdetaile;
 use App\ProcessHistory;
+use App\Customer;
 
 use App\Http\Controllers\CreateCompanyInformationController;
 use App\Http\Controllers\CreateDepartmentController;

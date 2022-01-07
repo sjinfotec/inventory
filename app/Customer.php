@@ -27,19 +27,6 @@ class Customer extends Model
     private $updated_at;    // 修正日時
     private $is_deleted;    // 削除フラグ
 
-    //private $id;
-    //private $account_id;                    // ログインユーザーのアカウント
-    //private $apply_term_from;               // 適用期間開始
-    //private $code;                          // 部署コード
-    //private $name;                          // 部署名
-    //private $kill_from_date;                // 廃止年月日
-    //private $is_deleted;                    // 削除フラグ
-    //private $created_user;                  // 作成ユーザー
-    //private $updated_user;                  // 修正ユーザー
-    //private $created_at;                    // 作成日時
-    //private $updated_at;                    // 修正日時
-
-
     // ID
     public function getIdAttribute()
     {
@@ -182,18 +169,6 @@ class Customer extends Model
     }
     
 
-/*
-    private $id;            //
-    private $office_code;   // 営業所コード
-    private $code;          // 顧客コード
-    private $name;          // 顧客名
-    private $created_user;  // 作成ユーザー
-    private $updated_user;  // 修正ユーザー
-    private $created_at;    // 作成日時
-    private $updated_at;    // 修正日時
-    private $is_deleted;    // 削除フラグ
-*/
-
     /**
      * 顧客新規登録
      *
@@ -301,8 +276,7 @@ class Customer extends Model
                     ->where('t1.code', $this->code);
             }
             $results = $mainquery
-                ->where('t1.office_code', $this->param_office_code)
-                ->where('t1.code', $this->param_code)
+                ->where('t1.office_code', $this->office_code)
                 ->where('t1.is_deleted', 0)
                 ->orderBy('t1.code', 'desc')
                 ->get();
@@ -383,7 +357,6 @@ class Customer extends Model
     public function isExistsName(){
         try {
             $is_exists = DB::table($this->table)
-                ->where('account_id', '=', $this->param_account_id)
                 ->where('name',$this->name)
                 ->where('is_deleted',0)
                 ->exists();
@@ -402,19 +375,16 @@ class Customer extends Model
 
 
     /**
-     * 部署追加
+     * 営業所追加
      *
      * @return void
      */
-    public function insertDepartment(){
+    public function insertOffice(){
         try {
             DB::table($this->table)->insert(
                 [
-                    'account_id' => $this->account_id,
-                    'apply_term_from' => $this->apply_term_from,
                     'code' => $this->code,
                     'name' => $this->name,
-                    'kill_from_date' => $this->kill_from_date,
                     'created_user'=>$this->created_user,
                     'created_at'=>$this->created_at
                 ]
@@ -431,20 +401,17 @@ class Customer extends Model
     }
 
     /**
-     * 部署更新
+     * 営業所更新
      *
      * @return void
      */
-    public function updateDepartment(){
+    public function updateOffice(){
         try {
             DB::table($this->table)
-                ->where('account_id', '=', $this->param_account_id)
                 ->where('id', $this->id)
                 ->where('is_deleted', 0)
                 ->update([
-                    'apply_term_from' => $this->apply_term_from,
                     'name' => $this->name,
-                    'kill_from_date' => $this->kill_from_date,
                     'updated_at'=>$this->updated_at,
                     'updated_user'=>$this->updated_user
                 ]);
