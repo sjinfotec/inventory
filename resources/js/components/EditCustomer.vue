@@ -83,7 +83,7 @@
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:header-text1="'◆ユーザー情報設定'"
+            v-bind:header-text1="'◆ 新規顧客情報 追加'"
             v-bind:header-text2="''"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
@@ -123,6 +123,21 @@
                       <span class="color-red">[必須]</span>
                     </span>
                   </div>
+
+
+                  <select-officelist
+                    ref="selectofficelist"
+                    v-if="showofficelist"
+                    v-bind:blank-data="true"
+                    v-bind:placeholder-data="'営業所を選択してください'"
+                    v-bind:selected-value="selectedOfficeValue"
+                    v-bind:add-new="false"
+                    v-bind:date-value="''"
+                    v-bind:row-index="0"
+                    v-on:change-event="addofficeChanges"
+                  ></select-officelist>
+
+<!--
                   <select-officelist
                     v-if="showaddofficelist"
                     ref="addselectofficelist"
@@ -131,6 +146,7 @@
                     v-bind:selected-value="form.office_code"
                     v-on:change-event="addofficeChanges"
                   ></select-officelist>
+-->
                 </div>
               </div>
               <!-- /.col -->
@@ -168,17 +184,6 @@
             </div>
             <!-- /.row -->
 
-
-
-
-
-
-
-
-
-
-
-
             <!-- ----------- 項目部 END ---------------- -->
             <!-- ----------- ボタン部 START ---------------- -->
             <!-- .row -->
@@ -208,24 +213,10 @@
         <div class="card shadow-pl" v-if="details.length">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:header-text1="'◆　' + searchedUserName"
+            v-bind:header-text1="'◆　' + searchedCustomerName"
             v-bind:header-text2="''"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
-          <!-- ----------- 「＋」アイコン部 START ---------------- -->
-          <!-- panel header -->
-          <div class="card-header bg-transparent pt-3 border-0">
-            <h1 class="float-sm-left font-size-rg">
-              <span>
-                <button
-                  class="btn btn-success btn-lg font-size-rg"
-                  v-on:click="appendRowClick"
-                >＋新規履歴追加</button>
-              </span>
-            </h1>
-          </div>
-          <!-- /.panel header -->
-          <!-- ----------- 「＋」アイコン部 END ---------------- -->
           <!-- ----------- 編集入力部 START ---------------- -->
           <!-- main contentns row -->
           <div class="card-body pt-2">
@@ -255,38 +246,9 @@
                   <!-- item.result  2: 未来適用予定または -->
                   <!-- 現在適用中 ----------------------------------------------------------------->
                   <div v-if="item.result != ''">
-                    <!-- .row -->
-                    <div class="row justify-content-between" v-if="item.result == 1">
-                      <!-- panel header -->
-                      <div class="col-md-2 pb-2">
-                        <col-note
-                          v-bind:item-name="'No.' + (index+1) + ' 現在適用中'"
-                          v-bind:item-control="'INFO'"
-                          v-bind:item-note="''"
-                        ></col-note>
-                      </div>
-                      <!-- /.panel header -->
-                    </div>
-                    <div class="row justify-content-between" v-else>
-                      <!-- panel header -->
-                      <div class="col-md-2 pb-2">
-                        <col-note
-                          v-bind:item-name="'No.' + (index+1)"
-                          v-bind:item-control="'LIGHT'"
-                          v-bind:item-note="''"
-                        ></col-note>
-                      </div>
-                      <!-- /.panel header -->
-                    </div>
-                    <!-- /.row -->
-
-
 
                     <!-- .row -->
                     <div id="input-area_3" class="row justify-content-between">
-
-
-
                       <!-- .col -->
                       <div class="col-md-6 pb-2">
                         <div class="input-group">
@@ -299,6 +261,17 @@
                               <span class="color-red">[必須]</span>
                             </span>
                           </div>
+                  <select-officelist
+                    ref="selectofficelist"
+                    v-if="showofficelist"
+                    v-bind:blank-data="true"
+                    v-bind:placeholder-data="'営業所を選択してください'"
+                    v-bind:selected-value="selectedOfficeValue"
+                    v-bind:add-new="false"
+                    v-bind:date-value="''"
+                    v-bind:row-index="0"
+                  ></select-officelist>
+<!--
                           <select class="custom-select" v-model="item.office_code">
                             <option value></option>
                             <option
@@ -307,6 +280,7 @@
                               v-bind:key="dlist.code"
                             >{{ dlist.name }}</option>
                           </select>
+-->
                         </div>
                       </div>
                       <!-- /.col -->
@@ -409,35 +383,6 @@
       </div>
     </div>
     <!-- /.panel -->
-    <el-dialog
-      v-bind:title="' モバイル打刻用URL送信'"
-      :visible.sync="dialogVisible"
-      width="50%"
-      center="true"
-    >
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">送信するモバイルのメールアドレスを入力してください</h5>
-          <h5 class="card-subtitle mb-2">{{ form.code }}</h5>
-          <div class="input-group">
-            <div class="input-group-prepend">
-              <span class="input-group-text font-size-sm line-height-xs label-width-150">email</span>
-            </div>
-            <input
-              type="email"
-              class="form-control"
-              v-model="input_mobile_address"
-              maxlength="191"
-              name="input_mobile_address"
-            />
-          </div>
-          <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
-        </div>
-        <div class="card-footer">
-          <button class="btn btn-warning" @click="sendUrl()">送信する</button>
-        </div>
-      </div>
-    </el-dialog>
   </div>
   <!-- /main contentns row -->
 </template>
@@ -702,25 +647,6 @@ export default {
       var itemname = "顧客名";
       chkArray = this.checkHeader(
         this.form.name,
-        required,
-        equalength,
-        maxlength,
-        itemname
-      );
-      if (chkArray.length > 0) {
-        if (this.messagevalidatesNew.length == 0) {
-          this.messagevalidatesNew = chkArray;
-        } else {
-          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-        }
-      }
-      // 顧客CODE
-      required = true;
-      equalength = 0;
-      maxlength = 10;
-      itemname = "ログインＩＤ";
-      chkArray = this.checkHeader(
-        this.form.code,
         required,
         equalength,
         maxlength,
@@ -1161,7 +1087,7 @@ export default {
           this.getThen(response);
         })
         .catch(reason => {
-          this.serverCatch("顧客", "取得getItem");
+          this.serverCatch("err:顧客", "取得");
         });
     },
     // 顧客登録処理
@@ -1386,7 +1312,7 @@ export default {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("getThenエラー", res.messagedata, "error", true, false);
         } else {
-          this.serverCatch("氏名", "取得");
+          this.serverCatch("顧客客先", "取得");
         }
       }
     },
@@ -1530,7 +1456,7 @@ export default {
     // 異常処理
     serverCatch(kbn, eventtext) {
       var messages = [];
-      messages.push(kbn + "情報" + eventtext + "に失敗しました");
+      messages.push(kbn + "情報 " + eventtext + "に失敗しました");
       this.htmlMessageSwal("異常処理エラー", messages, "error", true, false);
     },
     inputClear() {
@@ -1539,10 +1465,11 @@ export default {
       this.form.name = "";
       this.form.id = "";
       this.form.code = "";
-      this.selectedUserValue = "";
-      this.searchedUserValue = "";
-      this.selectedUserName = "";
-      this.searchedUserName = "";
+      this.form.office_code = "";
+      this.selectedCustomerValue = "";
+      this.searchedCustomerValue = "";
+      this.selectedCustomerName = "";
+      this.searchedCustomerName = "";
       this.selectMode = "";
       this.count = 0;
       this.before_count = 0;

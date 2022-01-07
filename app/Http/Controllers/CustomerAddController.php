@@ -100,25 +100,34 @@ class CustomerAddController extends Controller
                 );
             }
             $details = $params['details'];
-            // ログインIDチェック
+            // IDチェック
             $target_user_code = null;
             if ($details['code'] != "") {
                 $authuser = Auth::user();
                 $login_user_code = $authuser->code;
                 $login_account_id = $authuser->account_id;
-                $user_model = new UserModel();
-                $target_user_code = $details['code'];
-                $user_model->setParamAccountidAttribute($login_account_id);
-                $user_model->setParamcodeAttribute($target_user_code);
-                $isExists = $user_model->isExistsCode();
+                //$user_model = new UserModel();
+                $customerphp = new Customer();
+                $target_code = $details['code'];
+                //$customerphp->setParamAccountidAttribute($login_account_id);
+                $customerphp->setParamcodeAttribute($target_code);
+                $isExists = $customerphp->isExistsCode();
                 if ($isExists) {
-                    $this->array_messagedata[] = str_replace('{0}', "ログインID", Config::get('const.MSG_ERROR.already_item'));
+                    $this->array_messagedata[] = str_replace('{0}', "ID", Config::get('const.MSG_ERROR.already_item'));
                     $result = false;
                     return response()->json(
                         ['result' => $result,
                         Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                     );
                 }
+            } else {
+
+                $max_code_str = getMaxCode();
+
+
+
+
+
             }
             // insert
             $result = $this->insert($details, $login_account_id, $target_user_code);
@@ -153,17 +162,18 @@ class CustomerAddController extends Controller
     private function insert($data, $account_id, $target_user_code){
         DB::beginTransaction();
         try{
-            $users = new Customer();
+            $customers = new Customer();
             $systemdate = Carbon::now();
             $authuser = Auth::user();
             $user_code = $authuser->code;
-            $applyfrom = new Carbon($data['apply_term_from']);
-            $users->setCodeAttribute($target_user_code);
-            $users->setNameAttribute($data['name']);
-            $users->setCreatedatAttribute($systemdate);
-            $users->setCreateduserAttribute($user_code);
+            //$applyfrom = new Carbon($data['apply_term_from']);
+            $customers->setCodeAttribute($data['code']);
+            $customers->setOfficecodeAttribute($data['office_code']);
+            $customers->setNameAttribute($data['name']);
+            $customers->setCreatedatAttribute($systemdate);
+            $customers->setCreateduserAttribute($user_code);
             // insert
-            $users->insertNewUser();
+            $customers->insertNewCustomer();
             DB::commit();
             return true;
         }catch(\PDOException $pe){

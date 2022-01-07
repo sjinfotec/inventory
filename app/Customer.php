@@ -260,17 +260,13 @@ class Customer extends Model
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code');
 */                
-            $case_sql1 = "";
-            $case_sql2 = "";
             $mainquery = DB::table($this->table.' AS t1')
                 ->select(
                     't1.id',
                     't1.office_code',
                     't1.code',
                     't1.name'
-                    )
-                ->selectRaw($case_sql1)
-                ->selectRaw($case_sql2);
+                );
             if (!empty($this->code)) {
                 $mainquery
                     ->where('t1.code', $this->code);
@@ -350,14 +346,14 @@ class Customer extends Model
     }
 
     /**
-     * 部署名（同名）チェック
+     * （同名）チェック
      *
      * @return boolean
      */
-    public function isExistsName(){
+    public function isExistsCode(){
         try {
             $is_exists = DB::table($this->table)
-                ->where('name',$this->name)
+                ->where('code',$this->code)
                 ->where('is_deleted',0)
                 ->exists();
         }catch(\PDOException $pe){
@@ -372,6 +368,33 @@ class Customer extends Model
 
         return $is_exists;
     }
+
+
+    /**
+     * 新規追加用顧客コード取得
+     *
+     * @return boolean
+     */
+    public function isNewCode(){
+        try {
+            $is_newcode = DB::table($this->table)
+                ->select('MAX(code) AS max_code')
+                ->where('office_code',$this->office_code)
+                ->exists();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $is_newcode;
+    }
+
+
 
 
     /**
@@ -436,6 +459,7 @@ class Customer extends Model
             $max_code = DB::select($this->maxCodeSql());
             if(isset($max_code[0]->{'max_code'})){
                 $max_code = $max_code[0]->{'max_code'};
+                Log::debug('Customer getMaxCode max_code = '.$max_code);
             }else{
                 $max_code = 0;
             }
@@ -458,7 +482,7 @@ class Customer extends Model
         $sql .= " customers";
         $sql .= " where";
         $sql .= " office_code = '".$this->param_office_code."'";
-        $sql .= " and is_deleted = 0";
+        //$sql .= " and is_deleted = 0";
 
         return $sql;
     }
