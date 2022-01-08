@@ -1093,7 +1093,10 @@ export default {
     // 顧客登録処理
     storeData() {
       console.log('storeData password = ' + this.form.password);
-      var arrayParams = { details: this.form };
+      console.log('storeData office_code = ' + this.form.office_code);
+      console.log('storeData name = ' + this.form.name);
+      //var arrayParams = { details: this.form };
+      var arrayParams = { office_code : this.form.office_code, name : this.form.name, details: this.form};
       this.postRequest("/edit_customer/store", arrayParams)
         .then(response => {
           this.putThenHead(response, CONST_KBNNAME_REG);
@@ -1278,24 +1281,6 @@ export default {
         99
       );
     },
-    // 取得正常処理（ユーザーリスト）
-    // getThenuser(response) {
-    //   this.details = [];
-    //   this.before_details = [];
-    //   var res = response.data;
-    //   if (res.result) {
-    //     this.details = res.details;
-    //     this.count = this.details.length;
-    //     this.before_details = res.details;
-    //     this.before_count = this.count;
-    //   } else {
-    //     if (res.messagedata.length > 0) {
-    //       this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
-    //     } else {
-    //       this.serverCatch("氏名", "取得");
-    //     }
-    //   }
-    // },
     // 取得正常処理（ユーザー）
     getThen(response) {
       this.details = [];
@@ -1327,7 +1312,7 @@ export default {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
-          this.serverCatch("営業所", "取得");
+          this.serverCatch("顧客", "取得");
         }
       }
     },

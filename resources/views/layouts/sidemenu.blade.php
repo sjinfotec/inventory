@@ -64,7 +64,7 @@
                                         <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_user') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-laptop-chromebook-w.svg') }}" alt="">{{ $menu_selections[Config::get('const.MENUITEM.setting_user') - 1]->item_kanji_name }}</a></li>
                                     @endif
                                     @if($menu_selections[Config::get('const.MENUITEM.setting_office') - 1]->is_select)
-                                        <li><a class="px-3 py-1 text-white d-block" href="{{ url('/create_time_table') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-restore-w.svg') }}" alt="">{{ $menu_selections[Config::get('const.MENUITEM.setting_office') - 1]->item_kanji_name }}</a></li>
+                                        <li><a class="px-3 py-1 text-white d-block" href="{{ url('/create_office') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-restore-w.svg') }}" alt="">{{ $menu_selections[Config::get('const.MENUITEM.setting_office') - 1]->item_kanji_name }}</a></li>
                                     @endif
                                     @if($menu_selections[Config::get('const.MENUITEM.setting_department') - 1]->is_select)
                                         <li><a class="px-3 py-1 text-white d-block" href="{{ url('/create_department') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-assignment-ind-w.svg') }}" alt="">{{ $menu_selections[Config::get('const.MENUITEM.setting_department') - 1]->item_kanji_name }}</a></li>

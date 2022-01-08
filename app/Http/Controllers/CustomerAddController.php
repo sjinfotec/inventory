@@ -86,51 +86,51 @@ class CustomerAddController extends Controller
                 Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
                 return response()->json(
-                    ['result' => false,
+                    ['result' => false, 'code' => $code,
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                 );
             }
             $params = $request->keyparams;
-            if (!isset($params['details'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
+            Log::debug('CustomerAddController store insert before check name = '.$params['name']);
+            if (!isset($params['name'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "name", Config::get('const.LOG_MSG.parameter_illegal')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
                 return response()->json(
-                    ['result' => false,
+                    ['result' => false, 'name' => $name,
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                 );
             }
-            $details = $params['details'];
-            // IDチェック
-            $target_user_code = null;
-            if ($details['code'] != "") {
-                $authuser = Auth::user();
-                $login_user_code = $authuser->code;
-                $login_account_id = $authuser->account_id;
-                //$user_model = new UserModel();
-                $customerphp = new Customer();
-                $target_code = $details['code'];
-                //$customerphp->setParamAccountidAttribute($login_account_id);
-                $customerphp->setParamcodeAttribute($target_code);
-                $isExists = $customerphp->isExistsCode();
+            Log::debug('CustomerAddController store insert before check = '.$params['office_code']);
+            if (!isset($params['office_code'])) {
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.already_data');
+                $result = false;
+                return response()->json(
+                    ['result' => $result, 'office_code' => $office_code,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+
+            $name = $params['name'];
+            $office_code = $params['office_code'];
+
+            // 名チェック
+            if ($name != "") {
+                $customer_model = new Customer();
+                $customer_model->setNameAttribute($name);
+                $isExists = $customer_model->isExistsName();
                 if ($isExists) {
-                    $this->array_messagedata[] = str_replace('{0}', "ID", Config::get('const.MSG_ERROR.already_item'));
+                    $this->array_messagedata[] = str_replace('{0}', "顧客", Config::get('const.MSG_ERROR.already_name'));
                     $result = false;
                     return response()->json(
-                        ['result' => $result,
+                        ['result' => $result, 'code' => $code,
                         Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                     );
                 }
-            } else {
-
-                $max_code_str = getMaxCode();
-
-
-
-
-
             }
+            //$code = $this->insert($office_code, $name );
+
             // insert
-            $result = $this->insert($details, $login_account_id, $target_user_code);
+            $result = $this->insert($office_code, $name );
             if (!$result) {
                 Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "calendarparam", Config::get('const.LOG_MSG.parameter_illegal')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
@@ -159,7 +159,7 @@ class CustomerAddController extends Controller
      * @param [type] $data
      * @return void
      */
-    private function insert($data, $account_id, $target_user_code){
+    private function insert($office_code, $name){
         DB::beginTransaction();
         try{
             $customers = new Customer();
@@ -167,9 +167,17 @@ class CustomerAddController extends Controller
             $authuser = Auth::user();
             $user_code = $authuser->code;
             //$applyfrom = new Carbon($data['apply_term_from']);
-            $customers->setCodeAttribute($data['code']);
-            $customers->setOfficecodeAttribute($data['office_code']);
-            $customers->setNameAttribute($data['name']);
+            $max_code = $customers->getMaxCode($office_code);          // code 自動採番
+            if (isset($max_code)) {
+                $code = $max_code + 1;
+            } else {
+                $code = 1;
+            }
+            $code = sprintf('%02d', $code);
+            Log::debug('CustomerAddController store insert in auto-code = '.$code);
+            $customers->setCodeAttribute($code);
+            $customers->setOfficecodeAttribute($office_code);
+            $customers->setNameAttribute($name);
             $customers->setCreatedatAttribute($systemdate);
             $customers->setCreateduserAttribute($user_code);
             // insert
