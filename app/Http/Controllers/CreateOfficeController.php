@@ -47,6 +47,7 @@ class CreateOfficeController extends Controller
     public function getDetails(Request $request){
         $this->array_messagedata = array();
         $result = true;
+        Log::debug('CreateOfficeController getDetails actmode = ');
         try {
             // パラメータチェック
             $params = array();
@@ -67,6 +68,7 @@ class CreateOfficeController extends Controller
             }
             if ($r_cnt == 0) {
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_found_data');
+                
                 $result = false;
             }
             return response()->json(
@@ -101,7 +103,9 @@ class CreateOfficeController extends Controller
             $office_model = new Office();
             $dt = new Carbon();
             $from = $dt->copy()->format('Ymd');
-            $office_model->setParamcodeAttribute($code);
+            if(isset($code)){
+                $office_model->setParamcodeAttribute($code);
+            }
             $details = $office_model->getDetails();
             return $details;
         }catch(\PDOException $pe){

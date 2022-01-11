@@ -230,6 +230,31 @@ class Customer extends Model
         }
     }
 
+    /**
+     * 削除(フラグ)
+     *
+     * @return void
+     */
+    public function updateIsDelete(){
+        try {
+            DB::table($this->table)
+                ->where('id', $this->id)
+                ->update([
+                    'is_deleted' => 1,
+                    'updated_at' => $this->updated_at,
+                    'updated_user' => $this->updated_user
+                ]);
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
 
 
 

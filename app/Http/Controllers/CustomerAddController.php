@@ -225,17 +225,10 @@ class CustomerAddController extends Controller
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                 );
             }
-            if (!isset($params['before_details'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "before_details", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
             $details = $params['details'];
-            $before_details = $params['before_details'];
-            $this->update($details, $before_details);
+            //$before_details = $params['before_details'];
+            //$this->update($details, $before_details);
+            $this->update($details);
             return response()->json(
                 ['result' => true,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
@@ -261,93 +254,35 @@ class CustomerAddController extends Controller
      * @param [type] $details
      * @return boolean
      */
-    private function update($data, $before_data){
+    //private function update($data, $before_data){
+    private function update($data){
         $systemdate = Carbon::now();
         $user = Auth::user();
         $login_user_code = $user->code;
         $login_account_id = $user->account_id;
         DB::beginTransaction();
         try{
-            $user_model = new UserModel();
-            $carbon = new Carbon($data['apply_term_from']);
+            $customer_model = new Customer();
+            $carbon = new Carbon();
             $temp_from = $carbon->copy()->format('Ymd');
             $apply_term_from = $temp_from;
-            $user_model->setParamAccountidAttribute($login_account_id);
-            $user_model->setAccountidAttribute($login_account_id);
-            $user_model->setApplytermfromAttribute($apply_term_from);
-            $user_model->setCodeAttribute($data['code']);
-            $user_model->setDepartmentcodeAttribute($data['department_code']);
-            $user_model->setEmploymentstatusAttribute($data['employment_status']);
-            $user_model->setNameAttribute($data['name']);
-            $user_model->setShortNameAttribute($data['short_name']);
-            $user_model->setKanaAttribute($data['kana']);
-            $user_model->setOfficialpositionAttribute($data['official_position']);
+            $customer_model->setCodeAttribute($data['code']);
+            $customer_model->setOfficecodeAttribute($data['office_code']);
+            $customer_model->setNameAttribute($data['name']);
             $temp_from = Config::get('const.INIT_DATE.maxdate');
-            if ($data['kill_from_date'] != "" && $data['kill_from_date'] != null) {
-                $carbon = new Carbon($data['kill_from_date']);
-                $temp_from = $carbon->copy()->format('Ymd');
-            }
-            $kill_from_date = $temp_from;
-            $user_model->setKillfromdateAttribute($kill_from_date);
-            Log::debug('UserAddController update working_timetable_no = '.$data['working_timetable_no']);
-            $user_model->setWorkingtimetablenoAttribute($data['working_timetable_no']);
-            $user_model->setEmailAttribute($data['email']);
-            $user_model->setMobileEmailAttribute($data['mobile_email']);
-            $user_model->setCreatedatAttribute($systemdate);
-            $user_model->setCreateduserAttribute($login_user_code);
-            $user_model->setManagementAttribute($data['management']);
-            $user_model->setRoleAttribute($data['role']);
-            $isUpdateDepartment = false;
-            $isUpdateEmployment = false;
+            Log::debug('CustomerAddController update code = '.$data['code']);
+            $customer_model->setCreatedatAttribute($systemdate);
+            $customer_model->setCreateduserAttribute($login_user_code);
             if ($data['id'] == "" || $data['id'] == null) {
-                $user_model->setCreateduserAttribute($login_user_code);
-                $user_model->setCreatedatAttribute($systemdate);
-                Log::debug('UserAddController update password = '.$data['code']);
-                $user_model->setPasswordAttribute(bcrypt($data['code']));
-                $user_model->insertNewUser();
-                $isUpdateDepartment = true;
-                $isUpdateEmployment = true;
+                $customer_model->setCreateduserAttribute($login_user_code);
+                $customer_model->setCreatedatAttribute($systemdate);
+                Log::debug('UserAddController update non-id = '.$data['code']);
+                $customer_model->insertNewCustomer();
             } else {
-                $user_model->setIdAttribute($data['id']);   
-                $user_model->setUpdateduserAttribute($login_user_code);
-                $user_model->setUpdatedatAttribute($systemdate);
-                $user_model->updateUser();
-                $updateapplytermfrom = null;
-                $updateDepartment = null;
-                $updateEmployment = null;
-                $before_updateapplytermfrom = null;
-                $before_updateDepartment = null;
-                $before_updateEmployment = null;
-                if ($data['apply_term_from'] != null && $data['apply_term_from'] != "") { $updateapplytermfrom = $data['apply_term_from']; }
-                if ($before_data['apply_term_from'] != null && $before_data['apply_term_from'] != "") { $before_updateapplytermfrom = $before_data['apply_term_from']; }
-                if ($data['department_code'] != null && $data['department_code'] != "") { $updateDepartment = $data['department_code']; }
-                if ($before_data['department_code'] != null && $before_data['department_code'] != "") { $before_updateDepartment = $before_data['department_code']; }
-                if ($data['employment_status'] != null && $data['employment_status'] != "") { $updateEmployment = $data['employment_status']; }
-                if ($before_data['employment_status'] != null && $before_data['employment_status'] != "") { $before_updateEmployment = $before_data['employment_status']; }
-                if ($updateapplytermfrom != $before_updateapplytermfrom) {
-                    $isUpdateDepartment = true;
-                    $isUpdateEmployment = true;
-                } else {
-                    if ($updateDepartment != $before_updateDepartment) {
-                        $isUpdateDepartment = true;
-                    }
-                    if ($updateEmployment != $before_updateEmployment) {
-                        $isUpdateEmployment = true;
-                    }
-                }
-            }
-            // 部署・雇用形態変更ありの場合
-            if ($isUpdateDepartment || $isUpdateEmployment) {
-                // upDepartmentEmployment implement
-                $array_impl_upDepartmentEmployment = array (
-                    'isUpdateDepartment' => $isUpdateDepartment,
-                    'isUpdateEmployment' => $isUpdateEmployment,
-                    'login_user_code' => $login_user_code,
-                    'account_id' => $login_account_id,
-                    'details' => $data,
-                    'before_details' => $before_data
-                );
-                $this->upDepartmentEmployment($array_impl_upDepartmentEmployment);
+                $customer_model->setIdAttribute($data['id']);   
+                $customer_model->setUpdateduserAttribute($login_user_code);
+                $customer_model->setUpdatedatAttribute($systemdate);
+                $customer_model->updateCustomer();
             }
             DB::commit();
 
@@ -364,7 +299,7 @@ class CustomerAddController extends Controller
 
 
     /**
-     * ユーザー削除
+     * 削除
      *
      * @param Request $request
      * @return void
@@ -400,19 +335,8 @@ class CustomerAddController extends Controller
             Log::debug('useradd del id = '.$details['id']);
             $id = $details['id'];
             DB::beginTransaction();
-            // ユーザー履歴削除
+            // 削除
             $this->updateIsDelete($id);
-            // ほかのテーブルの部署・雇用形態を戻す
-            // upDepartmentEmploymentTableBefore implement
-            $array_impl_upDepartmentEmploymentTableBefore = array (
-                'isUpdateDepartment' => true,
-                'isUpdateEmployment' => true,
-                'isDelete' => true,
-                'login_user_code' => $login_user_code,
-                'account_id' => $login_account_id,
-                'details' => $details
-            );
-            $this->upDepartmentEmploymentTableBefore($array_impl_upDepartmentEmploymentTableBefore);
             DB::commit();
         
             return response()->json(
@@ -437,11 +361,16 @@ class CustomerAddController extends Controller
      * @return void
      */
     private function updateIsDelete($id){
-        $users = new UserModel();
-        $users->setIdAttribute($id);
-        
+        $systemdate = Carbon::now();
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $customers = new Customer();
+        $customers->setIdAttribute($id);
+        $customers->setUpdateduserAttribute($login_user_code);
+        $customers->setUpdatedatAttribute($systemdate);
+
         try{
-            $users->updateIsDelete();
+            $customers->updateIsDelete();
 
         }catch(\PDOException $pe){
             throw $pe;
@@ -457,6 +386,7 @@ class CustomerAddController extends Controller
      * @return list results
      */
     public function getCustomerDetails(Request $request){
+        Log::debug('CustomerAddController getCustomerDetails go-in ');
 
         $this->array_messagedata = array();
         $code = "";
@@ -510,105 +440,9 @@ class CustomerAddController extends Controller
 
 
 
-     public function getCustomerDetails_bak(Request $request){
-        $this->array_messagedata = array();
-        $code = "";
-        $result = true;
-        try {
-            // パラメータチェック
-            $params = array();
-            if (!isset($request->keyparams)) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => null,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $params = $request->keyparams;
-            if (!isset($params['code'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "code", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => null,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $code = $params['code'];
-            $user = Auth::user();
-            $login_user_code = $user->code;
-            $login_account_id = $user->account_id;
-            $customers = new Customer();
-            $customers->setCodeAttribute($code);
-            $details = $customers->getCustomerDetails();
-    
-            return response()->json(
-                ['result' => $result, 'details' => $details,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
 
 
 
-
-    /**
-     * 部署雇用形態更新
-     *
-     * @param [type] $details
-     * @return boolean
-     */
-    private function upDepartmentEmployment($params){
-        $isUpdateDepartment = $params['isUpdateDepartment'];
-        $isUpdateEmployment = $params['isUpdateEmployment'];
-        $login_user_code = $params['login_user_code'];
-        $account_id = $params['account_id'];
-        $details = $params['details'];
-        $before_details = $params['before_details'];
-        $systemdate = Carbon::now();
-        try{
-            $department_code = null;
-            $employment_status = null;
-            $array_update = array();
-            if ($isUpdateDepartment) {
-                $department_code = $details['department_code'];
-                $array_update = array_merge($array_update, ['department_code' => $department_code]);
-            }
-            if ($isUpdateEmployment) {
-                $employment_status = $details['employment_status'];
-                $array_update = array_merge($array_update, ['employment_status' => $employment_status]);
-            }
-            // update項目があるか
-            if (count($array_update) > 0) {
-                $array_update = array_merge($array_update, ['updated_user' => $login_user_code]);
-                $array_update = array_merge($array_update, ['updated_at' => $systemdate]);
-                // 各テーブル部署雇用形態更新
-                // upDepartmentEmploymentTable implement
-                $array_impl_upDepartmentEmploymentTable = array (
-                    'isUpdateDepartment' => $isUpdateDepartment,
-                    'isUpdateEmployment' => $isUpdateEmployment,
-                    'login_user_code' => $login_user_code,
-                    'account_id' => $account_id,
-                    'details' => $details,
-                    'before_details' => $before_details,
-                    'array_update' => $array_update
-                );
-                $this->upDepartmentEmploymentTable($array_impl_upDepartmentEmploymentTable);
-            }
-        }catch(\PDOException $pe){
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "users", Config::get('const.LOG_MSG.data_access_error')));
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
 
 
 

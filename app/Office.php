@@ -263,7 +263,7 @@ class Office extends Model
     }
 
     /**
-     * 削除フラッグ
+     * 削除フラグ
      *
      * @return void
      */

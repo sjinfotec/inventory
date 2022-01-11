@@ -22,7 +22,7 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
-                    >営業所<span class="color-red">[必須]</span></span>
+                    >営業所<!--<span class="color-red">[必須]</span>--></span>
                   </div>
                   <select-officelist v-if="showofficelist"
                     ref="selectOfficeList"
@@ -206,27 +206,11 @@ export default {
       type: Array,
       default: []
     },
-    isexistdownload: {
-      type: String,
-      default: ""
-    },
     settingcompanies: {
       type: String,
       default: ""
     },
-    settingdepartments: {
-      type: String,
-      default: ""
-    },
     settingsettings: {
-      type: String,
-      default: ""
-    },
-    settingworkingtimetables: {
-      type: String,
-      default: ""
-    },
-    settingcalendarsettinginformations: {
       type: String,
       default: ""
     },
@@ -246,8 +230,6 @@ export default {
       listitemname: "",
       messagevalidatesNew: [],
       messagevalidatesEdt: [],
-      valuedepartment: "",
-      valuekillcheck: false,
       officeList: [],
       selectMode: "",
       details: [],
@@ -259,7 +241,9 @@ export default {
       confirmresult: true,
       oldId: "",
       infoMsgcnt: 0,
-      settingmessage: []
+      settingmessage: [],
+      actmode: "",
+      actvalue: ""
     };
   },
   methods: {
@@ -367,10 +351,11 @@ export default {
     
     // -------------------- サーバー処理 ----------------------------
     // 営業所取得処理
-    getOffice() {
+    getOffice(actvalue) {
       this.details = [];
       var messages = [];
-      this.postRequest("/create_office/get", { code : this.selectedValue})
+      console.log('CreateOffice getoffice act = ' + actvalue);
+      this.postRequest("/create_office/get", { code : this.selectedValue, actmode : actvalue})
         .then(response  => {
           this.getThen(response);
         })
@@ -406,9 +391,15 @@ export default {
     DelDetail(index) {
       var messages = [];
       var arrayParams = { id : this.details[index].id };
+      //this.selectedValue = value;
+      //this.selectedValue = 0;
+      var delmode = 1;
+      console.log('CreateOffice DelDetail go-in ');
+      console.log('CreateOffice DelDetail delmode = ' + delmode);
+
       this.postRequest("/create_office/del", arrayParams)
         .then(response  => {
-          this.putThenDetail(response, "削除");
+          this.delThenHead(response, "削除", delmode);
         })
         .catch(reason => {
           this.serverCatch("削除");
@@ -419,10 +410,10 @@ export default {
     getThen(response) {
       this.details = [];
       var res = response.data;
+
       if (res.result) {
         this.details = res.details;
         this.count = this.details.length;
-        this.before_count = this.count;
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("ERROR getThen", res.messagedata, "error", true, false);
@@ -446,16 +437,30 @@ export default {
         }
       }
     },
-    // 更新系正常処理（明細）
-    putThenDetail(response, eventtext) {
+    // 更新系正常処理
+    putThenDetail(response, eventtext, actmode) {
+      var messages = [];
+      var res = response.data;
+      if (res.result) {
+        this.$toasted.show("営業所を" + eventtext + "しました");
+        this.getOffice(actmode);
+        this.refreshOfficeList();
+      } else {
+        if (res.messagedata.length > 0) {
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
+        } else {
+          this.serverCatch(eventtext);
+        }
+      }
+    },
+    // 削除系正常処理
+    delThenHead(response, eventtext, actmode) {
       var messages = [];
       var res = response.data;
       if (res.result) {
         this.$toasted.show("営業所を" + eventtext + "しました");
         this.refreshOfficeList();
-        this.getOffice();
-        this.count = this.details.length;
-        this.before_count = this.count;
+        this.selectMode = "viewoff";
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
