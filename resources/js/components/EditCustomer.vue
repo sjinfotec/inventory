@@ -130,7 +130,7 @@
                     v-if="showofficelist"
                     v-bind:blank-data="true"
                     v-bind:placeholder-data="'営業所を選択してください'"
-                    v-bind:selected-value="selectedOfficeValue"
+                    v-bind:selected-value="form.office_code"
                     v-bind:add-new="false"
                     v-bind:date-value="''"
                     v-bind:row-index="0"
@@ -266,7 +266,7 @@
                     v-if="showofficelist"
                     v-bind:blank-data="true"
                     v-bind:placeholder-data="'営業所を選択してください'"
-                    v-bind:selected-value="selectedOfficeValue"
+                    v-bind:selected-value="form.office_code"
                     v-bind:add-new="false"
                     v-bind:date-value="''"
                     v-bind:row-index="0"
@@ -1018,7 +1018,7 @@ export default {
           this.serverCatch("顧客", CONST_KBNNAME_REG);
         });
     },
-    // 顧客更新処理（明細）
+    // 顧客更新処理
     FixDetail(kbnname, index) {
       var arrayParams = [];
       if (kbnname == CONST_KBNNAME_ADD) {
@@ -1034,7 +1034,7 @@ export default {
           this.serverCatch("顧客", CONST_KBNNAME_UPD);
         });
     },
-    // 顧客削除処理（明細）
+    // 顧客削除処理
     DelDetail(index) {
       var arrayParams = { details: this.details[index] };
       this.postRequest("/edit_customer/del", arrayParams)
