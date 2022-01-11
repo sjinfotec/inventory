@@ -16,6 +16,7 @@
               </div>
               <!-- /.panel header -->
             </div>
+            <!-- /row -->
             <!-- .row -->
             <div class="row">
               <div class="col-12">
@@ -94,7 +95,8 @@ export default {
       before_count: 0,
       details: [],
       isActiveKind: false,
-      work_kind: ""
+      work_kind: "",
+      page_no: 1
     };
   },
   computed: {
@@ -128,9 +130,9 @@ export default {
     // -------------------- サーバー処理 ----------------------------
     // 指示書／管理書取得
     getItem() {
-      console.log('getItem in ')
       var arrayParams = { 
-        order_no : ''
+        order_no : '',
+        page_no : this.page_no
         };
       this.postRequest("/process_view/get", arrayParams)
         .then(response  => {
@@ -146,6 +148,7 @@ export default {
       var res = response.data;
       if (res.result) {
         this.details = res.details;
+        this.page_no = res.page_no;
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
