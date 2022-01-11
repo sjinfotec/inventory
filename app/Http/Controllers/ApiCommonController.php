@@ -860,7 +860,7 @@ class ApiCommonController extends Controller
      * @return list customer
      */
     public function getOfficeList(Request $request){
-        Log::debug('getOfficeList in');
+        Log::debug('Api getOfficeList in');
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;

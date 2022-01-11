@@ -800,7 +800,7 @@ export default {
         this.form.office_code = this.searchedOfficeValue;
         console.log('selectmode = ' + this.selectMode);
         console.log('office_code = ' + this.searchedOfficeValue);
-        this.refresOfficeList();
+        this.refreshOfficeList();
       } else {
         this.selectMode = 'EDT';
         console.log('selectmode = ' + this.selectMode);
@@ -842,7 +842,6 @@ export default {
       this.messagevalidatesEdt = [];
       this.messagevalidatestimetable = [];
       var flag = this.checkFormStore();
-      this.form.role = 0;
       if (flag) {
         var messages = [];
         messages.push("この内容で登録しますか？");
@@ -853,19 +852,6 @@ export default {
             }
           }
         );
-        // 項目数が多い場合以下コメントアウト
-      } else {
-        this.countswal(
-          "エラー",
-          this.messagevalidatesNew,
-          "error",
-          true,
-          false,
-          true
-        ).then(result => {
-          if (result) {
-          }
-        });
       }
     },
     // 更新ボタンクリック処理
@@ -892,58 +878,6 @@ export default {
           result => {
             if (result) {
               this.FixDetail(CONST_KBNNAME_UPD, index);
-            }
-          }
-        );
-        // 項目数が多い場合以下コメントアウト
-      } else {
-        this.countswal(
-          "エラー",
-          this.messagevalidatesEdt,
-          "error",
-          true,
-          false,
-          true
-        ).then(result => {
-          if (result) {
-          }
-        });
-      }
-    },
-    // 追加ボタンクリック処理
-    addClick(index) {
-      this.messagevalidatesNew = [];
-      this.messagevalidatesEdt = [];
-      this.messagevalidatestimetable = [];
-      var msgCnt = 0;
-      var flag = this.checkFormFix(index);
-      if (flag) {
-        var messages = [];
-        if (this.details.length > 1) {
-          if (this.details[index].code != this.before_details[this.before_count - 1].code) {
-            msgCnt += 1;
-            messages.push(this.toWide(String(msgCnt)) + ". " + "ログインIDが変更されていますが、");
-            messages.push("以前のログインIDと別ユーザーで集計されます。");
-          }
-        }
-        if (
-          this.details[index].kill_from_date != "" &&
-          this.details[index].kill_from_date != null
-        ) {
-          msgCnt += 1;
-          messages.push(
-            this.toWide(String(msgCnt)) + ". " + "退職日が入力されているため入力日より退職扱いとなります。"
-          );
-        }
-        if (messages.length == 0) {
-          messages.push("この内容で追加しますか？");
-        } else {
-          messages.push("追加してよろしいですか？");
-        }
-        this.htmlMessageSwal(CONST_KBNNAME_CON, messages, "info", true, true).then(
-          result => {
-            if (result) {
-              this.FixDetail(CONST_KBNNAME_ADD, index);
             }
           }
         );
@@ -1055,26 +989,6 @@ export default {
         this.count = this.details.length;
       }
     },
-    // ICカード情報削除ボタンクリック処理
-    releaseclick(index) {
-      this.messagevalidatesNew = [];
-      this.messagevalidatesEdt = [];
-      this.messagevalidatestimetable = [];
-      var messages = [];
-      var item_name = this.jdgSearchItemInput();
-      if (item_name != null) {
-        messages.push(item_name + "が変更されていますが、");
-        messages.push("変更前の条件で解除します。");
-      }
-      messages.push("カード情報の紐づけを解除しますか？");
-      this.htmlMessageSwal(CONST_KBNNAME_CON, messages, "info", true, true).then(
-        result => {
-          if (result) {
-            this.ReleaseCard(CONST_KBNNAME_REL, index);
-          }
-        }
-      );
-    },
     // -------------------- サーバー処理 ----------------------------
     // 顧客取得処理
     getItem() {
@@ -1092,8 +1006,10 @@ export default {
     },
     // 顧客登録処理
     storeData() {
-      console.log('storeData password = ' + this.form.password);
-      var arrayParams = { details: this.form };
+      console.log('storeData office_code = ' + this.form.office_code);
+      console.log('storeData name = ' + this.form.name);
+      //var arrayParams = { details: this.form };
+      var arrayParams = { office_code : this.form.office_code, name : this.form.name, details: this.form};
       this.postRequest("/edit_customer/store", arrayParams)
         .then(response => {
           this.putThenHead(response, CONST_KBNNAME_REG);
@@ -1115,7 +1031,7 @@ export default {
           this.putThenDetail(response, kbnname);
         })
         .catch(reason => {
-          this.serverCatch("顧客", CONST_KBNNAME_REG);
+          this.serverCatch("顧客", CONST_KBNNAME_UPD);
         });
     },
     // 顧客削除処理（明細）
@@ -1154,67 +1070,6 @@ export default {
 
 
 
-    // モバイル端末へ打刻URL送信
-    sendUrl() {
-      const url = "/api/mail/inquiry";
-      const self = this;
-      this.messageshowsearch = true;
-      this.details.forEach(element => {
-        if (element.result == 1) {
-          this.latest_user_code = element.code;
-          this.mobile_address = element.mobile_email;
-        }
-      });
-      //axiosでPOST送信
-      axios
-        .post(url, {
-          email: this.mobile_address,
-          login_id: this.latest_user_code
-        })
-        .then(res => {
-          console.log(res);
-          if (res.data.result) {
-            //メール送信完了画面に遷移する
-            var messages = [];
-            messages.push(
-              "※メールが届かない場合は、お手数ですがご使用いただくモバイル端末のブラウザにて「https://onedawnm.onedawn.net」へ手動で接続して下さい。"
-            );
-            this.htmlMessageSwal("送信完了", messages, "success", true, false);
-          } else {
-            self.errors = res.data.errors;
-          }
-          this.messageshowsearch = false;
-        })
-        .catch(err => {
-          //例外処理を行う
-          console.log(err);
-          this.messageshowsearch = false;
-        });
-    },
-    // アップロード登録処理
-    usersUpload() {
-      // 処理中メッセージ表示
-      this.$swal({
-        title: "処　理　中...",
-        html: "",
-        allowOutsideClick: false, //枠外をクリックしても画面を閉じない
-        showConfirmButton: false,
-        showCancelButton: true,
-        onBeforeOpen: () => {
-          this.$swal.showLoading();
-          var arrayParams = { usersups: this.usersups };
-          this.postRequest("/edit_user/up", arrayParams)
-            .then(response => {
-              this.$swal.close();
-              this.putThenUp(response, CONST_KBNNAME_UPL);
-            })
-            .catch(reason => {
-              this.$swal.close();
-              this.serverCatch("ユーザ", CONST_KBNNAME_UPL);
-            });
-        }
-      });
-    },
 
     // ----------------- privateメソッド ----------------------------------
     // イベントログファイル操作
@@ -1278,24 +1133,6 @@ export default {
         99
       );
     },
-    // 取得正常処理（ユーザーリスト）
-    // getThenuser(response) {
-    //   this.details = [];
-    //   this.before_details = [];
-    //   var res = response.data;
-    //   if (res.result) {
-    //     this.details = res.details;
-    //     this.count = this.details.length;
-    //     this.before_details = res.details;
-    //     this.before_count = this.count;
-    //   } else {
-    //     if (res.messagedata.length > 0) {
-    //       this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
-    //     } else {
-    //       this.serverCatch("氏名", "取得");
-    //     }
-    //   }
-    // },
     // 取得正常処理（ユーザー）
     getThen(response) {
       this.details = [];
@@ -1327,7 +1164,7 @@ export default {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
-          this.serverCatch("営業所", "取得");
+          this.serverCatch("顧客", "取得");
         }
       }
     },
@@ -1337,62 +1174,20 @@ export default {
 
 
 
-    // 取得正常処理（明細部署選択リスト）
-    getThendepartment(response) {
-      var res = response.data;
-      if (res.result) {
-        this.departmentList = res.details;
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
-        } else {
-          this.serverCatch("部署", "取得");
-        }
-      }
-    },
-    // 取得正常処理（明細タイムテーブル対象選択リスト）
-    getThentimetable(response) {
-      var res = response.data;
-      if (res.result) {
-        this.timetableList = res.details;
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
-        } else {
-          this.serverCatch("明細タイムテーブル", "取得");
-        }
-      }
-    },
-    // 更新系正常処理
-    timputThenTimetable(response, eventtext) {
-      var messages = [];
-      var res = response.data;
-      if (res.result) {
-        messages.push("タイムテーブルを" + eventtext + "しました。");
-        this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
-        this.refreshUserList();
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
-        } else {
-          this.serverCatch("タイムテーブル", eventtext);
-        }
-      }
-    },
     // 更新系正常処理
     putThenHead(response, eventtext) {
       var messages = [];
       var res = response.data;
       if (res.result) {
-        messages.push("ユーザーを" + eventtext + "しました。");
+        messages.push("顧客を" + eventtext + "しました。");
         this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
-        this.refreshUserList();
-        //this.getNotSetting();
+        this.refreshOfficeList();
+        //this.refresCustomerlist();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
-          this.serverCatch("ユーザー", eventtext);
+          this.serverCatch("顧客ユーザー putThenHead", eventtext);
         }
       }
     },
@@ -1401,58 +1196,21 @@ export default {
       var messages = [];
       var res = response.data;
       if (res.result) {
-        this.$toasted.show("ユーザーを" + eventtext + "しました");
-        this.refreshUserList();
+        this.$toasted.show("顧客を" + eventtext + "しました");
+        this.refresCustomerlist();
+        this.refreshOfficeList();
+        //this.selectedOfficeValue = 0;
+        this.selectedCustomerValue = 0;
         this.getItem();
-        //this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
-          this.serverCatch("ユーザ", eventtext);
-        }
-      }
-    },
-    // カード解除正常処理（明細）
-    putThenCard(response, eventtext) {
-      var messages = [];
-      var res = response.data;
-      if (res.result) {
-        this.$toasted.show("ユーザーとカードの紐づけを解除しました");
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
-        } else {
-          this.serverCatch("ユーザ", eventtext);
-        }
-      }
-    },
-    // 更新系正常処理（アップロード）
-    putThenUp(response, eventtext) {
-      var messages = [];
-      var res = response.data;
-      if (res.result) {
-        this.$toasted.show("ユーザーを" + eventtext + "しました");
-        //this.getNotSetting();
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
-        } else {
-          this.serverCatch("ユーザー", eventtext);
+          this.serverCatch("顧客ユーザー putThenDetail", eventtext);
         }
       }
     },
     
-    // 設定要否取得処理
-    getNotSetting() {
-      if (this.infoMsgcnt > 1) { return; }
-      if (this.settingcalendarsettinginformations == 0) {
-        this.getThenCalendarSettingInfos();
-      } else if (this.isexistdownload == 0) {
-        this.getThenDownload();
-      }
-      this.infoMsgcnt++;
-    },
     // 異常処理
     serverCatch(kbn, eventtext) {
       var messages = [];
@@ -1497,7 +1255,7 @@ export default {
       return false;
     },
     // 最新リストの表示（営業所）
-    refresOfficeList() {
+    refreshOfficeList() {
       this.showofficelist = false;
       this.$nextTick(() => (this.showofficelist = true));
     },
@@ -1507,16 +1265,6 @@ export default {
       this.$nextTick(() => (this.showoCustomerlist = true));
     },
 
-    // 最新リストの表示（明細部署）
-    refreshaddDepartmentList() {
-      this.showadddepartmentlist = false;
-      this.$nextTick(() => (this.showadddepartmentlist = true));
-    },
-    // 最新リストの表示（明細部署）
-    refreshreleaseCardbottun() {
-      this.showrelease = false;
-      this.$nextTick(() => (this.showrelease = true));
-    },
     // 検索項目入力変更判定
     jdgSearchItemInput: function() {
       if (this.searchedOfficeValue != this.selectedOfficeValue) {

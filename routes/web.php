@@ -146,6 +146,13 @@ Route::post('/create_company_information/get', 'CreateCompanyInformationControll
 Route::post('/create_company_information/store', 'CreateCompanyInformationController@store')->middleware('auth');
 // カスタマ情報
 Route::post('/customer_information/get', 'CustomerInformationController@getCustomerInfo')->middleware('auth');
+// 営業所
+Route::get('/create_office', 'CreateOfficeController@index')->middleware('auth');
+Route::post('/create_office/get', 'CreateOfficeController@getDetails')->middleware('auth');
+Route::post('/create_office/store', 'CreateOfficeController@store')->middleware('auth');
+Route::post('/create_office/fix', 'CreateOfficeController@fix')->middleware('auth');
+Route::post('/create_office/del', 'CreateOfficeController@del')->middleware('auth');
+Route::post('/create_office/edit', 'CreateOfficeController@edit')->middleware('auth');
 // 部署
 Route::get('/create_department', 'CreateDepartmentController@index')->middleware('auth');
 Route::post('/create_department/get', 'CreateDepartmentController@getDetails')->middleware('auth');

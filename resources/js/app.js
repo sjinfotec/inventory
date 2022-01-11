@@ -214,6 +214,11 @@
  );
  // 顧客情報設定
  Vue.component("edit-customer", require("./components/EditCustomer.vue").default);
+ // 組織設定
+ Vue.component(
+    "create-office",
+    require("./components/CreateOffice.vue").default
+);
 
 
  // タイムテーブル設定
