@@ -980,8 +980,9 @@ return [
     ],
 
     // シリアル基準値
-    'SERIALDATA' => [
-        'excel_serial_base' => 25569        // excel日付シリアル基準値
+    'BASEVALUE' => [
+        'excel_serial_base' => 25569,       // excel日付シリアル基準値
+        'process_view_pagerow' => 8        // process_view 1ページ分行数
     ],
 
     // 作業種別

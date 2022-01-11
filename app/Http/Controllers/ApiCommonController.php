@@ -1982,6 +1982,66 @@ log::debug('lai = '.$login_account_id);
         $result = true;
         try {
             // パラメータチェック
+            $params = array();
+            $params_order_no = null;
+            $params_page_no = null;
+            if (isset($request->keyparams)) {
+                $params = $request->keyparams;
+                if (isset($params['order_no'])) {
+                    $params_order_no = $params['order_no'];
+                }
+                if (isset($params['page_no'])) {
+                    $params_page_no = $params['page_no'];
+                }
+            }
+            $array_impl_selectProcessView = array (
+                'order_no' => $params_order_no,
+                'page_no' => $params_page_no
+            );
+            $details = $this->selectProcessView($array_impl_selectProcessView);
+            $r_cnt = 0;
+            foreach($details as $item) {
+                $r_cnt++;
+                break;
+            }
+            if ($r_cnt == 0) { 
+                $params_page_no = 1;
+                $array_impl_selectProcessView = array (
+                    'order_no' => $params_order_no,
+                    'page_no' => $params_page_no
+                );
+                Log::debug('getProcessView $params_page_no = '.$params_page_no);
+                $details = $this->selectProcessView($array_impl_selectProcessView);
+            } else {
+                $params_page_no++;
+            }
+            return response()->json(
+                ['result' => true, 'details' => $details, 'page_no' => $params_page_no,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
+    /** 作業工程取得
+     *
+     * @return list customer
+     */
+    private function selectProcessView($params){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params_order_no = $params['order_no'];
+            $params_page_no = $params['page_no'];
             // ログインユーザの権限取得
             $user = Auth::user();
             $login_user_code = $user->code;
@@ -2028,13 +2088,17 @@ log::debug('lai = '.$login_account_id);
             $sqlString .= "  from ";
             $sqlString .= "  ".$this->table_process_histories." as t1 ";
             $sqlString .= "    inner join ";
-            $sqlString .= "      (select order_no, seq, max(process_history_no) as max_process_history_no ";
+            // $sqlString .= "      (select order_no, seq, max(process_history_no) as max_process_history_no ";
+            $sqlString .= "      (select order_no, seq, device_code, user_code, max(process_history_no) as max_process_history_no ";
             $sqlString .= "       from ".$this->table_process_histories;
             $sqlString .= "       where is_deleted = 0 ";
-            $sqlString .= "       group by order_no, seq, progress_no) as t2 ";
+            // $sqlString .= "       group by order_no, seq, progress_no) as t2 ";
+            $sqlString .= "       group by order_no, seq, device_code, user_code) as t2 ";
             $sqlString .= "    on ";
             $sqlString .= "      t1.order_no = t2.order_no";
             $sqlString .= "      and t1.seq = t2.seq";
+            $sqlString .= "      and t1.device_code = t2.device_code";
+            $sqlString .= "      and t1.user_code = t2.user_code";
             $sqlString .= "      and t1.process_history_no = t2.max_process_history_no";
             $sqlString .= "    left outer join ";
             $sqlString .= "      ".$this->table_progress_headers." as t3 ";
@@ -2054,6 +2118,9 @@ log::debug('lai = '.$login_account_id);
             $sqlString .= "      and t5.is_deleted = 0 ";
             $sqlString .= "  where ";
             $sqlString .= "    ? = ? ";
+            if (!empty($params_order_no)) {
+                $sqlString .= "    and t1.order_no = ? ";
+            }
             $sqlString .= "    and t1.process_history_time >= ? ";
             $sqlString .= "    and t1.process_history_time <= ? ";
             $sqlString .= "    and t1.is_deleted = ? ";
@@ -2061,18 +2128,26 @@ log::debug('lai = '.$login_account_id);
             $sqlString .= "  t1.order_no asc ";
             $sqlString .= " , t1.seq asc ";
             $sqlString .= " , t1.progress_no asc ";
+            if (!empty($params_page_no)) {
+                $sqlString .= "LIMIT ? ";
+                $sqlString .= "OFFSET ?";
+            }
             // バインド
             $array_setBindingsStr = array();
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            if (!empty($params_order_no)) {
+                $array_setBindingsStr[] = $params_order_no;
+            }
             $array_setBindingsStr[] = $dt->format('Y/m/d '.'00:00:00');
             $array_setBindingsStr[] = $dt->format('Y/m/d '.'23:59:59');
             $array_setBindingsStr[] = 0;
+            if (!empty($params_page_no)) {
+                $array_setBindingsStr[] = Config::get('const.BASEVALUE.process_view_pagerow');
+                $array_setBindingsStr[] = ($params_page_no - 1) * Config::get('const.BASEVALUE.process_view_pagerow');
+            }
             $details = DB::select($sqlString, $array_setBindingsStr);
-            return response()->json(
-                ['result' => true, 'details' => $details,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
+            return $details;
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());

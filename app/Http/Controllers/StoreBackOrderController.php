@@ -214,11 +214,11 @@ class StoreBackOrderController extends Controller
                 $backorder_model->setOutseqAttribute($item->out_seq);
                 $backorder_model->setOrdernoAttribute($item_backorder_order_no );
                 $backorder_model->setSeqAttribute($backorder_seq);
-                $backorder_model->setOrderdateAttribute(date('Ymd', ($item->order_date - (int)Config::get('const.SERIALDATA.excel_serial_base')) * 60 * 60 * 24));
+                $backorder_model->setOrderdateAttribute(date('Ymd', ($item->order_date - (int)Config::get('const.BASEVALUE.excel_serial_base')) * 60 * 60 * 24));
                 if (strpos($item->row_seq, "/")) {
                     $backorder_model->setRowseqAttribute($item->row_seq);
                 } else {
-                    $backorder_model->setRowseqAttribute(date('n/j', ($item->row_seq - (int)Config::get('const.SERIALDATA.excel_serial_base')) * 60 * 60 * 24));
+                    $backorder_model->setRowseqAttribute(date('n/j', ($item->row_seq - (int)Config::get('const.BASEVALUE.excel_serial_base')) * 60 * 60 * 24));
                 }
                 $backorder_model->setDrawingnoAttribute($item->drawing_no);
                 $backorder_model->setCustomernameAttribute($item->customer_name);
@@ -227,7 +227,7 @@ class StoreBackOrderController extends Controller
                 $backorder_model->setQualitynameAttribute($item->quality_name);
                 $backorder_model->setOrdercountAttribute($item->order_count);
                 if (is_numeric(substr($item->supply_date,0,1))) {
-                    $backorder_model->setSupplydateAttribute(date('Ymd', ($item->supply_date - (int)Config::get('const.SERIALDATA.excel_serial_base')) * 60 * 60 * 24));
+                    $backorder_model->setSupplydateAttribute(date('Ymd', ($item->supply_date - (int)Config::get('const.BASEVALUE.excel_serial_base')) * 60 * 60 * 24));
                 } else {
                     $backorder_model->setSupplydateAttribute($item->supply_date);
                 }

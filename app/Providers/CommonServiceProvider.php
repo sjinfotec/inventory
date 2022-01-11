@@ -45,7 +45,7 @@ class CommonServiceProvider extends ServiceProvider
         //     'edition' => Config::get('const.EDITION.EDITION')
         // ]);
         // View::share('account_datas', $account_data);
-        Log::debug('boot ip_address = '.$request-> ip());
+        // Log::debug('boot ip_address = '.$request-> ip());
 
         //menu selection
         $menu_model = new MenuItemSelection();

@@ -499,6 +499,8 @@ console.log('kindcolorArr[before_kindstatus] = ' + kindcolorArr[this.before_kind
           // 次工程の場合はcompleteで登録
           this.before_kind = "";
           this.form.kind = C_KIND_NEXT;
+          this.form.process_time_h = "";
+          this.form.process_time_m = "";
           var arrayParams = { form : this.form };
           console.log('putThen 2回目 ' + this.form.kind);
           this.postRequest("/process_history/put", arrayParams)

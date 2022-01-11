@@ -136,8 +136,10 @@ Route::post('/edit_customer/up', 'CustomerAddController@up')->middleware('auth')
 
 // 機器情報
 Route::get('/setting_device', 'SettingDeviceController@index')->middleware('auth');
-Route::post('/create_company_information/get', 'CreateCompanyInformationController@getCompanyInfo')->middleware('auth');
-Route::post('/create_company_information/store', 'CreateCompanyInformationController@store')->middleware('auth');
+Route::post('/setting_device/get', 'SettingDeviceController@get')->middleware('auth');
+Route::post('/setting_device/store', 'SettingDeviceController@store')->middleware('auth');
+Route::post('/setting_device/fix', 'SettingDeviceController@fix')->middleware('auth');
+Route::post('/setting_device/del', 'SettingDeviceController@del')->middleware('auth');
 // 会社情報
 Route::get('/create_company_information', 'CreateCompanyInformationController@index')->middleware('auth');
 Route::post('/create_company_information/get', 'CreateCompanyInformationController@getCompanyInfo')->middleware('auth');

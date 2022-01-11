@@ -43,7 +43,7 @@
         </div>
       </div>
       <!-- .panel -->
-      <div class="col-md-12 pt-3">
+      <div class="col-md-12 pt-3" v-if="selectMode!==''">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -85,7 +85,7 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-6 pb-2">
+              <div class="col-md-5 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
@@ -103,9 +103,16 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-3 pb-2">
+              <div class="col-md-2 pb-2">
                 <div class="input-group">
                   <a @click="qrcodeClick" class="btn btn-primary">QRコード作成</a>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-2 pb-2">
+                <div class="input-group">
+                  <a @click="qrcodePrintClick" class="btn btn-primary">QRコード印刷</a>
                 </div>
               </div>
               <!-- /.col -->
@@ -186,6 +193,18 @@
                 <btn-work-time
                   v-on:storeclick-event="storeclick"
                   v-bind:btn-mode="'store'"
+                ></btn-work-time>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div id="btn_cnt6" class="row justify-content-between  print-none" v-if="selectMode == 'EDT'">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <btn-work-time
+                  v-on:deleteclick-event="delclick"
+                  v-bind:btn-mode="'delete'"
                 ></btn-work-time>
               </div>
               <!-- /.col -->
@@ -361,10 +380,11 @@ export default {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
       this.selectedValue = value;
+      this.form.qrText1 = "";
       if (value == "" || value == null) {
-        this.addNew = true;
+        this.selectMode = 'NEW';
       } else {
-        this.addNew = false;
+        this.selectMode = 'EDT';
         this.form.code = arrayitem['code'];
         this.form.name = arrayitem['name'];
         this.form.floor_pos = arrayitem['floor_pos'];
@@ -374,13 +394,18 @@ export default {
     
     // QRコード作成ボタンクリック処理
     qrcodeClick() {
-      console.log('this.form.code = ' + this.form.code);
       this.form.qrText1 = "&device='" + this.form.code + "'";
       this.form.qrText2 = "";
       this.form.qrText3 = "";
       this.form.qrText9 = "";
-      console.log('this.form.qrText1 = ' + this.form.qrText1);
       this.$forceUpdate();
+    },
+    // QRコード印刷ボタンクリック処理
+    async qrcodePrintClick() {
+      await Promise.all([
+          this.qrcodeClick(),
+      ]);
+      await window.print();
     },
     // 新規作成ボタンクリック処理
     storeclick() {
@@ -396,28 +421,14 @@ export default {
         });
       }
     },
-    // 更新ボタンクリック処理
-    fixclick(index) {
-      var flag = this.checkFormFix(index);
-      if (flag) {
-        var messages = [];
-        messages.push("この内容で更新しますか？");
-        this.htmlMessageSwal("確認", messages, "info", true, true)
-          .then(result  => {
-            if (result) {
-              this.FixDetail("更新", index);
-            }
-        });
-      }
-    },
     // 削除ボタンクリック処理
-    delClick(index) {
+    delclick() {
       var messages = [];
       messages.push("この内容を削除しますか？");
       this.htmlMessageSwal("確認", messages, "info", true, true)
         .then(result  => {
           if (result) {
-            this.DelDetail(index);
+            this.DelDetail();
           }
       });
     },
@@ -438,33 +449,21 @@ export default {
     store() {
       var messages = [];
       var arrayParams = { code : this.form.code, name : this.form.name };
-      this.postRequest("/create_device/store", arrayParams)
+      this.postRequest("/setting_device/store", arrayParams)
         .then(response  => {
-          this.putThenHead(response, "登録");
+          this.putThen(response, "登録");
         })
         .catch(reason => {
           this.serverCatch("登録");
         });
     },
-    // 機器更新処理（明細）
-    FixDetail(kbnname, index) {
+    // 機器削除処理
+    DelDetail() {
       var messages = [];
-      var arrayParams = { details : this.details[index] };
-      this.postRequest("/create_device/fix", arrayParams)
+      var arrayParams = { code : this.form.code };
+      this.postRequest("/setting_device/del", arrayParams)
         .then(response  => {
-          this.putThenDetail(response, kbnname);
-        })
-        .catch(reason => {
-          this.serverCatch(kbnname);
-        });
-    },
-    // 機器削除処理（明細）
-    DelDetail(index) {
-      var messages = [];
-      var arrayParams = { id : this.details[index].id };
-      this.postRequest("/create_device/del", arrayParams)
-        .then(response  => {
-          this.putThenDetail(response, "削除");
+          this.putThen(response, "削除");
         })
         .catch(reason => {
           this.serverCatch("削除");
@@ -488,13 +487,12 @@ export default {
       }
     },
     // 更新系正常処理
-    putThenHead(response, eventtext) {
+    putThen(response, eventtext) {
       var messages = [];
       var res = response.data;
       if (res.result) {
         this.$toasted.show("機器を" + eventtext + "しました");
         this.refreshtdeviceList();
-        this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -502,42 +500,6 @@ export default {
           this.serverCatch(eventtext);
         }
       }
-    },
-    // 更新系正常処理（明細）
-    putThenDetail(response, eventtext) {
-      var messages = [];
-      var res = response.data;
-      if (res.result) {
-        this.$toasted.show("機器を" + eventtext + "しました");
-        this.refreshtdeviceList();
-        this.getdevice();
-        this.count = this.details.length;
-        this.before_count = this.count;
-        this.getNotSetting();
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
-        } else {
-          this.serverCatch(eventtext);
-        }
-      }
-    },
-    
-    // 設定要否取得処理
-    getNotSetting() {
-      if (this.infoMsgcnt > 1) { return; }
-      if (this.settingsettings == 0) {
-        this.getThenSetting();
-      } else if (this.settingworkingtimetables == 0) {
-        this.getThenWorkingtimetables();
-      } else if (this.settingusers == 0) {
-        this.getThenUsers();
-      } else if (this.settingcalendarsettinginformations == 0) {
-        this.getThenCalendarSettingInfos();
-      } else if (this.isexistdownload == 0) {
-        this.getThenDownload();
-      }
-      this.infoMsgcnt++;
     },
     // 異常処理
     serverCatch(eventtext) {
@@ -556,12 +518,6 @@ export default {
       this.selectMode = "";
       this.count = 0;
       this.before_count = 0;
-    },
-    checkRowData(index) {
-      if (this.details[index].apply_term_from != "" && this.details[index].apply_term_from != null) { return true; }
-      if (this.details[index].kill_from_date != "" && this.details[index].kill_from_date != null) { return true; }
-      if (this.details[index].name != "" && this.details[index].name != null) { return true; }
-      return false;
     },
     refreshtdeviceList() {
       // 最新リストの表示
