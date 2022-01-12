@@ -22,7 +22,7 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
-                    >部署選択<span class="color-red">[必須]</span></span>
+                    >部署選択<!--<span class="color-red">[必須]</span>--></span>
                   </div>
                   <select-departmentlist v-if="showdepartmentlist"
                     ref="selectdepartmentlist"
@@ -590,7 +590,6 @@ export default {
       if (res.result) {
         this.$toasted.show("部署を" + eventtext + "しました");
         this.refreshtDepartmentList();
-        this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -609,7 +608,6 @@ export default {
         this.getDepartment();
         this.count = this.details.length;
         this.before_count = this.count;
-        this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -619,22 +617,6 @@ export default {
       }
     },
     
-    // 設定要否取得処理
-    getNotSetting() {
-      if (this.infoMsgcnt > 1) { return; }
-      if (this.settingsettings == 0) {
-        this.getThenSetting();
-      } else if (this.settingworkingtimetables == 0) {
-        this.getThenWorkingtimetables();
-      } else if (this.settingusers == 0) {
-        this.getThenUsers();
-      } else if (this.settingcalendarsettinginformations == 0) {
-        this.getThenCalendarSettingInfos();
-      } else if (this.isexistdownload == 0) {
-        this.getThenDownload();
-      }
-      this.infoMsgcnt++;
-    },
     // 異常処理
     serverCatch(eventtext) {
       var messages = [];

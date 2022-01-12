@@ -22,7 +22,7 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
-                    >雇用形態選択<span class="color-red">[必須]</span></span>
+                    >雇用形態選択<!--<span class="color-red">[必須]</span>--></span>
                   </div>
                   <select-employmentstatuslist v-if="showemploymentlist"
                     ref="selectemploymentlist"
@@ -376,7 +376,7 @@ export default {
       var arrayParams = { id : this.details[index].id };
       this.postRequest("/setting_employment/del", arrayParams)
         .then(response  => {
-          this.putThenDetail(response, "削除");
+          this.delThenHead(response, "削除");
         })
         .catch(reason => {
           this.serverCatch("削除");
@@ -432,6 +432,23 @@ export default {
         }
       }
     },
+        // 削除系正常処理
+    delThenHead(response, eventtext, actmode) {
+      var messages = [];
+      var res = response.data;
+      if (res.result) {
+        this.$toasted.show("雇用形態を" + eventtext + "しました");
+        this.refreshtemploymentList();
+        this.selectMode = "viewoff";
+      } else {
+        if (res.messagedata.length > 0) {
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
+        } else {
+          this.serverCatch(eventtext);
+        }
+      }
+    },
+
     // 異常処理
     serverCatch(eventtext) {
       var messages = [];

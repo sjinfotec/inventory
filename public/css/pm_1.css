@@ -903,6 +903,16 @@ white-space: nowrap;
     flex: 0 0 28%;
     max-width: 28%;
   }
+
+  .col-cnt_08 {
+    flex: 0 0 25%;
+    max-width: 25%;
+  }
+  .col-cnt_09 {
+    flex: 0 0 35%;
+    max-width: 35%;
+  }
+  
   #view_off {
     display:block;
   }
