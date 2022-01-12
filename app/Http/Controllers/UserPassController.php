@@ -70,13 +70,17 @@ class UserPassController extends Controller
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                 );
             }
+            Log::debug('passChange pass_word = '.$params['user_id']);
+            Log::debug('passChange pass_word = '.$params['pass_word']);
             $pass_word = bcrypt($params['pass_word']);
             $code = $params['user_id'];
             $systemdate = Carbon::now();
             $authuser = Auth::user();
             $user_code = $authuser->code;
-            $user_accout_id = $authuser->accout_id;
+            // $user_accout_id = $authuser->accout_id;
+            $user_accout_id = Config::get('const.ACCOUNTID.account_id');
             $users = new UserModel();
+            Log::debug('passChange $authuser->accout_id = '.$authuser->accout_id);
             $users->setParamAccountidAttribute($user_accout_id);
             $users->setCodeAttribute($code);
             $users->setPasswordAttribute($pass_word);
