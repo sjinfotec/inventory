@@ -249,46 +249,16 @@
 
                     <!-- .row -->
                     <div id="input-area_3" class="row justify-content-between">
-                      <!-- .col -->
-                      <div class="col-md-6 pb-2">
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <span
-                              class="input-group-text font-size-sm line-height-xs label-width-180"
-                              id="basic-addon1"
-                            >
-                              営業所
-                              <span class="color-red">[必須]</span>
-                            </span>
-                          </div>
-                  <select-officelist
-                    ref="selectofficelist"
-                    v-if="showofficelist"
-                    v-bind:blank-data="true"
-                    v-bind:placeholder-data="'営業所を選択してください'"
-                    v-bind:selected-value="form.office_code"
-                    v-bind:add-new="false"
-                    v-bind:date-value="''"
-                    v-bind:row-index="0"
-                  ></select-officelist>
-<!--
-                          <select class="custom-select" v-model="item.office_code">
-                            <option value></option>
-                            <option
-                              v-for="dlist in officeList"
-                              :value="dlist.code"
-                              v-bind:key="dlist.code"
-                            >{{ dlist.name }}</option>
-                          </select>
--->
-                        </div>
-                      </div>
-                      <!-- /.col -->
-
 
                       <!-- .col -->
-                      <div class="col-md-6 pb-2">
+                      <div class="col-md-12 pb-2">
                         <div class="input-group">
+                          <input
+                            type="hidden"
+                            class="form-control"
+                            v-model="item.office_code"
+                            name="office_code"
+                          />
                           <div class="input-group-prepend">
                             <span
                               class="input-group-text font-size-sm line-height-xs label-width-180"
@@ -571,6 +541,7 @@ export default {
       showofficelist: true,
       showoCustomerlist: true,
       selectedOfficeValue: "",
+      selectedOfficeValue_fix: "",
       selectedCustomerValue: "",
       selectedCustomerName: "",
 
@@ -769,6 +740,13 @@ export default {
     addofficeChanges: function(value, arrayitem) {
       this.form.office_code = value;
     },
+    // 編集営業所選択が変更された場合の処理
+    fixofficeChanges: function(value, arrayitem) {
+      this.form.office_code = value;
+      this.selectedOfficeValue = value;
+      console.log('fixofficeChanges selectedOfficeValue = ' + this.selectedOfficeValue);
+      console.log('fixofficeChanges form.office_code = ' + this.form.office_code);
+    },
     // 選択が変更された場合の処理
     timetablechkptnChanges: function(value, index) {
       if (index == 0) {
@@ -859,6 +837,7 @@ export default {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
       this.messagevalidatestimetable = [];
+
       var flag = this.checkFormFix(index);
       var msgCnt = 0;
       if (flag) {
@@ -916,79 +895,6 @@ export default {
         }
       );
     },
-    // プラス追加ボタンクリック処理
-    appendRowClick: function() {
-      this.messagevalidatesNew = [];
-      this.messagevalidatesEdt = [];
-      this.messagevalidatestimetable = [];
-      if (this.before_count < this.count) {
-        var messages = [];
-        messages.push(
-          "１度に追加できる情報は１個です。追加してから再実行してください"
-        );
-        this.htmlMessageSwal("エラー", messages, "error", true, false);
-      } else {
-        var add_apply_term_from = this.details[0].apply_term_from;
-        var add_kill_from_date = this.details[0].kill_from_date;
-        var add_card_idm = this.details[0].card_idm;
-        var add_code = this.details[0].code;
-        var add_department_code = this.details[0].department_code;
-        var add_employment_status = this.details[0].employment_status;
-        var add_name = this.details[0].name;
-        var add_kana = this.details[0].kana;
-        var add_short_name = this.details[0].short_name;
-        var add_official_position = this.details[0].official_position;
-        var add_working_timetable_no = this.details[0].working_timetable_no;
-        var add_email = this.details[0].email;
-        var add_mobile_email = this.details[0].mobile_email;
-        var add_management = this.details[0].management;
-        var add_role = this.details[0].role;
-        var add_password = this.details[0].password;
-        this.object = {
-          id: "",
-          code: add_code,
-          department_code: add_department_code,
-          employment_status: add_employment_status,
-          name: add_name,
-          kana: add_kana,
-          short_name: add_short_name,
-          official_position: add_official_position,
-          working_timetable_no: add_working_timetable_no,
-          email: add_email,
-          mobile_email: add_mobile_email,
-          password: add_password,
-          management: add_management,
-          role: add_role,
-          card_idm: add_card_idm,
-          apply_term_from: "",
-          kill_from_date: add_kill_from_date,
-          result: "2"
-        };
-        this.details.unshift(this.object);
-        this.count = this.details.length;
-      }
-    },
-    // 行削除ボタンクリック処理
-    rowDelClick: function(index) {
-      this.messagevalidatesNew = [];
-      this.messagevalidatesEdt = [];
-      this.messagevalidatestimetable = [];
-      if (this.checkRowData(index)) {
-        var messages = [];
-        messages.push("履歴追加取り消ししてよろしいですか？");
-        this.htmlMessageSwal(CONST_KBNNAME_CON, messages, "info", true, true).then(
-          result => {
-            if (result) {
-              this.details.splice(index, 1);
-              this.count = this.details.length;
-            }
-          }
-        );
-      } else {
-        this.details.splice(index, 1);
-        this.count = this.details.length;
-      }
-    },
     // -------------------- サーバー処理 ----------------------------
     // 顧客取得処理
     getItem() {
@@ -1021,11 +927,12 @@ export default {
     // 顧客更新処理
     FixDetail(kbnname, index) {
       var arrayParams = [];
-      if (kbnname == CONST_KBNNAME_ADD) {
-        arrayParams = { details: this.details[index], before_details: [] };
-      } else {
-        arrayParams = { details: this.details[index], before_details: this.before_details[index] };
-      }
+      //console.log('FixDetail go-in ');
+      //arrayParams = { details: this.details[index] };
+      //console.log('FixDetail selectedOfficeValue = ' + this.selectedOfficeValue);
+      //console.log('FixDetail form.office_code = ' + this.form.office_code);
+
+      arrayParams = { office_code : this.form.office_code, name : this.form.name, details: this.details[index]};
       this.postRequest("/edit_customer/fix", arrayParams)
         .then(response => {
           this.putThenDetail(response, kbnname);
@@ -1040,6 +947,9 @@ export default {
       this.postRequest("/edit_customer/del", arrayParams)
         .then(response => {
           this.putThenDetail(response, CONST_KBNNAME_DEL);
+          this.selectMode = "viewoff";
+        this.newItemClear();
+
         })
         .catch(reason => {
           this.serverCatch("顧客", CONST_KBNNAME_DEL);
@@ -1133,7 +1043,7 @@ export default {
         99
       );
     },
-    // 取得正常処理（ユーザー）
+    // 取得正常処理
     getThen(response) {
       this.details = [];
       this.count = 0;
@@ -1153,8 +1063,6 @@ export default {
         }
       }
     },
-
-
     // 取得正常処理（客先選択リスト）
     getThencustomer(response) {
       var res = response.data;
@@ -1168,12 +1076,6 @@ export default {
         }
       }
     },
-
-
-
-
-
-
     // 更新系正常処理
     putThenHead(response, eventtext) {
       var messages = [];
@@ -1183,6 +1085,9 @@ export default {
         this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
         this.refreshOfficeList();
         //this.refresCustomerlist();
+        this.selectMode = "viewoff";
+      this.getCustomerSelected(this.form.office_code);
+
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -1198,11 +1103,14 @@ export default {
       if (res.result) {
         this.$toasted.show("顧客を" + eventtext + "しました");
         this.refresCustomerlist();
-        this.refreshOfficeList();
+        //this.refreshOfficeList();
         //this.selectedOfficeValue = 0;
-        this.selectedCustomerValue = 0;
-        this.getItem();
-      } else {
+        //this.selectedCustomerValue = 0;
+        this.getCustomerSelected(this.form.office_code);
+        this.getCustomerList("");
+
+        //this.getItem();
+              } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {

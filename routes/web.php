@@ -129,7 +129,7 @@ Route::post('/edit_customer/store', 'CustomerAddController@store')->middleware('
 Route::post('/edit_customer/get', 'CustomerAddController@getCustomerDetails')->middleware('auth');
 Route::post('/edit_customer/del', 'CustomerAddController@del')->middleware('auth');
 Route::post('/edit_customer/edit', 'CustomerAddController@edit')->middleware('auth');
-Route::post('/edit_customer/fix', 'CustomerAddController@fixUser')->middleware('auth');
+Route::post('/edit_customer/fix', 'CustomerAddController@fix')->middleware('auth');
 // Route::post('/edit_customer/fixtimetable', 'CustomerAddController@fixTimetable')->middleware('auth');
 Route::post('/edit_customer/release_card_info', 'CustomerAddController@releaseCardInfo')->middleware('auth');
 Route::post('/edit_customer/up', 'CustomerAddController@up')->middleware('auth');

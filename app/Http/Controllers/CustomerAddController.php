@@ -201,10 +201,11 @@ class CustomerAddController extends Controller
      * @param Request $request
      * @return response
      */
-    public function fixUser(Request $request){
+    public function fix(Request $request){
         $this->array_messagedata = array();
         $details = array();
         $result = true;
+        Log::debug('CustomerAddController fix in ');
         try {
             // パラメータチェック
             $params = array();
@@ -268,6 +269,7 @@ class CustomerAddController extends Controller
             $apply_term_from = $temp_from;
             $customer_model->setCodeAttribute($data['code']);
             $customer_model->setOfficecodeAttribute($data['office_code']);
+            //$customer_model->setOfficecodeAttribute($office_code);
             $customer_model->setNameAttribute($data['name']);
             $temp_from = Config::get('const.INIT_DATE.maxdate');
             Log::debug('CustomerAddController update code = '.$data['code']);
