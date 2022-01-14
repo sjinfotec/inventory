@@ -71,8 +71,8 @@ class EditWorkOrderController extends Controller
         if (isset($request->seq)) {
             $seq = $request->seq;
         }
-        Log::debug('edithome $request->seq = '.$request->seq);
-        Log::debug('edithome $seq = '.$seq);
+        // Log::debug('edithome $request->seq = '.$request->seq);
+        // Log::debug('edithome $seq = '.$seq);
         $authusers = Auth::user();
         $login_user_code = $authusers->code;
         $accountid = $authusers->account_id;

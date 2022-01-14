@@ -582,6 +582,10 @@ white-space: nowrap;
   #table_cnt4 td {
   font-size:2rem;
 }
+#table_cnt4 .td_complete {
+  background:#6cb2eb;
+  color:#FFF;
+  }
 #table_cnt4 .textwrap {
   white-space: normal;
   overflow-wrap: break-word;

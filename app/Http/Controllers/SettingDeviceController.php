@@ -125,8 +125,8 @@ class SettingDeviceController extends Controller
             }
             $code = $params['code'];
             $name = $params['name'];
-            Log::debug('settingdevicecontroller store code = '.$code);
-            Log::debug('settingdevicecontroller store name = '.$name);
+            // Log::debug('settingdevicecontroller store code = '.$code);
+            // Log::debug('settingdevicecontroller store name = '.$name);
             // 登録済みか判断
             $device_model = new Device();
             $device_model->setParamCodeAttribute(sprintf('%06d', $code));

@@ -17,8 +17,11 @@
                         <td class="w2 text-center align-middle">{{ form.item_data[index] }}</td>
                       </tr>
                       <tr>
-                        <td class="text-center align-middle"><div id="pview_status" v-if="maketime">時間入力</div></td>
-                        <td>
+                        <td class="text-center align-middle">
+                          <div id="pview_status" v-if="maketime">時間入力</div>
+                          <div id="pview_status" v-else>経過時間</div>
+                        </td>
+                        <td class="text-center align-middle">
                           <div id="input_cnt1" v-if="maketime">
                           加工時間
                               <span class="input_w1">
@@ -39,6 +42,16 @@
                                 />
                               </span>
                               <span class="input_w2">M</span>
+                          </div>
+                          <div v-else>
+                            <div v-if="formatTimer">
+                              <span>{{ timerStrings[0] }}</span>
+                              <span>H</span>
+                              <span>{{ timerStrings[1] }}</span>
+                              <span>M</span>
+                              <span>{{ timerStrings[2] }}</span>
+                              <span>S</span>
+                            </div>
                           </div>
                         </td>
                       </tr>
@@ -194,7 +207,7 @@ const C_OUTLINE_NAME = "明細摘要";
 const C_DEVICE_NAME = "機器名";
 const C_USER_NAME = "作業者";
 const C_KIND_INI = "1";
-const C_KIND_INI_NAME = "";
+const C_KIND_INI_NAME = "作業準備";
 const C_KIND_START = "2";
 const C_KIND_START_NAME = "作業開始";
 const C_KIND_STOP = "3";
@@ -205,7 +218,7 @@ const C_KIND_COMPLETE = "5";
 const C_KIND_COMPLETE_NAME = "作業完了";
 const C_KIND_NEXT = "6";
 const C_KIND_NEXT_NAME = "次工程";
-const kindcolorArr = {"":"#FFF", "作業開始":"#80bb60", "作業中断":"#dd6060", "ミス中断":"#dd6060", "作業完了":"#6cb2eb", "次工程":"#eeaa00" };
+const kindcolorArr = {"作業準備":"#FFF", "作業開始":"#80bb60", "作業中断":"#dd6060", "ミス中断":"#dd6060", "作業完了":"#6cb2eb", "次工程":"#eeaa00" };
 
 export default {
   name: "ProcessInfo",
@@ -256,9 +269,35 @@ export default {
       kindstatus: "",
       mode_button: "",
       work_kind: "",
+      hour: 0,
+      min: 0,
+      sec: 0,
+      timerOn: false,
+      timerObj: null,
+      timerStrings: [],
+
     };
   },
   computed: {
+    // タイマー表示
+    formatTimer() {
+      this.timerStrings = [
+        this.hour.toString(),
+        this.min.toString(),
+        this.sec.toString()
+      ].map(function(str) {
+        if (str.length < 2) {
+          return "0" + str
+        } else {
+          return str
+        }
+      })
+      if (this.hour > 0 || this.min > 0 || this.sec > 0) {
+        return true;
+      } else {
+        return false;
+      }
+    }
   },
   // マウント時
   mounted() {
@@ -300,6 +339,8 @@ export default {
       this.before_kindstatus = this.kindstatus;
       this.isbtnctrl = 'comple';
       this.form.kind = C_KIND_COMPLETE;
+      this.form.process_time_h = this.hour;
+      this.form.process_time_m = this.min;
       this.setKind();
       this.form.item_name[this.kind_index] = this.kind_name;
       this.maketime = true;
@@ -379,6 +420,34 @@ console.log('kindcolorArr[before_kindstatus] = ' + kindcolorArr[this.before_kind
         table_cnt3.style.color = '#212529';
       }
       this.kindstatus = this.before_kindstatus;
+    },
+    // 作業タイマー開始処理
+    startTimer() {
+      let $this = this;
+      this.timerObj = setInterval(function() {$this.setTimer()}, 1000)
+      this.timerOn = true; //timerがONであることを状態として保持
+    },
+    // 作業タイマー終了処理
+    stopTimer() {
+      clearInterval(this.timerObj);
+      this.timerOn = false; //timerがOFFであることを状態として保持
+    },
+    // タイマー設定処理
+    setTimer() {
+      if (this.sec >= 59) {
+        if (this.min >= 59) {
+          this.hour++;
+          this.min = 0;
+          this.sec = 0;
+        } else {
+          if (this.sec >= 59) {
+            this.min++;
+            this.sec = 0;
+          }
+        }
+      } else {
+        this.sec++;
+      }
     },
     // -------------------- サーバー処理 ----------------------------
     // 指示書／管理書取得
@@ -472,7 +541,18 @@ console.log('kindcolorArr[before_kindstatus] = ' + kindcolorArr[this.before_kind
           $this.kind_index = set_index;
           // $this.kindstatus = $this.kind_name;
           $this.work_kind = detail.work_kind;
+          console.log('getThen detail.process_time_h = ' + detail.process_time_h);
+          console.log('getThen detail.process_time_m = ' + detail.process_time_m);
+          $this.hour = detail.process_time_h;
+          $this.min = detail.process_time_m;
+          $this.sec = 0;
         });
+        //  作業開始、再開はタイマー起動する
+        if (this.form.kind == C_KIND_START) {
+          this.startTimer();
+        } else {
+          this.stopTimer();
+        }
         this.form_count = set_index + 1;
         this.setKind();
         if (this.isbtnctrl == '') {
@@ -496,13 +576,12 @@ console.log('kindcolorArr[before_kindstatus] = ' + kindcolorArr[this.before_kind
       if (res.result) {
         console.log('putThen this.before_kind = ' + this.before_kind);
         if (this.before_kind == C_KIND_NEXT) {
-          // 次工程の場合はcompleteで登録
+          // 次工程の場合はcompleteで事前登録しているので2回目nextで登録する
           this.before_kind = "";
           this.form.kind = C_KIND_NEXT;
           this.form.process_time_h = "";
           this.form.process_time_m = "";
           var arrayParams = { form : this.form };
-          console.log('putThen 2回目 ' + this.form.kind);
           this.postRequest("/process_history/put", arrayParams)
             .then(response => {
               this.putThen(response, "登録");
@@ -564,7 +643,8 @@ console.log('kindcolorArr[before_kindstatus] = ' + kindcolorArr[this.before_kind
         default:
           this.kind_name = C_KIND_INI_NAME;
           this.kindstatus = this.kind_name;
-      	  //target.style.background = '#FFF';
+          this.form.item_name[this.kind_index] = this.kind_name;
+      	  // target.style.background = '#FFF';
           break;
       }
       console.log('setKind out = ' + this.kind_name);

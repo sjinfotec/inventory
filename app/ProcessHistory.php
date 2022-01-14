@@ -460,7 +460,7 @@ class ProcessHistory extends Model
             if (!empty($this->param_device_code)) {
                 $sqlString .= "    and t1.device_code = ?" ;
             }
-            if (!empty($this->param_users_code)) {
+            if (!empty($this->param_user_code)) {
                 $sqlString .= "    and t1.user_code = ?" ;
             }
             if (!empty($this->param_progress_no)) {
@@ -486,8 +486,8 @@ class ProcessHistory extends Model
             if (!empty($this->param_device_code)) {
                 $array_setBindingsStr[] = $this->param_device_code;
             }
-            if (!empty($this->param_users_code)) {
-                $array_setBindingsStr[] = $this->param_users_code;
+            if (!empty($this->param_user_code)) {
+                $array_setBindingsStr[] = $this->param_user_code;
             }
             if (!empty($this->param_progress_no)) {
                 $array_setBindingsStr[] = $this->param_progress_no;
@@ -535,6 +535,44 @@ class ProcessHistory extends Model
         }catch(\Exception $e){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$e');
             Log::error($e->getMessage());
+        }
+    }
+
+    /**
+     * 編集（加工時間）
+     *
+     * @return void
+     */
+    public function updateProcessTime(){
+        Log::debug('mobile updateProcessTime $param_order_no = '.$this->param_order_no);
+        Log::debug('mobile updateProcessTime $param_seq = '.$this->param_seq);
+        Log::debug('mobile updateProcessTime $param_device_code = '.$this->param_device_code);
+        Log::debug('mobile updateProcessTime $param_user_code = '.$this->param_user_code);
+        Log::debug('mobile updateProcessTime $param_process_seq = '.$this->param_process_seq);
+        Log::debug('mobile updateProcessTime $param_process_history_no = '.$this->param_process_history_no);
+        try {
+            DB::table($this->table)
+            ->where('order_no', $this->param_order_no)
+            ->where('seq', $this->param_seq)
+            ->where('device_code', $this->param_device_code)
+            ->where('user_code', $this->param_user_code)
+            ->where('process_seq', $this->param_process_seq)
+            ->where('process_history_no', $this->param_process_history_no)
+            ->update([
+                'process_time_m' => $this->process_time_m,
+                'process_time_h' => $this->process_time_h,
+                'updated_user'=>$this->updated_user,
+                'updated_at' => $this->updated_at
+                ]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
         }
     }
 

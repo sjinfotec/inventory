@@ -311,6 +311,41 @@ class MobileAccessController extends Controller
             $process_histories_model->setCreateduserAttribute($login_user_code);
             $process_histories_model->setCreatedatAttribute(Carbon::now());
             $process_histories_model->insert();
+            // 更新後加工時間を自動計算する（入力されている場合($process_time_h != 0 || $process_time_m != 0)は入力値のまま）
+            if ($process_time_h == 0 && $process_time_m == 0) {
+                $api_common = new ApiCommonController();
+                $array_impl_calcProcessTime = array (
+                    'order_no' => $order_no,
+                    'seq' => $seq,
+                    'device_code' => $device_code,
+                    'user_code' => $user_code,
+                    'progress_no' => $progress_no
+                );
+                $calcdifftime = $api_common->calcProcessTime($array_impl_calcProcessTime);
+                Log::debug('mobile putProcessHistory $calcdifftime = '.$calcdifftime);
+                $process_time_h = (int)($calcdifftime / 60 / 60);
+                $process_time_m = ($calcdifftime - ($process_time_h * 60 * 60)) / 60;
+                Log::debug('mobile putProcessHistory $process_time_h = '.$process_time_h);
+                Log::debug('mobile putProcessHistory $process_time_m = '.$process_time_m);
+                // 加工時間変わったためprocess_historiesを更新する
+                $process_histories_model->setParamOrdernoAttribute($order_no);
+                $process_histories_model->setParamSeqAttribute($seq);
+                $process_histories_model->setParamProcesseqAttribute($process_seq);
+                $process_histories_model->setParamProcesshistorynoAttribute($process_history_no);
+                $process_histories_model->setParamDevicecodeAttribute($device_code);
+                $process_histories_model->setParamUsercodeAttribute($user_code);
+                Log::debug('mobile putProcessHistory $order_no = '.$order_no);
+                Log::debug('mobile putProcessHistory $seq = '.$seq);
+                Log::debug('mobile putProcessHistory $process_seq = '.$process_seq);
+                Log::debug('mobile putProcessHistory $process_history_no = '.$process_history_no);
+                Log::debug('mobile putProcessHistory $device_code = '.$device_code);
+                Log::debug('mobile putProcessHistory $user_code = '.$user_code);
+                $process_histories_model->setProcessTimeHAttribute($process_time_h);
+                $process_histories_model->setProcessTimeMAttribute($process_time_m);
+                $process_histories_model->setUpdateduserAttribute($login_user_code);
+                $process_histories_model->setUpdatedatAttribute(Carbon::now());
+                $process_histories_model->updateProcessTime();
+            }
             // 指示書／管理書の明細に登録する
             $progress_details_model->setOrdernoAttribute($order_no);
             $progress_details_model->setSeqAttribute($seq);
@@ -325,23 +360,6 @@ class MobileAccessController extends Controller
             $progress_details_model->setProcesshistorynoAttribute($process_history_no);
             $progress_details_model->setWorkkindAttribute($work_kind);
             if ($work_kind == Config::get('const.WORKKINDS.complete')) {
-                if ($process_time_h == 0 && $process_time_m == 0) {
-                    // 加工時間を自動計算する
-                    $api_common = new ApiCommonController();
-                    $array_impl_calcProcessTime = array (
-                        'order_no' => $order_no,
-                        'seq' => $seq,
-                        'device_code' => $device_code,
-                        'user_code' => $user_code,
-                        'progress_no' => $progress_no
-                    );
-                    $calcdifftime = $api_common->calcProcessTime($array_impl_calcProcessTime);
-                    Log::debug('mobile putProcessHistory $calcdifftime = '.$calcdifftime);
-                    $process_time_h = (int)($calcdifftime / 60 / 60);
-                    $process_time_m = ($calcdifftime - ($process_time_h * 60 * 60)) / 60;
-                    Log::debug('mobile putProcessHistory $process_time_h = '.$process_time_h);
-                    Log::debug('mobile putProcessHistory $process_time_m = '.$process_time_m);
-                }
                 // 完了日設定
                 $dt = new Carbon();
                 $complete_date = $dt->format('Ymd');
