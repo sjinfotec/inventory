@@ -917,8 +917,8 @@ class ApiCommonController extends Controller
             $login_user_code = $user->code;
             $login_account_id = $user->account_id;
 
-log::debug('luc = '.$login_user_code);
-log::debug('lai = '.$login_account_id);
+Log::debug('luc = '.$login_user_code);
+Log::debug('lai = '.$login_account_id);
     
             $mainQuery = DB::table($this->table_customers)
                 ->select($this->table_customers.'.code',$this->table_customers.'.name');
@@ -1810,7 +1810,6 @@ log::debug('lai = '.$login_account_id);
             $sqlString .= "  , t2.setup_time_h as setup_time_h ";
             $sqlString .= "  , t2.complete_date as complete_date ";
             $sqlString .= "  , t2.qr_code as qr_code ";
-            $sqlString .= "  , t2.process_time_h as process_time_h ";
             $sqlString .= "  , t3.name as office_name ";
             $sqlString .= "  , t4.name as customer_name ";
             $sqlString .= "  , t5.name as product_name ";
@@ -1829,6 +1828,7 @@ log::debug('lai = '.$login_account_id);
             $sqlString .= "    on ";
             $sqlString .= "      t1.order_no = t2.order_no ";
             $sqlString .= "      and t1.seq = t2.seq ";
+            $sqlString .= "      and t2.work_kind < 6 ";
             $sqlString .= "      and t1.is_deleted = 0 ";
             $sqlString .= "      and t2.is_deleted = 0 ";
             $sqlString .= "    left outer join ";
@@ -2050,7 +2050,7 @@ log::debug('lai = '.$login_account_id);
             $dt = new Carbon();
             $sqlString = "";
             $sqlString .= "select ";
-            $sqlString .= "  date_format(t3.supply_date,'%m月%d日') as supply_date_name ";
+            $sqlString .= "  date_format(t3.supply_date,'%m/%d') as supply_date_name ";
             $sqlString .= "  , left(t3.back_order_customer_name,5) as back_order_customer_name ";
             $sqlString .= "  , t1.order_no as order_no ";
             $sqlString .= "  , t1.seq as seq ";
@@ -2089,16 +2089,18 @@ log::debug('lai = '.$login_account_id);
             $sqlString .= "  ".$this->table_process_histories." as t1 ";
             $sqlString .= "    inner join ";
             // $sqlString .= "      (select order_no, seq, max(process_history_no) as max_process_history_no ";
-            $sqlString .= "      (select order_no, seq, device_code, user_code, max(process_history_no) as max_process_history_no ";
+            // $sqlString .= "      (select order_no, seq, device_code, user_code, max(process_history_no) as max_process_history_no ";
+            $sqlString .= "      (select order_no, seq, max(process_history_no) as max_process_history_no ";
             $sqlString .= "       from ".$this->table_process_histories;
             $sqlString .= "       where is_deleted = 0 ";
             // $sqlString .= "       group by order_no, seq, progress_no) as t2 ";
-            $sqlString .= "       group by order_no, seq, device_code, user_code) as t2 ";
+            // $sqlString .= "       group by order_no, seq, device_code, user_code) as t2 ";
+            $sqlString .= "       group by order_no, seq) as t2 ";
             $sqlString .= "    on ";
             $sqlString .= "      t1.order_no = t2.order_no";
             $sqlString .= "      and t1.seq = t2.seq";
-            $sqlString .= "      and t1.device_code = t2.device_code";
-            $sqlString .= "      and t1.user_code = t2.user_code";
+            // $sqlString .= "      and t1.device_code = t2.device_code";
+            // $sqlString .= "      and t1.user_code = t2.user_code";
             $sqlString .= "      and t1.process_history_no = t2.max_process_history_no";
             $sqlString .= "    left outer join ";
             $sqlString .= "      ".$this->table_progress_headers." as t3 ";
@@ -2196,6 +2198,8 @@ log::debug('lai = '.$login_account_id);
             $calc_diff_fromtime = null;
             $calc_diff_totime = null;
             foreach($result_details as $item) {
+                Log::debug('apicommon calcProcessTime $item->work_kind = '.$item->work_kind);
+                Log::debug('apicommon calcProcessTime $item->process_history_time = '.$item->process_history_time);
                 Log::debug('apicommon calcProcessTime $calc_diff_fromtime = '.$calc_diff_fromtime);
                 Log::debug('apicommon calcProcessTime $calc_diff_totime = '.$calc_diff_totime);
                 switch ($item->work_kind) {
@@ -2247,6 +2251,12 @@ log::debug('lai = '.$login_account_id);
                 }
             }
             Log::debug('apicommon calcProcessTime $calc_diff_totaltime = '.$calc_diff_totaltime);
+            // トータル時間0で開始時刻のみの場合は現在時刻で計算
+            if ($calc_diff_totaltime == 0) {
+                if ($calc_diff_fromtime != null && $calc_diff_totime == null) {
+                    $calc_diff_totaltime = $this->diffTimeSerial($calc_diff_fromtime, $calc_diff_totime);
+                }
+            }
             return $calc_diff_totaltime;
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_insert_error')).'$pe');
@@ -4764,9 +4774,22 @@ log::debug('lai = '.$login_account_id);
      * @return 時間差
      */
     public function diffTimeSerial($time_from, $time_to){
-        $from = strtotime(date('Y-m-d H:i:00',strtotime($time_from)));
-        $to   = strtotime(date('Y-m-d H:i:00',strtotime($time_to))); 
+        $from = null;
+        $to = null;
+        Log::debug('apicommon diffTimeSerial $time_from = '.$time_from);
+        Log::debug('apicommon diffTimeSerial $time_to = '.$time_to);
+        if ($time_from == null || $time_from == "") {
+            $from = strtotime(date('Y-m-d H:i:00', strtotime('now')));
+        } else {
+            $from = strtotime(date('Y-m-d H:i:00',strtotime($time_from)));
+        }
+        if ($time_to == null || $time_to == "") {
+            $to = strtotime(date('Y-m-d H:i:00', strtotime('now')));
+        } else {
+            $to = strtotime(date('Y-m-d H:i:00',strtotime($time_to))); 
+        }
         $interval = $to - $from;
+        Log::debug('apicommon diffTimeSerial $interval = '.$interval);
         return $interval;
     }
     

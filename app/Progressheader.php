@@ -1160,6 +1160,8 @@ class Progressheader extends Model
             $sqlString .= "  , ( select name from ".$this->table_users." where code = ".$this->param_user_code." ) as user_name" ;
             $sqlString .= "  , case ifnull(t5.work_kind ,'') when '' then '".Config::get('const.WORKKINDS.init')."'" ;
             $sqlString .= "    else t5.work_kind end as work_kind" ;
+            $sqlString .= "  , ifnull(t5.process_time_h ,0) as process_time_h ";
+            $sqlString .= "  , ifnull(t5.process_time_m ,0) as process_time_m ";
             $sqlString .= "  from" ;
             $sqlString .= "  ".$this->table." as t1" ;
             $sqlString .= "  left outer join" ;
@@ -1193,6 +1195,8 @@ class Progressheader extends Model
             $sqlString .= "        , t1.user_code as user_code ";
             $sqlString .= "        , t1.process_history_no as process_history_no ";
             $sqlString .= "        , t1.work_kind as work_kind ";
+            $sqlString .= "        , t1.process_time_h as process_time_h ";
+            $sqlString .= "        , t1.process_time_m as process_time_m ";
             $sqlString .= "        , t1.is_deleted as is_deleted  ";
             $sqlString .= "      from process_histories as t1 ";
             $sqlString .= "        inner join (  ";

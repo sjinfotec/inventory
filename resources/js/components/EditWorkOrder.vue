@@ -793,7 +793,7 @@
                   <td class="frame_wh1" v-for="(n,index1) in 4" :key="index1">
                     <div class="flex1" v-if="form.total.process_total_short_name_1[index1]">
                       <div class="cnt2_name">{{ form.total.process_total_short_name_1[index1] }}</div>
-                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_1[index1]">
+                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_1[index1] || form.total.process_result_process_time_m_1[index2]">
                         <span class="str01">{{ form.total.process_result_process_time_h_1[index1] }}H</span>
                         <span class="str01">{{ form.total.process_result_process_time_m_1[index1] }}M</span></div>
                     </div>
@@ -827,7 +827,7 @@
                   <td class="frame_wh1" v-for="(n,index2) in 4" :key="index2">
                     <div class="flex1" v-if="form.total.process_total_short_name_2[index2]">
                       <div class="cnt2_name">{{ form.total.process_total_short_name_2[index2] }}</div>
-                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_2[index2]">
+                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_2[index2] || form.total.process_result_process_time_m_2[index2]">
                         <span class="str01">{{ form.total.process_result_process_time_h_2[index2] }}H</span>
                         <span class="str01">{{ form.total.process_result_process_time_m_2[index2] }}M</span></div>
                     </div>
@@ -855,7 +855,7 @@
                   <td class="frame_wh1" v-for="(n,index3) in 4" :key="index3">
                     <div class="flex1" v-if="form.total.process_total_short_name_3[index3]">
                       <div class="cnt2_name">{{ form.total.process_total_short_name_3[index3] }}</div>
-                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_3[index3]">
+                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_3[index3] || form.total.process_result_process_time_m_3[index2]">
                         <span class="str01">{{ form.total.process_result_process_time_h_3[index3] }}H</span>
                         <span class="str01">{{ form.total.process_result_process_time_m_3[index3] }}M</span></div>
                     </div>
@@ -875,7 +875,7 @@
                   <td class="frame_wh1" v-for="(n,index4) in 4" :key="index4">
                     <div class="flex1" v-if="form.total.process_total_short_name_4[index4]">
                       <div class="cnt2_name">{{ form.total.process_total_short_name_4[index4] }}</div>
-                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_4[index4]">
+                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_4[index4] || form.total.process_result_process_time_m_4[index2]">
                         <span class="str01">{{ form.total.process_result_process_time_h_4[index4] }}H</span>
                         <span class="str01">{{ form.total.process_result_process_time_m_4[index4] }}M</span></div>
                     </div>
@@ -1265,7 +1265,7 @@ export default {
     this.index_or_home = this.indexorhome;
     // 1:index 2:homeindex
     if (this.index_or_home == CONST_INDEXORHOME_HOME) {
-      console.log('EditWorkOrder getItem ');
+      // console.log('EditWorkOrder getItem ');
       this.getItem();
     }
     this.getDeviceList();
@@ -1293,7 +1293,7 @@ export default {
         flag  = false;
       }
 
-      console.log('checkForm this.form.order_no = ' + this.form.order_no)
+      // console.log('checkForm this.form.order_no = ' + this.form.order_no)
       if (this.form.order_no == "" || this.form.order_no == null) {
         this.messagedataorderno.push("受注番号は必ず入力してください");
       }
@@ -1433,7 +1433,7 @@ export default {
     // 素材納入営業所が変更された場合の処理
     materialofficeChanges: function(value, arrayitem) {
       this.form.m_office_code = value;
-      console.log('materialofficeChanges this.form.m_office_code = ' + this.form.m_office_code);
+      // console.log('materialofficeChanges this.form.m_office_code = ' + this.form.m_office_code);
       // 客先選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
       this.getMaterialCustomerSelected(this.form.m_office_code);
@@ -1484,7 +1484,7 @@ export default {
     },
     // 加工者が変更された場合の処理
     usercodeChanges: function(value , index) {
-      console.log('usercodeChanges = value = ' + value);
+      // console.log('usercodeChanges = value = ' + value);
       this.form.process_user_name[index] = value;
     },
     // 加工時間が変更された場合の処理
@@ -1650,7 +1650,7 @@ export default {
     // 登録処理
     storeData() {
       this.form.supply_date = moment(this.valuesupplydate).format("YYYYMMDD");
-      console.log('storeData this.form.processes_code = ' + this.form.processes_code);
+      // console.log('storeData this.form.processes_code = ' + this.form.processes_code);
       var arrayParams = { form : this.form };
       this.postRequest("/edit_work_order/put_process", arrayParams)
         .then(response => {
@@ -1737,7 +1737,7 @@ export default {
           this.form.seq = this.details[0]['seq'];
           this.form.order_date = this.details[0]['order_date'];
           this.form.order_kingaku = this.details[0]['order_kingaku'];
-          console.log('getThen this.details[0][save_sheet] = ' + this.details[0]['save_sheet']);
+          // console.log('getThen this.details[0][save_sheet] = ' + this.details[0]['save_sheet']);
           this.form.save_sheet = this.details[0]['save_sheet'];
           this.form.processes_code = this.details[0]['processes_code'];
           this.form.back_order_customer_name = this.details[0]['back_order_customer_name'];
@@ -2100,10 +2100,10 @@ export default {
       for (let index1 = 0; index1 < 12; index1++) {
         isSet = false;
         if (this.form.process_user_name[index1] != "") {
-          console.log('calcTimes process_user_name ' + this.form.process_user_name[index1]);
+          // console.log('calcTimes process_user_name ' + this.form.process_user_name[index1]);
           for (let index2 = 0; index2 < 4; index2++) {
             if (!isSet) {
-              console.log('calcTimes this.form.total.process_total_user_name_1[index2] ' + this.form.total.process_total_user_name_1[index2]);
+              // console.log('calcTimes this.form.total.process_total_user_name_1[index2] ' + this.form.total.process_total_user_name_1[index2]);
               if (this.form.total.process_total_user_name_1[index2] != "") {
                 if (this.form.total.process_total_user_name_1[index2] == this.form.process_user_name[index1]) {
                   this.form.total.process_result_process_time_h_1[index2] += Number(this.form.process_time_h[index1]);
@@ -2113,11 +2113,16 @@ export default {
               }
             }
             if (!isSet) {
-              console.log('calcTimes this.form.total.process_total_user_name_2[index2] ' + this.form.total.process_total_user_name_2[index2]);
+              // console.log('calcTimes this.form.total.process_total_user_name_2[index2]  = [' + this.form.total.process_total_user_name_2[index2] + ']');
               if (this.form.total.process_total_user_name_2[index2] != "") {
+                // console.log('calcTimes this.form.process_user_name[index1] = [' + this.form.process_user_name[index1] + ']');
                 if (this.form.total.process_total_user_name_2[index2] == this.form.process_user_name[index1]) {
+                  // console.log('calcTimes this.form.process_time_h[index1] ' + this.form.process_time_h[index1]);
+                  // console.log('calcTimes this.form.process_time_m[index1] ' + this.form.process_time_m[index1]);
                   this.form.total.process_result_process_time_h_2[index2] += Number(this.form.process_time_h[index1]);
                   this.form.total.process_result_process_time_m_2[index2] += Number(this.form.process_time_m[index1]);
+                  // console.log('calcTimes this.form.total.process_result_process_time_h_2[index2] ' + this.form.total.process_result_process_time_h_2[index2]);
+                  // console.log('calcTimes this.form.total.process_result_process_time_m_2[index2] ' + this.form.total.process_result_process_time_m_2[index2]);
                   isSet = true;
                 }
               }
@@ -2142,7 +2147,7 @@ export default {
             }
           }
           if (!isSet) {
-            console.log('calcTimes this.form.total.process_total_cnt ' + this.form.total.process_total_cnt);
+            // console.log('calcTimes this.form.total.process_total_cnt ' + this.form.total.process_total_cnt);
             if (this.form.total.process_total_cnt < 4) {
               if (this.form.process_user_name[index1] != null && this.form.process_user_name[index1] != "") {
                 this.form.total.process_total_user_name_1[this.form.total.process_total_cnt] = this.form.process_user_name[index1];
@@ -2152,12 +2157,12 @@ export default {
               this.form.total.process_total_cnt +=1;
             } else {
               if (this.form.total.process_total_cnt < 8) {
-                console.log('calcTimes this.form.process_user_name[index1] ' + this.form.process_user_name[index1]);
+                // console.log('calcTimes this.form.process_user_name[index1] ' + this.form.process_user_name[index1]);
                 if (this.form.process_user_name[index1] != null && this.form.process_user_name[index1] != "") {
                   this.form.total.process_total_user_name_2[this.form.total.process_total_cnt - 4] = this.form.process_user_name[index1];
                   this.form.total.process_result_process_time_h_2[this.form.total.process_total_cnt - 4] += Number(this.form.process_time_h[index1]);
                   this.form.total.process_result_process_time_m_2[this.form.total.process_total_cnt - 4] += Number(this.form.process_time_m[index1]);
-                  console.log('calcTimes this.form.total.process_total_user_name_2[this.form.total.process_total_cnt - 4] ' + this.form.total.process_total_user_name_2[this.form.total.process_total_cnt - 4]);
+                  // console.log('calcTimes this.form.total.process_total_user_name_2[this.form.total.process_total_cnt - 4] ' + this.form.total.process_total_user_name_2[this.form.total.process_total_cnt - 4]);
                 }
                 this.form.total.process_total_cnt +=1;
               } else {
@@ -2237,7 +2242,7 @@ export default {
         }
         i = i + 1;
       });
-      console.log('setProductProcessTable this.form.processes_code = ' + this.form.processes_code);
+      // console.log('setProductProcessTable this.form.processes_code = ' + this.form.processes_code);
       this.$forceUpdate();
     },
     // 最新リストの表示
