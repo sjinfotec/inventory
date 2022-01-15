@@ -45,6 +45,7 @@ class SettingDeviceController extends Controller
         $this->array_messagedata = array();
         $details = array();
         $result = true;
+        //Log::debug('settingdevicecontroller get in ');
         try {
             // パラメータチェック
             $params = array();
@@ -69,7 +70,6 @@ class SettingDeviceController extends Controller
             $device_model = new Device();
             $device_model->setParamCodeAttribute(sprintf('%06d', $code));
             $details = $device_model->getDevice();
-    
             return response()->json(
                 ['result' => $result, 'details' => $details,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
@@ -125,6 +125,7 @@ class SettingDeviceController extends Controller
             }
             $code = $params['code'];
             $name = $params['name'];
+            $symbol = $params['symbol'];
             // Log::debug('settingdevicecontroller store code = '.$code);
             // Log::debug('settingdevicecontroller store name = '.$name);
             // 登録済みか判断
@@ -132,11 +133,12 @@ class SettingDeviceController extends Controller
             $device_model->setParamCodeAttribute(sprintf('%06d', $code));
             $result_exists = $device_model->existsDevice();
             if (!$result_exists) {
-                $this->insert($code, $name);
+                $this->insert($code, $name, $symbol);
             } else {
                 $array_impl_fixdata = array (
                     'code' => $code,
-                    'name' => $name
+                    'name' => $name,
+                    'symbol' => $symbol
                 );
                 $this->fixData($array_impl_fixdata);
             }
@@ -160,7 +162,7 @@ class SettingDeviceController extends Controller
      * @param [type] $code_name
      * @return void
      */
-    private function insert($code, $name){
+    private function insert($code, $name, $symbol){
         DB::beginTransaction();
         try{
             $systemdate = Carbon::now();
@@ -169,6 +171,7 @@ class SettingDeviceController extends Controller
             $user_code = $user->code;
             $device_model->setCodeAttribute(sprintf('%06d', $code));
             $device_model->setNameAttribute($name);
+            $device_model->setSymbolAttribute($symbol);
             $device_model->setFloorposAttribute($code);
             $device_model->setCreateduserAttribute($user_code);
             $device_model->setCreatedatAttribute($systemdate);
@@ -251,6 +254,7 @@ class SettingDeviceController extends Controller
             $device_model->setParamCodeAttribute(sprintf('%06d', $details['code']));
             $device_model->setCodeAttribute(sprintf('%06d', $details['code']));
             $device_model->setNameAttribute($details['name']);
+            $device_model->setSymbolAttribute($details['symbol']);
             $device_model->setFloorposAttribute($details['code']);
             $device_model->setUpdateduserAttribute($user_code);
             $device_model->setUpdatedatAttribute($systemdate);

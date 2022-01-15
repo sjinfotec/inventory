@@ -20,6 +20,7 @@ class Device extends Model
     private $id;                              // ID
     private $code;                              // 機器コード
     private $name;                              // 機器名
+    private $symbol;                              // 略号
     private $floor_pos;                              // 設置位置
     private $created_user;                              // 作成ユーザー
     private $updated_user;                              // 修正ユーザー
@@ -56,6 +57,16 @@ class Device extends Model
     public function setNameAttribute($value)
     {
         $this->name = $value;
+    }
+    //略号
+    public function getSymbolAttribute()
+    {
+        return $this->symbol;
+    }
+
+    public function setSymbolAttribute($value)
+    {
+        $this->symbol = $value;
     }
     //設置位置
     public function getFloorposAttribute()
@@ -121,6 +132,7 @@ class Device extends Model
     private $param_id;                              // ID
     private $param_code;                              // 機器コード
     private $param_name;                              // 機器名
+    private $param_symbol;                              // 略号
     private $param_floor_pos;                              // 設置位置
     private $param_created_user;                              // 作成ユーザー
     private $param_updated_user;                              // 修正ユーザー
@@ -158,6 +170,16 @@ class Device extends Model
     public function setParamNameAttribute($value)
     {
         $this->param_name = $value;
+    }
+    //略号
+    public function getParamSymbolAttribute()
+    {
+        return $this->param_symbol;
+    }
+
+    public function setParamSymbolAttribute($value)
+    {
+        $this->param_symbol = $value;
     }
     //設置位置
     public function getParamFloorposAttribute()
@@ -232,6 +254,7 @@ class Device extends Model
                     $this->table.'.id',
                     $this->table.'.code as code',
                     $this->table.'.name as name',
+                    $this->table.'.symbol as symbol',
                     $this->table.'.floor_pos as floor_pos',
                     $this->table.'.is_deleted as is_deleted'
                 );
@@ -284,6 +307,7 @@ class Device extends Model
                 [
                     'code' => $this->code,
                     'name' => $this->name,
+                    'symbol' => $this->symbol,
                     'floor_pos' => $this->floor_pos,
                     'created_user'=>$this->created_user,
                     'created_at'=>$this->created_at
@@ -313,6 +337,7 @@ class Device extends Model
             ->update([
                 'code' => $this->code,
                 'name' => $this->name,
+                'symbol' => $this->symbol,
                 'updated_user'=>$this->updated_user,
                 'updated_at'=>$this->updated_at
         ]

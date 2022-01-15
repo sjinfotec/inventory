@@ -1084,7 +1084,7 @@ Log::debug('lai = '.$login_account_id);
             $login_account_id = $user->account_id;
 
             $mainQuery = DB::table($this->table_devices)
-                ->select($this->table_devices.'.code',$this->table_devices.'.name',$this->table_devices.'.floor_pos');
+                ->select($this->table_devices.'.code',$this->table_devices.'.name',$this->table_devices.'.symbol',$this->table_devices.'.floor_pos');
             if (isset($product_code)) {
                 $mainQuery->where($this->table_devices.'.code', '=',$device_code);
             }

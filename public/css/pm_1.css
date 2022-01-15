@@ -591,19 +591,39 @@ white-space: nowrap;
   overflow-wrap: break-word;
 }
 
+/*-- 納期 --*/			
 #table_cnt4 td.w1 {
  width:5em;
 }
+/*-- 客先 --*/
 #table_cnt4 td.w2 {
-  width:5.2em;
+  width:10.2em;
  }
+ /*-- 品名 --*/
+ #table_cnt4 td.w5 {
+  width:18em;
+}
+/*-- 機器名（略号） --*/
+ #table_cnt4 td.w6 {
+  width:8em;
+}
+/*-- 作業者名 --*/
  #table_cnt4 td.w7 {
-  width:4em;
+  width:5em;
 }
+/*-- 状況 --*/
 #table_cnt4 td.w8 {
-  width:3em;
+  width:5em;
 }
- 
+
+#table_cnt4 .overflowhidden1 {
+  width:16em;
+  overflow: hidden;
+  margin:auto;
+  text-align:left;
+}
+
+
 /*--------------------## table progress header  (TOP page) ##--------------------*/
 #search_btn_cnt {
   display:flex;
