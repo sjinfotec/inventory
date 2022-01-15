@@ -354,8 +354,8 @@ export default {
   mounted() {
     //this.valuesupplydate = this.defaultDate;
     this.valuesupplydate = null;
-    console.log('mounted defaultDate = ' + this.defaultDate);
-    console.log('mounted valuesupplydate = ' + this.valuesupplydate);
+    // console.log('mounted defaultDate = ' + this.defaultDate);
+    // console.log('mounted valuesupplydate = ' + this.valuesupplydate);
     var date = new Date();
 
     if (this.targetFromDate == null || this.targetFromDate == "") {
@@ -364,7 +364,7 @@ export default {
       this.valuesupplydate = this.targetFromDate;
       this.targetFromYmd = moment(this.targetFromDate).format("YYYYMMDD");
     }
-    console.log('mounted targetFromYmd = ' + this.targetFromYmd);
+    // console.log('mounted targetFromYmd = ' + this.targetFromYmd);
     if (this.targetToDate == null || this.targetToDate == "") {
       this.targetToYmd = null;
     } else {
@@ -375,7 +375,7 @@ export default {
     this.value_order_no = null;
     this.value_drawing_no = null;
     this.getItem();
-    console.log('mounted valuesupplydate = ' + this.valuesupplydate);
+    // console.log('mounted valuesupplydate = ' + this.valuesupplydate);
     if (this.valuesupplydate == null || this.valuesupplydate == "") {
     this.targetFromYmd = null;
     } else {
@@ -408,11 +408,11 @@ export default {
     },
       // 営業所選択が変更された場合の処理
     officeChanges: function(value, arrayitem) {
-      console.log('officeChanges value = ' + value);
+      // console.log('officeChanges value = ' + value);
       this.selectedOfficeValue = value;
       // 客先選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
-      console.log('officeChanges this.selectedOfficeValue = ' + this.selectedOfficeValue);
+      // console.log('officeChanges this.selectedOfficeValue = ' + this.selectedOfficeValue);
       this.getCustomerSelected(this.selectedOfficeValue);
     },
     // 客先選択が変更された場合の処理
@@ -445,12 +445,12 @@ return;
       var value_targetToYmd = null;
       value_targetFromYmd = this.targetFromYmd;
       value_targetToYmd = this.targetToYmd;
-      console.log('getItem value_targetFromYmd = ' + value_targetFromYmd);
-      console.log('getItem value_targetToYmd = ' + value_targetToYmd);
-      console.log('getItem this.selectedOfficeValue = ' + this.selectedOfficeValue);
-      console.log('getItem this.selectedCustomerValue = ' + this.selectedCustomerValue);
-      console.log('getItem this.value_order_no = ' + this.value_order_no);
-      console.log('getItem this.value_drawing_no = ' + this.value_drawing_no);
+      // console.log('getItem value_targetFromYmd = ' + value_targetFromYmd);
+      // console.log('getItem value_targetToYmd = ' + value_targetToYmd);
+      // console.log('getItem this.selectedOfficeValue = ' + this.selectedOfficeValue);
+      // console.log('getItem this.selectedCustomerValue = ' + this.selectedCustomerValue);
+      // console.log('getItem this.value_order_no = ' + this.value_order_no);
+      // console.log('getItem this.value_drawing_no = ' + this.value_drawing_no);
       // 処理中メッセージ表示
       this.$swal({
         title: "処　理　中...",
@@ -487,7 +487,7 @@ return;
     },
     // 客先選択コンポーネント取得メソッド
     getCustomerSelected: function(value) {
-      console.log('getCustomerSelected value = ' + value);
+      // console.log('getCustomerSelected value = ' + value);
       this.$refs.selectcustomerlist.getList(value);
     },
     // 取得正常処理（ユーザー）

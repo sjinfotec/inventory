@@ -153,7 +153,7 @@ class ApiCommonController extends Controller
      * @return string サブクエリー
      */
     public function getUserApplyTermSubquery($targetdate, $account_id){
-        Log::debug('getUserApplyTermSubquery account_id = '.$account_id);
+        // Log::debug('getUserApplyTermSubquery account_id = '.$account_id);
         try {
             // 適用期間日付の取得
             $dt = null;
@@ -740,10 +740,10 @@ class ApiCommonController extends Controller
             $user = Auth::user();
             $login_user_code = $user->code;
             $login_account_id = $user->account_id;
-            Log::debug('getDepartmentList login_user_code = '.$login_user_code);
-            Log::debug('getDepartmentList login_account_id = '.$login_account_id);
+            // Log::debug('getDepartmentList login_user_code = '.$login_user_code);
+            // Log::debug('getDepartmentList login_account_id = '.$login_account_id);
             $role = $this->getUserRole($login_user_code, $target_date);
-            Log::debug('getDepartmentList role = '.$role);
+            // Log::debug('getDepartmentList role = '.$role);
             if(!isset($role)) {
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_setting_role');
                 // エラー追加 20200121
@@ -770,7 +770,7 @@ class ApiCommonController extends Controller
                 $feature_model->setParamaccountidAttribute($login_account_id);
             }
             $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
-            Log::debug('getDepartmentList calc_list_allselect = '.Config::get('const.FEATUREITEM.calc_list_allselect'));
+            // Log::debug('getDepartmentList calc_list_allselect = '.Config::get('const.FEATUREITEM.calc_list_allselect'));
             $feature_model->setParamitemcodeAttribute(Config::get('const.FEATUREITEM.calc_list_allselect'));
             $feature_data = $feature_model->getItem();
             $calc_list_allselect = true;
@@ -779,17 +779,17 @@ class ApiCommonController extends Controller
                 break;
             }
             $role_general_user = false;
-            Log::debug('getDepartmentList role = '.$role);
-            Log::debug('getDepartmentList general_user = '.Config::get('const.C025.general_user'));
+            // Log::debug('getDepartmentList role = '.$role);
+            // Log::debug('getDepartmentList general_user = '.Config::get('const.C025.general_user'));
             if($role == Config::get('const.C025.general_user')){
-                Log::debug('getDepartmentList calc_list_allselect = '.$calc_list_allselect);
+                // Log::debug('getDepartmentList calc_list_allselect = '.$calc_list_allselect);
                 if (!$calc_list_allselect) {
-                    Log::debug('getDepartmentList role_general_user true = ');
+                    // Log::debug('getDepartmentList role_general_user true = ');
                     $role_general_user = true;
                 }
             }
 
-            Log::debug('getDepartmentList role_general_user = '.$role_general_user);
+            // Log::debug('getDepartmentList role_general_user = '.$role_general_user);
             if($role_general_user){
                 $mainQuery = DB::table($this->table_departments)
                     ->JoinSub($subquery1, 't1', function ($join) { 
@@ -838,7 +838,7 @@ class ApiCommonController extends Controller
                         ->orderby($this->table_departments.'.code','asc');
                 }
                 $details = $mainQuery->get();
-                Log::debug('getDepartmentList details = '.count($details));
+                // Log::debug('getDepartmentList details = '.count($details));
             }
             return response()->json(
                 ['result' => true, 'details' => $details,
@@ -860,7 +860,7 @@ class ApiCommonController extends Controller
      * @return list customer
      */
     public function getOfficeList(Request $request){
-        Log::debug('Api getOfficeList in');
+        // Log::debug('Api getOfficeList in');
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
@@ -897,7 +897,7 @@ class ApiCommonController extends Controller
      * @return list customer
      */
     public function getCustomerList(Request $request){
-        Log::debug('getCustomerList in');
+        // Log::debug('getCustomerList in');
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
@@ -917,12 +917,12 @@ class ApiCommonController extends Controller
             $login_user_code = $user->code;
             $login_account_id = $user->account_id;
 
-Log::debug('luc = '.$login_user_code);
-Log::debug('lai = '.$login_account_id);
+// Log::debug('luc = '.$login_user_code);
+// Log::debug('lai = '.$login_account_id);
     
             $mainQuery = DB::table($this->table_customers)
                 ->select($this->table_customers.'.code',$this->table_customers.'.name');
-            Log::debug('getCustomerList office_code = '.$office_code);
+            // Log::debug('getCustomerList office_code = '.$office_code);
             if (isset($office_code)) {
                 $mainQuery->where($this->table_customers.'.office_code', '=',$office_code);
             }
@@ -951,7 +951,7 @@ Log::debug('lai = '.$login_account_id);
      * @return list customer
      */
     public function getOutsoucingCustomerList(Request $request){
-        Log::debug('getOutsoucingCustomerList in');
+        // Log::debug('getOutsoucingCustomerList in');
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
@@ -1169,7 +1169,7 @@ Log::debug('lai = '.$login_account_id);
                 'details' => $details
             );
             $array_products_processes = $this->setArrayProductProcess($array_impl_setArrayProductProcess);
-            Log::debug('setArrayProductProcess array_products_processes = '.count($array_products_processes));
+            // Log::debug('setArrayProductProcess array_products_processes = '.count($array_products_processes));
             return response()->json(
                 ['result' => true, 'details' => $array_products_processes,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
@@ -1223,7 +1223,7 @@ Log::debug('lai = '.$login_account_id);
                 ->where('order_no', $order_no)
                 ->where('seq', $params_product_process_data["seq"])
                 ->exists();
-            Log::debug('$result_exists = '.$result_exists);
+            // Log::debug('$result_exists = '.$result_exists);
             // データ作成（ヘッダ）
             $systemdate = Carbon::now();
             $user = Auth::user();
@@ -1291,8 +1291,8 @@ Log::debug('lai = '.$login_account_id);
                 DB::table($this->table_progress_headers)
                     ->insert($array_putData);
             } else {
-                Log::debug('$result_exists = '.$order_no);
-                Log::debug('$result_exists = '.$seq);
+                // Log::debug('$result_exists = '.$order_no);
+                // Log::debug('$result_exists = '.$seq);
                 // 'out_seq' => $params_product_process_data["out_seq"],
                 $array_putData = [
                     'order_no' => $order_no,
@@ -1337,9 +1337,9 @@ Log::debug('lai = '.$login_account_id);
                 ->where('seq', '=', $seq)
                 ->delete();
             // 明細insert
-            Log::debug('putProcess count($params_product_process_data["progress_no"]) = '.count($params_product_process_data["progress_no"]));
+            // Log::debug('putProcess count($params_product_process_data["progress_no"]) = '.count($params_product_process_data["progress_no"]));
             for ($i=0;$i<count($params_product_process_data["progress_no"]);$i++) {
-                Log::debug('putProcess count($params_product_process_data["device_code"]) = '.$params_product_process_data["device_code"][$i]);
+                // Log::debug('putProcess count($params_product_process_data["device_code"]) = '.$params_product_process_data["device_code"][$i]);
                 if ($params_product_process_data["device_code"][$i] != null && $params_product_process_data["device_code"][$i] != "") {
                     $array_putData = array();
                     $process_time_h = $params_product_process_data["process_time_h"][$i];
@@ -1366,23 +1366,27 @@ Log::debug('lai = '.$login_account_id);
                     if ($params_product_process_data["product_processes_detail_no"][$i] == "" || $params_product_process_data["product_processes_detail_no"][$i] == null) {
                         $product_processes_detail_no = 0;
                     }
-                    Log::debug('putProcess [$i] = '.$i." ".$params_product_process_data['progress_no'][$i]);
+                    // Log::debug('putProcess [$i] = '.$i." ".$params_product_process_data['progress_no'][$i]);
+                    $dt = new carbon($params_product_process_data["complete_date"][$i]);
+                    $dt_complete_date = $dt->format('Ymd');
                     $array_putData = [
                         'order_no' => $order_no,
                         'seq' => $seq,
                         'progress_no' => $i + 1,
+                        'process_seq' => $params_product_process_data["process_seq"][$i],
                         'product_processes_code' => $product_processes_code,
                         'product_processes_detail_no' => $product_processes_detail_no,
                         'device_code' => $params_product_process_data["device_code"][$i],
                         'department_code' => $params_product_process_data["process_department_code"][$i],
                         'users_code' => $params_product_process_data["process_user_code"][$i],
                         'process_history_no' => $params_product_process_data["process_history_no"][$i],
+                        'work_kind' => $params_product_process_data["process_work_kind"][$i],
                         'process_time_h' => $process_time_h,
                         'process_time_m' => $process_time_m,
                         'setup_history_no' => $params_product_process_data["setup_history_no"][$i],
                         'setup_time_h' => $setup_time_h,
                         'setup_time_m' => $setup_time_m,
-                        'complete_date' => $params_product_process_data["complete_date"][$i],
+                        'complete_date' => $dt_complete_date,
                         'qr_code' => $params_product_process_data["qrText"][$i],
                         'created_user' => $login_user_code,
                         'created_at' => $systemdate
@@ -1414,7 +1418,7 @@ Log::debug('lai = '.$login_account_id);
      * @return list customer
      */
     public function setArrayProductProcess($params){
-        Log::debug('setArrayProductProcess in ');
+        // Log::debug('setArrayProductProcess in ');
         $param_details = $params['details'];
         $array_products_processes = array();
         try {
@@ -1456,7 +1460,7 @@ Log::debug('lai = '.$login_account_id);
                     'detail_name' => $items->detail_name
                 );
             }
-            Log::debug('setArrayProductProcess count($array_products_details) '.count($array_products_details));
+            // Log::debug('setArrayProductProcess count($array_products_details) '.count($array_products_details));
             if(count($array_products_details) > 0) {
                 $array_products[] = array(
                     'products_code' => $before_products_code,
@@ -1465,7 +1469,7 @@ Log::debug('lai = '.$login_account_id);
                     'array_products_details' => $array_products_details
                 );
             }
-            Log::debug('setArrayProductProcess end '.count($array_products_details));
+            // Log::debug('setArrayProductProcess end '.count($array_products_details));
             return $array_products;
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_product_processes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
@@ -1497,7 +1501,7 @@ Log::debug('lai = '.$login_account_id);
             $params_drawing_no = null;
             if (isset($request->keyparams)) {
                 $params = $request->keyparams;
-                Log::debug('getProductheader  $params[target_from_date] = '.$params['target_from_date']);
+                // Log::debug('getProductheader  $params[target_from_date] = '.$params['target_from_date']);
                 if (isset($params['target_from_date'])) {
                     $params_target_from_date = $params['target_from_date'];
                 }
@@ -1517,7 +1521,7 @@ Log::debug('lai = '.$login_account_id);
                     $params_drawing_no = $params['drawing_no'];
                 }
             }
-            Log::debug('getProductheader  $params_target_from_date = '.$params_target_from_date);
+            // Log::debug('getProductheader  $params_target_from_date = '.$params_target_from_date);
 
             DB::beginTransaction();
             // いったん全件を取得し、加工指示書／工程管理未登録データを事前登録する
@@ -1685,7 +1689,7 @@ Log::debug('lai = '.$login_account_id);
         try {
             // パラメータチェック
             $params = array();
-            Log::debug('getProductheadertable  $$param[target_from_date] = '.$param['target_from_date']);
+            // Log::debug('getProductheadertable  $$param[target_from_date] = '.$param['target_from_date']);
             $params_target_from_date = $param['target_from_date'];
             $params_target_to_date = $param['target_to_date'];
             $params_office_code = $param['office_code'];
@@ -1759,10 +1763,10 @@ Log::debug('lai = '.$login_account_id);
                     $params_seq = $params['seq'];
                 }
             }
-            Log::debug('getProductChart order_no = '.$params_order_no);
-            Log::debug('getProductChart order_no = '.$params['order_no']);
-            Log::debug('getProductChart row_seq = '.$params_row_seq);
-            Log::debug('getProductChart seq = '.$params_seq);
+            // Log::debug('getProductChart order_no = '.$params_order_no);
+            // Log::debug('getProductChart order_no = '.$params['order_no']);
+            // Log::debug('getProductChart row_seq = '.$params_row_seq);
+            // Log::debug('getProductChart seq = '.$params_seq);
 
             // ログインユーザの権限取得
             $user = Auth::user();
@@ -1802,14 +1806,26 @@ Log::debug('lai = '.$login_account_id);
             $sqlString .= "  , t1.outsourcing_customer_code as outsourcing_customer_code ";
             $sqlString .= "  , t1.outsourcing_cost as outsourcing_cost ";
             $sqlString .= "  , t2.progress_no as progress_no ";
+            $sqlString .= "  , t2.process_seq as process_seq ";
             $sqlString .= "  , t2.product_processes_code as product_processes_code ";
             $sqlString .= "  , t2.product_processes_detail_no as product_processes_detail_no ";
             $sqlString .= "  , t2.device_code as device_code ";
             $sqlString .= "  , t2.department_code as department_code ";
             $sqlString .= "  , t2.users_code as users_code ";
             $sqlString .= "  , t2.process_history_no as process_history_no ";
-            $sqlString .= "  , t2.process_time_m as process_time_m ";
-            $sqlString .= "  , t2.process_time_h as process_time_h ";
+            $sqlString .= "  , t2.work_kind as work_kind ";
+            $sqlString .= "  , CASE ifnull(t2.work_kind,'".Config::get('const.WORKKINDS.init')."') ";
+            $sqlString .= "    WHEN '".Config::get('const.WORKKINDS.init')."' THEN 0 ";
+            $sqlString .= "    WHEN '".Config::get('const.WORKKINDS.start')."' THEN 0 ";
+            $sqlString .= "    WHEN '".Config::get('const.WORKKINDS.stop')."' THEN 0 ";
+            $sqlString .= "    WHEN '".Config::get('const.WORKKINDS.miss')."' THEN 0 ";
+            $sqlString .= "    ELSE t2.process_time_m END as process_time_m";
+            $sqlString .= "  , CASE ifnull(t2.work_kind,'".Config::get('const.WORKKINDS.init')."') ";
+            $sqlString .= "    WHEN '".Config::get('const.WORKKINDS.init')."' THEN 0 ";
+            $sqlString .= "    WHEN '".Config::get('const.WORKKINDS.start')."' THEN 0 ";
+            $sqlString .= "    WHEN '".Config::get('const.WORKKINDS.stop')."' THEN 0 ";
+            $sqlString .= "    WHEN '".Config::get('const.WORKKINDS.miss')."' THEN 0 ";
+            $sqlString .= "    ELSE t2.process_time_h END as process_time_h";
             $sqlString .= "  , t2.setup_history_no as setup_history_no ";
             $sqlString .= "  , t2.setup_time_m as setup_time_m ";
             $sqlString .= "  , t2.setup_time_h as setup_time_h ";
@@ -1833,7 +1849,7 @@ Log::debug('lai = '.$login_account_id);
             $sqlString .= "    on ";
             $sqlString .= "      t1.order_no = t2.order_no ";
             $sqlString .= "      and t1.seq = t2.seq ";
-            $sqlString .= "      and t2.work_kind < 6 ";
+            // $sqlString .= "      and t2.work_kind < 6 ";
             $sqlString .= "      and t1.is_deleted = 0 ";
             $sqlString .= "      and t2.is_deleted = 0 ";
             $sqlString .= "    left outer join ";
@@ -1955,7 +1971,7 @@ Log::debug('lai = '.$login_account_id);
                 $array_setBindingsStr[] = $params_seq;
             }
             $details = DB::select($sqlString, $array_setBindingsStr);
-            Log::debug('getProductChart details = '.count($details));
+            // Log::debug('getProductChart details = '.count($details));
             $users_details =
                 DB::table($this->table_users)
                     ->where('out_seq', '>', 0)
@@ -2055,13 +2071,14 @@ Log::debug('lai = '.$login_account_id);
             $sqlString = "";
             $sqlString .= "select ";
             $sqlString .= "  date_format(t3.supply_date,'%m/%d') as supply_date_name ";
-            $sqlString .= "  , left(t3.back_order_customer_name,5) as back_order_customer_name ";
+            $sqlString .= "  , left(t3.back_order_customer_name,13) as back_order_customer_name ";
             $sqlString .= "  , t1.order_no as order_no ";
             $sqlString .= "  , t1.seq as seq ";
             $sqlString .= "  , t1.row_seq as row_seq ";
             $sqlString .= "  , t3.back_order_product_name as back_order_product_name ";
             $sqlString .= "  , t4.code as device_code ";
             $sqlString .= "  , t4.name as device_name ";
+            $sqlString .= "  , t4.symbol as symbol_name ";
             $sqlString .= "  , t1.work_kind as work_kind ";
             $sqlString .= "  , t5.short_name as user_name ";
             $sqlString .= "  , CASE ifnull(t1.work_kind,'') ";
@@ -2185,11 +2202,11 @@ Log::debug('lai = '.$login_account_id);
             $login_user_code = $user->code;
             $login_account_id = $user->account_id;
             // 未登録の存在チェック
-            Log::debug('apicommon calcProcessTime $params_order_no = '.$params_order_no);
-            Log::debug('apicommon calcProcessTime $params_seq = '.$params_seq);
-            Log::debug('apicommon calcProcessTime $params_device_code = '.$params_device_code);
-            Log::debug('apicommon calcProcessTime $params_user_code = '.$params_user_code);
-            Log::debug('apicommon calcProcessTime $params_progress_no = '.$params_progress_no);
+            // Log::debug('apicommon calcProcessTime $params_order_no = '.$params_order_no);
+            // Log::debug('apicommon calcProcessTime $params_seq = '.$params_seq);
+            // Log::debug('apicommon calcProcessTime $params_device_code = '.$params_device_code);
+            // Log::debug('apicommon calcProcessTime $params_user_code = '.$params_user_code);
+            // Log::debug('apicommon calcProcessTime $params_progress_no = '.$params_progress_no);
             $process_histories_model = new ProcessHistory();
             $process_histories_model->setParamOrdernoAttribute($params_order_no);
             $process_histories_model->setParamSeqAttribute($params_seq);
@@ -2202,10 +2219,10 @@ Log::debug('lai = '.$login_account_id);
             $calc_diff_fromtime = null;
             $calc_diff_totime = null;
             foreach($result_details as $item) {
-                Log::debug('apicommon calcProcessTime $item->work_kind = '.$item->work_kind);
-                Log::debug('apicommon calcProcessTime $item->process_history_time = '.$item->process_history_time);
-                Log::debug('apicommon calcProcessTime $calc_diff_fromtime = '.$calc_diff_fromtime);
-                Log::debug('apicommon calcProcessTime $calc_diff_totime = '.$calc_diff_totime);
+                // Log::debug('apicommon calcProcessTime $item->work_kind = '.$item->work_kind);
+                // Log::debug('apicommon calcProcessTime $item->process_history_time = '.$item->process_history_time);
+                // Log::debug('apicommon calcProcessTime $calc_diff_fromtime = '.$calc_diff_fromtime);
+                // Log::debug('apicommon calcProcessTime $calc_diff_totime = '.$calc_diff_totime);
                 switch ($item->work_kind) {
                     case Config::get('const.WORKKINDS.start'):
                         $calc_diff_fromtime = $item->process_history_time;
@@ -2214,7 +2231,7 @@ Log::debug('lai = '.$login_account_id);
                         $calc_diff_totime = $item->process_history_time;
                         if ($calc_diff_fromtime != null) {
                             $calc_diff_time = $this->diffTimeSerial($calc_diff_fromtime, $calc_diff_totime);
-                            Log::debug('apicommon calcProcessTime end $calc_diff_time = '.$calc_diff_time);
+                            // Log::debug('apicommon calcProcessTime end $calc_diff_time = '.$calc_diff_time);
                             $calc_diff_totaltime = $calc_diff_totaltime + $calc_diff_time;
                             $calc_diff_fromtime = null;
                             $calc_diff_totime = null;
@@ -2224,7 +2241,7 @@ Log::debug('lai = '.$login_account_id);
                         $calc_diff_totime = $item->process_history_time;
                         if ($calc_diff_fromtime != null) {
                             $calc_diff_time = $this->diffTimeSerial($calc_diff_fromtime, $calc_diff_totime);
-                            Log::debug('apicommon calcProcessTime stop $calc_diff_time = '.$calc_diff_time);
+                            // Log::debug('apicommon calcProcessTime stop $calc_diff_time = '.$calc_diff_time);
                             $calc_diff_totaltime = $calc_diff_totaltime + $calc_diff_time;
                             $calc_diff_fromtime = null;
                             $calc_diff_totime = null;
@@ -2234,7 +2251,7 @@ Log::debug('lai = '.$login_account_id);
                         $calc_diff_totime = $item->process_history_time;
                         if ($calc_diff_fromtime != null) {
                             $calc_diff_time = $this->diffTimeSerial($calc_diff_fromtime, $calc_diff_totime);
-                            Log::debug('apicommon calcProcessTime miss $calc_diff_time = '.$calc_diff_time);
+                            // Log::debug('apicommon calcProcessTime miss $calc_diff_time = '.$calc_diff_time);
                             $calc_diff_totaltime = $calc_diff_totaltime + $calc_diff_time;
                             $calc_diff_fromtime = null;
                             $calc_diff_totime = null;
@@ -2243,10 +2260,10 @@ Log::debug('lai = '.$login_account_id);
                     case Config::get('const.WORKKINDS.complete'):
                         $calc_diff_totime = $item->process_history_time;
                         if ($calc_diff_fromtime != null) {
-                            Log::debug('apicommon calcProcessTime complete $calc_diff_fromtime = '.$calc_diff_fromtime);
-                            Log::debug('apicommon calcProcessTime complete $calc_diff_totime = '.$calc_diff_totime);
+                            // Log::debug('apicommon calcProcessTime complete $calc_diff_fromtime = '.$calc_diff_fromtime);
+                            // Log::debug('apicommon calcProcessTime complete $calc_diff_totime = '.$calc_diff_totime);
                             $calc_diff_time = $this->diffTimeSerial($calc_diff_fromtime, $calc_diff_totime);
-                            Log::debug('apicommon calcProcessTime complete $calc_diff_time = '.$calc_diff_time);
+                            // Log::debug('apicommon calcProcessTime complete $calc_diff_time = '.$calc_diff_time);
                             $calc_diff_totaltime = $calc_diff_totaltime + $calc_diff_time;
                             $calc_diff_fromtime = null;
                             $calc_diff_totime = null;
@@ -2254,7 +2271,7 @@ Log::debug('lai = '.$login_account_id);
                         break;
                 }
             }
-            Log::debug('apicommon calcProcessTime $calc_diff_totaltime = '.$calc_diff_totaltime);
+            // Log::debug('apicommon calcProcessTime $calc_diff_totaltime = '.$calc_diff_totaltime);
             // トータル時間0で開始時刻のみの場合は現在時刻で計算
             if ($calc_diff_totaltime == 0) {
                 if ($calc_diff_fromtime != null && $calc_diff_totime == null) {
@@ -2498,7 +2515,7 @@ Log::debug('lai = '.$login_account_id);
                 $feature_model->setParamaccountidAttribute($login_account_id);
             }
             $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
-            Log::debug('getModeList mode_list = '.Config::get('const.C042.mode_list'));
+            // Log::debug('getModeList mode_list = '.Config::get('const.C042.mode_list'));
             $feature_model->setParamitemcodeAttribute(Config::get('const.C042.mode_list'));
             $feature_data = $feature_model->getItem();
             $value_select = "0";
@@ -2731,7 +2748,7 @@ Log::debug('lai = '.$login_account_id);
      * @return list departments
      */
     public function getLoginUserInfo(Request $request){
-        Log::debug('getLoginUserInfo  in');
+        // Log::debug('getLoginUserInfo  in');
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
@@ -2769,10 +2786,10 @@ Log::debug('lai = '.$login_account_id);
             } else {
                 $dt = new Carbon();
             }
-            Log::debug('getLoginUserInfo  company = '.$company);
-            Log::debug('getLoginUserInfo  usercode = '.$usercode);
-            Log::debug('getLoginUserInfo  departmentcode = '.$departmentcode);
-            Log::debug('getLoginUserInfo  target_date = '.$target_date);
+            // Log::debug('getLoginUserInfo  company = '.$company);
+            // Log::debug('getLoginUserInfo  usercode = '.$usercode);
+            // Log::debug('getLoginUserInfo  departmentcode = '.$departmentcode);
+            // Log::debug('getLoginUserInfo  target_date = '.$target_date);
             $target_date = $dt->format('Ymd');
             // usersの最大適用開始日付subquery
             $user = Auth::user();
@@ -3492,10 +3509,10 @@ Log::debug('lai = '.$login_account_id);
             $target_date = $dt->format('Ymd');
             // usersの最大適用開始日付subquery
             $user = Auth::user();
-            Log::debug('getUserDepartment user = '.$user);
+            // Log::debug('getUserDepartment user = '.$user);
             $login_user_code = $user->code;
             $login_account_id = $user->account_id;
-            Log::debug('getUserDepartment login_account_id = '.$login_account_id);
+            // Log::debug('getUserDepartment login_account_id = '.$login_account_id);
             $subquery3 = $this->getUserApplyTermSubquery($target_date, $login_account_id);
             // departmentsの最大適用開始日付subquery
             $subquery4 = $this->getDepartmentApplyTermSubquery($target_date, $login_account_id);
@@ -3838,35 +3855,35 @@ Log::debug('lai = '.$login_account_id);
                             // 所定時間が日またぎの場合
                             $w_working_timetable_from_record_datetime = $item->working_timetable_from_record_time;
                             $w_working_timetable_to_record_datetime = $item->working_timetable_to_record_time;
-                            Log::debug('getWorkingHours  $item->working_timetable_from_record_time = '.$item->working_timetable_from_record_time);
-                            Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
+                            // Log::debug('getWorkingHours  $item->working_timetable_from_record_time = '.$item->working_timetable_from_record_time);
+                            // Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
                             if ($item->working_timetable_from_record_time < $regular_start_recordtime) {
                                 $w_working_timetable_from_record_datetime = 
                                     date_format(new Carbon($regular_end_record_date.' '.$item->working_timetable_from_time),'Y-m-d H:i:s');
                             }
-                            Log::debug('getWorkingHours  $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
-                            Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
+                            // Log::debug('getWorkingHours  $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
+                            // Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
                             if ($item->working_timetable_to_record_time < $regular_start_recordtime) {
                                 $w_working_timetable_to_record_datetime = 
                                     date_format(new Carbon($regular_end_record_date.' '.$item->working_timetable_to_time),'Y-m-d H:i:s');
                             }
-                            Log::debug('getWorkingHours  $w_working_timetable_from_record_datetime = '.$w_working_timetable_from_record_datetime);
-                            Log::debug('getWorkingHours  $w_working_timetable_to_record_datetime = '.$w_working_timetable_to_record_datetime);
+                            // Log::debug('getWorkingHours  $w_working_timetable_from_record_datetime = '.$w_working_timetable_from_record_datetime);
+                            // Log::debug('getWorkingHours  $w_working_timetable_to_record_datetime = '.$w_working_timetable_to_record_datetime);
                             if (($w_working_timetable_from_record_datetime >= $regular_start_recordtime &&
                                 $w_working_timetable_from_record_datetime <= $regular_end_recordtime) &&
                                 ($w_working_timetable_to_record_datetime >= $regular_start_recordtime &&
                                 $w_working_timetable_to_record_datetime <= $regular_end_recordtime)) {
                                 $working_timetable_from_record_datetime = $w_working_timetable_from_record_datetime;
                                 $working_timetable_to_record_datetime = $w_working_timetable_to_record_datetime;
-                                Log::debug('getWorkingHours  $working_timetable_from_record_datetime = '.$working_timetable_from_record_datetime);
-                                Log::debug('getWorkingHours  $working_timetable_to_record_datetime = '.$working_timetable_to_record_datetime);
+                                // Log::debug('getWorkingHours  $working_timetable_from_record_datetime = '.$working_timetable_from_record_datetime);
+                                // Log::debug('getWorkingHours  $working_timetable_to_record_datetime = '.$working_timetable_to_record_datetime);
                             }
                         }
                         if ($working_timetable_from_record_datetime != null && $working_timetable_to_record_datetime != null) {
                             if ($working_timetable_from_record_datetime >= $regular_2after_recordtime) {
                                 $calc_times = $this->diffTimeSerial($working_timetable_from_record_datetime, $working_timetable_to_record_datetime);
                                 // from-toで30分以上か？
-                                Log::debug('getWorkingHours  $calc_times = '.$calc_times);
+                                // Log::debug('getWorkingHours  $calc_times = '.$calc_times);
                                 if ($calc_times >= 1800) {
                                     $lunch_start_time = $item->working_timetable_from_time;
                                     $lunch_start_recordtime = $working_timetable_from_record_datetime;
@@ -3931,9 +3948,9 @@ Log::debug('lai = '.$login_account_id);
                 }
             }
             $record_datetime = $params['record_datetime'];
-            Log::debug('         apicommon getWorkingHoursByStamp = '.date_format(new Carbon($record_datetime), 'H:i:s'));
+            // Log::debug('         apicommon getWorkingHoursByStamp = '.date_format(new Carbon($record_datetime), 'H:i:s'));
             $record_datetime_date = date_format(new Carbon($target_date), 'Y-m-d')." ".date_format(new Carbon($record_datetime), 'H:i:s');
-            Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
+            // Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
             // usersのカレンダーからタイムテーブルの所定時刻を取得する
             $authuser = Auth::user();
             $login_user_code = $authuser->code;
@@ -3945,24 +3962,24 @@ Log::debug('lai = '.$login_account_id);
             $time_tables->setParamDepartmentcodeAttribute($department_code);
             $time_tables->setParamaccountidAttribute($login_account_id);
             $time_tables->setParamUsercodeAttribute($user_code);
-            Log::debug('         apicommon getWorkingHoursByStamp $target_dateYmd = '.$target_dateYmd);
-            Log::debug('         apicommon getWorkingHoursByStamp $department_code = '.$department_code);
-            Log::debug('         apicommon getWorkingHoursByStamp $user_code = '.$user_code);
+            // Log::debug('         apicommon getWorkingHoursByStamp $target_dateYmd = '.$target_dateYmd);
+            // Log::debug('         apicommon getWorkingHoursByStamp $department_code = '.$department_code);
+            // Log::debug('         apicommon getWorkingHoursByStamp $user_code = '.$user_code);
             $workingHours = $time_tables->getWorkingTimeTable();
             $working_from_time = null;
             $working_to_time = null;
             $working_to_time_date = null;
-            Log::debug('         apicommon getWorkingHoursByStamp $workingHours = '.count($workingHours));
+            // Log::debug('         apicommon getWorkingHoursByStamp $workingHours = '.count($workingHours));
             foreach($workingHours as $item) {
-                Log::debug('         apicommon getWorkingHoursByStamp $item->working_time_kubun = '.$item->working_time_kubun);
+                // Log::debug('         apicommon getWorkingHoursByStamp $item->working_time_kubun = '.$item->working_time_kubun);
                 if ($item->working_time_kubun == Config::get('const.C004.regular_working_time')) {
-                    Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
-                    Log::debug('         apicommon getWorkingHoursByStamp $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
+                    // Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
+                    // Log::debug('         apicommon getWorkingHoursByStamp $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
                     if ($mode == Config::get('const.C005.attendance_time') ||
                         $mode == Config::get('const.C005.missing_middle_time') ||
                         $mode == Config::get('const.C005.public_going_out_time')) {
                         if ($record_datetime_date < $item->working_timetable_to_record_time) {
-                            Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
+                            // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
                             if ($working_from_time == null) {
                                 $working_from_time = $item->working_timetable_from_time;
                                 $working_to_time = $item->working_timetable_to_time;
@@ -3978,7 +3995,7 @@ Log::debug('lai = '.$login_account_id);
                             if ($record_datetime_date > $item->working_timetable_to_record_time ||
                             ($record_datetime_date > $item->working_timetable_from_record_time &&
                             $record_datetime_date <= $item->working_timetable_to_record_time)) {
-                            Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
+                            // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
                             if ($working_from_time == null) {
                                 $working_from_time = $item->working_timetable_from_time;
                                 $working_to_time = $item->working_timetable_to_time;
@@ -3989,12 +4006,12 @@ Log::debug('lai = '.$login_account_id);
                             }
                         }
                     }
-                    Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
-                    Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
+                    // Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
+                    // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
                 }
             }
-            Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
-            Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
+            // Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
+            // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
             // 設定
             $array_workingHours = array(
                 'working_from_time' => $working_from_time,
@@ -4506,9 +4523,9 @@ Log::debug('lai = '.$login_account_id);
             // 当月でチェック
             $target_month = $dt->format('m');
             $target_dd = $dt->format('d');
-            Log::debug('apicommon getNotSetting $target_year1 = '.$target_year);
-            Log::debug('apicommon getNotSetting $target_month1 = '.$target_month);
-            Log::debug('apicommon getNotSetting $target_dd1 = '.$target_dd);
+            // Log::debug('apicommon getNotSetting $target_year1 = '.$target_year);
+            // Log::debug('apicommon getNotSetting $target_month1 = '.$target_month);
+            // Log::debug('apicommon getNotSetting $target_dd1 = '.$target_dd);
             $Calendar_controller = new EditCalendarController();
             $array_impl_getDetailFuncCalendar = array (
                 'departmentcode' => null,
@@ -4518,9 +4535,9 @@ Log::debug('lai = '.$login_account_id);
                 'month' => $target_month
             );
             $details = $Calendar_controller->getDetailsFunc($array_impl_getDetailFuncCalendar);
-            Log::debug('apicommon getNotSetting $target_year2 = '.$target_year);
-            Log::debug('apicommon getNotSetting $target_month2 = '.$target_month);
-            Log::debug('apicommon getNotSetting $target_dd2 = '.$target_dd);
+            // Log::debug('apicommon getNotSetting $target_year2 = '.$target_year);
+            // Log::debug('apicommon getNotSetting $target_month2 = '.$target_month);
+            // Log::debug('apicommon getNotSetting $target_dd2 = '.$target_dd);
             $r_cnt = 0;
             foreach($details as $item) {
                 if (isset($item->date)) {
@@ -4529,9 +4546,9 @@ Log::debug('lai = '.$login_account_id);
                 break;
             }
             if ($r_cnt > 0) { $array_result["calendar_setting_informations"] = 1; }
-            Log::debug('apicommon getNotSetting $target_year3 = '.$target_year);
-            Log::debug('apicommon getNotSetting $target_month3 = '.$target_month);
-            Log::debug('apicommon getNotSetting $target_dd3 = '.$target_dd);
+            // Log::debug('apicommon getNotSetting $target_year3 = '.$target_year);
+            // Log::debug('apicommon getNotSetting $target_month3 = '.$target_month);
+            // Log::debug('apicommon getNotSetting $target_dd3 = '.$target_dd);
 
             return $array_result;
         }catch(\PDOException $pe){
@@ -4725,10 +4742,10 @@ Log::debug('lai = '.$login_account_id);
         if (isset($setting_from_datetime) && isset($setting_to_datetime)) {
             // タイムテーブル設定時刻のチェックを行う場合
             // タイムテーブル時間範囲内に休憩開始終了時刻がある場合に計算する
-            Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
-            Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
-            Log::debug('calcBetweenBreakTime $setting_from_datetime = '.$setting_from_datetime);
-            Log::debug('calcBetweenBreakTime $setting_to_datetime = '.$setting_to_datetime);
+            // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
+            // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
+            // Log::debug('calcBetweenBreakTime $setting_from_datetime = '.$setting_from_datetime);
+            // Log::debug('calcBetweenBreakTime $setting_to_datetime = '.$setting_to_datetime);
             if (($time_calc_from <= $setting_from_datetime || $time_calc_from >= $setting_to_datetime) &&
                 ($time_calc_to <= $setting_from_datetime || $time_calc_to >= $setting_to_datetime)) {
                 $chk_time = false;
@@ -4736,10 +4753,10 @@ Log::debug('lai = '.$login_account_id);
         }
         if ($chk_time) {
             //  指定時間範囲内に休憩開始終了時刻がある場合に計算する
-            Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
-            Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
-            Log::debug('calcBetweenBreakTime $target_from_datetime = '.$target_from_datetime);
-            Log::debug('calcBetweenBreakTime $target_to_datetime = '.$target_to_datetime);
+            // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
+            // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
+            // Log::debug('calcBetweenBreakTime $target_from_datetime = '.$target_from_datetime);
+            // Log::debug('calcBetweenBreakTime $target_to_datetime = '.$target_to_datetime);
             if (($time_calc_from >= $target_from_datetime && $time_calc_from <= $target_to_datetime) ||
                 ($time_calc_to >= $target_from_datetime && $time_calc_to <= $target_to_datetime)) {
                 if ($target_from_datetime > $time_calc_from) {
@@ -4748,8 +4765,8 @@ Log::debug('lai = '.$login_account_id);
                 if ($target_to_datetime < $time_calc_to) {
                     $time_calc_to = $target_to_datetime;
                 }
-                Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
-                Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
+                // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
+                // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
                 if ($time_calc_from < $time_calc_to) {
                     $calc_times += $this->diffTimeSerial($time_calc_from, $time_calc_to);
                 }
@@ -4780,8 +4797,8 @@ Log::debug('lai = '.$login_account_id);
     public function diffTimeSerial($time_from, $time_to){
         $from = null;
         $to = null;
-        Log::debug('apicommon diffTimeSerial $time_from = '.$time_from);
-        Log::debug('apicommon diffTimeSerial $time_to = '.$time_to);
+        // Log::debug('apicommon diffTimeSerial $time_from = '.$time_from);
+        // Log::debug('apicommon diffTimeSerial $time_to = '.$time_to);
         if ($time_from == null || $time_from == "") {
             $from = strtotime(date('Y-m-d H:i:00', strtotime('now')));
         } else {
@@ -4793,7 +4810,7 @@ Log::debug('lai = '.$login_account_id);
             $to = strtotime(date('Y-m-d H:i:00',strtotime($time_to))); 
         }
         $interval = $to - $from;
-        Log::debug('apicommon diffTimeSerial $interval = '.$interval);
+        // Log::debug('apicommon diffTimeSerial $interval = '.$interval);
         return $interval;
     }
     
@@ -4824,7 +4841,7 @@ Log::debug('lai = '.$login_account_id);
         $time_rounding = $params['time_rounding'];
         $working_timetable_no = $params['working_timetable_no'];
         $array_get_timetable_result = $params['array_get_timetable_result'];
-        Log::debug('roundTimeByTimeStart $start_time = '.$start_time);
+        // Log::debug('roundTimeByTimeStart $start_time = '.$start_time);
         // 1分単位の場合はそのまま
         if ($time_unit == Config::get('const.C009.round1')) {
             return $start_time;
@@ -4885,7 +4902,7 @@ Log::debug('lai = '.$login_account_id);
             }
             $result_round_time = date('Y-m-d H:i:00',strtotime(('+'.$calc_times_round).' second',strtotime($source_dt)));
         }
-        Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
+        // Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
         return $result_round_time;
     }
 
@@ -4902,7 +4919,7 @@ Log::debug('lai = '.$login_account_id);
         $time_rounding = $params['time_rounding'];
         $working_timetable_no = $params['working_timetable_no'];
         $array_get_timetable_result = $params['array_get_timetable_result'];
-        Log::debug('roundTimeByTimeStart $end_time = '.$end_time);
+        // Log::debug('roundTimeByTimeStart $end_time = '.$end_time);
         // 1分単位の場合はそのまま
         if ($time_unit == Config::get('const.C009.round1')) {
             return $end_time;
@@ -4969,7 +4986,7 @@ Log::debug('lai = '.$login_account_id);
             }
             $result_round_time = date('Y-m-d H:i:00',strtotime(('+'.$calc_times_round).' second',strtotime($source_dt)));
         }
-        Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
+        // Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
         return $result_round_time;
     }
 
@@ -4983,9 +5000,9 @@ Log::debug('lai = '.$login_account_id);
         $round_time = $params['round_time'];
         $time_unit = $params['time_unit'];
         $time_rounding = $params['time_rounding'];
-        Log::debug('roundTimeStart $round_time = '.$round_time);
-        Log::debug('roundTimeStart $time_unit = '.$time_unit);
-        Log::debug('roundTimeStart $time_rounding = '.$time_rounding);
+        // Log::debug('roundTimeStart $round_time = '.$round_time);
+        // Log::debug('roundTimeStart $time_unit = '.$time_unit);
+        // Log::debug('roundTimeStart $time_rounding = '.$time_rounding);
         $dt = new Carbon($round_time);
         $target_datetime = $dt->format("Y-m-d H:i:s");
         $target_ymd = $dt->format("Y-m-d");
@@ -5386,7 +5403,7 @@ Log::debug('lai = '.$login_account_id);
             }
         }
 
-        Log::debug('roundTimeStart $target_datetime = '.$target_datetime);
+        // Log::debug('roundTimeStart $target_datetime = '.$target_datetime);
         return $target_datetime;
     }
 
@@ -5400,9 +5417,9 @@ Log::debug('lai = '.$login_account_id);
         $round_time = $params['round_time'];
         $time_unit = $params['time_unit'];
         $time_rounding = $params['time_rounding'];
-        Log::debug('roundTimeEnd $round_time = '.$round_time);
-        Log::debug('roundTimeEnd $time_unit = '.$time_unit);
-        Log::debug('roundTimeEnd $time_rounding = '.$time_rounding);
+        // Log::debug('roundTimeEnd $round_time = '.$round_time);
+        // Log::debug('roundTimeEnd $time_unit = '.$time_unit);
+        // Log::debug('roundTimeEnd $time_rounding = '.$time_rounding);
         $dt = new Carbon($round_time);
         $target_datetime = $dt->format("Y-m-d H:i:s");
         $target_ymd = $dt->format("Y-m-d");
@@ -5808,14 +5825,14 @@ Log::debug('lai = '.$login_account_id);
             }
         }
 
-        Log::debug('roundTimeEnd $target_datetime = '.$target_datetime);
+        // Log::debug('roundTimeEnd $target_datetime = '.$target_datetime);
         return $target_datetime;
     }
     // public function roundTime($round_time, $time_unit, $time_rounding){
 
-    //     Log::debug('roundTime $round_time = '.$round_time);
-    //     Log::debug('roundTime $time_unit = '.$time_unit);
-    //     Log::debug('roundTime $time_rounding = '.$time_rounding);
+    //     // Log::debug('roundTime $round_time = '.$round_time);
+    //     // Log::debug('roundTime $time_unit = '.$time_unit);
+    //     // Log::debug('roundTime $time_rounding = '.$time_rounding);
     //     if ($time_rounding == Config::get('const.C010.round_half_up')) {
     //         // 四捨五入
     //         if ($time_unit == Config::get('const.C009.round1')) {
@@ -6216,8 +6233,8 @@ Log::debug('lai = '.$login_account_id);
      */
     public function chkMode($target_mode, $source_mode, $is_chk_mode_autoset){
 
-        Log::debug('chkMode $target_mode = '.$target_mode);
-        Log::debug('chkMode $source_mode = '.$source_mode);
+        // Log::debug('chkMode $target_mode = '.$target_mode);
+        // Log::debug('chkMode $source_mode = '.$source_mode);
         if ( $source_mode == '') {
             if ($target_mode == Config::get('const.C005.attendance_time')) {
                 return Config::get('const.RESULT_CODE.normal');
@@ -6571,8 +6588,8 @@ Log::debug('lai = '.$login_account_id);
                 ->where('working_time_kubun', '!=', Config::get('const.C004.out_of_regular_working_time'))
                 ->sortBy('from_time');
             foreach($filtered as $result_time) {
-                Log::debug('            analyzeTimeTable from_time = '.$result_time->from_time);
-                Log::debug('            analyzeTimeTable to_time = '.$result_time->to_time);
+                // Log::debug('            analyzeTimeTable from_time = '.$result_time->from_time);
+                // Log::debug('            analyzeTimeTable to_time = '.$result_time->to_time);
                 if (isset($result_time->from_time) && isset($result_time->to_time)) {
                     $dt = new Carbon('2019-08-01 '.$result_time->from_time);
                     $check_from_hour = date_format($dt, 'H');
@@ -6646,14 +6663,14 @@ Log::debug('lai = '.$login_account_id);
                             if ($array_sets[$i][$j] == 0) {
                                 if ($temp_from_time == "") {
                                     $temp_from_time = str_pad($i,2,0,STR_PAD_LEFT).':'.str_pad($j,2,0,STR_PAD_LEFT).':00';
-                                    Log::debug('            analyzeTimeTable 配列=0の範囲を設定する temp_from_time = '.$temp_from_time);
+                                    // Log::debug('            analyzeTimeTable 配列=0の範囲を設定する temp_from_time = '.$temp_from_time);
                                 }
                             } else {
                                 if ($temp_from_time == "") {
                                     $temp_to_time ="";
                                 } else {
                                     $temp_to_time = str_pad($i,2,0,STR_PAD_LEFT).':'.str_pad($j,2,0,STR_PAD_LEFT).':00';
-                                    Log::debug('            analyzeTimeTable 配列=0の範囲を設定する temp_to_time = '.$temp_to_time);
+                                    // Log::debug('            analyzeTimeTable 配列=0の範囲を設定する temp_to_time = '.$temp_to_time);
                                     $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time , 'item_times' => $result_time->item_times);
                                     // from to の判定は予備もとで行います。
                                     // if ($result_time->from_time < $result_time->to_time) {
@@ -6854,8 +6871,8 @@ Log::debug('lai = '.$login_account_id);
 
         DB::beginTransaction();
         try{
-            Log::debug('addAttendanceWork login_user_code = '.$login_user_code);
-            Log::debug('addAttendanceWork login_account_id = '.$login_account_id);
+            // Log::debug('addAttendanceWork login_user_code = '.$login_user_code);
+            // Log::debug('addAttendanceWork login_account_id = '.$login_account_id);
             $login_department_code = null;
             $dt = new Carbon($target_date);
             $target_date = $dt->format('Ymd');
@@ -6907,13 +6924,13 @@ Log::debug('lai = '.$login_account_id);
             }
             $calendar_setting_model->setUpdatedatAttribute($systemdate);
             $calendar_setting_model->setUpdateduserAttribute($login_user_code);
-            Log::debug('addAttendanceWork count details = '.count($details));
+            // Log::debug('addAttendanceWork count details = '.count($details));
             if (count($details) == 0) {
                 $calendar_setting_model->setHolidaykubunAttribute(0);
                 $calendar_setting_model->updateCalendar();
             } else {
                 foreach($details as $item) {
-                    Log::debug('addAttendanceWork kbn_flag = '.$item['kbn_flag']);
+                    // Log::debug('addAttendanceWork kbn_flag = '.$item['kbn_flag']);
                     if($item['kbn_flag'] == 1){     // 休暇区分のみ登録
                         $calendar_setting_model->setHolidaykubunAttribute($item['user_holiday_kbn']);
                         // $user_holiday->setHolidaykubunAttribute($item['user_holiday_kbn']);
@@ -6932,7 +6949,7 @@ Log::debug('lai = '.$login_account_id);
             // beforeidsが存在した場合は論理削除する
             $work_time_model->setParamAccountidAttribute($login_account_id);
             $work_time_model->setAccountidAttribute($login_account_id);
-            Log::debug('addAttendanceWork setAccountidAttribute login_account_id = '.$login_account_id);
+            // Log::debug('addAttendanceWork setAccountidAttribute login_account_id = '.$login_account_id);
             for($i=0;$i<count($beforeids);$i++) {
                 $work_time_model->setIdAttribute($beforeids[$i]);
                 $work_time_model->setEditordepartmentcodeAttribute($login_department_code);

@@ -92,10 +92,10 @@ export default {
     getThen(response) {
       this.itemList = [];
       var res = response.data;
-      console.log('selecOutsoucingCustomerList getThen = res.result' + res.result);
+      // console.log('selecOutsoucingCustomerList getThen = res.result' + res.result);
       if (res.result) {
         // 固有処理 START
-        console.log('selecOutsoucingCustomerList getThen = res.details' + res.details.length);
+        // console.log('selecOutsoucingCustomerList getThen = res.details' + res.details.length);
         this.itemList = res.details;
         if (this.addNew) {
           this.object = { name: "新規に外注先を登録する", code: "" };

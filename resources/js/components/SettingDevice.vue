@@ -471,9 +471,9 @@ export default {
         .catch(reason => {
           this.serverCatch("取得");
         });
-      console.log('getdevice name = ' + this.form.name);
-      console.log('getdevice symbol = ' + this.form.symbol);
-      console.log('getdevice floor_pos = ' + this.form.floor_pos);
+      // console.log('getdevice name = ' + this.form.name);
+      // console.log('getdevice symbol = ' + this.form.symbol);
+      // console.log('getdevice floor_pos = ' + this.form.floor_pos);
     },
     // 機器登録処理
     store() {

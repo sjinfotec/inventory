@@ -310,7 +310,7 @@ class CustomerInformation extends Model
             ->selectRaw('company_name')
             ->selectRaw("max(account_id) as max_account_id");
             if (!empty($this->param_account_id)) {
-                Log::debug('account_id = '.$this->param_account_id);
+                // Log::debug('account_id = '.$this->param_account_id);
                 $mainQuery->where($this->table.'.account_id',$this->param_account_id);
             }
             if (!empty($this->param_company_name)) {
@@ -365,7 +365,7 @@ class CustomerInformation extends Model
                     ->where('t2.is_deleted', '=', 0);
                 });
             if (!empty($this->param_account_id)) {
-                Log::debug('account_id = '.$this->param_account_id);
+                // Log::debug('account_id = '.$this->param_account_id);
                 $mainQuery->where($this->table.'.account_id',$this->param_account_id);
             }
             if (!empty($this->param_company_name)) {

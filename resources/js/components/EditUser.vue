@@ -2232,7 +2232,7 @@ export default {
     },
     // 氏名登録処理
     storeData() {
-      console.log('storeData password = ' + this.form.password);
+      // console.log('storeData password = ' + this.form.password);
       var arrayParams = { details: this.form };
       this.postRequest("/edit_user/store", arrayParams)
         .then(response => {
@@ -2390,7 +2390,7 @@ export default {
           login_id: this.latest_user_code
         })
         .then(res => {
-          console.log(res);
+          // console.log(res);
           if (res.data.result) {
             //メール送信完了画面に遷移する
             var messages = [];
@@ -2405,7 +2405,7 @@ export default {
         })
         .catch(err => {
           //例外処理を行う
-          console.log(err);
+          // console.log(err);
           this.messageshowsearch = false;
         });
     },

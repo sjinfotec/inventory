@@ -793,7 +793,7 @@
                   <td class="frame_wh1" v-for="(n,index1) in 4" :key="index1">
                     <div class="flex1" v-if="form.total.process_total_short_name_1[index1]">
                       <div class="cnt2_name">{{ form.total.process_total_short_name_1[index1] }}</div>
-                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_1[index1] || form.total.process_result_process_time_m_1[index2]">
+                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_1[index1] || form.total.process_result_process_time_m_1[index1]">
                         <span class="str01">{{ form.total.process_result_process_time_h_1[index1] }}H</span>
                         <span class="str01">{{ form.total.process_result_process_time_m_1[index1] }}M</span></div>
                     </div>
@@ -855,7 +855,7 @@
                   <td class="frame_wh1" v-for="(n,index3) in 4" :key="index3">
                     <div class="flex1" v-if="form.total.process_total_short_name_3[index3]">
                       <div class="cnt2_name">{{ form.total.process_total_short_name_3[index3] }}</div>
-                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_3[index3] || form.total.process_result_process_time_m_3[index2]">
+                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_3[index3] || form.total.process_result_process_time_m_3[index3]">
                         <span class="str01">{{ form.total.process_result_process_time_h_3[index3] }}H</span>
                         <span class="str01">{{ form.total.process_result_process_time_m_3[index3] }}M</span></div>
                     </div>
@@ -875,7 +875,7 @@
                   <td class="frame_wh1" v-for="(n,index4) in 4" :key="index4">
                     <div class="flex1" v-if="form.total.process_total_short_name_4[index4]">
                       <div class="cnt2_name">{{ form.total.process_total_short_name_4[index4] }}</div>
-                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_4[index4] || form.total.process_result_process_time_m_4[index2]">
+                      <div class="cnt2_hm" v-if="form.total.process_result_process_time_h_4[index4] || form.total.process_result_process_time_m_4[index4]">
                         <span class="str01">{{ form.total.process_result_process_time_h_4[index4] }}H</span>
                         <span class="str01">{{ form.total.process_result_process_time_m_4[index4] }}M</span></div>
                     </div>
@@ -1071,6 +1071,7 @@ export default {
         outsourcing_customer_code: "",
         outsourcing_cost: "",
         progress_no: [{}],
+        process_seq: [{}],
         progress_name: [{}],
         product_processes_code: [{}],
         product_processes_detail_no: [{}],
@@ -1079,6 +1080,7 @@ export default {
         process_user_code: [{}],
         process_user_name: [{}],
         process_history_no: [{}],
+        process_work_kind: [{}],
         process_time_h: [{}],
         process_time_m: [{}],
         setup_history_no: [{}],
@@ -1766,6 +1768,11 @@ export default {
             } else {
               this.form.progress_no[i] = "";
             }
+            if (detail.process_seq != null) {
+              this.form.process_seq[i] = detail.process_seq.toString();
+            } else {
+              this.form.process_seq[i] = "";
+            }
             if (detail.progress_name != null) {
               this.form.progress_name[i] = detail.progress_name;
             } else {
@@ -1807,6 +1814,13 @@ export default {
             } else {
               this.form.process_history_no[i] = "";
             }
+            // console.log('getThen detail.process_work_kind ' + detail.work_kind);
+            if (detail.work_kind != null) {
+              this.form.process_work_kind[i] = detail.work_kind;
+            } else {
+              this.form.process_work_kind[i] = "";
+            }
+            // console.log('getThen this.form.process_work_kind[i] ' + this.form.process_work_kind[i]);
             if (detail.process_time_h != null) {
               this.form.process_time_h[i] = detail.process_time_h;
             } else {
@@ -1833,7 +1847,7 @@ export default {
               this.form.setup_time_m[i] = "";
             }
             if (detail.complete_date != null) {
-              this.form.complete_date[i] = moment(detail.complete_date).format("YYYY-MM-DD");;
+              this.form.complete_date[i] = moment(detail.complete_date).format("YYYY-MM-DD");
             } else {
               this.form.complete_date[i] = "";
             }
@@ -1981,6 +1995,7 @@ export default {
       this.form.outsourcing_cost = "";
       for (let index = 0; index < 12; index++) {
         this.form.progress_no[index] = index + 1;
+        this.form.process_seq[index] = 0;
         this.form.progress_name[index] = "";
         this.form.product_processes_code[index] = "";
         this.form.product_processes_detail_no[index] = 0;
@@ -1989,6 +2004,7 @@ export default {
         this.form.process_user_name[index] = "";
         this.form.process_department_code[index] = "";
         this.form.process_history_no[index] = "";
+        this.form.process_work_kind[index] = "";
         this.form.setup_history_no[index] = "";
         this.form.process_time_h[index] = "";
         this.form.process_time_m[index] = "";
@@ -2215,11 +2231,13 @@ export default {
     setProductProcessTable() {
       for (let index = 1; index < 11; index++) {
         this.form.progress_no[index] = index + 1;
+        this.form.process_seq[index] = 0;
         this.form.progress_name[index] = "";
         this.form.product_processes_code[index] = "";
         this.form.product_processes_detail_no[index] = 0;
         this.form.device_code[index] = "";
         this.form.process_user_code[index] = "";
+        this.form.work_kind[index] = "";
         this.form.process_time_h[index] = "";
         this.form.process_time_m[index] = "";
         this.form.setup_time_h[index] = "";

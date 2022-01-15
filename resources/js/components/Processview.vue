@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- main contentns row -->
-    <div class="row justify-content-between">
+    <div id="fullscreen" class="row justify-content-between">
       <!-- .panel -->
       <div class="col-md pt-3">
         <div class="card shadow-pl">
@@ -48,7 +48,7 @@
                           <td class="text-center align-middle w3" >{{ item.order_no }}</td>
                           <!--<td class="text-center align-middle w4">{{ item.row_seq }}</td>-->
                           <td class="text-center align-middle w5 "><div class="overflowhidden1">{{ item.back_order_product_name }}</div></td>
-                          <td class="text-center align-middle w6 ">{{ item.device_name }}</td>
+                          <td class="text-center align-middle w6 ">{{ item.symbol_name }}</td>
                           <td class="text-center align-middle w7">{{ item.user_name }}</td>
                           <td class="text-center align-middle w8">{{ item.work_kind_name }}</td>
                           <!--
@@ -108,7 +108,7 @@ export default {
   },
   // マウント時
   mounted() {
-    console.log('ProcessView mounted ');
+    // console.log('ProcessView mounted ');
     moment.locale("ja", {
       weekdays: ["日曜日", "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日"],
       weekdaysShort: ["日", "月", "火", "水", "木", "金", "土"]
@@ -171,5 +171,15 @@ export default {
 <style scoped>
 .mw-rem-2 {
     min-width: 2rem;
+}
+
+#fullscreen {
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+
 }
 </style>

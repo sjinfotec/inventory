@@ -446,9 +446,9 @@ class UserModel extends Model
      */
     public function updateUser(){
         try {
-            Log::debug('UserModel updateUser working_timetable_no = '.$this->working_timetable_no);
-            Log::debug('UserModel updateUser param_account_id = '.$this->param_account_id);
-            Log::debug('UserModel updateUser id = '.$this->id);
+            // Log::debug('UserModel updateUser working_timetable_no = '.$this->working_timetable_no);
+            // Log::debug('UserModel updateUser param_account_id = '.$this->param_account_id);
+            // Log::debug('UserModel updateUser id = '.$this->id);
             DB::table($this->table)
             ->where('account_id', $this->param_account_id)
             ->where('id', $this->id)

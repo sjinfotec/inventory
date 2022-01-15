@@ -724,8 +724,8 @@ export default {
       this.form.code = value;
       this.selectedCustomerValue = value;
       this.selectedCustomerName = arrayitem["name"];
-      console.log('customerChanges_selectedOfficeValue = ' + this.selectedOfficeValue);
-      console.log('customerChanges_selectedCustomerValue = ' + this.selectedCustomerValue);
+      // console.log('customerChanges_selectedOfficeValue = ' + this.selectedOfficeValue);
+      // console.log('customerChanges_selectedCustomerValue = ' + this.selectedCustomerValue);
       this.searchclick();
 
     },
@@ -744,8 +744,8 @@ export default {
     fixofficeChanges: function(value, arrayitem) {
       this.form.office_code = value;
       this.selectedOfficeValue = value;
-      console.log('fixofficeChanges selectedOfficeValue = ' + this.selectedOfficeValue);
-      console.log('fixofficeChanges form.office_code = ' + this.form.office_code);
+      // console.log('fixofficeChanges selectedOfficeValue = ' + this.selectedOfficeValue);
+      // console.log('fixofficeChanges form.office_code = ' + this.form.office_code);
     },
     // 選択が変更された場合の処理
     timetablechkptnChanges: function(value, index) {
@@ -769,19 +769,19 @@ export default {
       this.searchedCustomerName = this.selectedCustomerName;
       this.searchedOfficeValue = this.selectedOfficeValue;
 
-        console.log('searchedCustomerValue = ' + this.searchedCustomerValue);
-        console.log('searchedOfficeValue = ' + this.searchedOfficeValue);
+        // console.log('searchedCustomerValue = ' + this.searchedCustomerValue);
+        // console.log('searchedOfficeValue = ' + this.searchedOfficeValue);
 
       if (this.selectedCustomerValue == "" || this.selectedCustomerValue == null) {
         this.selectMode = 'NEW';
         this.newItemClear();
         this.form.office_code = this.searchedOfficeValue;
-        console.log('selectmode = ' + this.selectMode);
-        console.log('office_code = ' + this.searchedOfficeValue);
+        // console.log('selectmode = ' + this.selectMode);
+        // console.log('office_code = ' + this.searchedOfficeValue);
         this.refreshOfficeList();
       } else {
         this.selectMode = 'EDT';
-        console.log('selectmode = ' + this.selectMode);
+        // console.log('selectmode = ' + this.selectMode);
         this.getItem();
       }
     },
@@ -912,8 +912,8 @@ export default {
     },
     // 顧客登録処理
     storeData() {
-      console.log('storeData office_code = ' + this.form.office_code);
-      console.log('storeData name = ' + this.form.name);
+      // console.log('storeData office_code = ' + this.form.office_code);
+      // console.log('storeData name = ' + this.form.name);
       //var arrayParams = { details: this.form };
       var arrayParams = { office_code : this.form.office_code, name : this.form.name, details: this.form};
       this.postRequest("/edit_customer/store", arrayParams)
@@ -927,10 +927,10 @@ export default {
     // 顧客更新処理
     FixDetail(kbnname, index) {
       var arrayParams = [];
-      //console.log('FixDetail go-in ');
+      //// console.log('FixDetail go-in ');
       //arrayParams = { details: this.details[index] };
-      //console.log('FixDetail selectedOfficeValue = ' + this.selectedOfficeValue);
-      //console.log('FixDetail form.office_code = ' + this.form.office_code);
+      //// console.log('FixDetail selectedOfficeValue = ' + this.selectedOfficeValue);
+      //// console.log('FixDetail form.office_code = ' + this.form.office_code);
 
       arrayParams = { office_code : this.form.office_code, name : this.form.name, details: this.details[index]};
       this.postRequest("/edit_customer/fix", arrayParams)

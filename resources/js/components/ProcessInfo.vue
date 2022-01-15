@@ -301,7 +301,7 @@ export default {
   },
   // マウント時
   mounted() {
-    console.log('ProcessInfo mounted ');
+    // console.log('ProcessInfo mounted ');
     this.getItem();
     //this.setKind();
   },
@@ -312,7 +312,7 @@ export default {
     // 作業開始処理
     startClick1() {
       this.before_kindstatus = this.kindstatus;
-      console.log('作業開始ボタンbefore_kindstatus = ' + this.kindstatus);
+      // console.log('作業開始ボタンbefore_kindstatus = ' + this.kindstatus);
       this.isbtnctrl = false;
       this.form.kind = C_KIND_START;
       this.setKind();
@@ -383,7 +383,7 @@ export default {
     },
     // 完成処理
     startClickcomp() {
-      console.log('startClickcomp in');
+      // console.log('startClickcomp in');
       this.form.kind = C_KIND_COMPLETE;
       this.setKind();
       this.form.item_name[this.kind_index] = this.kind_name;
@@ -412,9 +412,9 @@ export default {
       //this.form.item_name[this.kind_index] = this.kind_name;
       this.form.item_name[this.kind_index] = this.before_kindstatus;
       this.maketime = false;
-console.log( kindcolorArr );
-console.log('before_kindstatus = ' + this.before_kindstatus);
-console.log('kindcolorArr[before_kindstatus] = ' + kindcolorArr[this.before_kindstatus]);
+// console.log( kindcolorArr );
+// console.log('before_kindstatus = ' + this.before_kindstatus);
+// console.log('kindcolorArr[before_kindstatus] = ' + kindcolorArr[this.before_kindstatus]);
   	  target.style.background = kindcolorArr[this.before_kindstatus];
       if (kindcolorArr[this.before_kindstatus] == '#FFF') {
         table_cnt3.style.color = '#212529';
@@ -469,11 +469,11 @@ console.log('kindcolorArr[before_kindstatus] = ' + kindcolorArr[this.before_kind
     // 登録処理
     storeData() {
       var arrayParams = { form : this.form };
-      console.log('storeData this.form.kind = ' + this.form.kind);
-      // 次工程の場合はじめはcompleteで登録
+      // console.log('storeData this.form.kind = ' + this.form.kind);
+      // 次工程の場合はじめはcompleteで登録  -- todo
       this.before_kind = "";
       if (this.form.kind == C_KIND_NEXT) {
-        this.form.kind = C_KIND_COMPLETE;
+        // this.form.kind = C_KIND_COMPLETE;
         this.before_kind = C_KIND_NEXT;
       }
       this.postRequest("/process_history/put", arrayParams)
@@ -487,7 +487,7 @@ console.log('kindcolorArr[before_kindstatus] = ' + kindcolorArr[this.before_kind
     // -------------------- 共通 ----------------------------
     // 取得正常処理
     getThen(response) {
-      console.log('getThen in');
+      // console.log('getThen in');
       var res = response.data;
       this.details = res.details;
       this.count = this.details.length;
@@ -501,13 +501,13 @@ console.log('kindcolorArr[before_kindstatus] = ' + kindcolorArr[this.before_kind
         this.details.forEach((detail, i) => {
           $this.form.row_seq = detail.row_seq;
           $this.form.kind = detail.work_kind;
-          console.log('getThen in detail.work_kind = ' + detail.work_kind);
-          console.log('getThen in detail.user_name = ' + detail.user_name);
+          // console.log('getThen in detail.work_kind = ' + detail.work_kind);
+          // console.log('getThen in detail.user_name = ' + detail.user_name);
           // progress_noは廃止する方向
           $this.form.progress_no = null;
           $this.form.item_name[set_index] = C_SUPPLY_DATE_NAME;
           $this.form.item_data[set_index] = detail.supply_date_name;
-          console.log('getThen detail.supply_date_name = ' + $this.form.item_data[set_index]);
+          // console.log('getThen detail.supply_date_name = ' + $this.form.item_data[set_index]);
           set_index = set_index + 1;
           $this.form.item_name[set_index] = C_ORDER_NO_NAME;
           $this.form.item_data[set_index] = detail.order_no;
@@ -541,8 +541,8 @@ console.log('kindcolorArr[before_kindstatus] = ' + kindcolorArr[this.before_kind
           $this.kind_index = set_index;
           // $this.kindstatus = $this.kind_name;
           $this.work_kind = detail.work_kind;
-          console.log('getThen detail.process_time_h = ' + detail.process_time_h);
-          console.log('getThen detail.process_time_m = ' + detail.process_time_m);
+          // console.log('getThen detail.process_time_h = ' + detail.process_time_h);
+          // console.log('getThen detail.process_time_m = ' + detail.process_time_m);
           $this.hour = detail.process_time_h;
           $this.min = detail.process_time_m;
           $this.sec = 0;
@@ -559,7 +559,7 @@ console.log('kindcolorArr[before_kindstatus] = ' + kindcolorArr[this.before_kind
           this.setKindBackColorBottun();
           // this.isbtnctrl = 'top';
         }
-        console.log('getThen in form_count = ' + this.form_count);
+        // console.log('getThen in form_count = ' + this.form_count);
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
@@ -572,28 +572,31 @@ console.log('kindcolorArr[before_kindstatus] = ' + kindcolorArr[this.before_kind
     putThen(response, eventtext) {
       var messages = [];
       var res = response.data;
-      console.log('putThen res.result = ' + res.result);
+      // console.log('putThen res.result = ' + res.result);
       if (res.result) {
-        console.log('putThen this.before_kind = ' + this.before_kind);
+        // console.log('putThen this.before_kind = ' + this.before_kind);
         if (this.before_kind == C_KIND_NEXT) {
-          // 次工程の場合はcompleteで事前登録しているので2回目nextで登録する
+          // 次工程の場合はcompleteで事前登録しているので2回目nextで登録する  -- todo
           this.before_kind = "";
           this.form.kind = C_KIND_NEXT;
           this.form.process_time_h = "";
           this.form.process_time_m = "";
-          var arrayParams = { form : this.form };
-          this.postRequest("/process_history/put", arrayParams)
-            .then(response => {
-              this.putThen(response, "登録");
-            })
-            .catch(reason => {
-              this.serverCatch("作業工程", "登録");
-            });
-        } else {
-          messages.push("作業工程を" + eventtext + "しました。");
-          this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
-          this.getItem();
+          // var arrayParams = { form : this.form };
+          // this.postRequest("/process_history/put", arrayParams)
+          //   .then(response => {
+          //     this.putThen(response, "登録");
+          //   })
+          //   .catch(reason => {
+          //     this.serverCatch("作業工程", "登録");
+          //   });
+        // } else {
+        //   messages.push("作業工程を" + eventtext + "しました。");
+        //   this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
+        //   this.getItem();
         }
+        messages.push("作業工程を" + eventtext + "しました。");
+        this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
+        this.getItem();
         //this.isbtnctrl = 'top';
 
       } else {
@@ -613,7 +616,7 @@ console.log('kindcolorArr[before_kindstatus] = ' + kindcolorArr[this.before_kind
     // 作業ステータス設定
     setKind() {
       this.kind_name = "";
-      console.log('setKind this.form.kind = ' + this.form.kind);
+      // console.log('setKind this.form.kind = ' + this.form.kind);
       switch (this.form.kind) {
         case C_KIND_START:
           this.kind_name = C_KIND_START_NAME;
@@ -647,12 +650,12 @@ console.log('kindcolorArr[before_kindstatus] = ' + kindcolorArr[this.before_kind
       	  // target.style.background = '#FFF';
           break;
       }
-      console.log('setKind out = ' + this.kind_name);
+      // console.log('setKind out = ' + this.kind_name);
     },
     // 作業ステータス設定
     setKindBackColorBottun(eventtext) {
-      console.log('作業ステータス設定setKindBackColorBottun = ' + this.form.kind);
-      console.log('setKind this.form.kind = ' + this.form.kind);
+      // console.log('作業ステータス設定setKindBackColorBottun = ' + this.form.kind);
+      // console.log('setKind this.form.kind = ' + this.form.kind);
       switch (this.form.kind) {
         case C_KIND_START:
           this.isbtnctrl = 'top';

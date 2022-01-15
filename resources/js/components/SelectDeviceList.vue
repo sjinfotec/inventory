@@ -78,9 +78,9 @@ export default {
       this.selectedname = this.getText(value);
       this.selectedsymbol = this.getSymbolText(value);
       this.selectedfloor_pos = this.getPosText(value);
-      console.log('selChanges index =' + index);
-      console.log('selChanges symbol =' + this.selectedsymbol);
-      console.log('selChanges floor_pos =' + this.selectedfloor_pos);
+      // console.log('selChanges index =' + index);
+      // console.log('selChanges symbol =' + this.selectedsymbol);
+      // console.log('selChanges floor_pos =' + this.selectedfloor_pos);
       var arrayData = {'rowindex' : index, 'code' : value, 'name' : this.selectedname, 'symbol' : this.selectedsymbol, 'floor_pos' : this.selectedfloor_pos};
       this.$emit('change-event', value, arrayData);
     },

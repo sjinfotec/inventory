@@ -544,12 +544,12 @@ class ProcessHistory extends Model
      * @return void
      */
     public function updateProcessTime(){
-        Log::debug('mobile updateProcessTime $param_order_no = '.$this->param_order_no);
-        Log::debug('mobile updateProcessTime $param_seq = '.$this->param_seq);
-        Log::debug('mobile updateProcessTime $param_device_code = '.$this->param_device_code);
-        Log::debug('mobile updateProcessTime $param_user_code = '.$this->param_user_code);
-        Log::debug('mobile updateProcessTime $param_process_seq = '.$this->param_process_seq);
-        Log::debug('mobile updateProcessTime $param_process_history_no = '.$this->param_process_history_no);
+        // Log::debug('mobile updateProcessTime $param_order_no = '.$this->param_order_no);
+        // Log::debug('mobile updateProcessTime $param_seq = '.$this->param_seq);
+        // Log::debug('mobile updateProcessTime $param_device_code = '.$this->param_device_code);
+        // Log::debug('mobile updateProcessTime $param_user_code = '.$this->param_user_code);
+        // Log::debug('mobile updateProcessTime $param_process_seq = '.$this->param_process_seq);
+        // Log::debug('mobile updateProcessTime $param_process_history_no = '.$this->param_process_history_no);
         try {
             DB::table($this->table)
             ->where('order_no', $this->param_order_no)

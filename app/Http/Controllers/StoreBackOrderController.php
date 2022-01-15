@@ -109,7 +109,7 @@ class StoreBackOrderController extends Controller
             // calcresult trueを指定するとセル内の計算結果を返して、falseなら計算式が表示される
             // cellformat 各セルのフォーマットを利用するかしないか
             // indexkey trueだと、A1形式がキーになった配列。falseだと0から始まる数字がキーなった配列
-            Log::debug('insertBackorder file_name = '.$params['file_name']);
+            // Log::debug('insertBackorder file_name = '.$params['file_name']);
             $array_impl_getExcelRowData = array (
                 'filename' => $params['file_name'],
                 'cellnodata' => null,
@@ -149,7 +149,7 @@ class StoreBackOrderController extends Controller
                 }
 
             }
-            Log::debug('insertBackorder item_count = '.$item_count);
+            // Log::debug('insertBackorder item_count = '.$item_count);
 
             $imp_model = new ImportBackOrder();
             $imp_model->delAlldata();
@@ -210,7 +210,7 @@ class StoreBackOrderController extends Controller
                     $backorder_order_no = $item->order_no;
                 }
                 $backorder_seq += 1;
-                Log::debug('insertBackorder $backorder_seq = '.$backorder_seq);
+                // Log::debug('insertBackorder $backorder_seq = '.$backorder_seq);
                 $backorder_model->setOutseqAttribute($item->out_seq);
                 $backorder_model->setOrdernoAttribute($item_backorder_order_no );
                 $backorder_model->setSeqAttribute($backorder_seq);

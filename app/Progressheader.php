@@ -964,7 +964,7 @@ class Progressheader extends Model
             $sqlString .= "    and t4.is_deleted = 0 ";
             $sqlString .= "  where" ;
             $sqlString .= "    ? = ?" ;
-            Log::debug('getProductheader = '.$this->param_order_date_from);
+            // Log::debug('getProductheader = '.$this->param_order_date_from);
             if (!empty($this->param_supply_date_from)) {
                 $sqlString .= "    and t1.supply_date = ?" ;
             }

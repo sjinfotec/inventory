@@ -33,31 +33,31 @@ class MobileAccessController extends Controller
      */
     public function index()
     {
-        Log::debug('MobileAccessController index in ');
+        // Log::debug('MobileAccessController index in ');
         // リダイレクト
         // return redirect()->route('edit_work_order.edithome', [
         //     'order_no' => $_GET["order_no"],
         //     'seq' => $_GET["seq"]
         // ]);
-	if (isset($_GET["order_no"])) {
-        	Log::debug('MobileAccessController index in '.$_GET["order_no"]);
-        	Log::debug('MobileAccessController index in '.$_GET["seq"]);
-        	Log::debug('MobileAccessController index in '.$_GET["device"]);
-        	Log::debug('MobileAccessController index in '.$_GET["user_code"]);
+    	if (isset($_GET["order_no"])) {
+        	// Log::debug('MobileAccessController index in '.$_GET["order_no"]);
+        	// Log::debug('MobileAccessController index in '.$_GET["seq"]);
+        	// Log::debug('MobileAccessController index in '.$_GET["device"]);
+        	// Log::debug('MobileAccessController index in '.$_GET["user_code"]);
 	        return view('process_info', [
             	'order_no' => $_GET["order_no"],
             	'seq' => $_GET["seq"],
             	'device' => $_GET["device"],
             	'user_code' => $_GET["user_code"]
 	        ]);
-	} else {
+	    } else {
 	        $authusers = Auth::user();
 
 	        return view('home',
         	    compact(
                 'authusers'
 	            ));
-	} 
+    	} 
     }
 
     /**
@@ -67,7 +67,7 @@ class MobileAccessController extends Controller
      * @return void
      */
     public function getProductheader(Request $request) { 
-        Log::debug('MobileAccessController getProductheader in ');
+        // Log::debug('MobileAccessController getProductheader in ');
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
@@ -110,6 +110,10 @@ class MobileAccessController extends Controller
             $progress_header_model->setParamDevicecodeAttribute($params_device);
             $progress_header_model->setParamUsercodeAttribute($params_user_code);
             $details = $progress_header_model->getProductheaderM();
+            // TODO 作業開始状態でページを閉じた場合の処理確認 20220115
+            // $sqlString .= "    else t5.work_kind end as work_kind" ;
+            // $sqlString .= "  , ifnull(t5.process_time_h ,0) as process_time_h ";
+            // $sqlString .= "  , ifnull(t5.process_time_m ,0) as process_time_m ";
             return response()->json(
                 ['result' => true, 'details' => $details,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
@@ -132,7 +136,7 @@ class MobileAccessController extends Controller
      * @return void
      */
     public function putProcessHistory(Request $request) { 
-        Log::debug('MobileAccessController putProcessHistory in ');
+        // Log::debug('MobileAccessController putProcessHistory in ');
         $this->array_messagedata = array();
         $result = true;
         try {
@@ -197,11 +201,12 @@ class MobileAccessController extends Controller
                     ->max('process_seq');
                     if (isset($result_maxseq)) {
                         // 次工程の場合は工程順番をMAX番号+1を設定
-                        if ($work_kind == Config::get('const.WORKKINDS.next')) {
-                            $process_seq = $result_maxseq + 1;
-                        } else {
-                            $process_seq = $result_maxseq;
-                        }
+                        // if ($work_kind == Config::get('const.WORKKINDS.next')) {
+                        //     $process_seq = $result_maxseq + 1;
+                        // } else {
+                        //     $process_seq = $result_maxseq;
+                        // }
+                        $process_seq = $result_maxseq;
                     }
                 // 加工履歴No=1にMAX番号+1を設定
                 $result_maxseq = DB::table($this->table_process_histories)
@@ -255,7 +260,7 @@ class MobileAccessController extends Controller
                 break;
             }
             // 存在しない場合
-            Log::debug('mobile putProcessHistory process_histories_model $progress_details_cnt = '.$progress_details_cnt);
+            // Log::debug('mobile putProcessHistory process_histories_model $progress_details_cnt = '.$progress_details_cnt);
             if ($progress_details_cnt == 0) {
                 $result_order_exists = DB::table($this->table_progress_details)
                     ->where('order_no', $order_no)
@@ -270,7 +275,7 @@ class MobileAccessController extends Controller
                     $progress_no = $result_maxseq + 1;
                 }
             } else {
-                Log::debug('mobile putProcessHistory process_histories_model $work_kind = '.$work_kind);
+                // Log::debug('mobile putProcessHistory process_histories_model $work_kind = '.$work_kind);
                 if ($work_kind == Config::get('const.WORKKINDS.next')) {
                     // 次工程の場合は工程NOにMAX番号+1を設定
                     $result_maxseq = DB::table($this->table_process_histories)
@@ -280,8 +285,8 @@ class MobileAccessController extends Controller
                     $progress_no = $result_maxseq + 1;
                 } else {
                     // todo 
-                    Log::debug('mobile putProcessHistory process_histories_model $device_code = '.$device_code);
-                    Log::debug('mobile putProcessHistory process_histories_model $user_code = '.$user_code);
+                    // Log::debug('mobile putProcessHistory process_histories_model $device_code = '.$device_code);
+                    // Log::debug('mobile putProcessHistory process_histories_model $user_code = '.$user_code);
                     $result_maxseq = DB::table($this->table_process_histories)
                         ->where('order_no', $order_no)
                         ->where('seq', $seq)
@@ -289,7 +294,7 @@ class MobileAccessController extends Controller
                         ->where('user_code', $user_code)
                         ->max('progress_no');
                     $progress_no = $result_maxseq;
-                    Log::debug('mobile putProcessHistory process_histories_model $result_maxseq = '.$progress_no);
+                    // Log::debug('mobile putProcessHistory process_histories_model $result_maxseq = '.$progress_no);
                 }
             }
 
@@ -303,7 +308,7 @@ class MobileAccessController extends Controller
             $process_histories_model->setDevicecodeAttribute($device_code);
             $process_histories_model->setUsercodeAttribute($user_code);
             $process_histories_model->setRowseqAttribute($row_seq);
-            Log::debug('mobile putProcessHistory process_histories_model $progress_no = '.$progress_no);
+            // Log::debug('mobile putProcessHistory process_histories_model $progress_no = '.$progress_no);
             $process_histories_model->setProgressnoAttribute($progress_no);
             $process_histories_model->setProcesshistorytimeAttribute(Carbon::now());
             $process_histories_model->setProcessTimeHAttribute($process_time_h);
@@ -322,11 +327,11 @@ class MobileAccessController extends Controller
                     'progress_no' => $progress_no
                 );
                 $calcdifftime = $api_common->calcProcessTime($array_impl_calcProcessTime);
-                Log::debug('mobile putProcessHistory $calcdifftime = '.$calcdifftime);
+                // Log::debug('mobile putProcessHistory $calcdifftime = '.$calcdifftime);
                 $process_time_h = (int)($calcdifftime / 60 / 60);
                 $process_time_m = ($calcdifftime - ($process_time_h * 60 * 60)) / 60;
-                Log::debug('mobile putProcessHistory $process_time_h = '.$process_time_h);
-                Log::debug('mobile putProcessHistory $process_time_m = '.$process_time_m);
+                // Log::debug('mobile putProcessHistory $process_time_h = '.$process_time_h);
+                // Log::debug('mobile putProcessHistory $process_time_m = '.$process_time_m);
                 // 加工時間変わったためprocess_historiesを更新する
                 $process_histories_model->setParamOrdernoAttribute($order_no);
                 $process_histories_model->setParamSeqAttribute($seq);
@@ -334,12 +339,12 @@ class MobileAccessController extends Controller
                 $process_histories_model->setParamProcesshistorynoAttribute($process_history_no);
                 $process_histories_model->setParamDevicecodeAttribute($device_code);
                 $process_histories_model->setParamUsercodeAttribute($user_code);
-                Log::debug('mobile putProcessHistory $order_no = '.$order_no);
-                Log::debug('mobile putProcessHistory $seq = '.$seq);
-                Log::debug('mobile putProcessHistory $process_seq = '.$process_seq);
-                Log::debug('mobile putProcessHistory $process_history_no = '.$process_history_no);
-                Log::debug('mobile putProcessHistory $device_code = '.$device_code);
-                Log::debug('mobile putProcessHistory $user_code = '.$user_code);
+                // Log::debug('mobile putProcessHistory $order_no = '.$order_no);
+                // Log::debug('mobile putProcessHistory $seq = '.$seq);
+                // Log::debug('mobile putProcessHistory $process_seq = '.$process_seq);
+                // Log::debug('mobile putProcessHistory $process_history_no = '.$process_history_no);
+                // Log::debug('mobile putProcessHistory $device_code = '.$device_code);
+                // Log::debug('mobile putProcessHistory $user_code = '.$user_code);
                 $process_histories_model->setProcessTimeHAttribute($process_time_h);
                 $process_histories_model->setProcessTimeMAttribute($process_time_m);
                 $process_histories_model->setUpdateduserAttribute($login_user_code);
@@ -349,7 +354,7 @@ class MobileAccessController extends Controller
             // 指示書／管理書の明細に登録する
             $progress_details_model->setOrdernoAttribute($order_no);
             $progress_details_model->setSeqAttribute($seq);
-            Log::debug('mobile putProcessHistory progress_details_model $progress_no = '.$progress_no);
+            // Log::debug('mobile putProcessHistory progress_details_model $progress_no = '.$progress_no);
             $progress_details_model->setProgressnoAttribute($progress_no);
             $progress_details_model->setProcessseqAttribute($process_seq);
             $progress_details_model->setProductprocessescodeAttribute($product_processes_code);
@@ -359,7 +364,7 @@ class MobileAccessController extends Controller
             $progress_details_model->setUserscodeAttribute($user_code);
             $progress_details_model->setProcesshistorynoAttribute($process_history_no);
             $progress_details_model->setWorkkindAttribute($work_kind);
-            if ($work_kind == Config::get('const.WORKKINDS.complete')) {
+            if ($work_kind == Config::get('const.WORKKINDS.next') || $work_kind == Config::get('const.WORKKINDS.complete')) {
                 // 完了日設定
                 $dt = new Carbon();
                 $complete_date = $dt->format('Ymd');

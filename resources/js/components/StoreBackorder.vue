@@ -105,7 +105,7 @@ export default {
     fileUpload(e) {
       const formData = new FormData();
       var file_data = e.target.files[0];
-      console.log("fileUpload file_data = " + file_data.name);
+      // console.log("fileUpload file_data = " + file_data.name);
       formData.append("file", file_data);
       axios
         .post("/api/backorderUpload", formData)
