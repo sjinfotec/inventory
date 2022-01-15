@@ -64,6 +64,7 @@
               <!-- /.col -->
             </div>
             <!-- /.row -->
+
             <!-- .row -->
             <div id="input-area_3" class="row justify-content-between  print-none">
               <!-- .col -->
@@ -71,7 +72,7 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                      class="input-group-text font-size-sm line-height-xs label-width-60"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       id="basic-addon1"
                     >コード<span class="color-red">[必須]</span></span>
                   </div>
@@ -84,12 +85,17 @@
                 </div>
               </div>
               <!-- /.col -->
+            </div>
+            <!-- /.row -->
+
+            <!-- .row -->
+            <div id="input-area_3" class="row justify-content-between  print-none">
               <!-- .col -->
               <div class="col-md-5 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                      class="input-group-text font-size-sm line-height-xs label-width-150"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       id="basic-addon1"
                     >機器名<span class="color-red">[必須]</span></span>
                   </div>
@@ -98,6 +104,24 @@
                     class="form-control"
                     v-model="form.name"
                     name="name"
+                  />
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-3 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      id="basic-addon1"
+                    >略号<span class="color-red">[必須]</span></span>
+                  </div>
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model="form.symbol"
+                    name="symbol"
                   />
                 </div>
               </div>
@@ -118,6 +142,7 @@
               <!-- /.col -->
             </div>
             <!-- /.row -->
+
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- .col -->
@@ -244,6 +269,7 @@ export default {
         code: "",
         floor_pos: "",
         name: "",
+        symbol: "",
         qrText1: "",
         qrText2: "",
         qrText3: "",
@@ -334,7 +360,7 @@ export default {
         this.messagevalidatesNew = chkArray;
         flag = false;
       }
-      return flag;
+       return flag;
     },
     // バリデーション（更新）
     checkFormFix: function(index) {
@@ -387,6 +413,7 @@ export default {
         this.selectMode = 'EDT';
         this.form.code = arrayitem['code'];
         this.form.name = arrayitem['name'];
+        this.form.symbol = arrayitem['symbol'];
         this.form.floor_pos = arrayitem['floor_pos'];
         this.getdevice();
       }
@@ -444,11 +471,14 @@ export default {
         .catch(reason => {
           this.serverCatch("取得");
         });
+      console.log('getdevice name = ' + this.form.name);
+      console.log('getdevice symbol = ' + this.form.symbol);
+      console.log('getdevice floor_pos = ' + this.form.floor_pos);
     },
     // 機器登録処理
     store() {
       var messages = [];
-      var arrayParams = { code : this.form.code, name : this.form.name };
+      var arrayParams = { code : this.form.code, name : this.form.name, symbol : this.form.symbol };
       this.postRequest("/setting_device/store", arrayParams)
         .then(response  => {
           this.putThen(response, "登録");
@@ -510,6 +540,7 @@ export default {
     inputClear() {
       this.details = [];
       this.form.name = "";
+      this.form.symbol = "";
       this.form.floor_pos = "";
       this.form.id = "";
       this.form.code = "";
