@@ -1079,8 +1079,9 @@ class Progressheader extends Model
         try {
             DB::table($this->table)
             ->where('order_no', $this->param_order_no)
-            ->where('seq', $this->param_seq)
+            ->where('out_seq', $this->param_out_seq)
             ->update([
+                'seq' => $this->seq,
                 'row_seq' => $this->row_seq,
                 'drawing_no' => $this->drawing_no,
                 'order_date' => $this->order_date,
@@ -1089,10 +1090,25 @@ class Progressheader extends Model
                 'supply_date' => $this->supply_date,
                 'office_code' => $this->office_code,
                 'customer_code' => $this->customer_code,
-                'customer_name' => $this->customer_name,
+                'back_order_customer_name' => $this->back_order_customer_name,
                 'order_count' => $this->order_count,
                 'model_number' => $this->model_number,
                 'product_code' => $this->product_code,
+                'processes_code' => $this->processes_code,
+                'back_order_product_name' => $this->back_order_product_name,
+                'unit_price' => $this->unit_price,
+                'outline_name' => $this->outline_name,
+                'back_order_quality_name' => $this->back_order_quality_name,
+                'material_cost' => $this->material_cost,
+                'material_office_code' => $this->material_office_code,
+                'product_code' => $this->product_code,
+                'material_customer_code' => $this->material_customer_code,
+                'material_customer_name' => $this->material_customer_name,
+                'heat_process' => $this->heat_process,
+                'heat_cost' => $this->heat_cost,
+                'outsourcing_office_code' => $this->outsourcing_office_code,
+                'outsourcing_customer_code' => $this->outsourcing_customer_code,
+                'outsourcing_cost' => $this->outsourcing_cost,
                 'updated_user'=>$this->updated_user,
                 'updated_at' => $this->updated_at
                 ]

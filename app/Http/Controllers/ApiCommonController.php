@@ -1590,7 +1590,7 @@ Log::debug('lai = '.$login_account_id);
                     // if ($item->order_no  != $backorder_order_no) {
                         $result_exists = DB::table($this->table_progress_headers)
                         ->where('order_no', $item->order_no )
-                        ->where('seq', $item->seq )
+                        ->where('out_seq', $item->out_seq )
                         ->exists();
                         // if ($result_exists) {
                             // DB::table($this->table_progress_headers)
@@ -1600,9 +1600,14 @@ Log::debug('lai = '.$login_account_id);
                         // $backorder_order_no = $item->order_no;
                     // }
                     $progress_header_model->setOrdernoAttribute($item->order_no);
-                    $progress_header_model->setSeqAttribute($item->seq);
+                    $progress_header_model->setOutseqAttribute($item->out_seq);
                     if (!$result_exists) {
-                        $progress_header_model->setOutseqAttribute($item->out_seq);
+                        // progress_headersの同じ受注番号の最大seq+1を求める
+                        $result_maxseq = DB::table($this->table_progress_headers)
+                                        ->where('order_no', $item->order_no)
+                                        ->max('seq');
+                        $seq = $result_maxseq + 1;
+                        $progress_header_model->setSeqAttribute($seq);
                         $progress_header_model->setRowseqAttribute($item->row_seq);
                         $progress_header_model->setDrawingnoAttribute($item->drawing_no);
                         $progress_header_model->setOrderdateAttribute($item->order_date);
@@ -1631,23 +1636,23 @@ Log::debug('lai = '.$login_account_id);
                         $progress_header_model->setCreateduserAttribute($login_user_code);
                         $progress_header_model->setCreatedatAttribute(Carbon::now());
                         $progress_header_model->insert();
-                    } else {
-                        $progress_header_model->setParamOrdernoAttribute($item->order_no);
-                        $progress_header_model->setParamSeqAttribute($item->seq);
-                        $progress_header_model->setOutseqAttribute($item->out_seq);
-                        $progress_header_model->setRowseqAttribute($item->row_seq);
-                        $progress_header_model->setDrawingnoAttribute($item->drawing_no);
-                        $progress_header_model->setOrderdateAttribute($item->order_date);
-                        $progress_header_model->setOrderkingakuAttribute($item->order_kingaku);
-                        $progress_header_model->setSupplydateAttribute($item->supply_date);
-                        $progress_header_model->setOfficecodeAttribute($item->office_code);
-                        $progress_header_model->setCustomercodeAttribute($item->customer_code);
-                        $progress_header_model->setBackordercustomernameAttribute($item->customer_name);
-                        $progress_header_model->setOrdercountAttribute($item->order_count);
-                        $progress_header_model->setModelnumberAttribute($item->model_number);
-                        $progress_header_model->setProductcodeAttribute($item->product_code);
-                        $progress_header_model->setUpdateduserAttribute($login_user_code);
-                        $progress_header_model->setUpdatedatAttribute(Carbon::now());
+                    // } else {
+                    //     $progress_header_model->setParamOrdernoAttribute($item->order_no);
+                    //     $progress_header_model->setParamOutSeqAttribute($item->out_seq);
+                    //     $progress_header_model->setRowseqAttribute($item->row_seq);
+                    //     $progress_header_model->setDrawingnoAttribute($item->drawing_no);
+                    //     $progress_header_model->setOrderdateAttribute($item->order_date);
+                    //     $progress_header_model->setOrderkingakuAttribute($item->order_kingaku);
+                    //     $progress_header_model->setSupplydateAttribute($item->supply_date);
+                    //     $progress_header_model->setOfficecodeAttribute($item->office_code);
+                    //     $progress_header_model->setCustomercodeAttribute($item->customer_code);
+                    //     $progress_header_model->setBackordercustomernameAttribute($item->customer_name);
+                    //     $progress_header_model->setOrdercountAttribute($item->order_count);
+                    //     $progress_header_model->setModelnumberAttribute($item->model_number);
+                    //     $progress_header_model->setProductcodeAttribute($item->product_code);
+                    //     $progress_header_model->setUpdateduserAttribute($login_user_code);
+                    //     $progress_header_model->setUpdatedatAttribute(Carbon::now());
+                    //     $progress_header_model->updateHeader();
                     }
                     // 受注残を登録済みにする
                     $back_order_model->setParamOrdernoAttribute($item->order_no);
@@ -2010,7 +2015,6 @@ Log::debug('lai = '.$login_account_id);
                     'order_no' => $params_order_no,
                     'page_no' => $params_page_no
                 );
-                Log::debug('getProcessView $params_page_no = '.$params_page_no);
                 $details = $this->selectProcessView($array_impl_selectProcessView);
             } else {
                 $params_page_no++;
