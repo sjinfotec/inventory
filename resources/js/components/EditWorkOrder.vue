@@ -690,7 +690,8 @@
                       </thead>
                       <tbody>
                         <tr v-for="(n,index) in 12" :key="index">
-                          <td class="td-first text-center align-middle">{{form.progress_no[index]}}</td>
+                          <!-- <td class="td-first text-center align-middle">{{form.progress_no[index]}}</td> -->
+                          <td class="td-first text-center align-middle">{{ index+1 }}</td>
                           <td class="text-center align-middle">{{form.progress_name[index]}}</td>
                           <td class="text-center align-middle">
                             <select class="form-control" v-model="form.device_code[index]"
