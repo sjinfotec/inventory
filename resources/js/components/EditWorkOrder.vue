@@ -676,7 +676,7 @@
               <div class="col-12" id="position_base1">
                 <div class="table-responsive">
                   <div class="col-12 p-0">
-                    <table id="table_cnt1" class="table table-striped border-bottom font-size-sm text-nowrap">
+                    <table id="table_cnt1" class="table table-striped  font-size-sm text-nowrap">
                       <thead>
                         <tr>
                           <td class="td-first text-center align-middle w1">工程No.</td>
@@ -684,8 +684,8 @@
                           <td class="text-center align-middle w3">機器名</td>
                           <td class="text-center align-middle w4">加工者</td>
                           <td  colspan="4" class="text-center align-middle ">加工時間</td>
-                          <td class="text-center align-middle ">完了日</td>
-                          <!--<td class="text-center align-middle w-5">QRコード</td>-->
+                          <td class="text-center align-middle w6">完了日</td>
+                          <!--<td class="text-center align-middle">QRコード</td>-->
                         </tr>
                       </thead>
                       <tbody>
@@ -741,11 +741,11 @@
                             </div>
                           </td>
                           <td class="td-first text-left align-middle ws2 pad1">M</td>
-                          <td class="text-center align-middle w6 ">
+                          <td class="text-center align-middle  ">
                             <div class>
                               <input
                                 type="date"
-                                class="form-control"
+                                class="form-control w_input_date"
                                 v-model="form.complete_date[index]"
                               />
                             </div>
@@ -761,7 +761,7 @@
                             <div v-if="form.result_process_time_m !== 0">{{form.result_process_time_m}}</div>
                           </td>
                           <td class="td-first text-left align-middle ws2 pad1 f_style_1 str_style1">M</td>
-                          <td class="text-center align-middle w6 f_style_1 ">
+                          <td class="text-center align-middle  f_style_1 ">
                           </td>
                         </tr>
                       </tbody>
