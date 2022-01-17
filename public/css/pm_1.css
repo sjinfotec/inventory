@@ -238,7 +238,12 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   margin-bottom: 1rem;
   color: #212529;
 }
-#table_cnt1  {width: 100%;}
+#table_cnt1  {
+  width: 99%; margin:auto;
+  border-right: 1px solid #dee2e6;
+  border-left: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
+}
 #table_cnt1 .form-control {
   display: block;
   width: 100%;
@@ -272,8 +277,12 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 #table_cnt1 td.w2  {width:45%;}
 #table_cnt1 td.w3  {width:20%;}
 #table_cnt1 td.w4  {width:10%;}
-#table_cnt1 td.w5  {width:10%;}
-#table_cnt1 td.w6  {width:auto;}
+/*#table_cnt1 td.w5  {width:10%;}*/
+#table_cnt1 td.w6  {width:140px;}
+#table_cnt1 .w_input_date  {width:140px;}
+
+
+
 #table_cnt1 .ws1 {
   width:3.4rem;
 }
@@ -306,9 +315,14 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 
 /*--下部コンテンツ：加工時間実績等--*/
 #table_cnt2 {
-  width:100%;
+
+  width: 99%;
   border-collapse: collapse;
+  margin-top:15px;
   margin-bottom:15px;
+  margin-left:auto;
+  margin-right:auto;
+  border-right: 1px solid #dee2e6;
 }
 #table_cnt2 td {
   padding:4px 8px;
@@ -343,7 +357,7 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 */
   text-align: center;
   vertical-align: middle;
-  width:2rem;
+  width:1em;
   height:192px;
 }
 #table_cnt2 .flex1  {
@@ -378,6 +392,7 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 
 #table_cnt2 .textalign1 {
   text-align: right;
+  white-space: nowrap;
 }
 #table_cnt2 .frame_wh1  {
   height:48px;
@@ -945,13 +960,23 @@ white-space: nowrap;
     display:block;
   }
   */
-  #table_cnt1 td.w2  {width:35%;}
+  #table_cnt1 {border-color:#AAA;}
+  #table_cnt1 .table th, .table td {border-color:#AAA;}
+  #table_cnt1 .f_style_1 {border-color:#AAA;}
+  #table_cnt1 td.w1  {width:5em;}
+  #table_cnt1 td.w2  {width:auto;}
+  #table_cnt1 td.w3  {width:30%;}
   #table_cnt1 td.w4  {width:12%;}
+  #table_cnt1 td.w6  {width:140px;}
+  #table_cnt1 .w_input_date  {width:140px;}
+  .vdp-datepicker__clear-button  {display:none;}
   #table_cnt1 .ws1 {width:5%;}
-
+  
   #table_cnt2 tr {
     height:48px;
   }
+  #table_cnt99 {border-color:#ccd4dd;}
+  #table_cnt2 td  {border-color:#AAA;}
   #table_cnt2 .wrmode {
   border-top:none 0px;
   border-bottom:none 0px;
@@ -965,7 +990,12 @@ white-space: nowrap;
   #table_cnt2 .str01{
     margin-left: 2px;
   }
-  
+
+  select {
+    -webkit-appearance: none;/* ベンダープレフィックス(Google Chrome、Safari用) */
+    -moz-appearance: none; /* ベンダープレフィックス(Firefox用) */
+    appearance: none; /* 標準のスタイルを無効にする */
+    }
 
 }
 
