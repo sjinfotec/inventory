@@ -601,6 +601,10 @@ white-space: nowrap;
   background:#6cb2eb;
   color:#FFF;
   }
+#table_cnt4 .td_next {
+  background:#EEAA00;
+  color:#FFF;
+  }
 #table_cnt4 .textwrap {
   white-space: normal;
   overflow-wrap: break-word;
@@ -616,7 +620,7 @@ white-space: nowrap;
  }
  /*-- 品名 --*/
  #table_cnt4 td.w5 {
-  width:18em;
+  width:9em;
 }
 /*-- 機器名（略号） --*/
  #table_cnt4 td.w6 {
@@ -632,7 +636,7 @@ white-space: nowrap;
 }
 
 #table_cnt4 .overflowhidden1 {
-  width:16em;
+  width:7em;
   overflow: hidden;
   margin:auto;
   text-align:left;
