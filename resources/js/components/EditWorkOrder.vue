@@ -948,8 +948,9 @@ const CONST_KBNNAME_DEL = "削除"
 const CONST_KBNNAME_REL = "解除"
 const CONST_KBNNAME_REG = "登録"
 const CONST_SAVE_SHEET_NAME = "で渡し済"
-const CONST_QRTEXT_KBN_CHECK = "1"
-const CONST_QRTEXT_KBN_HEAT = "2"
+const CONST_QRTEXT_KBN_NOTHING = "00"
+const CONST_QRTEXT_KBN_CHECK = "91"
+const CONST_QRTEXT_KBN_HEAT = "92"
 
 
 export default {
