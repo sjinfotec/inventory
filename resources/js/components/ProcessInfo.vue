@@ -219,6 +219,11 @@ const C_KIND_COMPLETE_NAME = "作業完了";
 const C_KIND_NEXT = "6";
 const C_KIND_NEXT_NAME = "次工程";
 const kindcolorArr = {"作業準備":"#FFF", "作業開始":"#80bb60", "作業中断":"#dd6060", "ミス中断":"#dd6060", "作業完了":"#6cb2eb", "次工程":"#eeaa00" };
+const CONST_QRTEXT_KBN_NOTHING = "00"
+const CONST_QRTEXT_KBN_CHECK = "91"
+const CONST_QRTEXT_KBN_HEAT = "92"
+const CONST_QRTEXT_KBN_NAME_CHECK = "受入チェック"
+const CONST_QRTEXT_KBN_NAME_HEAT = "熱処理"
 
 export default {
   name: "ProcessInfo",
@@ -239,6 +244,10 @@ export default {
     user_code: {
       type: String,
       default: ""
+    },
+    kbn: {
+      type: String,
+      default: ""
     }
   },
   data() {
@@ -247,6 +256,7 @@ export default {
         order_no: "",
         seq: 0,
         kind: "",
+        kbn: "",
         device_code: "",
         user_code: "",
         row_seq: "",
@@ -259,6 +269,7 @@ export default {
       isbtnctrl: '',
       kind_index: 0,
       kind_name: "",
+      kbn_name: "",
       before_kind: "",
       count: 0,
       before_count: 0,
@@ -537,7 +548,7 @@ export default {
           $this.form.item_data[set_index] = detail.user_name;
           set_index = set_index + 1;
           $this.form.item_name[set_index] = $this.kind_name;
-          $this.form.item_data[set_index] = "";
+          $this.form.item_data[set_index] = $this.kbn_name;
           $this.kind_index = set_index;
           // $this.kindstatus = $this.kind_name;
           $this.work_kind = detail.work_kind;

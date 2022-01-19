@@ -25,6 +25,7 @@
 						v-bind:seq="{{ $seq }}"
 						v-bind:device="{{ $device }}"
 						v-bind:user_code="{{ $user_code }}"
+						v-bind:kbn="{{ $kbn }}"
 					></process-info>
 					<!-- /main contentns row -->
 @endsection

@@ -44,11 +44,16 @@ class MobileAccessController extends Controller
         	// Log::debug('MobileAccessController index in '.$_GET["seq"]);
         	// Log::debug('MobileAccessController index in '.$_GET["device"]);
         	// Log::debug('MobileAccessController index in '.$_GET["user_code"]);
+            $kbn = Config::get('const.QRCODE_KBN.nothing');
+            if (isset($_GET["kbn"])) {
+                $kbn = $_GET["kbn"];
+            }
 	        return view('process_info', [
             	'order_no' => $_GET["order_no"],
             	'seq' => $_GET["seq"],
             	'device' => $_GET["device"],
-            	'user_code' => $_GET["user_code"]
+            	'user_code' => $_GET["user_code"],
+            	'kbn' => $kbn
 	        ]);
 	    } else {
 	        $authusers = Auth::user();

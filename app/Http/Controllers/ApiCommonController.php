@@ -2073,6 +2073,7 @@ class ApiCommonController extends Controller
             $sqlString .= "  date_format(t3.supply_date,'%m/%d') as supply_date_name ";
             $sqlString .= "  , left(t3.back_order_customer_name,13) as back_order_customer_name ";
             $sqlString .= "  , t1.order_no as order_no ";
+            $sqlString .= "  , SUBSTR(t1.order_no,4,CHAR_LENGTH(t1.order_no)-3) as dsp_order_no ";
             $sqlString .= "  , t1.seq as seq ";
             $sqlString .= "  , t1.row_seq as row_seq ";
             $sqlString .= "  , t3.back_order_product_name as back_order_product_name ";
