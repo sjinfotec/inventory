@@ -776,6 +776,14 @@
                         :value="qrText" :options="qroption1" tag="img">
                       </vue-qrcode>
                       <p><span>[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}]</span></p>
+                      <vue-qrcode
+                        :value="qrText_check" :options="qroption1" tag="img">
+                      </vue-qrcode>
+                      <p><span>[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}][受入チェック]</span></p>
+                      <vue-qrcode
+                        :value="qrText_heat" :options="qroption1" tag="img">
+                      </vue-qrcode>
+                      <p><span>[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}][熱処理]</span></p>
                     </div>
                   </div><!--end view QR code v-if="isprint_qrText"-->
                 </div>
@@ -940,6 +948,8 @@ const CONST_KBNNAME_DEL = "削除"
 const CONST_KBNNAME_REL = "解除"
 const CONST_KBNNAME_REG = "登録"
 const CONST_SAVE_SHEET_NAME = "で渡し済"
+const CONST_QRTEXT_KBN_CHECK = "1"
+const CONST_QRTEXT_KBN_HEAT = "2"
 
 
 export default {
@@ -1118,6 +1128,8 @@ export default {
         }
       },
       qrText:"",
+      qrText_check:"",
+      qrText_heat:"",
       product_resresults: [],
       qroption1: {
         errorCorrectionLevel: "M",
@@ -2076,8 +2088,12 @@ export default {
     setQrText() {
       if (this.form.seq == 0) {
         this.qrText = 'A' + "order_no='" + this.form.order_no + "'&seq='1'";
+        this.qrText_check = 'A' + "order_no='" + this.form.order_no + "'&seq='1'&kbn='" + CONST_QRTEXT_KBN_CHECK + "'";
+        this.qrText_heat = 'A' + "order_no='" + this.form.order_no + "'&seq='1'&kbn='" + CONST_QRTEXT_KBN_HEAT + "'";
       } else {
         this.qrText = 'A' + "order_no='" + this.form.order_no + "'&seq='" + this.form.seq + "'";
+        this.qrText_check = 'A' + "order_no='" + this.form.order_no + "'&seq='" + this.form.seq + "'&kbn='" + CONST_QRTEXT_KBN_CHECK + "'";
+        this.qrText_heat = 'A' + "order_no='" + this.form.order_no + "'&seq='" + this.form.seq + "'&kbn='" + CONST_QRTEXT_KBN_HEAT + "'";
       }
       // for (let index = 0; index < 12; index++) {
         // this.form.qrText[index] = this.form.order_no + this.form.row_seq + this.form.drawing_no + ('00' + (index+1)).slice(-2);
