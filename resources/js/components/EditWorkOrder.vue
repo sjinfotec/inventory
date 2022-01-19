@@ -15,6 +15,20 @@
             <!-- panel contents -->
 
             <!-- .row -->
+            <div id="area1" >
+              <!-- .col -->
+              <div id="cnt_1">
+                  <div class="style1 w1 txtalign_c">
+                    <label class="labeltxt">発行日</label>
+                  </div>
+                  <div class="style1 w2">
+                    <span class="labeltxt">令和4年2月23日</span>
+                  </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
             <div class="row justify-content-between">
               <!-- .col -->
               <div class="col-cnt_22 pb-2 print_view">
@@ -54,22 +68,25 @@
               <!-- .col -->
               <div class="col-cnt_01 pb-2">
                 <div id="input-area_1">
-                  <div class="input-area-prepend">
+                  <div class="input-area-prepend print_view_inline print_w3">
                     <span
-                      class="input-area-text"
+                      class="input-area-text print_noneview"
                       for="target_fromdate"
                     >
                       納期日付
                       <span class="color-red print-none">[必須]</span>
                     </span>
+                    <label class="print_view labeltxt2">納期：</label>
                   </div>
-                  <input-datepicker
-                    v-bind:default-date="valuesupplydate"
-                    v-bind:date-format="DatePickerFormat"
-                    v-bind:place-holder="'納期日付を選択してください'"
-                    v-on:change-event="supplydateChanges"
-                    v-on:clear-event="supplydateCleared"
-                  ></input-datepicker>
+                  <div class="print_view_inline print_w2">
+                    <input-datepicker
+                      v-bind:default-date="valuesupplydate"
+                      v-bind:date-format="DatePickerFormat"
+                      v-bind:place-holder="'納期日付を選択してください'"
+                      v-on:change-event="supplydateChanges"
+                      v-on:clear-event="supplydateCleared"
+                    ></input-datepicker>
+                  </div>
                 </div>
                 <message-data
                   v-bind:message-datas="messagedatasupplydate"
@@ -126,14 +143,14 @@
                     <label
                       class="input-area-text"
                       for="target_customer"
-                    >客先</label>
+                    >客先名</label>
                   </div>
                   <div v-if="selectedOfficeValue">
                     <select-customerlist
                       ref="selectcustomerlist"
                       v-if="showoCustomerlist"
                       v-bind:blank-data="true"
-                      v-bind:placeholder-data="'客先を選択してください'"
+                      v-bind:placeholder-data="'客先名を選択してください'"
                       v-bind:selected-value="selectedCustomerValue"
                       v-bind:add-new="false"
                       v-bind:office-code="selectedOfficeValue"
@@ -144,7 +161,7 @@
                   <div v-else class="form-control p-0">
                     <input
                       type="text"
-                      title="客先"
+                      title="客先名"
                       class="form-control"
                       :value="value_back_order_customer_name"
                       @change="backordercustomernameChanges"
@@ -182,13 +199,13 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-cnt_05 pb-2 print-none">
+              <div class="col-cnt_05 pb-2">
                 <div id="input-area_1">
                   <div class="input-area-prepend">
                     <span
                       class="input-area-text"
                       id="basic-addon1"
-                    >行</span>
+                    ><span class="print_noneview">行</span><span class="print_view">&nbsp;</span></span>
                   </div>
                   <div class="form-control p-0">
                     <input
@@ -410,7 +427,7 @@
                     <span
                       class="input-area-text"
                       id="basic-addon1"
-                    >材質・寸法</span>
+                    >材質・寸法<span class="print_view">及び材料費</span></span>
                   </div>
                   <div class="form-control p-0">
                     <input
@@ -432,7 +449,7 @@
                     <span
                       class="input-area-text"
                       id="basic-addon1"
-                    >材料費</span>
+                    ><span class="print_noneview">材料費</span><span class="print_view">&nbsp;</span></span>
                   </div>
                   <div class="form-control p-0" v-if="materialcostediting">
                     <input
@@ -497,17 +514,18 @@
               <!-- .col -->
               <div class="col-cnt_16 pb-2">
                 <div id="input-area_1">
-                  <div class="input-area-prepend">
+                  <div class="input-area-prepend print_view_inline print_w1">
                     <span
-                      class="input-area-text"
+                      class="input-area-text print_noneview"
                       id="basic-addon1"
                     >熱処理</span>
+                    <label class="print_view labeltxt">熱処理<br>及び<br>熱処理費</label>
                   </div>
-                  <div class="form-control p-0">
+                  <div class=" print_view_inline print_w2">
                     <input
                       type="text"
                       title="熱処理"
-                      class="form-control"
+                      class="form-control fc2 print_w2"
                       :value="value_heat_process"
                       @change="heatprocesschanges"
                     />
@@ -519,37 +537,39 @@
               <!-- .col -->
               <div class="col-cnt_17 pb-2">
                 <div id="input-area_1">
-                  <div class="input-area-prepend">
+                  <div class="input-area-prepend print_noneview">
                     <span
                       class="input-area-text"
                       id="basic-addon1"
                     >熱処理費</span>
                   </div>
-                  <div class="form-control p-0" v-if="heatcostediting">
-                    <input
-                      ref="target"
-                      type="number"
-                      title="熱処理費"
-                      min="0"
-                      class="form-control inputnum_r"
-                      :value="value_heat_cost"
-                      @change="heatcostChanges"
-                      @focusin="heatcostFocusin"
-                      @focusout="heatcostFocusout"
+                  <div class="print_view_inline">
+                    <div class="form-control fc2 p-0" v-if="heatcostediting">
+                      <input
+                        ref="target"
+                        type="number"
+                        title="熱処理費"
+                        min="0"
+                        class="form-control fc2 inputnum_r"
+                        :value="value_heat_cost"
+                        @change="heatcostChanges"
+                        @focusin="heatcostFocusin"
+                        @focusout="heatcostFocusout"
 
-                    />
-                  </div>
-                  <div class="form-control p-0" v-else>
-                    <input
-                      type="text"
-                      title="熱処理費"
-                      class="form-control inputnum_r"
-                      :value ="value_heat_cost | localeNum"
-                      @change="heatcostChanges"
-                      @focusin="heatcostFocusin"
-                      @focusout="heatcostFocusout"
+                      />
+                    </div>
+                    <div class="form-control fc2 p-0" v-else>
+                      <input
+                        type="text"
+                        title="熱処理費"
+                        class="form-control fc2 inputnum_r"
+                        :value ="value_heat_cost | localeNum"
+                        @change="heatcostChanges"
+                        @focusin="heatcostFocusin"
+                        @focusout="heatcostFocusout"
 
-                    />
+                      />
+                    </div>
                   </div>
                 </div>
                 <message-data v-bind:message-datas="messagedataheatcost" v-bind:message-class="'warning'"></message-data>
@@ -558,15 +578,18 @@
               <!-- .col -->
               <div class="col-cnt_19 pb-2">
                 <div id="input-area_1">
-                  <div class="input-area-prepend">
+                  <div class="input-area-prepend print_view_inline print_w1">
                     <label
-                      class="input-area-text"
+                      class="input-area-text print_noneview"
                       for="target_customer"
                     >外注先</label>
+                    <label class="print_view labeltxt">外注<br>及び<br>外注費</label>
                   </div>
+                  <div class="print_view_inline print_w2">
                   <select-outsoucingcustomerlist
                     ref="selectoutsourcingcustomerlist"
                     v-if="showoOutsourcingcustomerlist"
+                    v-bind:style="{ margin: 0}"
                     v-bind:blank-data="true"
                     v-bind:placeholder-data="'外注先を選択してください'"
                     v-bind:selected-value="selectedOutsourcingCustomerValue"
@@ -574,6 +597,7 @@
                     v-bind:row-index="0"
                     v-on:change-event="outsourcingcustomerChanges"
                   ></select-outsoucingcustomerlist>
+                  </div>
                 </div>
                 <message-data
                   v-bind:message-datas="messagedataoutsourcingcustomer"
@@ -584,37 +608,40 @@
               <!-- .col -->
               <div class="col-cnt_20 pb-2">
                 <div id="input-area_1">
-                  <div class="input-area-prepend">
+                  <div class="input-area-prepend print_noneview">
                     <span
                       class="input-area-text"
                       id="basic-addon1"
+                      v-if="isprint_layout_view == 'view'"
                     >外注費</span>
                   </div>
-                  <div class="form-control p-0" v-if="outsourcingcostediting">
-                    <input
-                      ref="target"
-                      type="number"
-                      title="外注費"
-                      min="0"
-                      class="form-control inputnum_r"
-                      :value="value_outsourcing_cost"
-                      @change="outsourcingcostChanges"
-                      @focusin="outsourcingcostFocusin"
-                      @focusout="outsourcingcostFocusout"
+                  <div class="print_view_inline">
+                    <div class="form-control fc2 p-0" v-if="outsourcingcostediting">
+                      <input
+                        ref="target"
+                        type="number"
+                        title="外注費"
+                        min="0"
+                        class="form-control fc2 inputnum_r"
+                        :value="value_outsourcing_cost"
+                        @change="outsourcingcostChanges"
+                        @focusin="outsourcingcostFocusin"
+                        @focusout="outsourcingcostFocusout"
 
-                    />
-                  </div>
-                  <div class="form-control p-0" v-else>
-                    <input
-                      type="text"
-                      title="外注費"
-                      class="form-control inputnum_r"
-                      :value ="value_outsourcing_cost | localeNum"
-                      @change="outsourcingcostChanges"
-                      @focusin="outsourcingcostFocusin"
-                      @focusout="outsourcingcostFocusout"
+                      />
+                    </div>
+                    <div class="form-control fc2 p-0" v-else>
+                      <input
+                        type="text"
+                        title="外注費"
+                        class="form-control fc2 inputnum_r"
+                        :value ="value_outsourcing_cost | localeNum"
+                        @change="outsourcingcostChanges"
+                        @focusin="outsourcingcostFocusin"
+                        @focusout="outsourcingcostFocusout"
 
-                    />
+                      />
+                    </div>
                   </div>
                 </div>
                 <message-data v-bind:message-datas="messagedataoutsourcingcost" v-bind:message-class="'warning'"></message-data>
@@ -635,7 +662,7 @@
               <!-- .col -->
               <div class="btn_col_1">
                 <div class="input-group btn_sty_1">
-                  <a @click="no_qrcodeClick" class="btn btn-primary">印刷</a>
+                  <a @click="no_qrcodeClick(); " class="btn btn-primary">印刷</a>
                 </div>
               </div>
               <!-- /.col -->
@@ -679,12 +706,12 @@
                     <table id="table_cnt1" class="table table-striped  font-size-sm text-nowrap">
                       <thead>
                         <tr>
-                          <td class="td-first text-center align-middle w1">工程No.</td>
-                          <td class="text-center align-middle w2">使用機種</td>
-                          <td class="text-center align-middle w3">機器名</td>
-                          <td class="text-center align-middle w4">加工者</td>
-                          <td  colspan="4" class="text-center align-middle ">加工時間</td>
-                          <td class="text-center align-middle w6">完了日</td>
+                          <td class="td-first text-center align-middle w1 txt1">工程No.</td>
+                          <td class="text-center align-middle w2 txt1">使用機種</td>
+                          <td class="text-center align-middle w3 txt1">機器名</td>
+                          <td class="text-center align-middle w4 txt1">加工者</td>
+                          <td  colspan="4" class="text-center align-middle txt1">加工時間</td>
+                          <td class="text-center align-middle w6 txt1">完了日</td>
                           <!--<td class="text-center align-middle">QRコード</td>-->
                         </tr>
                       </thead>
@@ -1172,7 +1199,8 @@ export default {
       const_C009_data: [],
       const_C010_data: [],
       storeisPush: false,
-      isprint_qrText: false
+      isprint_qrText: false,
+      isprint_layout_view: "view"
     };
   },
   filters: {
@@ -1580,6 +1608,12 @@ export default {
     },
     backClick() {
       this.isQr = true;
+    },
+    print_cnt_layout()  {
+this.isprint_layout_view = "print";
+
+
+
     },
     // -------------------- サーバー処理 ----------------------------
     // 機器リスト取得処理
