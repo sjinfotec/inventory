@@ -51,15 +51,17 @@
                     >保存シート
                     </span>
                   </div>
-                  <div class="form-control p-0">
+                  <div class="form-control p-0 po_adj">
+                    <div class="inlineblock storage_sheet_input">
                     <input
                       type="text"
                       title="保存シート"
-                      class="inlineblock form-control storage_sheet_input"
+                      class=" form-control "
                       :value="value_save_sheet"
                       @change="savesheetChanges"
                     />
-                    <p class="inlineblock storage_sheet_text">{{ save_sheet_name }}</p>
+                    </div>
+                    <div class="inlineblock storage_sheet_text">{{ save_sheet_name }}</div>
                   </div>
                 </div>
                 <span class="print-none"><message-data v-bind:message-datas="messagedataorderno" v-bind:message-class="'warning'"></message-data></span>
@@ -797,20 +799,26 @@
                 </div>
                 <!-- 印刷用QRコード-->
                 <div id="view_off" >
-                  <div id="print_view_qr" class="cnt_view_qr">
-                    <div class="cnt_view_position" v-if="qrText">
-                      <vue-qrcode
-                        :value="qrText" :options="qroption1" tag="img">
-                      </vue-qrcode>
-                      <p><span>[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}]</span></p>
-                      <vue-qrcode
-                        :value="qrText_check" :options="qroption1" tag="img">
-                      </vue-qrcode>
-                      <p><span>[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}][受入チェック]</span></p>
-                      <vue-qrcode
-                        :value="qrText_heat" :options="qroption1" tag="img">
-                      </vue-qrcode>
-                      <p><span>[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}][熱処理]</span></p>
+                  <div id="print_view_qr" class="cnt_view_qr"  v-if="qrText">
+                    <div class="cnt_view_position">
+                      <div>
+                        <vue-qrcode
+                          :value="qrText" :options="qroption1" tag="img">
+                        </vue-qrcode>
+                        <p><span class="qrtxtstyle">[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}]</span></p>
+                      </div>
+                      <div class="posi_adj">
+                        <vue-qrcode
+                          :value="qrText_check" :options="qroption1" tag="img">
+                        </vue-qrcode>
+                        <p><span class="qrtxtstyle">[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}][受入チェック]</span></p>
+                      </div>
+                      <div class="posi_adj">
+                        <vue-qrcode
+                          :value="qrText_heat" :options="qroption1" tag="img">
+                        </vue-qrcode>
+                        <p><span class="qrtxtstyle">[{{ form.order_no }}][{{ form.row_seq }}][{{ form.drawing_no }}][熱処理]</span></p>
+                      </div>
                     </div>
                   </div><!--end view QR code v-if="isprint_qrText"-->
                 </div>

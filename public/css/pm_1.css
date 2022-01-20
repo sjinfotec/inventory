@@ -109,7 +109,7 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   text-align:right;
 }
 
-#input-area_1 .storage_sheet_input  {width:auto;}
+#input-area_1 .storage_sheet_input  {width: calc( 100% - 5em ) ;}
 #input-area_1 .storage_sheet_text  {width:4em;}
 
 
@@ -119,16 +119,16 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
   max-width: 100%;
 }
 /*--各項目の横幅 1段目--*/
+.col-cnt_21 {
+  flex: 0 0 30%;
+  max-width: 30%;
+  border-left: 1px solid #ccd4dd;
+}
 .col-cnt_01 {
   flex: 0 0 70%;
   max-width: 70%;
   border-left: 1px solid #ccd4dd;
   border-right: 1px solid #ccd4dd;
-}
-.col-cnt_21 {
-  flex: 0 0 30%;
-  max-width: 30%;
-  border-left: 1px solid #ccd4dd;
 }
 /*--各項目の横幅 2段目--*/
 .col-cnt_02 {
@@ -453,11 +453,21 @@ pre,form,fieldset,p,span,blockquote,th,td,figure,hr {
 #position_base1 .cnt_view_qr  {
   /*display:none;*/
   position: absolute;
-  top:30%;
+  top:8%;
   width:100%;
+  z-index:100;
 }
 #position_base1 .cnt_view_position  {
   text-align:center;
+}
+#position_base1 .posi_adj  {
+  display:inline-block;
+  width:45%;
+  margin-top:30px;
+}
+#position_base1 .qrtxtstyle  {
+  background:#FFF;
+  padding:20px 30px;
 }
 
 
@@ -648,7 +658,7 @@ white-space: nowrap;
 }
 /*-- 客先 --*/
 #table_cnt4 td.w2 {
-  width:10.2em;
+  width:9.2em;
  }
  /*-- 品名 --*/
  #table_cnt4 td.w5 {
@@ -673,6 +683,12 @@ white-space: nowrap;
   margin:auto;
   text-align:left;
 }
+
+/*疑似長体（コンテンツの変形）*/
+#table_cnt4 .trans1 {
+  transform: scale(0.5,1); display: inline-block;
+}
+
 
 
 /*--------------------## table progress header  (TOP page) ##--------------------*/
@@ -976,11 +992,16 @@ white-space: nowrap;
 }
 
 
-/*--print out--*/
+/*------#### print out ####------*/
 @media print {
   .print_view {display:block;}
 /*--各項目 1段目--*/
-.col-cnt_01 #input-area_1 .vdp-datepicker div input {
+.col-cnt_21 #input-area_1 .form-control {
+  font-size:20px;
+}
+#input-area_1 .storage_sheet_input  { width: calc( 100% - 5em ) ;}
+#input-area_1 .storage_sheet_text  { width:4em;}
+  .col-cnt_01 #input-area_1 .vdp-datepicker div input {
   font-size:24px;
   }
 /*--各項目 2段目--*/
@@ -1006,6 +1027,9 @@ white-space: nowrap;
     flex: 0 0 28%;
     max-width: 28%;
   }
+  .col-cnt_06 #input-area_1 .form-control {
+    font-size:20px;
+  }
   .col-cnt_07 {
     flex: 0 0 12%;
     max-width: 12%;
@@ -1019,28 +1043,75 @@ white-space: nowrap;
     flex: 0 0 25%;
     max-width: 25%;
   }
+  .col-cnt_08 #input-area_1 .form-control {
+    font-size:20px;
+  }
   .col-cnt_09 {
     flex: 0 0 35%;
     max-width: 35%;
   }
+  .col-cnt_09 #input-area_1 .form-control {
+    font-size:20px;
+  }
+  .col-cnt_11 #input-area_1 .form-control {
+    font-size:20px;
+  }
 /*--各項目 4段目--*/
-  .col-cnt_13 {
-    border-left: none;
-  }
+.col-cnt_12 {
+  flex: 0 0 65%;
+  max-width: 65%;
+}
+.col-cnt_12 #input-area_1 .form-control {
+  font-size:20px;
+}
+.col-cnt_13 {
+  flex: 0 0 15%;
+  max-width: 15%;
+  border-left: none;
+}
+.col-cnt_13 #input-area_1 .form-control {
+  font-size:20px;
+}
+.col-cnt_15 #input-area_1 .form-control {
+  font-size:20px;
+}
+
 /*--各項目 5段目--*/
-  .col-cnt_17 {
-    border-left: none;
+.col-cnt_16 {
+  flex: 0 0 45%;
+  max-width: 45%;
+}
+.col-cnt_16 #input-area_1 .form-control {
+  font-size:20px;
+}
+.col-cnt_17 {
+  flex: 0 0 15%;
+  max-width: 15%;
+  border-left: none;
+}
+.col-cnt_17 #input-area_1 .form-control {
+  font-size:20px;
+}
+.col-cnt_19 {
+    flex: 0 0 27%;
+    max-width: 27%;
   }
-  .col-cnt_19 {
-    flex: 0 0 28%;
-    max-width: 28%;
+  .col-cnt_19 #input-area_1 .form-control {
+    font-size:20px;
+  }
+  .col-cnt_19 #input-area_1 .print_w2 {
+    margin-top:-10px;
   }
   .col-cnt_20 {
-    flex: 0 0 12%;
-    max-width: 12%;
+    flex: 0 0 13%;
+    max-width: 13%;
     border-left: none;
   }
+  .col-cnt_20 #input-area_1 .form-control {
+    font-size:20px;
+  }
   
+
   #view_off {
     display:block;
   }
@@ -1064,9 +1135,25 @@ white-space: nowrap;
     display:inline-block;
     vertical-align: middle
   }
-  #input-area_1 .print_w1 {width:5em; }
+  #input-area_1 .print_w1 {
+    width:5em;
+    /*after用セッティング*/
+    position:relative;
+    display:inline-block;
+   }
+  #input-area_1 .print_w1::after {
+    content:"";
+    display:inline-block;
+    width:1px;
+    height:66px;
+    /*background-color:#0097A7;*/
+    position:absolute;
+    top:-10px;
+    right:0px;
+    border-right:1px dashed #ccd4dd;
+  }
   #input-area_1 .print_w2 {
-    width: calc( 100% - 10em ) ;
+    width: calc( 100% - 7em ) ;
     /*width: 40%;*/
     /*border-top:1px solid #FF8800;*/
   }
@@ -1102,6 +1189,9 @@ white-space: nowrap;
   }  
   #input-area_1 .tankaatto  {width:15%; font-size:1.1rem; vertical-align: top;}
   #input-area_1 .tankainput  {width:80%; font-size:1.1rem; vertical-align: top; margin:0; padding:0;}
+  .col-cnt_21 #input-area_1 .po_adj  {
+    margin:0; padding:0;
+  }
   .col-cnt_03 #input-area_1 .input-area-prepend  {
     border-bottom: 1px solid #ccd4dd;
   }
@@ -1151,7 +1241,7 @@ white-space: nowrap;
     padding-top:8px;
     padding-bottom:4px;
   }
-  
+
 
 
 

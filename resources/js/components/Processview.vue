@@ -44,7 +44,7 @@
                           :key="index" v-bind:class="[item.work_kind==3 || item.work_kind==4 ? 'td_active':'' 
                             , item.work_kind==5 ? 'td_complete':'', item.work_kind==6 ? 'td_next':'']">
                           <td class="text-center align-middle w1" >{{ item.supply_date_name }}</td>
-                          <td class="text-center align-middle w2" >{{ item.back_order_customer_name }}</td>
+                          <td class="text-center align-middle w2 " >{{ item.back_order_customer_name }}</td>
                           <td class="text-center align-middle w3" >{{ item.dsp_order_no }}</td>
                           <!--<td class="text-center align-middle w4">{{ item.row_seq }}</td>-->
                           <td class="text-center align-middle w5 "><div class="overflowhidden1">{{ item.back_order_product_name }}</div></td>
