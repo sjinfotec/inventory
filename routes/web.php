@@ -21,254 +21,41 @@ Auth::routes();
 // })->where('any', '.*');
 
 // ------------------ ホーム --------------------------------
-Route::get('/', 'HomeController@index')->middleware('auth');
+//Route::get('/', 'HomeController@index')->middleware('auth');
+Route::get('/', 'HomeController@index');
 Route::get('/home', 'HomeController@index')->name('home');
-// ------------------ 加工指示／工程管理 --------------------------------
-// 指示書／管理書作成
-Route::get('/edit_work_order', 'EditWorkOrderController@index')->middleware('auth');
-Route::get('/edit_work_order/home', 'EditWorkOrderController@homeindex')->middleware('auth');
-Route::get('/edit_work_order/edithome', 'EditWorkOrderController@edithome')->middleware('auth')->name('edit_work_order.edithome');
-Route::post('/edit_work_order/put_process', 'ApiCommonController@putProcess')->middleware('auth');
-// 受注残登録
-Route::get('/store_backorder', 'StoreBackOrderController@index')->middleware('auth');
-Route::post('/store_backorder/store', 'StoreBackOrderController@store')->middleware('auth');
-// モバイル
-Route::get('/process_info', 'MobileAccessController@index')->middleware('auth');
-Route::post('/process_info/get', 'MobileAccessController@getProductheader')->middleware('auth');
-Route::post('/process_history/put', 'MobileAccessController@putProcessHistory')->middleware('auth');
-// 進捗状況
-Route::get('/process_view', 'ProcessViewController@index')->middleware('auth');
-Route::post('/process_view/get', 'ApiCommonController@getProcessView')->middleware('auth');
 
+Route::get('/view_inventory', 'ViewInventoryController@index');
+Route::get('/inventory', 'ViewInventoryController@search');
+Route::get('/stocksearch', 'StockController@index');
+// 預かり
+Route::get('/view_inventory_a', 'ViewInventoryController@inventorya');
+Route::post('/view_inventory_a/get', 'ViewInventoryController@getDataA');
+Route::post('/view_inventory_a/getone', 'ViewInventoryController@getDataAone');
+Route::post('/view_inventory_a/update', 'ViewInventoryController@fixA');
+Route::post('/view_inventory_a/insert', 'ViewInventoryController@storeA');
+Route::post('/view_inventory_a/search', 'ViewInventoryController@getDataAsearch');
 
+// 在庫
+Route::get('/view_inventory_z', 'ViewInventoryController@inventoryz');
+Route::post('/view_inventory_z/get', 'ViewInventoryController@getDataZ');
+Route::post('/view_inventory_z/getone', 'ViewInventoryController@getDataZone');
+Route::post('/view_inventory_z/update', 'ViewInventoryController@fixZ');
+Route::post('/view_inventory_z/insert', 'ViewInventoryController@storeZ');
+Route::post('/view_inventory_z/search', 'ViewInventoryController@getDataZsearch');
 
-Route::get('/working_status', 'WorkingStatusController@index')->middleware('auth');
-Route::post('/daily/calc', 'DailyWorkingInformationController@show')->middleware('auth');
-Route::get('/daily/show', 'DailyWorkingInformationController@show')->middleware('auth');
-// 月次集計
-Route::get('/monthly', 'MonthlyWorkingInformationController@index')->middleware('auth');
-Route::post('/monthly/calc', 'MonthlyWorkingInformationController@calc')->middleware('auth');
-Route::post('/monthly/show', 'MonthlyWorkingInformationController@show')->middleware('auth');
-// 勤怠ログ集計
-Route::get('/attendancelog', 'AttendanceLogController@index')->middleware('auth');
-Route::post('/attendancelog/show', 'AttendanceLogController@show')->middleware('auth');
-// ------------------ 警告 --------------------------------
-// 日次警告通知
-Route::get('/daily_alert', 'DailyWorkingAlertController@index')->middleware('auth');
-Route::get('/daily_alert/home', 'DailyWorkingAlertController@homeindex')->middleware('auth');
-Route::get('/daily_alert/alerthome', 'DailyWorkingAlertController@alerthome')->middleware('auth')->name('daily_alert.alerthome');
-Route::post('/daily_alert/show', 'DailyWorkingAlertController@show')->middleware('auth');
-// 月次警告通知
-Route::get('/monthly_alert', 'MonthlyWorkingAlertController@index')->middleware('auth');
-Route::get('/monthly_alert/show', 'MonthlyWorkingAlertController@show')->middleware('auth');
-// ------------------ 申請 --------------------------------
-// 申請
-Route::get('/demand', 'DemandController@index')->middleware('auth');
-Route::get('/demand/list_demand', 'DemandController@listDemand')->middleware('auth');
-Route::post('/demand/make_demand', 'DemandController@makeDemand')->middleware('auth');
-// 承認
-Route::get('/approval', 'ApprovalController@index')->middleware('auth');
-Route::get('/approval/list_approval', 'ApprovalController@listApproval')->middleware('auth');
-Route::post('/approval/make_approval', 'ApprovalController@makeApproval')->middleware('auth');
-// 承認設定 いずれ削除　ConfirmControllerも
-Route::get('/confirm', 'ConfirmController@index')->middleware('auth');
-Route::post('/confirm/gettable', 'ConfirmController@gettable')->middleware('auth');
-Route::post('/confirm/show', 'ConfirmController@show')->middleware('auth');
-Route::post('/confirm/store', 'ConfirmController@store')->middleware('auth');
-Route::post('/confirm/del', 'ConfirmController@del')->middleware('auth');
-// 承認設定
-Route::get('/approvalroot', 'CreateApprovalRouteNoController@index')->middleware('auth');
+// ステータス変更（ゴミ箱）
+Route::get('/view_inventory_dust', 'ViewInventoryController@inventorydust');
+Route::post('/view_inventory_dust/get', 'ViewInventoryController@getDataDust');
+Route::post('/view_inventory_dust/update_a', 'ViewInventoryController@statusA');
+Route::post('/view_inventory_dust/update_z', 'ViewInventoryController@statusZ');
 
-// カレンダー登録
-// Route::get('/setting-calendar', 'CreateCalendarController@index')->middleware('auth');
-// Route::post('/setting-calendar/store', 'CreateCalendarController@store')->middleware('auth');
-// Route::post('/setting-calendar/init', 'CreateCalendarController@init')->middleware('auth');
-// カレンダー編集
-// Route::get('/edit_calendar', 'EditCalendarController@index')->middleware('auth');
-// Route::post('/edit_calendar/get', 'EditCalendarController@getDetail')->middleware('auth');
-// Route::post('/edit_calendar/store', 'EditCalendarController@store')->middleware('auth');
-// Route::post('/edit_calendar/fix', 'EditCalendarController@fix')->middleware('auth');
-// Route::post('/edit_calendar/init', 'EditCalendarController@init')->middleware('auth');
-// ------------------ 編集 --------------------------------
-// 勤怠編集
-Route::get('/edit_work_times', 'EditWorkTimesController@index')->middleware('auth');
-Route::post('/edit_work_times/get', 'EditWorkTimesController@get')->middleware('auth');
-Route::post('/edit_work_times/store', 'EditWorkTimesController@store')->middleware('auth');
-Route::post('/edit_work_times/fix', 'EditWorkTimesController@fix')->middleware('auth');
-Route::post('/edit_work_times/fixtime', 'EditWorkTimesController@fixtime')->middleware('auth');
-Route::post('/edit_work_times/del', 'EditWorkTimesController@del')->middleware('auth');
-Route::post('/edit_work_times/add', 'EditWorkTimesController@add')->middleware('auth');
-// シフト
-// Route::get('/create_shift_time', 'CreateShiftTimeController@index')->middleware('auth');        // 未使用
-// Route::post('/create_shift_time/store', 'CreateShiftTimeController@store')->middleware('auth'); // 未使用
-// Route::post('/create_shift_time/get', 'CreateShiftTimeController@get')->middleware('auth');     // 未使用
-// Route::post('/create_shift_time/del', 'CreateShiftTimeController@del')->middleware('auth');     // 未使用
-// Route::get('/setting_shift_time', 'SttingShiftTimeController@index')->middleware('auth');
-// Route::post('/setting_shift_time/del', 'SttingShiftTimeController@del')->middleware('auth');
-// Route::post('/setting_shift_time/store', 'SttingShiftTimeController@store')->middleware('auth');
-// Route::post('/setting_shift_time/range_del', 'SttingShiftTimeController@rangeDel')->middleware('auth');
-Route::get('/edit_shift_time', 'EditShiftTimeController@index')->middleware('auth');
-Route::post('/edit_shift_time/get', 'EditShiftTimeController@getDetail')->middleware('auth');
-Route::post('/edit_shift_time/fix', 'EditShiftTimeController@fix')->middleware('auth');
-Route::post('/edit_shift_time/fixbatch', 'EditShiftTimeController@fixbatch')->middleware('auth');
-Route::post('/edit_shift_time/fixbatchw', 'EditShiftTimeController@fixbatchW')->middleware('auth');
-// 勤怠ログ登録
-Route::get('/store_attendancelog', 'StoreAttendanceLogController@index')->middleware('auth');
-Route::post('/store_attendancelog/store', 'StoreAttendanceLogController@store')->middleware('auth');
-// 勤怠ログ編集
-Route::get('/edit_attendancelog', 'EditAttendanceLogController@index')->middleware('auth');
-Route::post('/edit_attendancelog/get', 'EditAttendanceLogController@get')->middleware('auth');
-Route::post('/edit_attendancelog/store', 'EditAttendanceLogController@store')->middleware('auth');
-Route::post('/edit_attendancelog/fix', 'EditAttendanceLogController@fix')->middleware('auth');
-// ------------------ 設定 --------------------------------
-
-
-// 顧客情報
-Route::get('/edit_customer', 'CustomerAddController@index')->middleware('auth');
-Route::post('/edit_customer/store', 'CustomerAddController@store')->middleware('auth');
-Route::post('/edit_customer/get', 'CustomerAddController@getCustomerDetails')->middleware('auth');
-Route::post('/edit_customer/del', 'CustomerAddController@del')->middleware('auth');
-Route::post('/edit_customer/edit', 'CustomerAddController@edit')->middleware('auth');
-Route::post('/edit_customer/fix', 'CustomerAddController@fix')->middleware('auth');
-// Route::post('/edit_customer/fixtimetable', 'CustomerAddController@fixTimetable')->middleware('auth');
-Route::post('/edit_customer/release_card_info', 'CustomerAddController@releaseCardInfo')->middleware('auth');
-Route::post('/edit_customer/up', 'CustomerAddController@up')->middleware('auth');
-
-// 機器情報
-Route::get('/setting_device', 'SettingDeviceController@index')->middleware('auth');
-Route::post('/setting_device/get', 'SettingDeviceController@get')->middleware('auth');
-Route::post('/setting_device/store', 'SettingDeviceController@store')->middleware('auth');
-Route::post('/setting_device/fix', 'SettingDeviceController@fix')->middleware('auth');
-Route::post('/setting_device/del', 'SettingDeviceController@del')->middleware('auth');
-// 会社情報
-Route::get('/create_company_information', 'CreateCompanyInformationController@index')->middleware('auth');
-Route::post('/create_company_information/get', 'CreateCompanyInformationController@getCompanyInfo')->middleware('auth');
-Route::post('/create_company_information/store', 'CreateCompanyInformationController@store')->middleware('auth');
-// カスタマ情報
-Route::post('/customer_information/get', 'CustomerInformationController@getCustomerInfo')->middleware('auth');
-// 営業所
-Route::get('/create_office', 'CreateOfficeController@index')->middleware('auth');
-Route::post('/create_office/get', 'CreateOfficeController@getDetails')->middleware('auth');
-Route::post('/create_office/store', 'CreateOfficeController@store')->middleware('auth');
-Route::post('/create_office/fix', 'CreateOfficeController@fix')->middleware('auth');
-Route::post('/create_office/del', 'CreateOfficeController@del')->middleware('auth');
-Route::post('/create_office/edit', 'CreateOfficeController@edit')->middleware('auth');
-// 部署
-Route::get('/create_department', 'CreateDepartmentController@index')->middleware('auth');
-Route::post('/create_department/get', 'CreateDepartmentController@getDetails')->middleware('auth');
-Route::post('/create_department/store', 'CreateDepartmentController@store')->middleware('auth');
-Route::post('/create_department/fix', 'CreateDepartmentController@fix')->middleware('auth');
-Route::post('/create_department/del', 'CreateDepartmentController@del')->middleware('auth');
-Route::post('/create_department/edit', 'CreateDepartmentController@edit')->middleware('auth');
-// 雇用形態
-Route::get('/setting_employment', 'SettingEmploymentController@index')->middleware('auth');
-Route::post('/setting_employment/get', 'SettingEmploymentController@getDetails')->middleware('auth');
-Route::post('/setting_employment/store', 'SettingEmploymentController@store')->middleware('auth');
-Route::post('/setting_employment/fix', 'SettingEmploymentController@fix')->middleware('auth');
-Route::post('/setting_employment/del', 'SettingEmploymentController@del')->middleware('auth');
-
-// 労働時間基本設定
-Route::get('/setting_calc', 'SettingCalcController@index')->middleware('auth');
-Route::post('/setting_calc/get', 'SettingCalcController@get')->middleware('auth');
-Route::post('/setting_calc/store', 'SettingCalcController@store')->middleware('auth');
-// 勤務帯時間設定
-Route::get('/create_time_table', 'CreateTimeTableController@index')->middleware('auth');
-Route::post('/create_time_table/get', 'CreateTimeTableController@getDetail')->middleware('auth');
-Route::post('/create_time_table/store', 'CreateTimeTableController@store')->middleware('auth');
-Route::post('/create_time_table/del', 'CreateTimeTableController@del')->middleware('auth');
-Route::post('/create_time_table/fix', 'CreateTimeTableController@fix')->middleware('auth');
-Route::post('/create_time_table/add', 'CreateTimeTableController@add')->middleware('auth');
-// カレンダー設定
-Route::get('/setting_calendar', 'EditCalendarController@index')->middleware('auth');
-Route::post('/setting_calendar/get', 'EditCalendarController@getDetail')->middleware('auth');
-Route::post('/setting_calendar/fix', 'EditCalendarController@fix')->middleware('auth');
-Route::post('/setting_calendar/fixbatch', 'EditCalendarController@fixbatch')->middleware('auth');
-Route::post('/setting_calendar/fixbatchw', 'EditCalendarController@fixbatchW')->middleware('auth');
-Route::post('/setting_calendar/init', 'EditCalendarController@init')->middleware('auth');
-Route::post('/setting_calendar/copyinit', 'EditCalendarController@copyinit')->middleware('auth');
-// 有給設定
-Route::get('/setting_paid_holiday', 'SettingPaidHolidayController@index')->middleware('auth');
-Route::get('/setting_paid_holiday/get', 'SettingPaidHolidayController@get')->middleware('auth');
-
-// ユーザー情報設定
-// Route::get('/user_add', 'UserAddController@index')->middleware('auth');
-// Route::post('/user_add/store', 'UserAddController@store')->middleware('auth');
-// Route::post('/user_add/get', 'UserAddController@getUserDetails')->middleware('auth');
-// Route::post('/user_add/del', 'UserAddController@del')->middleware('auth');
-// Route::post('/user_add/edit', 'UserAddController@edit')->middleware('auth');
-// Route::post('/user_add/fix', 'UserAddController@fixUser')->middleware('auth');
-// Route::post('/user_add/release_card_info', 'UserAddController@releaseCardInfo')->middleware('auth');
-Route::get('/edit_user', 'UserAddController@index')->middleware('auth');
-Route::post('/edit_user/store', 'UserAddController@store')->middleware('auth');
-Route::post('/edit_user/get', 'UserAddController@getUserDetails')->middleware('auth');
-Route::post('/edit_user/del', 'UserAddController@del')->middleware('auth');
-Route::post('/edit_user/edit', 'UserAddController@edit')->middleware('auth');
-Route::post('/edit_user/fix', 'UserAddController@fixUser')->middleware('auth');
-// Route::post('/edit_user/fixtimetable', 'UserAddController@fixTimetable')->middleware('auth');
-Route::post('/edit_user/release_card_info', 'UserAddController@releaseCardInfo')->middleware('auth');
-Route::post('/edit_user/up', 'UserAddController@up')->middleware('auth');
-// ------------------ 操作 --------------------------------
-// ユーザーパスワード変更
-Route::get('/user_pass', 'UserPassController@index')->middleware('auth');
-Route::post('/user_pass/passchange', 'UserPassController@passChange')->middleware('auth');
-// ファイルダウンロード
-Route::get('/file_download', 'FileDownloadController@index')->middleware('auth');
-Route::get('/file_download/getdownload', 'FileDownloadController@getfileDownload')->middleware('auth');
-// ------------------ 共通 --------------------------------
-// リスト取得
-Route::post('/get_office_list', 'ApiCommonController@getOfficeList')->middleware('auth');
-Route::post('/get_customers_list', 'ApiCommonController@getCustomerList')->middleware('auth');
-Route::post('/get_product_list', 'ApiCommonController@getProductList')->middleware('auth');
-Route::post('/get_device_list', 'ApiCommonController@getDeviceList')->middleware('auth');
-Route::post('/get_departments_list', 'ApiCommonController@getDepartmentList')->middleware('auth');
-Route::post('/get_employment_status_list', 'ApiCommonController@getEmploymentStatusList')->middleware('auth');
-Route::post('/get_outsoucingcustomers_list', 'ApiCommonController@getOutsoucingCustomerList')->middleware('auth');
-
-// データ取得
-Route::post('/get_progress_header', 'ApiCommonController@getProductHeader')->middleware('auth');
-Route::post('/get_product_chart', 'ApiCommonController@getProductChart')->middleware('auth');
-Route::post('/get_progress_chart', 'ApiCommonController@getProgress')->middleware('auth');
-Route::post('/get_product_processes', 'ApiCommonController@getProductProcess')->middleware('auth');
-
-Route::post('/get_time_table_list', 'ApiCommonController@getTimeTableList')->middleware('auth');
-Route::post('/get_business_day_list', 'ApiCommonController@getBusinessDayList')->middleware('auth');
-Route::post('/get_holi_day_list', 'ApiCommonController@getHoliDayList')->middleware('auth');
-Route::post('/get_user_leave_kbn', 'ApiCommonController@getUserLeaveKbnList')->middleware('auth');
-Route::post('/get_mode_list', 'ApiCommonController@getModeList')->middleware('auth');
-Route::post('/get_general_list', 'ApiCommonController@getRequestGeneralList')->middleware('auth');
-Route::post('/get_demand_list', 'ApiCommonController@getDemandList')->middleware('auth');
-Route::post('/get_confirm_list', 'ApiCommonController@getConfirmlList')->middleware('auth');
-Route::post('/get_company_info_apply', 'ApiCommonController@getCompanyInfoApply')->middleware('auth');
-Route::post('/approval_root_list', 'ApiCommonController@getApprovalroutenoList')->middleware('auth');
-Route::get('/get_paid_list', 'ApiCommonController@getPaidTypeList')->middleware('auth');
-Route::post('/update_paid_informations', 'SettingPaidHolidayController@updatePaidInformations')->middleware('auth');
-
-Route::post('/get_user_list', 'ApiCommonController@getUserList')->middleware('auth');
-Route::post('/get_user_list/csv', 'ApiCommonController@getUserListCsv')->middleware('auth');
-// Route::post('/get_user_shift', 'ApiCommonController@getShiftInformation')->middleware('auth');
-// 締日取得
-Route::post('/get_closing_day', 'ApiCommonController@getClosingDay')->middleware('auth');
-// ユーザー権限取得
-Route::post('/get_login_user_role', 'ApiCommonController@getLoginUserRole')->middleware('auth');
-// ユーザー部署権限取得
-Route::post('/get_login_user_department', 'ApiCommonController@getLoginUserDepartment')->middleware('auth');
-// お知らせ取得
-Route::get('/get_post_informations', 'ApiCommonController@getPostInformations')->middleware('auth');
-Route::post('/insert_post_informations', 'ApiCommonController@insertPostInformations')->middleware('auth');
-Route::post('/del_post_informations', 'ApiCommonController@delPostInformations')->middleware('auth');
-// ユーザー所定時刻取得
-Route::post('/get_working_hours', 'ApiCommonController@getWorkingHours')->middleware('auth');
-// 勤務状況取得
-Route::post('/get_working_status/get', 'ApiCommonController@getWorgingStatusInfo')->middleware('auth');
-// CSV項目取得
-Route::post('/get_csv_item', 'ApiCommonController@getCsvItem')->middleware('auth');
-
-
-// --------- カスタマ専用 --------------------
-// カスタマ専用
-Route::get('/customer_information', 'CustomerInformationController@index')->middleware('auth');
-Route::post('/customer_information/getList', 'CustomerInformationController@getSsjjooCustomerInfoList')->middleware('auth');
-Route::post('/customer_information/getDetail', 'CustomerInformationController@getSsjjooCustomerInfo')->middleware('auth');
-
-
+// 棚卸 stock
+Route::get('/stock', 'StockController@stockTop');
+Route::get('/stock_a', 'StockController@indexStockA');
+Route::get('/stock_z', 'StockController@indexStockZ');
+Route::post('/stock_a/invget', 'StockController@getDataMiniA');
+Route::post('/stock_a/insert', 'StockController@storeAllA');
+Route::post('/stock_a/stockget', 'StockController@getStockA');
+Route::post('/stock_a/update', 'StockController@fixA');
 

@@ -10,9 +10,6 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
-use App\GeneralCodes;
-use App\MenuItemSelection;
-use App\FeatureItemSelection;
 
 
 class CommonServiceProvider extends ServiceProvider
@@ -47,23 +44,5 @@ class CommonServiceProvider extends ServiceProvider
         // View::share('account_datas', $account_data);
         // Log::debug('boot ip_address = '.$request-> ip());
 
-        //menu selection
-        $menu_model = new MenuItemSelection();
-        $menu_model->setParamaccountidAttribute(Config::get('const.TRIALACCOUNTID.account_id'));
-        $menu_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
-        $menu_data = $menu_model->getMenuItem();
-        View::share('menu_selections', $menu_data);
-
-        //feature selection
-        $feature_model = new FeatureItemSelection();
-        $feature_model->setParamaccountidAttribute(Config::get('const.TRIALACCOUNTID.account_id'));
-        $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
-        $feature_data = $feature_model->getItem();
-        View::share('feature_item_selections', $feature_data);
-        $collect_feature_data = collect($feature_data);
-        //const
-        $general_model = new GeneralCodes();
-        $general_datas = $general_model->getGeneralcode();
-        View::share('const_general_datas', $general_datas);
     }
 }

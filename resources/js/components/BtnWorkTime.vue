@@ -49,9 +49,13 @@
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
         この条件での前月分を複写設定する</button>
     </div>
-    <div v-if="btnMode === 'store'" class="btn-group d-flex" v-on:click="storeclickBtn()">
-      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">この内容で登録する</button>
+
+
+    <div v-if="btnMode === 'store'" class="" v-on:click="storeclickBtn()">
+      <button type="button" class="" :disabled="isPush">この内容で登録する</button>
     </div>
+    
+    
     <div v-if="btnMode === 'initstore'" class="btn-group d-flex" v-on:click="initstoreclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">この内容で設定する</button>
     </div>
