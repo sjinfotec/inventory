@@ -915,9 +915,11 @@
             </div>
           </div>
           <div>
+            <!--
             <div class="btnstyle">
               <button type="button" class="" @click="dataUpdate(index,2)"><span>{{ item['company_name'] }} </span><span>の新しい商品を登録する</span></button>
             </div>
+            -->
             <div class="btnstyle">
               <button type="button" class="" @click="dataDel(index,4)">ゴミ箱へ移す</button>
             </div>
