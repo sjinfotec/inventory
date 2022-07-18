@@ -59,3 +59,21 @@ Route::post('/stock_a/insert', 'StockController@storeAllA');
 Route::post('/stock_a/stockget', 'StockController@getStockA');
 Route::post('/stock_a/update', 'StockController@fixA');
 
+// 資材 在庫
+Route::get('/material_management', 'MatManageController@index');
+Route::post('/material_management/get', 'MatManageController@getData');
+Route::post('/material_management/getone', 'MatManageController@getDataone');
+Route::post('/material_management/update', 'MatManageController@fix');
+Route::post('/material_management/insert', 'MatManageController@store');
+Route::post('/material_management/search', 'MatManageController@getDatasearch');
+
+// 資材 在庫 閲覧ONLY
+Route::get('/mmview', 'MMviewController@index');
+
+// 資材 棚卸 stock
+Route::get('/mmstock_top', 'MMStockController@stockTop');
+Route::get('/mmstock', 'MMStockController@indexStock');
+Route::post('/mmstock/invget', 'MMStockController@getDataMini');
+Route::post('/mmstock/insert', 'MMStockController@storeAll');
+Route::post('/mmstock/stockget', 'MMStockController@getStock');
+Route::post('/mmstock/update', 'MMStockController@fix');
