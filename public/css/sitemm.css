@@ -375,6 +375,15 @@ header button {width:auto;}
   color:#FFF;
   background:#C88;
 }
+#tbl_1 button.style2  {
+  border:1px solid #888;
+  border-radius: 4px;
+  background:#8CC;
+}
+#tbl_1 button.style2:hover  {
+  color:#FFF;
+  background:#C88;
+}
 #tbl_1 .mg_r  {
   margin-right:10px;
 }
@@ -479,21 +488,21 @@ button.style2:hover  {
 
 
 #cnt1 .w1{
-  flex:0 0 8em;
-  max-width:8em;
+  flex:0 0 14em;
+  max-width:14em;
 }
 #cnt1 .w2{
-  flex:0 0 17em;
-  max-width:17em;
+  flex:0 0 29em;
+  max-width:29em;
 }
 #cnt1 .w3{
-  flex:0 0 26em;
-  max-width:26em;
+  flex:0 0 44em;
+  max-width:44em;
 }
 #cnt1 .w4{
   /*flex:1 0 auto;*/
-  flex:0 0 35em;
-  max-width:35em;
+  flex:0 0 59em;
+  max-width:59em;
 }
 
 

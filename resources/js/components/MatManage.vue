@@ -65,9 +65,12 @@
               -->
               <td>{{ item['remarks'] }}</td>
               <!--<td>{{ item['note'] }}</td>-->
-              <td>
-                <button type="button" class="" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name)">
-                編集
+              <td class="nbr">
+                <button type="button" class="style1" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name, 'update')">
+                更新
+                </button>
+                <button type="button" class="style2" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name, 'fix')">
+                修正
                 </button>
               </td>
             </tr>
@@ -95,6 +98,30 @@
 
       <div id="cnt1">
         <div class="inputgroup w1">
+          <div class="cate gc2">日付</div>
+          <div class="inputzone">
+            <input
+              type="date"
+              class="form_style bc2"
+              v-model="form.mdate"
+              maxlength="12"
+              name="mdate"
+            />
+          </div>
+        </div>
+        <div class="inputgroup w1">
+          <div class="cate gc2">部署</div>
+          <div class="inputzone">
+            <input
+              type="text"
+              class="form_style bc2"
+              v-model="form.department"
+              maxlength="20"
+              name="department"
+            />
+          </div>
+        </div>
+        <div class="inputgroup w2">
           <div class="cate gc2">担当</div>
           <div class="inputzone">
             <input
@@ -106,30 +133,9 @@
             />
           </div>
         </div>
-        <div class="inputgroup w2">
-          <div class="cate gc2">受注番号</div>
-          <div class="inputzone">
-            <input
-              type="text"
-              class="form_style bc2"
-              v-model="form.order_no"
-              maxlength="30"
-              name="order_no"
-            />
-          </div>
-        </div>
-        <div class="inputgroup w3">
-          <div class="cate gc2">会社名</div>
-          <div class="inputzone">
-            <input
-              type="text"
-              class="form_style bc2"
-              v-model="form.company_name"
-              maxlength="40"
-              name="company_name"
-            />
-          </div>
-        </div>
+      </div><!--## end id="cnt1" ##-->
+
+      <div id="cnt1">
         <div class="inputgroup w4">
           <div class="cate gc2">商品名</div>
           <div class="inputzone">
@@ -142,8 +148,7 @@
             />
           </div>
         </div>
-      </div><!--## end id="cnt1" ##-->
-
+      </div>
       <div id="cnt1">
         <div class="inputgroup w1">
           <div class="cate gc2">単位</div>
@@ -157,6 +162,7 @@
             />
           </div>
         </div>
+        <!--
         <div class="inputgroup w1">
           <div class="cate gc2">入数</div>
           <div class="inputzone">
@@ -169,51 +175,28 @@
             />
           </div>
         </div>
-        <div class="inputgroup w2">
-          <div class="cate gc2">納入日</div>
-          <div class="inputzone">
-            <input
-              type="date"
-              class="form_style bc2"
-              v-model="form.supply_day"
-              maxlength="12"
-              name="supply_day"
-            />
-          </div>
-        </div>
+        -->
         <div class="inputgroup w1">
-          <div class="cate gc2">納入数</div>
+          <div class="cate gc2">入庫数</div>
           <div class="inputzone">
             <input
               type="text"
               class="form_style bc2"
-              v-model="form.supply_quantity"
+              v-model="form.receipt"
               maxlength="11"
-              name="supply_quantity"
-            />
-          </div>
-        </div>
-        <div class="inputgroup w2">
-          <div class="cate gc2">発注日</div>
-          <div class="inputzone">
-            <input
-              type="date"
-              class="form_style bc2"
-              v-model="form.order_day"
-              maxlength="12"
-              name="order_day"
+              name="receipt"
             />
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate gc2">発注数</div>
+          <div class="cate gc2">出庫数</div>
           <div class="inputzone">
             <input
               type="text"
               class="form_style bc2"
-              v-model="form.order_quantity"
+              v-model="form.delivery"
               maxlength="11"
-              name="order_quantity"
+              name="delivery"
             />
           </div>
         </div>
@@ -230,6 +213,7 @@
             />
           </div>
         </div>
+        <!--
         <div class="inputgroup w1">
           <div class="cate gc2">箱数</div>
           <div class="inputzone">
@@ -242,9 +226,11 @@
             />
           </div>
         </div>
+        -->
       </div><!--## end id="cnt1" ##-->
 
       <div id="cnt1">
+        <!--
         <div class="inputgroup w2">
           <div class="cate gc2">発注先</div>
           <div class="inputzone">
@@ -281,30 +267,21 @@
             />
           </div>
         </div>
-        <div class="inputgroup w1">
-          <div class="cate gc2">種別</div>
-          <div class="inputzone">
-            <input
-              type="text"
-              class="form_style bc2"
-              v-model="form.other1"
-              maxlength="10"
-              name="other1"
-            />
-          </div>
-        </div>
-        <div class="inputgroup w2">
+        -->
+        <div class="inputgroup w4">
           <div class="cate gc2">備考</div>
           <div class="inputzone">
             <textarea class="form_style_t bc2" v-model="form.remarks" maxlength="191" name="remarks" rows="3"></textarea>
           </div>
         </div>
+        <!--
         <div class="inputgroup w2">
           <div class="cate gc2">メモ/ノート</div>
           <div class="inputzone">
             <textarea class="form_style_t bc2" v-model="form.note" maxlength="191" name="note" rows="3"></textarea>
           </div>
         </div>
+        -->
       </div><!--## end id="cnt1" ##-->
 
       <div id="cnt1" v-if="view_switch=='on'">
@@ -370,18 +347,6 @@
         </div>
 
         <div class="inputgroup w1">
-          <div class="cate">会社ID</div>
-          <div class="inputzone">
-            <input
-              type="text"
-              class="form_style"
-              v-model="form.company_id"
-              maxlength="11"
-              name="company_id"
-            />
-          </div>
-        </div>
-        <div class="inputgroup w1">
           <div class="cate">商品ID</div>
           <div class="inputzone">
             <input
@@ -402,18 +367,6 @@
               v-model="form.status"
               maxlength="20"
               name="status"
-            />
-          </div>
-        </div>
-        <div class="inputgroup w1">
-          <div class="cate">発注情報</div>
-          <div class="inputzone">
-            <input
-              type="text"
-              class="form_style"
-              v-model="form.order_info"
-              maxlength="20"
-              name="order_info"
             />
           </div>
         </div>
@@ -497,8 +450,11 @@
                 <!--
                 id={{ item['id'] }} re_id={{ re_id }}
                 -->
-                <button v-if="btnMode=='1'" type="button" class="" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name)">
-                編集
+                <button v-if="btnMode==='1'" type="button" class="style1" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name)">
+                更新
+                </button>
+                <button v-if="btnMode==='1'" type="button" class="style2" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name)">
+                修正
                 </button>
               </td>
             </tr>
@@ -531,7 +487,7 @@
 
         <input type="hidden" v-model="details[index].id" name="id" />
         <div id="cnt1">
-          <div class="inputgroup w2">
+          <div class="inputgroup w1">
             <div class="cate gc2">日付</div>
             <div class="inputzone">
               <input
@@ -544,18 +500,6 @@
             </div>
           </div>
           <div class="inputgroup w1">
-            <div class="cate gc2">担当</div>
-            <div class="inputzone">
-              <input
-                type="text"
-                class="form_style bc2"
-                v-model="details[index].charge"
-                maxlength="20"
-                name="charge"
-              />
-            </div>
-          </div>
-          <div class="inputgroup w3">
             <div class="cate gc2">部署</div>
             <div class="inputzone">
               <input
@@ -567,6 +511,20 @@
               />
             </div>
           </div>
+          <div class="inputgroup w2">
+            <div class="cate gc2">担当</div>
+            <div class="inputzone">
+              <input
+                type="text"
+                class="form_style bc2"
+                v-model="details[index].charge"
+                maxlength="20"
+                name="charge"
+              />
+            </div>
+          </div>
+        </div>
+        <div id="cnt1">
           <div class="inputgroup w4">
             <div class="cate gc2">商品名</div>
             <div class="inputzone">
@@ -576,6 +534,7 @@
                 v-model="details[index].product_name"
                 maxlength="100"
                 name="product_name"
+                v-bind:disabled="isDisabled"
               />
             </div>
           </div>
@@ -590,6 +549,7 @@
                 v-model="details[index].unit"
                 maxlength="10"
                 name="unit"
+                v-bind:disabled="isDisabled"
               />
             </div>
           </div>
@@ -640,6 +600,8 @@
                 v-model="details[index].now_inventory"
                 maxlength="11"
                 name="now_inventory"
+                v-bind:disabled="isDisabled"
+                
               />
             </div>
           </div>
@@ -697,7 +659,7 @@
             </div>
           </div>
           -->
-          <div class="inputgroup w2">
+          <div class="inputgroup w4">
             <div class="cate gc2">備考</div>
             <div class="inputzone">
               <textarea class="form_style_t bc2" v-model="details[index].remarks" maxlength="191" name="remarks" rows="3"></textarea>
@@ -823,10 +785,10 @@
 
         <div id="button1">
           <div>
-            <div class="btnstyle">
+            <div class="btnstyle" v-if="btnMode==='update'">
               <button type="button" class="style1" @click="dataUpdate(index,1)">在庫の更新</button>
             </div>
-            <div class="btnstyle">
+            <div class="btnstyle" v-if="btnMode==='fix'">
               <button type="button" class="style2" @click="dataUpdate(index,0)">在庫の修正</button>
             </div>
           </div>
@@ -836,7 +798,7 @@
               <button type="button" class="" @click="dataUpdate(index,2)"><span>{{ item['company_name'] }} </span><span>の新しい商品を登録する</span></button>
             </div>
             -->
-            <div class="btnstyle">
+            <div class="btnstyle" v-if="btnMode==='fix'">
               <button type="button" class="" @click="dataDel(index,4)">ゴミ箱へ移す</button>
             </div>
           </div>
@@ -860,67 +822,45 @@
         <table>
           <thead>
             <tr>
+
+              <th class="gc2">日付</th>
+              <th class="gc2">部署</th>
               <th class="gc2">担当</th>
-              <th class="gc2">受注番号</th>
-              <th class="gc2">会社名</th>
               <th class="gc2">商品名</th>
               <th class="gc2">単位</th>
-              <th class="gc2">入数</th>
-              <th class="gc2">納入日</th>
-              <th class="gc2">納入数</th>
-              <th class="gc2">発注日</th>
-              <th class="gc2">発注数</th>
+              <th class="gc2">入庫数</th>
+              <th class="gc2">出庫数</th>
               <th class="gc2">現在在庫</th>
+              <!--
               <th class="gc2">箱数</th>
               <th class="gc2">発注先</th>
               <th class="gc2">単価</th>
               <th class="gc2">合計</th>
+              -->
               <th class="gc2">備考</th>
-              <th class="gc2">メモ/ノート</th>
-              <th class="gc2">&nbsp;</th>
+              <!--<th class="gc2">&nbsp;</th>-->
             </tr>
           </thead>
           <tbody>
-            <!--
-            <tr>
-              <td>charge</td>
-              <td>order_no</td>
-              <td>company_name</td>
-              <td>product_name</td>
-              <td>unit</td>
-              <td>quantity</td>
-              <td>supply_day</td>
-              <td>supply_quantity</td>
-              <td>order_day</td>
-              <td>order_quantity</td>
-              <td>now_inventory</td>
-              <td>nbox</td>
-              <td>order_address</td>
-              <td>unit_price</td>
-              <td>total</td>
-              <td>remarks</td>
-              <td>note</td>
-            </tr>
-            -->
             <tr  v-for="(item,rowIndex) in details2" :key="rowIndex" v-bind:class="(item['id'] == edit_id) ? 'bgcolor3' : ''"">
+              <td>{{ item['mdate'] }}</td>
+              <td>{{ item['department'] }}</td>
               <td>{{ item['charge'] }}</td>
-              <td>{{ item['order_no'] }}</td>
-              <td>{{ item['company_name'] }}</td>
               <td>{{ item['product_name'] }}</td>
               <td class="nbr">{{ item['unit'] }}</td>
-              <td class="style1">{{ item['quantity'] }}</td>
-              <td class="nbr">{{ item['supply_day'] }}</td>
-              <td class="style1" v-bind:class="(item['supply_quantity'] === 0) ? 'color3' : ''">{{ item['supply_quantity'] }}</td>
-              <td class="nbr">{{ item['order_day'] }}</td>
-              <td class="style1" v-bind:class="(item['order_quantity'] === 0) ? 'color3' : ''">{{ item['order_quantity'] }}</td>
+              <!--<td class="style1">{{ item['quantity'] }}</td>-->
+              <td class="style1" v-bind:class="(item['receipt'] === 0) ? 'color3' : ''">{{ item['receipt'] }}</td>
+              <td class="style1" v-bind:class="(item['delivery'] === 0) ? 'color3' : ''">{{ item['delivery'] }}</td>
               <td class="style1" v-bind:style="(item['now_inventory'] === 0) ? 'color:red' : ''">{{ item['now_inventory'] }}</td>
+              <!--
               <td class="style1">{{ item['nbox'] }}</td>
               <td>{{ item['order_address'] }}</td>
               <td>{{ item['unit_price'] }}</td>
               <td>{{ item['total'] }}</td>
+              -->
               <td>{{ item['remarks'] }}</td>
-              <td>{{ item['note'] }}</td>
-              <td><!-- id={{ item['id'] }} edit_id={{ edit_id }} --></td>
+              <!--<td>{{ item['note'] }}</td>-->
+              <!--<td>id={{ item['id'] }} edit_id={{ edit_id }}</td>-->
             </tr>
           </tbody>
         </table>
@@ -1010,7 +950,9 @@ export default {
       s_company_name: "",
       btnMode: 0,
       calc_now_inventory: "",
-      calc_nbox: ""
+      calc_nbox: "",
+      btn_select: "",
+      isDisabled: "",
     };
   },
   // マウント時
@@ -1024,13 +966,13 @@ export default {
       this.messagevalidatesNew = [];
       var chkArray = [];
       var flag = true;
-      // 会社名
+      // 担当
       var required = true;
       var equalength = 0;
       var maxlength = 20;
-      var itemname = '会社名';
+      var itemname = '担当者';
       chkArray = 
-        this.checkHeader(this.form.company_name, required, equalength, maxlength, itemname);
+        this.checkHeader(this.form.charge, required, equalength, maxlength, itemname);
       if (chkArray.length > 0) {
         if (this.messagevalidatesNew.length == 0) {
           this.messagevalidatesNew = chkArray;
@@ -1041,7 +983,7 @@ export default {
       // 商品名
       required = true;
       equalength = 0;
-      maxlength = 40;
+      maxlength = 80;
       itemname = '商品名';
       chkArray = 
         this.checkHeader(this.form.product_name, required, equalength, maxlength, itemname);
@@ -1059,12 +1001,14 @@ export default {
       return flag;
     },
     // ------------------------ イベント処理 ------------------------------------
-    EditBtn(eid,pid,pname) {
+    EditBtn(eid,pid,pname,smode) {
       //var edit_id = eid;
       //console.log("EditBtn in");
       //console.log(edit_id);
       this.selectMode = 'EDT';
-      this.getItemOne(eid,pid,pname);
+      this.btnMode = smode;
+      if(smode === 'fix') this.isDisabled = false;
+      this.getItemOne(eid,pid,pname,smode);
     },
     NewBtn()  {
       this.inputClear();
@@ -1097,22 +1041,14 @@ export default {
         // 取得処理
     getItem() {
       this.inputClear();
-      //console.log("getitem in");
       var arrayParams = { 
-        order_info : this.order_info ,
-        order_no : this.order_no,
-        company_id : this.company_id,
-        product_id2 : this.product_id2,
         charge : this.charge,
         product_name : this.product_name,
         mdate : this.mdate,
-        supply_day : this.supply_day,
-        order_day : this.order_day,
         orderfr : this.orderfr
       };
-      //console.log("getitem in arrayParams['supply_day'] = " + arrayParams['supply_day']);
-      //console.log("getitem in arrayParams['order_day'] = " + arrayParams['order_day']);
-      this.postRequest("/view_inventory_z/get", arrayParams)
+      //console.log("getitem in arrayParams['mdate'] = " + arrayParams['mdate']);
+      this.postRequest("/material_management/get", arrayParams)
         .then(response  => {
           //console.log(response);
           this.getThen(response);
@@ -1123,7 +1059,7 @@ export default {
         });
     },
     // 取得処理(単)
-    getItemOne(e,p,pn) {
+    getItemOne(e,p,pn,md) {
       this.inputClear();
       //console.log("getitem one in edit_id = " + e);
       //console.log("getitem one in product_id = " + p);
@@ -1133,7 +1069,7 @@ export default {
       this.product_title = pn;
       //console.log("getitem one in product_title = " + this.product_title);
       var arrayParams = {  edit_id : e , product_id : p};
-      this.postRequest("/view_inventory_z/getone", arrayParams)
+      this.postRequest("/material_management/getone", arrayParams)
         .then(response  => {
           this.getThen(response);
         })
@@ -1150,7 +1086,7 @@ export default {
         var motion_msg = "検索";
         var messages = [];
         var arrayParams = { s_order_no : this.s_order_no , s_company_name : this.s_company_name , order_info : 'a'};
-        this.postRequest("/view_inventory_z/search", arrayParams)
+        this.postRequest("/material_management/search", arrayParams)
           .then(response  => {
             this.putThenSearch(response, motion_msg);
             this.btnMode = 1;
@@ -1167,7 +1103,7 @@ export default {
         this.acttitle = "新規登録";
         var messages = [];
         var arrayParams = { form : this.form };
-        this.postRequest("/view_inventory_z/insert", arrayParams)
+        this.postRequest("/material_management/insert", arrayParams)
           .then(response  => {
             this.putThenStore(response, "新規登録");
           })
@@ -1184,7 +1120,7 @@ export default {
         this.acttitle = "ゴミ箱移動";
         var messages = [];
         var arrayParams = { details : this.details[index] , upkind : k };
-        this.postRequest("/view_inventory_z/update", arrayParams)
+        this.postRequest("/material_management/update", arrayParams)
           .then(response  => {
             this.putThenDel(response, "ゴミ箱へ移動");
           })
@@ -1202,7 +1138,7 @@ export default {
         if (k == 0) motion_msg = '修正';
         if (k == 1) motion_msg = '在庫を更新';
         if (k == 2) motion_msg = '新しい商品追加';
-        this.postRequest("/view_inventory_z/update", arrayParams)
+        this.postRequest("/material_management/update", arrayParams)
           .then(response  => {
             this.putThenHead(response, motion_msg);
           })

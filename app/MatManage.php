@@ -312,6 +312,475 @@ class MatManage extends Model
 		$this->param_status = $value;
 	}
 
+    // ------------- 順序・正逆・検索 --------------
+    // 商品
+    private $param_product_name;
+    public function getParamProductnameAttribute(){ return $this->param_product_name;}
+    public function setParamProductnameAttribute($value){  $this->param_product_name = $value;}
+    // 正逆
+    private $param_orderfr;
+    public function getParamOrderfrAttribute(){ return $this->param_orderfr;}
+    public function setParamOrderfrAttribute($value){  $this->param_orderfr = $value;}
+    // 担当
+    private $param_charge;
+    public function getParamChargeAttribute(){ return $this->param_charge;}
+    public function setParamChargeAttribute($value){  $this->param_charge = $value;}
+
+    // 日付
+    private $param_mdate;
+    public function getParamMdateAttribute(){ return $this->param_mdate;}
+    public function setParamMdateAttribute($value){  $this->param_mdate = $value;}
+
+
+    // ------------- メソッド --------------
+
+
+
+
+    /**
+     * 登録
+     *
+     * @return void
+     */
+    public function insertData($upkind){
+        try {
+            $re_data = [];
+            if($upkind == 3) {
+                $this->product_id = DB::table($this->table)->max('product_id') + 1;
+            }
+            if($upkind == 2) {
+                $this->product_id = DB::table($this->table)->max('product_id') + 1;
+                //$this->created_user = 'system';
+            }
+            $this->now_inventory = isset($this->now_inventory) ? $this->now_inventory : "";
+            $this->nbox = isset($this->nbox) ? $this->nbox : "";
+
+    
+            $id = DB::table($this->table)->insertGetId(
+                [
+
+					'mdate' => $this->mdate,
+					'department' => $this->department,
+					'charge' => $this->charge,
+					'product_name' => $this->product_name,
+					'product_id' => $this->product_id,
+					'unit' => $this->unit,
+					'quantity' => $this->quantity,
+					'receipt' => $this->receipt,
+					'delivery' => $this->delivery,
+					'now_inventory' => $this->now_inventory,
+					'nbox' => $this->nbox,
+					'order_address' => $this->order_address,
+					'unit_price' => $this->unit_price,
+					'total' => $this->total,
+					'remarks' => $this->remarks,
+					'note' => $this->note,
+					'status' => 'newest',
+					'marks' => $this->marks,
+					'created_user' => $this->created_user,
+					'created_at' => $this->created_at,
+                    'updated_at' => NULL
+	
+    
+                ]
+            );
+
+            if($upkind == 1){
+                DB::table($this->table)
+                ->where('id', $this->id)
+                ->update([
+                    'status' => '',
+                ]);
+
+            }
+            //Log::info("insertDataZ in id = ".$id);
+            $re_data['id'] = $id;
+            $re_data['product_id'] = $this->product_id;
+            $re_data['product_name'] = $this->product_name;
+            return $re_data;
+
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+
+    /**
+     * 更新
+     *
+     * @return void
+     */
+    public function updateData($upkind){
+        try {
+            if($upkind == 4)    {
+                //削除マーク
+                DB::table($this->table)
+                ->where('id', $this->id)
+                ->update([
+                    'status' => 'del',
+                ]);
+
+            }
+            elseif($upkind == 5)    {
+                //削除マーク→newest（戻す）
+                DB::table($this->table)
+                ->where('id', $this->id)
+                ->update([
+                    'status' => 'newest',
+                ]);
+                $re_data['id'] = $this->id;
+                $re_data['product_id'] = $this->product_id;
+                $re_data['product_name'] = $this->product_name;
+                return $re_data;
+
+            }
+            else {
+
+            DB::table($this->table)
+                ->where('id', $this->id)
+                ->update([
+
+					'mdate' => $this->mdate,
+					'department' => $this->department,
+					'charge' => $this->charge,
+					'product_name' => $this->product_name,
+					'product_id' => $this->product_id,
+					'unit' => $this->unit,
+					'quantity' => $this->quantity,
+					'receipt' => $this->receipt,
+					'delivery' => $this->delivery,
+					'now_inventory' => $this->now_inventory,
+					'nbox' => $this->nbox,
+					'order_address' => $this->order_address,
+					'unit_price' => $this->unit_price,
+					'total' => $this->total,
+					'remarks' => $this->remarks,
+					'note' => $this->note,
+					'status' => $this->status,
+					'marks' => $this->marks,
+					'updated_user' => $this->updated_user,
+					'updated_at' => $this->updated_at,
+					'is_deleted' => $this->is_deleted
+
+
+                ]);
+            }
+            $re_data['id'] = $this->id;
+            $re_data['product_id'] = $this->product_id;
+            $re_data['product_name'] = $this->product_name;
+            return $re_data;
+
+
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+    }
+
+
+	
+    /**
+     * 取得
+     *
+     * @return void
+     */
+    public function getDataMM(){
+        //$message = "ログ出力 getDataMM";
+        //Log::info("this->param_edit_id -- ".$this->param_edit_id);
+        //Log::info("this->param_product_id -- ".$this->param_product_id);
+
+        try {
+            $data = DB::table($this->table)
+            ->select(
+
+				'id',
+				'mdate',
+				'department',
+				'charge',
+				'product_name',
+				'product_id',
+				'unit',
+				'quantity',
+				'receipt',
+				'delivery',
+				'now_inventory',
+				'nbox',
+				'order_address',
+				'unit_price',
+				'total',
+				'remarks',
+				'note',
+				'status',
+				'marks',
+				'created_user',
+				'updated_user',
+				'created_at',
+				'updated_at',
+				'is_deleted'
+
+
+            );
+            $data->selectRaw('
+                FLOOR(now_inventory / quantity)  as calc_nbox,
+                (now_inventory mod quantity)  as calc_nbox_mod
+            ');
+
+
+            if(!empty($this->param_edit_id)){
+                $data->where('id',$this->param_edit_id);
+            }
+            elseif(!empty($this->param_product_id)){
+                $data->where('product_id',$this->param_product_id)
+                ->orderBy('id', 'DESC');
+            }
+            elseif(!empty($this->param_status)){
+                $data->where('status',$this->param_status)
+                ->orderBy('id');
+            }
+            else {
+                $data->where('status','newest');
+            }
+
+            // 順番変更 正順逆順
+            if(isset($this->param_product_name)){
+                //Log::info("isset this->param_company_id -- ".$this->param_company_id);
+                if($this->param_product_name == 1) {
+                    $data->orderBy('product_name');
+                }
+                if($this->param_product_name == 2) {
+                    $data->orderBy('product_name', 'DESC');
+                }
+            }
+            elseif(isset($this->param_product_id2)){
+                //Log::info("isset this->param_product_id2 -- ".$this->param_product_id2);
+                if($this->param_product_id2 == 1) {
+                    $data->orderBy('product_name');
+                }
+                if($this->param_product_id2 == 2) {
+                    $data->orderBy('product_name', 'DESC');
+                }
+            }
+            elseif(isset($this->param_mdate)){
+                //Log::info("isset this->param_mdate -- ".$this->param_mdate);
+                if($this->param_mdate == 1) {
+                    $data->orderBy('mdate');
+                }
+                if($this->param_mdate == 2) {
+                    $data->orderBy('mdate', 'DESC');
+                }
+            }
+            elseif(isset($this->param_charge)){
+                //Log::info("isset this->param_order_day -- ".$this->param_order_day);
+                if($this->param_charge == 1) {
+                    $data->orderBy('charge');
+                }
+                if($this->param_charge == 2) {
+                    $data->orderBy('charge', 'DESC');
+                }
+            }
+
+            $result = $data
+            ->get();
+
+            return $result;
+
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+    }
+
+
+    /**
+     * 検索SEARCH取得
+     *
+     * @return void
+     */
+    public function getSearch(){
+
+        try {
+            $result = "";
+            $data = DB::table($this->table)
+            ->select(
+
+				'id',
+				'mdate',
+				'department',
+				'charge',
+				'product_name',
+				'product_id',
+				'unit',
+				'quantity',
+				'receipt',
+				'delivery',
+				'now_inventory',
+				'nbox',
+				'order_address',
+				'unit_price',
+				'total',
+				'remarks',
+				'note',
+				'status',
+				'marks',
+				'created_user',
+				'updated_user',
+				'created_at',
+				'updated_at',
+				'is_deleted'
+
+            );
+            if(!empty($this->param_charge)){
+                $data->where('charge', $this->param_charge)
+                ->where('status','newest')
+                ->orderBy('id', 'DESC');
+            
+                $result = $data
+                ->get();
+            }
+            if(!empty($this->param_product_name)){
+                $str = "%".$this->param_product_name."%";
+                //Log::info("getSearchA this->param_company_name -- ".$str);
+                $data->where('product_name','LIKE', $str)
+                //->where('status','newest')
+                ->orderBy('id');
+            
+                $result = $data
+                ->get();
+            }
+
+
+            /*
+            if ($result->isEmpty()) {
+                $result = "";
+            } 
+            */
+
+            return $result;
+
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+    }
+
+
+    /**
+     * miniデータ取得
+     *
+     * @return void
+     */
+    public function getDataMiniInvZ(){
+
+        try {
+            $data = DB::table($this->table)
+            ->select(
+                [
+                    'id as inv_id',
+                    'order_no',
+                    'product_name',
+                    'product_id',
+                    'unit',
+                    'quantity',
+                    'now_inventory',
+                    'nbox',
+                    'status',
+                    'created_user',
+                    'created_at',
+                ]
+            );
+                $data->where('status','newest');
+                //->orderBy('id', 'DESC');
+                $result = $data
+                ->get();
+
+            if ($result->isEmpty()) {
+                $result = "";
+            } 
+            return $result;
+
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+    }
+
+
+
+    /**
+     * 存在チェック
+     *
+     * @return boolean
+     */
+    public function isExistsInfo(){
+        try {
+            $mainQuery = DB::table($this->table);
+            //$mainQuery->where('account_id',$this->param_account_id);
+            $is_exists = $mainQuery->where('status',0)
+                ->exists();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $is_exists;
+    }
+
+    /**
+     * 削除
+     *
+     * @return void
+     */
+    public function delData(){
+        try {
+            $mainQuery = DB::table($this->table);
+            //$mainQuery->where('account_id',$this->param_account_id);
+            $result = $mainQuery->where('status','del')->delete();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
 
 
 
