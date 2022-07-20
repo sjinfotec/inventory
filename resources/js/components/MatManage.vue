@@ -558,9 +558,9 @@
             <div class="cate gc2">入数</div>
             <div class="inputzone">
               <input
-                type="text"
+                type="number"
                 class="form_style bc2"
-                v-model="details[index].quantity"
+                v-model.number="details[index].quantity"
                 maxlength="11"
                 name="quantity"
               />
@@ -571,9 +571,10 @@
             <div class="cate gc2">入庫数</div>
             <div class="inputzone">
               <input
-                type="text"
+                type="number"
+                min="0"
                 class="form_style bc2"
-                v-model="details[index].receipt"
+                v-model.number="details[index].receipt"
                 maxlength="11"
                 name="receipt"
               />
@@ -583,29 +584,40 @@
             <div class="cate gc2">出庫数</div>
             <div class="inputzone">
               <input
-                type="text"
+                type="number"
+                min="0"
                 class="form_style bc2"
-                v-model="details[index].delivery"
+                v-model.number="details[index].delivery"
                 maxlength="11"
                 name="delivery"
               />
             </div>
           </div>
           <div class="inputgroup w1">
-            <div class="cate gc2">現在在庫</div>
-            <div class="inputzone">
+            <div class="cate gc2">在庫</div>
+            <div class="inputzone" v-if="btnMode ==='update'">
               <input
-                type="text"
+                type="number"
                 class="form_style bc2"
-                v-model="details[index].now_inventory"
+                v-model.number="details[index].now_inventory + details[index].receipt - details[index].delivery"
                 maxlength="11"
                 name="now_inventory"
                 v-bind:disabled="isDisabled"
-                
+              />
+            </div>
+            <div class="inputzone" v-else>
+              <input
+                type="number"
+                class="form_style bc2"
+                v-model.number="details[index].now_inventory"
+                maxlength="11"
+                name="now_inventory"
+                v-bind:disabled="isDisabled"
               />
             </div>
           </div>
-          <!--
+          <!--v-bind:disabled="isDisabled"
+          v-bind:readonly="isDisabled"
           <div class="inputgroup w1">
             <div class="cate gc2">箱数</div>
             <div class="inputzone">
@@ -953,6 +965,7 @@ export default {
       calc_nbox: "",
       btn_select: "",
       isDisabled: "",
+      smode: "",
     };
   },
   // マウント時
@@ -1007,8 +1020,14 @@ export default {
       //console.log(edit_id);
       this.selectMode = 'EDT';
       this.btnMode = smode;
-      if(smode === 'fix') this.isDisabled = false;
       this.getItemOne(eid,pid,pname,smode);
+      if(smode === 'fix') {
+        this.isDisabled = false;
+      }
+      else if(smode === 'update') {
+        //this.details[0].receipt = "";
+        //this.details[0].delivery = "";
+      }
     },
     NewBtn()  {
       this.inputClear();
@@ -1072,6 +1091,10 @@ export default {
       this.postRequest("/material_management/getone", arrayParams)
         .then(response  => {
           this.getThen(response);
+          if(md !== 'fix' || md !== '0') {
+            this.details[0].receipt = "";
+            this.details[0].delivery = "";
+          }
         })
         .catch(reason => {
           //console.log("getitem reason");
@@ -1133,6 +1156,7 @@ export default {
     dataUpdate(index,k) {
       if (this.checkFormStore()) {
         var messages = [];
+        if (k == 1) this.details[index].now_inventory = this.details[index].now_inventory + this.details[index].receipt - this.details[index].delivery
         var arrayParams = { details : this.details[index] , upkind : k };
         var motion_msg = "";
         if (k == 0) motion_msg = '修正';
@@ -1140,7 +1164,7 @@ export default {
         if (k == 2) motion_msg = '新しい商品追加';
         this.postRequest("/material_management/update", arrayParams)
           .then(response  => {
-            this.putThenHead(response, motion_msg);
+            this.putThenHead(response, motion_msg, k);
           })
           .catch(reason => {
             this.serverCatch(motion_msg);
@@ -1159,18 +1183,15 @@ export default {
         this.before_count = this.count;
         if ( this.details.length > 0) {
           this.form.id = this.details[0].id;
+          this.form.mdate = this.details[0].mdate;
+          this.form.department = this.details[0].department;
           this.form.charge = this.details[0].charge;
-          this.form.order_no = this.details[0].order_no;
-          this.form.company_name = this.details[0].company_name;
-          this.form.company_id = this.details[0].company_id;
           this.form.product_name = this.details[0].product_name;
           this.form.product_id = this.details[0].product_id;
           this.form.unit = this.details[0].unit;
           this.form.quantity = this.details[0].quantity;
-          this.form.supply_day = this.details[0].supply_day;
-          this.form.supply_quantity = this.details[0].supply_quantity;
-          this.form.order_day = this.details[0].order_day;
-          this.form.order_quantity = this.details[0].order_quantity;
+          this.form.receipt = this.details[0].receipt;
+          this.form.delivery = this.details[0].delivery;
           this.form.now_inventory = this.details[0].now_inventory;
           this.form.nbox = this.details[0].nbox;
           this.form.order_address = this.details[0].order_address;
@@ -1179,8 +1200,6 @@ export default {
           this.form.remarks = this.details[0].remarks;
           this.form.note = this.details[0].note;
           this.form.status = this.details[0].status;
-          this.form.order_info = this.details[0].order_info;
-          this.form.other1 = this.details[0].other1;
           this.form.marks = this.details[0].marks;
           this.form.created_user = this.details[0].created_user;
           this.form.updated_user = this.details[0].updated_user;
@@ -1220,7 +1239,7 @@ export default {
       }
     },
     // 更新系正常処理
-    putThenHead(response, eventtext) {
+    putThenHead(response, eventtext, k) {
       var messages = [];
       var res = response.data;
       if (res.result) {
@@ -1231,7 +1250,7 @@ export default {
           this.product_title = res.product_name;
         }
         this.$toasted.show(this.product_title + "を" + eventtext + "しました");
-        this.getItemOne(this.edit_id,this.product_id,this.product_title);
+        this.getItemOne(this.edit_id,this.product_id,this.product_title,k);
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -1289,19 +1308,17 @@ export default {
     
     inputClear() {
       this.details = [];
+
       this.form.id = "";
+      this.form.mdate = "";
+      this.form.department = "";
       this.form.charge = "";
-      this.form.order_no = "";
-      this.form.company_name = "";
-      this.form.company_id = "";
       this.form.product_name = "";
       this.form.product_id = "";
       this.form.unit = "";
       this.form.quantity = "";
-      this.form.supply_day = "";
-      this.form.supply_quantity = "";
-      this.form.order_day = "";
-      this.form.order_quantity = "";
+      this.form.receipt = "";
+      this.form.delivery = "";
       this.form.now_inventory = "";
       this.form.nbox = "";
       this.form.order_address = "";
@@ -1310,14 +1327,12 @@ export default {
       this.form.remarks = "";
       this.form.note = "";
       this.form.status = "";
-      this.form.order_info = "";
-      this.form.other1 = "";
       this.form.marks = "";
       this.form.created_user = "";
       this.form.updated_user = "";
       this.form.created_at = "";
       this.form.updated_at = "";
-      this.form.is_deleted = "";
+
     }
 
 
