@@ -312,6 +312,17 @@ class MatManage extends Model
 		$this->param_status = $value;
 	}
 
+	// マーク（部署グループ a b）
+	private $param_marks;
+	public function getParamMarksAttribute()
+	{
+		return $this->param_marks;
+	}
+	public function setParamMarksAttribute($value)
+	{
+		$this->param_marks = $value;
+	}
+	
     // ------------- 順序・正逆・検索 --------------
     // 商品
     private $param_product_name;
@@ -553,6 +564,11 @@ class MatManage extends Model
                 $data->where('status','newest');
             }
 
+            if(!empty($this->param_marks)){
+                $data->where('marks',$this->param_marks);
+            }
+
+
             // 順番変更 正順逆順
             if(isset($this->param_product_name)){
                 //Log::info("isset this->param_company_id -- ".$this->param_company_id);
@@ -765,11 +781,22 @@ class MatManage extends Model
      *
      * @return void
      */
-    public function delData(){
+    public function delData($delkind){
         try {
             $mainQuery = DB::table($this->table);
             //$mainQuery->where('account_id',$this->param_account_id);
-            $result = $mainQuery->where('status','del')->delete();
+            //$result = $mainQuery->where('status','del')->delete();
+			if($delkind === "one") {
+	            $mainQuery->where('id', $this->id);
+			}
+			elseif($delkind === "all") {
+	            $mainQuery->where('product_id', $this->product_id);
+			}
+			$result = $mainQuery
+            ->delete();
+			$re_data['id'] = $this->id;
+            return $re_data;
+
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$pe');
             Log::error($pe->getMessage());

@@ -3,17 +3,32 @@
   <!-- main contentns  -->
   <div id="">
 
+    <div v-if="selectMode=='HOME'">
+      <div id="btn_top">
+          <button type="button" class="" @click="SelectContentsBtn('a')">
+            在庫 1F
+          </button>
+          <button type="button" class="" @click="SelectContentsBtn('b')">
+            在庫 2F
+          </button>
+      </div>
+    </div>
+
+
+
+
     <div v-if="selectMode=='LINEACTIVE'">
       <div id="top_cnt">
-        <h2>資材在庫一覧</h2>
+        <h2 class="h2gc1" v-if="selectCnt=='a'">資材在庫一覧 1F</h2>
+        <h2 class="h2gc2" v-if="selectCnt=='b'">資材在庫一覧 2F</h2>
         <form id="form1" name="form2">
-          <input type="text" class="form_style bc1" v-model="s_company_name" maxlength="30" name="s_charge">
+          <input type="text" class="form_style bc1" v-model="s_charge" maxlength="30" name="s_charge">
           <button type="button" class="" @click="searchBtn()">
             担当 検索
           </button>
         </form>
         <form id="form1" name="form1">
-          <input type="text" class="form_style bc2" v-model="s_order_no" maxlength="30" name="s_product_name">
+          <input type="text" class="form_style bc1" v-model="s_product_name" maxlength="30" name="s_product_name">
           <button type="button" class="" @click="searchBtn()">
             商品 検索
           </button>
@@ -397,6 +412,9 @@
       <div>
         <h2>在庫 / {{ acttitle }} 完了</h2>
       </div>
+            <div id="btn_cnt2">
+              <button type="button" class="" @click="backLine()">一覧へ</button>
+            </div>
 
       <div class="" v-if="actionmsgArr.length">
           <ul class="error-red color_red">
@@ -407,55 +425,66 @@
         <table>
           <thead>
             <tr>
+              <th class="gc2">日付</th>
+              <th class="gc2">部署</th>
               <th class="gc2">担当</th>
-              <th class="gc2">受注番号</th>
-              <th class="gc2">会社名</th>
               <th class="gc2">商品名</th>
               <th class="gc2">単位</th>
-              <th class="gc2">入数</th>
-              <th class="gc2">納入日</th>
-              <th class="gc2">納入数</th>
-              <th class="gc2">発注日</th>
-              <th class="gc2">発注数</th>
-              <th class="gc2">現在在庫</th>
+              <!--<th class="gc2">入数</th>-->
+              <th class="gc2">入庫数</th>
+              <th class="gc2">出庫数</th>
+              <th class="gc2">在庫</th>
+              <!--
               <th class="gc2">箱数</th>
               <th class="gc2">発注先</th>
               <th class="gc2">単価</th>
               <th class="gc2">合計</th>
+              -->
               <th class="gc2">備考</th>
+              <!--
               <th class="gc2">メモ/ノート</th>
+              -->
               <th class="gc2">&nbsp;</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(item,rowIndex) in details" :key="rowIndex" v-bind:class="classObj1">
+              <td class="nbr">{{ item['mdate'] }}</td>
+              <td>{{ item['department'] }}</td>
               <td>{{ item['charge'] }}</td>
-              <td v-bind:class="(item['status'] == 'newest') ? 'bgcolor5' : ''">{{ item['order_no'] }}</td>
-              <td>{{ item['company_name'] }}</td>
-              <td>{{ item['product_name'] }}</td>
+              <td v-bind:class="(item['status'] == 'newest') ? 'bgcolor5' : ''">{{ item['product_name'] }}</td>
               <td class="nbr">{{ item['unit'] }}</td>
-              <td class="style1">{{ item['quantity'] }}</td>
-              <td class="nbr">{{ item['supply_day'] }}</td>
-              <td class="style1" v-bind:class="(item['supply_quantity'] === 0) ? 'color3' : ''">{{ item['supply_quantity'] }}</td>
-              <td class="nbr">{{ item['order_day'] }}</td>
-              <td class="style1" v-bind:class="(item['order_quantity'] === 0) ? 'color3' : ''">{{ item['order_quantity'] }}</td>
+              <!--<td class="style1">{{ item['quantity'] }}</td>-->
+              <td class="style1" v-bind:class="(item['receipt'] === 0) ? 'color3' : ''">{{ item['receipt'] }}</td>
+              <td class="style1" v-bind:class="(item['delivery'] === 0) ? 'color3' : ''">{{ item['delivery'] }}</td>
               <td class="style1" v-bind:style="(item['now_inventory'] === 0) ? 'color:red' : ''">{{ item['now_inventory'] }}</td>
+              <!--
               <td class="style1">{{ item['nbox'] }}</td>
               <td>{{ item['order_address'] }}</td>
               <td>{{ item['unit_price'] }}</td>
               <td>{{ item['total'] }}</td>
+              -->
               <td>{{ item['remarks'] }}</td>
+              <!--
               <td>{{ item['note'] }}</td>
+              -->
               <td>
                 <!--
                 id={{ item['id'] }} re_id={{ re_id }}
                 -->
-                <button v-if="btnMode==='1'" type="button" class="style1" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name)">
-                更新
-                </button>
-                <button v-if="btnMode==='1'" type="button" class="style2" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name)">
-                修正
-                </button>
+                <div v-if="item['status']=='newest'">
+                  <button type="button" class="style1" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name, 'update')">
+                  更新
+                  </button>
+                  <button type="button" class="style2" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name, 'fix')">
+                  修正
+                  </button>
+                </div>
+                <div v-else>
+                  <button type="button" class="style2" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name, 'fix')">
+                  修正
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -692,13 +721,13 @@
             <div class="cate">グループ</div>
             <div class="inputzone">
               <input
-                type="hidden"
+                type="text"
                 class="form_style"
                 v-model="details[index].marks"
                 maxlength="10"
                 name="marks"
               />
-              <span>{{ details[index].marks }}</span>
+              
             </div>
           </div>
           <div class="inputgroup">
@@ -771,13 +800,13 @@
             <div class="cate">ステータス</div>
             <div class="inputzone">
               <input
-                type="hidden"
+                type="text"
                 class="form_style"
                 v-model="details[index].status"
                 maxlength="20"
                 name="status"
               />
-              <span>{{ details[index].status }}</span>
+              
             </div>
           </div>
           <div class="inputgroup">
@@ -793,7 +822,14 @@
               <span>{{ details[index].is_deleted }}</span>
             </div>
           </div>
+          <div id="button1">
+            <button type="button" class="" @click="recordDel(index,'all')">この商品（履歴含む）を削除</button>
+          </div>
+
         </div>
+        <div id="cnt1" v-if="view_switch=='on'">
+        </div>
+
 
         <div id="button1">
           <div>
@@ -810,6 +846,12 @@
               <button type="button" class="" @click="dataUpdate(index,2)"><span>{{ item['company_name'] }} </span><span>の新しい商品を登録する</span></button>
             </div>
             -->
+            <div class="btnstyle">
+              <button type="button" class="" @click="backLine()">一覧へ</button>
+            </div>
+            <div class="btnstyle">
+              <button type="button" class="" @click="recordDel(index,'one')">この登録を削除</button>
+            </div>
             <div class="btnstyle" v-if="btnMode==='fix'">
               <button type="button" class="" @click="dataDel(index,4)">ゴミ箱へ移す</button>
             </div>
@@ -888,12 +930,12 @@
 <script>
 //import toasted from "vue-toasted";
 import moment from "moment";
-//import {dialogable} from '../mixins/dialogable.js';
+import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
 export default {
-  mixins: [ requestable , checkable ],
+  mixins: [ requestable , checkable , dialogable],
   props: {
     charge: {
       type: [String, Number],
@@ -917,18 +959,15 @@ export default {
     return {
       form: {
         id: "",
+        mdate: "",
+        department: "",
         charge: "",
-        order_no: "",
-        company_name: "",
-        company_id: "",
         product_name: "",
         product_id: "",
         unit: "",
         quantity: "",
-        supply_day: "",
-        supply_quantity: "",
-        order_day: "",
-        order_quantity: "",
+        receipt: "",
+        delivery: "",
         now_inventory: "",
         nbox: "",
         order_address: "",
@@ -937,13 +976,12 @@ export default {
         remarks: "",
         note: "",
         status: "",
-        order_info: "",
-        other1: "",
         marks: "",
         created_user: "",
         updated_user: "",
         created_at: "",
-        updated_at: ""
+        updated_at: "",
+        is_deleted: ""
       },
       messagevalidatesNew: [],
       settingmessage: [],
@@ -952,14 +990,15 @@ export default {
       edit_id: "",
       product_id: "",
       product_title: "",
-      selectMode: "LINEACTIVE",
+      selectMode: "HOME",
+      selectCnt: "",
       actionmsgArr: [],
       acttitle: "",
       classObj1: "",
       view_switch: "off",
       i: 2,
-      s_order_no: "",
-      s_company_name: "",
+      s_charge: "",
+      s_product_name: "",
       btnMode: 0,
       calc_now_inventory: "",
       calc_nbox: "",
@@ -970,7 +1009,7 @@ export default {
   },
   // マウント時
   mounted() {
-      this.getItem();
+      //this.getItem();
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -1014,6 +1053,14 @@ export default {
       return flag;
     },
     // ------------------------ イベント処理 ------------------------------------
+    SelectContentsBtn(sc) {
+
+      this.selectMode = "LINEACTIVE";
+      this.getItem(sc);
+      this.selectCnt = sc;
+
+
+    },
     EditBtn(eid,pid,pname,smode) {
       //var edit_id = eid;
       //console.log("EditBtn in");
@@ -1056,15 +1103,22 @@ export default {
     //console.log("viewBtn i = " + this.i);
 
     },
+    backLine() {
+      this.selectMode = "LINEACTIVE";
+      const sc = this.selectCnt;
+      this.getItem(sc);
+
+    },
     // -------------------- サーバー処理 ----------------------------
         // 取得処理
-    getItem() {
+    getItem(sc) {
       this.inputClear();
       var arrayParams = { 
         charge : this.charge,
         product_name : this.product_name,
         mdate : this.mdate,
-        orderfr : this.orderfr
+        orderfr : this.orderfr,
+        marks : sc
       };
       //console.log("getitem in arrayParams['mdate'] = " + arrayParams['mdate']);
       this.postRequest("/material_management/get", arrayParams)
@@ -1091,7 +1145,7 @@ export default {
       this.postRequest("/material_management/getone", arrayParams)
         .then(response  => {
           this.getThen(response);
-          if(md !== 'fix' || md !== '0') {
+          if(md === 'update') {
             this.details[0].receipt = "";
             this.details[0].delivery = "";
           }
@@ -1103,16 +1157,16 @@ export default {
     },
     // 検索処理
     searchItem() {
-        console.log("searchItem in s_order_no = " + this.s_order_no);
-        this.s_order_no = this.s_order_no;
+        //console.log("searchItem in s_ = " + this.s_order_no);
+        //this.s_order_no = this.s_order_no;
         this.acttitle = "検索";
         var motion_msg = "検索";
         var messages = [];
-        var arrayParams = { s_order_no : this.s_order_no , s_company_name : this.s_company_name , order_info : 'a'};
+        var arrayParams = { s_charge : this.s_charge , s_product_name : this.s_product_name , marks : 'a'};
         this.postRequest("/material_management/search", arrayParams)
           .then(response  => {
             this.putThenSearch(response, motion_msg);
-            this.btnMode = 1;
+            //this.btnMode = "1";
           })
           .catch(reason => {
             this.serverCatch("検索");
@@ -1125,7 +1179,7 @@ export default {
         this.classObj1 = "bgcolor3";
         this.acttitle = "新規登録";
         var messages = [];
-        var arrayParams = { form : this.form };
+        var arrayParams = { form : this.form , marks : this.selectCnt};
         this.postRequest("/material_management/insert", arrayParams)
           .then(response  => {
             this.putThenStore(response, "新規登録");
@@ -1151,6 +1205,28 @@ export default {
             this.serverCatch("ゴミ箱移動");
           });
       }
+    },
+    // レコード削除処理
+    recordDel(index,dk) {
+        var messages = [];
+        messages.push("この登録を削除しますか？");
+        this.htmlMessageSwal(this.details[index].product_name, messages, "info", true, true).then(
+          result => {
+            if (result) {
+              //this.storeData();
+              var arrayParams = { details : this.details[index] , delkind : dk  };
+              this.postRequest("/material_management/delete", arrayParams)
+                .then(response  => {
+                  this.putThenRecordDel(response, "削除");
+                })
+                .catch(reason => {
+                  this.serverCatch("削除");
+                });
+
+            }
+          }
+        );
+
     },
     // 編集変更処理
     dataUpdate(index,k) {
@@ -1205,6 +1281,7 @@ export default {
           this.form.updated_user = this.details[0].updated_user;
           this.form.created_at = this.details[0].created_at;
           this.form.updated_at = this.details[0].updated_at;
+          this.form.is_deleted = this.details[0].is_deleted;
 
         } else {
           
@@ -1225,12 +1302,12 @@ export default {
       if (res.details.length > 0) {
           this.details = res.details;
           //this.classObj1 = (this.details[0].status == 'newest') ? 'bgcolor3' : '';
-          this.product_title = res.s_order_no + res.s_company_name;
-          console.log("putThenSearch in res.s_order_no = " + res.s_order_no);
+          this.product_title = res.s_charge + res.s_product_name;
+          //console.log("putThenSearch in res.s_product_name = " + res.s_product_name);
           this.$toasted.show(this.product_title + " " + eventtext + "しました");
-          this.actionmsgArr.push(this.product_title + " を検索しました。","");
+          this.actionmsgArr.push(this.product_title + " を検索しました。");
       } else {
-          this.actionmsgArr.push(this.s_order_no + this.s_company_name + " が見つかりませんでした。","");
+          this.actionmsgArr.push(this.s_charge + this.s_product_name + " が見つかりませんでした。","");
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
@@ -1240,17 +1317,20 @@ export default {
     },
     // 更新系正常処理
     putThenHead(response, eventtext, k) {
+      let object_mode = {0: 'fix', 1: 'update', 2: 'new'};
+      console.log('key: ' + k + 'value: ' + object_mode[k]);
       var messages = [];
       var res = response.data;
       if (res.result) {
         if(res.id) {
+          //this.acttitle = "更新";
           this.edit_id = res.id;
           //console.log("putThenHead in res.pid = " + res.product_id);
           this.product_id = res.product_id;
           this.product_title = res.product_name;
         }
         this.$toasted.show(this.product_title + "を" + eventtext + "しました");
-        this.getItemOne(this.edit_id,this.product_id,this.product_title,k);
+        this.getItemOne(this.edit_id,this.product_id,this.product_title,object_mode[k]);
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -1265,7 +1345,7 @@ export default {
       var res = response.data;
       if (res.result) {
         this.re_id = res.id;
-
+        this.acttitle = "登録";
         this.getItemOne(this.re_id,this.product_id,this.product_title);
         this.$toasted.show(this.product_title + "を" + eventtext + "しました");
         this.actionmsgArr.push(this.product_title + "を新規登録しました。","");
@@ -1285,10 +1365,30 @@ export default {
       var res = response.data;
       if (res.result) {
         this.re_id = res.id;
-
+        this.acttitle = "移動";
         this.getItemOne(this.re_id,this.product_id,this.product_title);
         this.$toasted.show(this.product_title + "を" + eventtext + "しました");
         this.actionmsgArr.push(this.product_title + " をゴミ箱へ移動しました。","");
+        this.selectMode = 'COMPLETE';
+
+      } else {
+        if (res.messagedata.length > 0) {
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
+        } else {
+          this.serverCatch(eventtext);
+        }
+      }
+    },
+    // レコード削除正常処理
+    putThenRecordDel(response, eventtext) {
+      var messages = [];
+      var res = response.data;
+      if (res.result) {
+        this.re_id = res.id;
+        this.acttitle = "削除";
+        this.getItemOne(this.re_id,this.product_id,this.product_title);
+        this.$toasted.show(this.product_title + "を" + eventtext + "しました");
+        this.actionmsgArr.push(this.product_title + " を削除しました。");
         this.selectMode = 'COMPLETE';
 
       } else {
@@ -1332,6 +1432,7 @@ export default {
       this.form.updated_user = "";
       this.form.created_at = "";
       this.form.updated_at = "";
+      this.form.is_deleted = "";
 
     }
 

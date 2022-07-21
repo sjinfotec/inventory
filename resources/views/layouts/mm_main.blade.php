@@ -34,7 +34,7 @@
                 </button>
                 <!-- /offcanvas-left toggle button -->
                 <div id="logo">
-                <a class="" href="{{ url('/material_management') }}">
+                <a class="" href="{{ url('/mm') }}">
                     <span><img class="logo_h" src="{{ asset('images/home-white.svg') }}"  alt="資材－在庫管理システム"></span>
                     <span>資材－在庫管理システム</span>
                 </a>

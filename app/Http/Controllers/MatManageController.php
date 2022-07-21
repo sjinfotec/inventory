@@ -45,6 +45,12 @@ class MatManageController extends Controller
 
     }
 
+    public function home()
+    {
+        return view('mm_home'
+        );
+    }
+
     public function dust()
     {
         return view('mm_dust'
@@ -92,7 +98,8 @@ class MatManageController extends Controller
                 );
             }
             $details = $params['form'];
-            $re_data = $this->insertZ($details);
+            $marks = $params['marks'];
+            $re_data = $this->insert($details,$marks);
             if (!isset($re_data['id'])) {
                 $result = false;
             }
@@ -116,7 +123,7 @@ class MatManageController extends Controller
      * @param [type] $inputs
      * @return void
      */
-    private function insert($details){
+    private function insert($details,$marks){
         $material_management = new MatManage();
         $systemdate = Carbon::now();
  
@@ -141,7 +148,7 @@ class MatManageController extends Controller
             $material_management->setRemarksAttribute($details['remarks']);
             $material_management->setNoteAttribute($details['note']);
             $material_management->setStatusAttribute($details['status']);
-            $material_management->setMarksAttribute($details['marks']);
+            $material_management->setMarksAttribute($marks);
             $material_management->setCreateduserAttribute($details['charge']);
             $material_management->setCreatedatAttribute($systemdate);
             $material_management->setIsdeletedAttribute($details['is_deleted']);
@@ -370,6 +377,7 @@ class MatManageController extends Controller
             $params_mdate = null;
             $params_charge = null;
             $params_orderfr = null;
+            $params_marks = null;
 
             $material_management = new MatManage();
 
@@ -390,6 +398,10 @@ class MatManageController extends Controller
                 if (!empty($params['orderfr'])) {
                     $params_orderfr = $params['orderfr'];
                     $material_management->setParamOrderfrAttribute($params_orderfr);
+                }
+                if (!empty($params['marks'])) {
+                    $params_marks = $params['marks'];
+                    $material_management->setParamMarksAttribute($params_marks);
                 }
             }
 
@@ -573,6 +585,120 @@ class MatManageController extends Controller
     }
 
 
+
+    /**
+     * レコード削除
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function delete(Request $request){
+        global $id ;
+        $this->array_messagedata = array();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['details'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $details = $params['details'];
+            $delkind = $params['delkind'];
+            $re_data = $this->fixdel($details,$delkind);
+            if (!isset($re_data['id'])) {
+                $result = false;
+            }
+
+            return response()->json(
+                ['result' => $result, 'id' => $re_data['id'], 
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * DELETE
+     *
+     * @param [type] $inputs
+     * @return void
+     */
+    private function fixdel($details,$delkind){
+        $material_management = new MatManage();
+        $systemdate = Carbon::now();
+ 
+        DB::beginTransaction();
+        try{
+
+            $material_management->setIdAttribute($details['id']);
+            $material_management->setProductidAttribute($details['product_id']);
+            /*
+            $material_management->setMdateAttribute($details['mdate']);
+            $material_management->setDepartmentAttribute($details['department']);
+            $material_management->setChargeAttribute($details['charge']);
+            $material_management->setProductnameAttribute($details['product_name']);
+            $material_management->setProductidAttribute($details['product_id']);
+            $material_management->setUnitAttribute($details['unit']);
+            $material_management->setQuantityAttribute($details['quantity']);
+            $material_management->setReceiptAttribute($details['receipt']);
+            $material_management->setDeliveryAttribute($details['delivery']);
+            $material_management->setNowinventoryAttribute($details['now_inventory']);
+            $material_management->setNboxAttribute($details['nbox']);
+            $material_management->setOrderaddressAttribute($details['order_address']);
+            $material_management->setUnitpriceAttribute($details['unit_price']);
+            $material_management->setTotalAttribute($details['total']);
+            $material_management->setRemarksAttribute($details['remarks']);
+            $material_management->setNoteAttribute($details['note']);
+            $material_management->setStatusAttribute($details['status']);
+            $material_management->setMarksAttribute($marks);
+            $material_management->setCreateduserAttribute($details['charge']);
+            $material_management->setCreatedatAttribute($systemdate);
+            $material_management->setIsdeletedAttribute($details['is_deleted']);
+            */
+            
+            /*
+            $is_exists = $inventory_a->isExistsInfo();
+            if($is_exists){
+                $inventory_a->delDataA();
+            }
+            */
+
+            $re_data = $material_management->delData($delkind);
+            //Log::info("insertZ in inventory_z = ".$inventory_z);
+
+            DB::commit();
+            return $re_data;
+
+        }catch(\PDOException $pe){
+            Log::error($pe->getMessage());
+            DB::rollBack();
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            DB::rollBack();
+            throw $e;
+        }
+
+    }
 
 
 

@@ -20,7 +20,7 @@ textarea{
 body  {
   font-size:1.4rem;
   margin:0;
-  min-width:1280px;
+  min-width:960px;
 }
 .wrapper {
   width: 1920px;
@@ -45,28 +45,31 @@ a:hover {
 }
 button  {
   white-space:nowrap;
-  border-radius: 5px;
   padding:2px 6px;
+  border:1px solid #888;
+  border-radius: 4px;
   color:#FFF;
-  background:#bbaa88;
+  background:#8899bb;
   width:10em;
 }
 button:hover  {
-  background:#DDCCAA;
+  background:#aabbdd;
 }
 
-.gc1  {  background:#dddd88;}
-.bc1  {  border:2px solid #dddd88;}
-.bcc1 {  border-color:#dddd88;}
-.gc2  {  background:#ccbb55;}
-.bc2  {  border:2px solid #ccbb55;}
-.bcc2 {  border-color:#ccbb55;}
-.gc3  {  background:#ddaa88;}
-.bc3  {  border:2px solid #ddaa88;}
-.gc4  {  background:#eecc55;}
+
+
+.gc1  {  background:#88dddd;}
+.bc1  {  border:2px solid #88dddd;}
+.bcc1 {  border-color:#88dddd;}
+.gc2  {  background:#66ccee;}
+.bc2  {  border:2px solid #66ccee;}
+.bcc2 {  border-color:#66ccee;}
+.gc3  {  background:#66eee7;}
+.bc3  {  border:2px solid #66eee7;}
+.gc4  {  background:#66eecc;}
 .gc4b  {  background:linear-gradient(to bottom, #FFF 0%, #FFF 80%, #eecc55 80%,  #eecc55 100%);}
-.bc4  {  border:2px solid #eecc55;}
-.bcc4 {  border-color:#eecc55;}
+.bc4  {  border:2px solid #66eecc;}
+.bcc4 {  border-color:#66eecc;}
 .stock_active {  background:linear-gradient(to bottom, #ffeecc 0%, #ffeecc 80%, #eecc55 80%,  #eecc55 100%);}
 .bold { font-weight: bold;}
 
@@ -91,7 +94,7 @@ header  {
   position: sticky;
   top: 0px; /* 上端から0pxのところで固定 */
   width:100%;
-  background-color:#956321;
+  background-color:#217495;
   z-index: 1;
 }
 header .navbar  {
@@ -157,6 +160,7 @@ header button {width:auto;}
   align-items: center;
   justify-content: center;
   height:30px;
+  color:#330;
 }
 
 
@@ -260,13 +264,34 @@ header button {width:auto;}
 }
 
 
-/*--------------------## 預かり在庫 / 一覧 ##--------------------*/
+/*--------------------## 在庫 / 一覧 ##--------------------*/
+
+#btn_top {
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0px 100px;
+  margin-top:50px;
+
+}
+
+
 #top_cnt  {
   display:flex;
   width:100%;
   align-items: center;
   justify-content: space-between;
   margin-bottom:5px;
+}
+#top_cnt h2.h2gc1  {
+  padding:0 10px;
+  color:#333;
+  background:#adf5c5;
+}
+#top_cnt h2.h2gc2  {
+  padding:0 10px;
+  color:#333;
+  background:#f5adb7;
 }
 #top_cnt .customize  {
   white-space:nowrap;
@@ -293,6 +318,9 @@ header button {width:auto;}
   margin-right:10px;
 }
 
+
+
+
 #btn_cnt1 {
   display:flex;
   align-items: center;
@@ -316,6 +344,15 @@ header button {width:auto;}
   margin-left:10px;
 
 }
+
+#btn_cnt2 {
+  display:flex;
+  align-items: center;
+  justify-content: flex-end;
+
+}
+
+
 
 
 #tbl_1 {
@@ -411,7 +448,7 @@ header button {width:auto;}
   top:-120px; left:0px;
 }
 
-/*--------------------## 預かり在庫 / 編集追加登録 ##--------------------*/
+/*--------------------## 在庫 / 編集追加登録 ##--------------------*/
 #cnt1 {
   display:flex;
   width:100%;
@@ -637,8 +674,8 @@ button.style2:hover  {
 html { scroll-behavior: smooth;}
 
 
-/*------#### 1200px以下のとき ####------*/
-@media screen and (max-width: 1200px) {
+/*------#### 960px以下のとき ####------*/
+@media screen and (max-width: 960px) {
   .menu_btn {display:block;}
   #cnt_menu  .offcanvas_left {
     position: fixed;

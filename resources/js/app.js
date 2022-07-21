@@ -91,6 +91,11 @@
 
  // -------------------------- 資材 在庫 material management ----------------------------------------------
 
+ // 在庫home
+ Vue.component(
+    "mm-home",
+    require("./components/MMHome.vue").default
+);
  // 在庫一覧
  Vue.component(
     "mat-manage",

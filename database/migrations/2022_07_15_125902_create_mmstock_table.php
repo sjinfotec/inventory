@@ -25,6 +25,7 @@ class CreateMmstockTable extends Migration
             $table->integer('stock_now_inventory')->nullable()->comment('棚卸在庫');
             $table->string('stock_nbox', 16)->nullable()->comment('棚卸箱数');
             $table->string('status', 20)->nullable()->comment('ステータス');
+            $table->string('marks', 10)->nullable()->comment('マーク（グループ）');
             $table->char('stock_month', 7)->nullable()->comment('棚卸月');
             $table->string('created_user', 20)->nullable()->comment('作成ユーザー');
             $table->string('updated_user', 20)->nullable()->comment('修正ユーザー');
