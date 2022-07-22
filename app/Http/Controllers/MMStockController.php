@@ -25,7 +25,7 @@ class MMStockController extends Controller
             $rv_order_info = !empty($_GET["order_info"]) ? $_GET['order_info'] : "";
             $rv_order_no = !empty($_GET["order_no"]) ? $_GET['order_no'] : "";
             $rv_company_id = !empty($_GET["company_id"]) ? $_GET['company_id'] : "";
-            $rv_product_id2 = !empty($_GET["product_id2"]) ? $_GET['product_id2'] : "";
+            $rv_product_code = !empty($_GET["product_code"]) ? $_GET['product_code'] : "";
             $rv_receipt_day = !empty($_GET["receipt_day"]) ? $_GET['receipt_day'] : "";
             $rv_delivery_day = !empty($_GET["delivery_day"]) ? $_GET['delivery_day'] : "";
             $rv_orderfr = !empty($_GET["orderfr"]) ? $_GET['orderfr'] : "";
@@ -34,7 +34,7 @@ class MMStockController extends Controller
             	'order_info' => $rv_order_info,
             	'order_no' => $rv_order_no,
             	'company_id' => $rv_company_id,
-            	'product_id2' => $rv_product_id2,
+            	'product_code' => $rv_product_code,
             	'receipt_day' => $rv_receipt_day,
             	'delivery_day' => $rv_delivery_day,
             	'orderfr' => $rv_orderfr
@@ -110,6 +110,7 @@ class MMStockController extends Controller
             //$details['id'] = $params['edit_id'];
             $upkind = isset($params['upkind']) ? $params['upkind'] : "";
             $status = isset($params['status']) ? $params['status'] : "";
+            $marks = isset($params['marks']) ? $params['marks'] : "";
             //Log::debug("getDataDust details = ".$details);
 
 
@@ -122,6 +123,7 @@ class MMStockController extends Controller
             $max_stock_month = DB::table($table)->max('stock_month');
             $distinct_stock_month = DB::table($table)
             ->select('stock_month')
+            ->where('marks', $marks)
             ->distinct()
             ->get()
             ->toArray();
@@ -136,10 +138,11 @@ class MMStockController extends Controller
                 $update_num = DB::table($table)
                 ->where('status', 'newest')
                 ->update([
-                    'stock_now_inventory' => '',
+                    'stock_now_inventory' => null,
                     'stock_nbox' => '',
                     'stock_month' => $stock_month,
                     'status' => 'wait',
+                    'marks' => $marks
                 ]);
                 } else {
                     $insert_ok = false;
@@ -183,7 +186,7 @@ class MMStockController extends Controller
      * @param Request $request
      * @return void
      */
-    public function storeA(Request $request){
+    public function store(Request $request){
         $this->array_messagedata = array();
         $result = true;
         try {
@@ -213,7 +216,7 @@ class MMStockController extends Controller
             }
 
             return response()->json(
-                ['result' => $result, 'id' => $re_data['id'], 'inv_id' => $re_data['inv_id'], 'product_id' => $re_data['product_id'], 'product_name' => $re_data['product_name'],
+                ['result' => $result, 'id' => $re_data['id'], 'inv_id' => $re_data['inv_id'], 'product_code' => $re_data['product_code'], 'product_name' => $re_data['product_name'],
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
@@ -231,7 +234,7 @@ class MMStockController extends Controller
      * @param [type] $inputs
      * @return void
      */
-    private function insertA($details){
+    private function insert($details){
         $stock_a = new StockA();
         $systemdate = Carbon::now();
         $inputsys = "manual";
@@ -244,7 +247,7 @@ class MMStockController extends Controller
             $stock_a->setCompanynameAttribute($details['company_name']);
             $stock_a->setCompanyidAttribute($details['company_id']);
             $stock_a->setProductnameAttribute($details['product_name']);
-            $stock_a->setProductidAttribute($details['product_id']);
+            $stock_a->setProductcodeAttribute($details['product_code']);
             $stock_a->setUnitAttribute($details['unit']);
             $stock_a->setQuantityAttribute($details['quantity']);
             $stock_a->setNowinventoryAttribute($details['now_inventory']);
@@ -289,7 +292,7 @@ class MMStockController extends Controller
      * @param Request $request
      * @return response
      */
-    public function fixA(Request $request){
+    public function fix(Request $request){
         $this->array_messagedata = array();
         $details = array();
         $result = true;
@@ -315,9 +318,9 @@ class MMStockController extends Controller
             }
             $details = $params['details'];
             $upkind = $params['upkind'];
-            $re_data = $this->updateA($details,$upkind);
+            $re_data = $this->update($details,$upkind);
             return response()->json(
-                ['result' => $result, 'id' => $re_data['id'], 'product_id' => $re_data['product_id'], 'product_name' => $re_data['product_name'],
+                ['result' => $result, 'id' => $re_data['id'], 'product_code' => $re_data['product_code'], 'product_name' => $re_data['product_name'],
                 'stock_now_inventory' => $re_data['stock_now_inventory'], 'stock_nbox' => $re_data['stock_nbox'],
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
@@ -338,7 +341,7 @@ class MMStockController extends Controller
      * @param Request $request
      * @return response
      */
-    public function statusA(Request $request){
+    public function status(Request $request){
         $this->array_messagedata = array();
         $details = array();
         $result = true;
@@ -357,9 +360,9 @@ class MMStockController extends Controller
             $details = $params['details'];
             //$details['id'] = $params['edit_id'];
             $upkind = $params['upkind'];
-            $re_data = $this->updateA($details,$upkind);
+            $re_data = $this->update($details,$upkind);
             return response()->json(
-                ['result' => $result, 'id' => $re_data['id'], 'product_id' => $re_data['product_id'], 'product_name' => $re_data['product_name'],
+                ['result' => $result, 'id' => $re_data['id'], 'product_code' => $re_data['product_code'], 'product_name' => $re_data['product_name'],
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
@@ -381,12 +384,12 @@ class MMStockController extends Controller
      * @param [type] $details
      * @return boolean
      */
-    private function updateA($details,$upkind){
+    private function update($details,$upkind){
         $systemdate = Carbon::now();
         $updateuser = "Stock";
         //$stock_now_inventory = isset($details['stock_now_inventory']) ? $details['stock_now_inventory'] : "";
         //$stock_nbox = isset($details['stock_nbox']) ? $details['stock_nbox'] : "";
-        $stock_a = new StockA();
+        $mm_stock = new MMStock();
         //$user = Auth::user();
         //$login_user_code = $user->code;
         //$login_account_id = $user->account_id;
@@ -397,33 +400,30 @@ class MMStockController extends Controller
             //$from = $carbon->copy()->format('Ymd');
             //$inventory_a->setApplytermfromAttribute($from);
 
-            $stock_a->setIdAttribute($details['id']);
-            $stock_a->setInvidAttribute($details['inv_id']);
-            $stock_a->setOrdernoAttribute($details['order_no']);
-            $stock_a->setCompanynameAttribute($details['company_name']);
-            $stock_a->setCompanyidAttribute($details['company_id']);
-            $stock_a->setProductnameAttribute($details['product_name']);
-            $stock_a->setProductidAttribute($details['product_id']);
-            $stock_a->setUnitAttribute($details['unit']);
-            $stock_a->setQuantityAttribute($details['quantity']);
-            $stock_a->setNowinventoryAttribute($details['now_inventory']);
-            $stock_a->setNboxAttribute($details['nbox']);
-            $stock_a->setStocknowinventoryAttribute($details['stock_now_inventory']);
-            $stock_a->setStocknboxAttribute($details['stock_nbox']);
-            $stock_a->setStatusAttribute($details['status']);
-            $stock_a->setOrderinfoAttribute($details['order_info']);
-            $stock_a->setStockmonthAttribute($details['stock_month']);
-            $stock_a->setUpdateduserAttribute($updateuser);
-            $stock_a->setUpdatedatAttribute($systemdate);
+            $mm_stock->setIdAttribute($details['id']);
+            $mm_stock->setInvidAttribute($details['inv_id']);
+            $mm_stock->setProductnameAttribute($details['product_name']);
+            $mm_stock->setProductcodeAttribute($details['product_code']);
+            $mm_stock->setUnitAttribute($details['unit']);
+            $mm_stock->setQuantityAttribute($details['quantity']);
+            $mm_stock->setNowinventoryAttribute($details['now_inventory']);
+            $mm_stock->setNboxAttribute($details['nbox']);
+            $mm_stock->setStocknowinventoryAttribute($details['stock_now_inventory']);
+            $mm_stock->setStocknboxAttribute($details['stock_nbox']);
+            $mm_stock->setStatusAttribute($details['status']);
+            $mm_stock->setMarksAttribute($details['marks']);
+            $mm_stock->setStockmonthAttribute($details['stock_month']);
+            $mm_stock->setUpdateduserAttribute($updateuser);
+            $mm_stock->setUpdatedatAttribute($systemdate);
 
             
             //if ($details['id'] == "" || $details['id'] == null) {
             if ($upkind == 1 || $upkind == 2 ) {
                     //$inventory_a->setAccountidAttribute($login_account_id);
-                $re_data = $stock_a->insertDataStockA($upkind);
+                $re_data = $mm_stock->insertDataStock($upkind);
             } else {
                 //$inventory_a->setParamAccountidAttribute($login_account_id);
-                $re_data = $stock_a->updateDataStockA($upkind);
+                $re_data = $mm_stock->updateDataStock($upkind);
             }
             DB::commit();
             return $re_data;
@@ -447,10 +447,9 @@ class MMStockController extends Controller
      *
      * @return list results
      */
-    public function getDataMiniA(Request $request){
+    public function getDataMini(Request $request){
         //Log::debug("getDataAone in ");
         $this->array_messagedata = array();
-        //$s_order_no = "";
         $result = true;
         try {
             // パラメータチェック
@@ -465,15 +464,29 @@ class MMStockController extends Controller
                 );
             }
             */
-            $params = $request->keyparams;
+
+            $params_marks = null;
+
             //$s_order_no = $params['s_order_no'];
             //Log::debug("getDataAsearch params[s_order_no] = ".$params['s_order_no']);
             //Log::debug("getDataAone edit_id = ".$edit_id);
+            /*
             $inventory_a = new InventoryA();
             $details_a =  $inventory_a->getDataMiniInvA()->toArray();
             $inventory_z = new InventoryZ();
             $details_z =  $inventory_z->getDataMiniInvZ()->toArray();
             $details = array_merge($details_a, $details_z);
+            */
+            $material_management = new MatManage();
+            if (isset($request->keyparams)) {
+                $params = $request->keyparams;
+                if (!empty($params['marks'])) {
+                    $params_marks = $params['marks'];
+                    $material_management->setParamMarksAttribute($params_marks);
+                }
+            }
+
+            $details =  $material_management->getDataMiniMM();
 
             return response()->json(
                 ['result' => $result, 'details' => $details, 
@@ -494,13 +507,13 @@ class MMStockController extends Controller
      *
      * @return void
      */
-    public function getStockA(Request $request){
+    public function getStock(Request $request){
         //$params_order_info1 = $request->order_info;
         //Log::info("ViewInventoryController getDataAFunc paramsget = ".$params_order_info1);
         //Log::debug("debug --".$message);
         $this->array_messagedata = array();
         try {
-            $details = $this->getStockAFunc($request);
+            $details = $this->getStockFunc($request);
             return response()->json(
                 ['result' => true, 'details3' => $details,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
@@ -519,7 +532,7 @@ class MMStockController extends Controller
      *
      * @return void
      */
-    public function getStockAFunc($request){
+    public function getStockFunc($request){
 
         $this->array_messagedata = array();
         $result = true;
@@ -528,53 +541,37 @@ class MMStockController extends Controller
             // パラメータセット
             $params = array();
             $params_stock_month = null;
-            $params_order_info = null;
-            $params_order_no = null;
-            $params_company_id = null;
-            $params_product_id2 = null;
-            $params_receipt_day = null;
-            $params_delivery_day= null;
+            $params_product_code = null;
             $params_orderfr = null;
+            $params_marks = null;
 
-            $stock_a = new StockA();
+            $mm_stock = new MMStock();
             if (isset($request->keyparams)) {
                 $params = $request->keyparams;
                 if (!empty($params['stock_month'])) {
                     $params_stock_month = $params['stock_month'];
-                    $stock_a->setParamStockmonthAttribute($params_stock_month);
+                    $mm_stock->setParamStockmonthAttribute($params_stock_month);
                 }
-                if (!empty($params['order_info'])) {
-                    $params_order_info = $params['order_info'];
-                    $stock_a->setParamOrderinfoAttribute($params_order_info);
+                if (!empty($params['marks'])) {
+                    $params_marks = $params['marks'];
+                    $mm_stock->setParamMarksAttribute($params_marks);
                 }
                 if (!empty($params['order_no'])) {
                     $params_order_no = $params['order_no'];
-                    $stock_a->setParamOrdernoAttribute($params_order_no);
+                    $mm_stock->setParamOrdernoAttribute($params_order_no);
                 }
-                if (!empty($params['company_id'])) {
-                    $params_company_id = $params['company_id'];
-                    $stock_a->setParamCompanyidAttribute($params_company_id);
-                }
-                if (!empty($params['product_id2'])) {
-                    $params_product_id2 = $params['product_id2'];
-                    $stock_a->setParamProductid2Attribute($params_product_id2);
-                }
-                if (!empty($params['receipt_day'])) {
-                    $params_receipt_day = $params['receipt_day'];
-                    $stock_a->setParamReceiptdayAttribute($params_receipt_day);
-                }
-                if (!empty($params['delivery_day'])) {
-                    $params_delivery_day = $params['delivery_day'];
-                    $stock_a->setParamDeliverydayAttribute($params_delivery_day);
+                if (!empty($params['product_code'])) {
+                    $params_product_code = $params['product_code'];
+                    $mm_stock->setParamProductcodeAttribute($params_product_code);
                 }
                 if (!empty($params['orderfr'])) {
                     $params_orderfr = $params['orderfr'];
-                    $stock_a->setParamOrderfrAttribute($params_orderfr);
+                    $mm_stock->setParamOrderfrAttribute($params_orderfr);
                 }
             }
 
             //$inventory_a->setParamEditidAttribute($edit_id);
-            $details =  $stock_a->getDataStock();
+            $details =  $mm_stock->getDataStock();
 
             return $details;
         }catch(\PDOException $pe){
@@ -591,7 +588,7 @@ class MMStockController extends Controller
      *
      * @return list results
      */
-    public function getDataAsearch(Request $request){
+    public function getDatasearch(Request $request){
         //Log::debug("getDataAone in ");
         $this->array_messagedata = array();
         $s_order_no = "";
@@ -642,11 +639,11 @@ class MMStockController extends Controller
      *
      * @return list results
      */
-    public function getDataAone(Request $request){
+    public function getDataone(Request $request){
         //Log::debug("getDataAone in ");
         $this->array_messagedata = array();
         $edit_id = "";
-        $product_id = "";
+        $product_code = "";
         $result = true;
         try {
             // パラメータチェック
@@ -661,7 +658,7 @@ class MMStockController extends Controller
             }
             $params = $request->keyparams;
             //Log::debug("getDataAone params[edit_id] = ".$params['edit_id']);
-            //Log::debug("getDataAone params[product_id] = ".$params['product_id']);
+            //Log::debug("getDataAone params[product_code] = ".$params['product_code']);
             if (!isset($params['edit_id'])) {
                 Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "edit_id", Config::get('const.LOG_MSG.parameter_illegal')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
@@ -677,11 +674,11 @@ class MMStockController extends Controller
             $details =  $inventory_a->getDataInvA();
 
             
-            $product_id = $params['product_id'];
-            //Log::debug("getDataAone product_id = ".$product_id);
-            if(isset($product_id)) {
+            $product_code = $params['product_code'];
+            //Log::debug("getDataAone product_code = ".$product_code);
+            if(isset($product_code)) {
                 $inventory_a2 = new InventoryA();
-                $inventory_a2->setParamProductidAttribute($product_id);
+                $inventory_a2->setParamProductcodeAttribute($product_code);
                 $details2 =  $inventory_a2->getDataInvA();
             }  else {
                 $details2 = "";
@@ -690,7 +687,7 @@ class MMStockController extends Controller
 
 
             return response()->json(
-                ['result' => $result, 'details' => $details, 'details2' => $details2, 'edit_id' => $edit_id, 'product_id' => $product_id,
+                ['result' => $result, 'details' => $details, 'details2' => $details2, 'edit_id' => $edit_id, 'product_code' => $product_code,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){

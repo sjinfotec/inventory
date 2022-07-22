@@ -105,7 +105,7 @@ class MatManageController extends Controller
             }
 
             return response()->json(
-                ['result' => $result, 'id' => $re_data['id'], 'product_id' => $re_data['product_id'], 'product_name' => $re_data['product_name'],
+                ['result' => $result, 'id' => $re_data['id'], 'product_code' => $re_data['product_code'], 'product_name' => $re_data['product_name'],
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
@@ -135,7 +135,8 @@ class MatManageController extends Controller
             $material_management->setDepartmentAttribute($details['department']);
             $material_management->setChargeAttribute($details['charge']);
             $material_management->setProductnameAttribute($details['product_name']);
-            $material_management->setProductidAttribute($details['product_id']);
+            $material_management->setProductcodeAttribute($details['product_code']);
+            $material_management->setProductnumberAttribute($details['product_number']);
             $material_management->setUnitAttribute($details['unit']);
             $material_management->setQuantityAttribute($details['quantity']);
             $material_management->setReceiptAttribute($details['receipt']);
@@ -214,7 +215,7 @@ class MatManageController extends Controller
             $upkind = $params['upkind'];
             $re_data = $this->update($details,$upkind);
             return response()->json(
-                ['result' => $result, 'id' => $re_data['id'], 'product_id' => $re_data['product_id'], 'product_name' => $re_data['product_name'],
+                ['result' => $result, 'id' => $re_data['id'], 'product_code' => $re_data['product_code'], 'product_name' => $re_data['product_name'],
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
@@ -254,7 +255,7 @@ class MatManageController extends Controller
             $upkind = $params['upkind'];
             $re_data = $this->update($details,$upkind);
             return response()->json(
-                ['result' => $result, 'id' => $re_data['id'], 'product_id' => $re_data['product_id'], 'product_name' => $re_data['product_name'],
+                ['result' => $result, 'id' => $re_data['id'], 'product_code' => $re_data['product_code'], 'product_name' => $re_data['product_name'],
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
@@ -294,7 +295,8 @@ class MatManageController extends Controller
             $material_management->setDepartmentAttribute($details['department']);
             $material_management->setChargeAttribute($details['charge']);
             $material_management->setProductnameAttribute($details['product_name']);
-            $material_management->setProductidAttribute($details['product_id']);
+            $material_management->setProductcodeAttribute($details['product_code']);
+            $material_management->setProductnumberAttribute($details['product_number']);
             $material_management->setUnitAttribute($details['unit']);
             $material_management->setQuantityAttribute($details['quantity']);
             $material_management->setReceiptAttribute($details['receipt']);
@@ -480,7 +482,7 @@ class MatManageController extends Controller
         //Log::debug("getDataone in ");
         $this->array_messagedata = array();
         $edit_id = "";
-        $product_id = "";
+        $product_code = "";
         $result = true;
         try {
             // パラメータチェック
@@ -495,7 +497,7 @@ class MatManageController extends Controller
             }
             $params = $request->keyparams;
             //Log::debug("getDataZone params[edit_id] = ".$params['edit_id']);
-            //Log::debug("getDataZone params[product_id] = ".$params['product_id']);
+            //Log::debug("getDataZone params[product_code] = ".$params['product_code']);
             if (!isset($params['edit_id'])) {
                 Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "edit_id", Config::get('const.LOG_MSG.parameter_illegal')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
@@ -511,18 +513,18 @@ class MatManageController extends Controller
             $details =  $material_management->getDataMM();
 
             
-            $product_id = $params['product_id'];
-            //Log::debug("getDataAone product_id = ".$product_id);
-            if(isset($product_id)) {
+            $product_code = $params['product_code'];
+            //Log::debug("getDataAone product_code = ".$product_code);
+            if(isset($product_code)) {
                 $material_management2 = new MatManage();
-                $material_management2->setParamProductidAttribute($product_id);
+                $material_management2->setParamProductcodeAttribute($product_code);
                 $details2 =  $material_management2->getDataMM();
             } else {
                 $details2 = "";
             }
 
             return response()->json(
-                ['result' => $result, 'details' => $details, 'details2' => $details2, 'edit_id' => $edit_id, 'product_id' => $product_id,
+                ['result' => $result, 'details' => $details, 'details2' => $details2, 'edit_id' => $edit_id, 'product_code' => $product_code,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
@@ -650,13 +652,13 @@ class MatManageController extends Controller
         try{
 
             $material_management->setIdAttribute($details['id']);
-            $material_management->setProductidAttribute($details['product_id']);
+            $material_management->setProductcodeAttribute($details['product_code']);
             /*
             $material_management->setMdateAttribute($details['mdate']);
             $material_management->setDepartmentAttribute($details['department']);
             $material_management->setChargeAttribute($details['charge']);
             $material_management->setProductnameAttribute($details['product_name']);
-            $material_management->setProductidAttribute($details['product_id']);
+            $material_management->setProductcodeAttribute($details['product_code']);
             $material_management->setUnitAttribute($details['unit']);
             $material_management->setQuantityAttribute($details['quantity']);
             $material_management->setReceiptAttribute($details['receipt']);

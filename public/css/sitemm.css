@@ -55,8 +55,9 @@ button  {
 button:hover  {
   background:#aabbdd;
 }
-
-
+button:focus{
+  background: rgb(255, 174, 0);
+}
 
 .gc1  {  background:#88dddd;}
 .bc1  {  border:2px solid #88dddd;}
@@ -412,6 +413,10 @@ header button {width:auto;}
   color:#FFF;
   background:#C88;
 }
+#tbl_1 button.style1:focus{
+  background: rgb(255, 174, 0);
+}
+
 #tbl_1 button.style2  {
   border:1px solid #888;
   border-radius: 4px;
@@ -421,6 +426,10 @@ header button {width:auto;}
   color:#FFF;
   background:#C88;
 }
+#tbl_1 button.style2:focus{
+  background: rgb(255, 174, 0);
+}
+
 #tbl_1 .mg_r  {
   margin-right:10px;
 }

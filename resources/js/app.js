@@ -101,6 +101,11 @@
     "mat-manage",
     require("./components/MatManage.vue").default
 );
+ // 棚卸
+ Vue.component(
+    "mm-stock",
+    require("./components/MMStock.vue").default
+);
 
 
 

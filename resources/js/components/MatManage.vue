@@ -81,10 +81,10 @@
               <td>{{ item['remarks'] }}</td>
               <!--<td>{{ item['note'] }}</td>-->
               <td class="nbr">
-                <button type="button" class="style1" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name, 'update')">
+                <button type="button" class="style1" @click="EditBtn(item['id'], item['product_code'], details[rowIndex].product_name, 'update', rowIndex)">
                 更新
                 </button>
-                <button type="button" class="style2" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name, 'fix')">
+                <button type="button" class="style2" @click="EditBtn(item['id'], item['product_code'], details[rowIndex].product_name, 'fix', rowIndex)">
                 修正
                 </button>
               </td>
@@ -113,7 +113,7 @@
 
       <div id="cnt1">
         <div class="inputgroup w1">
-          <div class="cate gc2">日付</div>
+          <div class="cate gc2">日付 本日{{itsdate}}</div>
           <div class="inputzone">
             <input
               type="date"
@@ -151,7 +151,7 @@
       </div><!--## end id="cnt1" ##-->
 
       <div id="cnt1">
-        <div class="inputgroup w4">
+        <div class="inputgroup w3">
           <div class="cate gc2">商品名</div>
           <div class="inputzone">
             <input
@@ -160,6 +160,18 @@
               v-model="form.product_name"
               maxlength="100"
               name="product_name"
+            />
+          </div>
+        </div>
+        <div class="inputgroup w1">
+          <div class="cate gc2">Code Number</div>
+          <div class="inputzone">
+            <input
+              type="text"
+              class="form_style bc2"
+              v-model="form.product_number"
+              maxlength="30"
+              name="product_number"
             />
           </div>
         </div>
@@ -362,14 +374,14 @@
         </div>
 
         <div class="inputgroup w1">
-          <div class="cate">商品ID</div>
+          <div class="cate">商品CODE</div>
           <div class="inputzone">
             <input
               type="text"
               class="form_style"
-              v-model="form.product_id"
+              v-model="form.product_code"
               maxlength="11"
-              name="product_id"
+              name="product_code"
             />
           </div>
         </div>
@@ -473,15 +485,15 @@
                 id={{ item['id'] }} re_id={{ re_id }}
                 -->
                 <div v-if="item['status']=='newest'">
-                  <button type="button" class="style1" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name, 'update')">
+                  <button type="button" class="style1" @click="EditBtn(item['id'], item['product_code'], details[rowIndex].product_name, 'update', rowIndex)">
                   更新
                   </button>
-                  <button type="button" class="style2" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name, 'fix')">
+                  <button type="button" class="style2" @click="EditBtn(item['id'], item['product_code'], details[rowIndex].product_name, 'fix', rowIndex)">
                   修正
                   </button>
                 </div>
                 <div v-else>
-                  <button type="button" class="style2" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name, 'fix')">
+                  <button type="button" class="style2" @click="EditBtn(item['id'], item['product_code'], details[rowIndex].product_name, 'fix', rowIndex)">
                   修正
                   </button>
                 </div>
@@ -554,7 +566,7 @@
           </div>
         </div>
         <div id="cnt1">
-          <div class="inputgroup w4">
+          <div class="inputgroup w3">
             <div class="cate gc2">商品名</div>
             <div class="inputzone">
               <input
@@ -563,6 +575,19 @@
                 v-model="details[index].product_name"
                 maxlength="100"
                 name="product_name"
+                v-bind:disabled="isDisabled"
+              />
+            </div>
+          </div>
+          <div class="inputgroup w1">
+            <div class="cate gc2">Code Number</div>
+            <div class="inputzone">
+              <input
+                type="text"
+                class="form_style bc2"
+                v-model="details[index].product_number"
+                maxlength="100"
+                name="product_number"
                 v-bind:disabled="isDisabled"
               />
             </div>
@@ -784,16 +809,16 @@
           </div>
 
           <div class="inputgroup">
-            <div class="cate">商品ID</div>
+            <div class="cate">商品CODE</div>
             <div class="inputzone">
               <input
                 type="hidden"
                 class="form_style"
-                v-model="details[index].product_id"
+                v-model="details[index].product_code"
                 maxlength="11"
-                name="product_id"
+                name="product_code"
               />
-              <span>{{ details[index].product_id }}</span>
+              <span>{{ details[index].product_code }}</span>
             </div>
           </div>
           <div class="inputgroup">
@@ -946,10 +971,6 @@ export default {
       type: [String, Number],
       default: ""
     },
-    mdate: {
-      type: [String, Number],
-      default: ""
-    },
     orderfr: {
       type: [String, Number],
       default: ""
@@ -963,7 +984,8 @@ export default {
         department: "",
         charge: "",
         product_name: "",
-        product_id: "",
+        product_code: "",
+        product_number: "",
         unit: "",
         quantity: "",
         receipt: "",
@@ -988,8 +1010,9 @@ export default {
       details: [],
       details2: [],
       edit_id: "",
-      product_id: "",
+      product_code: "",
       product_title: "",
+      mdate: "",
       selectMode: "HOME",
       selectCnt: "",
       actionmsgArr: [],
@@ -1005,11 +1028,13 @@ export default {
       btn_select: "",
       isDisabled: "",
       smode: "",
+      itsdate: "",
     };
   },
   // マウント時
   mounted() {
       //this.getItem();
+      this.dateset();
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -1061,7 +1086,7 @@ export default {
 
 
     },
-    EditBtn(eid,pid,pname,smode) {
+    EditBtn(eid,pid,pname,smode,index) {
       //var edit_id = eid;
       //console.log("EditBtn in");
       //console.log(edit_id);
@@ -1072,12 +1097,11 @@ export default {
         this.isDisabled = false;
       }
       else if(smode === 'update') {
-        //this.details[0].receipt = "";
-        //this.details[0].delivery = "";
       }
     },
     NewBtn()  {
       this.inputClear();
+      this.form.mdate = this.itsdate;
       this.selectMode = 'NEW';
     },
     searchBtn() {
@@ -1135,17 +1159,18 @@ export default {
     getItemOne(e,p,pn,md) {
       this.inputClear();
       //console.log("getitem one in edit_id = " + e);
-      //console.log("getitem one in product_id = " + p);
+      //console.log("getitem one in product_code = " + p);
       //console.log("getitem one in p_name = " + pn);
       this.edit_id = e;
-      this.product_id = p;
+      this.product_code = p;
       this.product_title = pn;
       //console.log("getitem one in product_title = " + this.product_title);
-      var arrayParams = {  edit_id : e , product_id : p};
+      var arrayParams = {  edit_id : e , product_code : p};
       this.postRequest("/material_management/getone", arrayParams)
         .then(response  => {
           this.getThen(response);
           if(md === 'update') {
+            this.details[0].mdate = this.itsdate;
             this.details[0].receipt = "";
             this.details[0].delivery = "";
           }
@@ -1263,7 +1288,8 @@ export default {
           this.form.department = this.details[0].department;
           this.form.charge = this.details[0].charge;
           this.form.product_name = this.details[0].product_name;
-          this.form.product_id = this.details[0].product_id;
+          this.form.product_code = this.details[0].product_code;
+          this.form.product_number = this.details[0].product_number;
           this.form.unit = this.details[0].unit;
           this.form.quantity = this.details[0].quantity;
           this.form.receipt = this.details[0].receipt;
@@ -1325,12 +1351,12 @@ export default {
         if(res.id) {
           //this.acttitle = "更新";
           this.edit_id = res.id;
-          //console.log("putThenHead in res.pid = " + res.product_id);
-          this.product_id = res.product_id;
+          //console.log("putThenHead in res.pid = " + res.product_code);
+          this.product_code = res.product_code;
           this.product_title = res.product_name;
         }
         this.$toasted.show(this.product_title + "を" + eventtext + "しました");
-        this.getItemOne(this.edit_id,this.product_id,this.product_title,object_mode[k]);
+        this.getItemOne(this.edit_id,this.product_code,this.product_title,object_mode[k]);
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -1346,7 +1372,7 @@ export default {
       if (res.result) {
         this.re_id = res.id;
         this.acttitle = "登録";
-        this.getItemOne(this.re_id,this.product_id,this.product_title);
+        this.getItemOne(this.re_id,this.product_code,this.product_title);
         this.$toasted.show(this.product_title + "を" + eventtext + "しました");
         this.actionmsgArr.push(this.product_title + "を新規登録しました。","");
         this.selectMode = 'COMPLETE';
@@ -1366,7 +1392,7 @@ export default {
       if (res.result) {
         this.re_id = res.id;
         this.acttitle = "移動";
-        this.getItemOne(this.re_id,this.product_id,this.product_title);
+        this.getItemOne(this.re_id,this.product_code,this.product_title);
         this.$toasted.show(this.product_title + "を" + eventtext + "しました");
         this.actionmsgArr.push(this.product_title + " をゴミ箱へ移動しました。","");
         this.selectMode = 'COMPLETE';
@@ -1386,7 +1412,7 @@ export default {
       if (res.result) {
         this.re_id = res.id;
         this.acttitle = "削除";
-        this.getItemOne(this.re_id,this.product_id,this.product_title);
+        this.getItemOne(this.re_id,this.product_code,this.product_title);
         this.$toasted.show(this.product_title + "を" + eventtext + "しました");
         this.actionmsgArr.push(this.product_title + " を削除しました。");
         this.selectMode = 'COMPLETE';
@@ -1414,7 +1440,8 @@ export default {
       this.form.department = "";
       this.form.charge = "";
       this.form.product_name = "";
-      this.form.product_id = "";
+      this.form.product_code = "";
+      this.form.product_number = "";
       this.form.unit = "";
       this.form.quantity = "";
       this.form.receipt = "";
@@ -1434,7 +1461,20 @@ export default {
       this.form.updated_at = "";
       this.form.is_deleted = "";
 
-    }
+    },
+    dateset: function()  {
+      var date_obj = new Date();
+      //console.log('todayset = ' + date_obj);
+      this.today_year  = date_obj.getFullYear(); // 西暦年取得
+      this.today_month = date_obj.getMonth();    // 月取得
+      this.today_day = date_obj.getDate();    // 日取得
+      // 文字列として連結month_format
+      this.itsdate = ('0000' + this.today_year).slice(-4) 
+                      + '-' 
+                      + ('00' + (this.today_month + 1)).slice(-2) 
+                      + '-' 
+                      + ('00' + (this.today_day)).slice(-2) 
+    },
 
 
   }

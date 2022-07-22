@@ -19,7 +19,8 @@ class CreateMatmanageTable extends Migration
             $table->string('department', 20)->nullable()->comment('部署');
             $table->string('charge', 20)->nullable()->comment('担当');
             $table->string('product_name', 100)->nullable()->comment('商品名');
-            $table->integer('product_id')->nullable()->comment('商品ID');
+            $table->integer('product_code')->nullable()->comment('商品CODE');
+            $table->string('product_number', 30)->nullable()->comment('商品Number');
             $table->string('unit', 10)->nullable()->comment('単位');
             $table->integer('quantity')->nullable()->comment('入数');
             $table->integer('receipt')->nullable()->comment('入庫数');

@@ -17,7 +17,8 @@ class MatManage extends Model
 	private $department;			// 部署
 	private $charge;				// 担当
 	private $product_name;			// 商品名
-	private $product_id;			// 商品ID
+	private $product_code;			// 商品CODE
+	private $product_number;		// 商品Number
 	private $unit;					// 単位
 	private $quantity;				// 入数
 	private $receipt;				// 入庫数
@@ -87,14 +88,24 @@ class MatManage extends Model
 		$this->product_name = $value;
 	}
 
-	//商品ID
-	public function getProductidAttribute()
+	//商品CODE
+	public function getProductcodeAttribute()
 	{
-		return $this->product_id;
+		return $this->product_code;
 	}
-	public function setProductidAttribute($value)
+	public function setProductcodeAttribute($value)
 	{
-		$this->product_id = $value;
+		$this->product_code = $value;
+	}
+
+	//商品Number
+	public function getProductnumberAttribute()
+	{
+		return $this->product_number;
+	}
+	public function setProductnumberAttribute($value)
+	{
+		$this->product_number = $value;
 	}
 
 	//単位
@@ -291,15 +302,15 @@ class MatManage extends Model
 	$this->param_edit_id = $value;
 	}
 
-	// 商品ID
-	private $param_product_id;
-	public function getParamProductidAttribute()
+	// 商品CODE
+	private $param_product_code;
+	public function getParamProductcodeAttribute()
 	{
-		return $this->param_product_id;
+		return $this->param_product_code;
 	}
-		public function setParamProductidAttribute($value)
+		public function setParamProductcodeAttribute($value)
 	{
-	$this->param_product_id = $value;}
+	$this->param_product_code = $value;}
 
 	// ステータス
 	private $param_status;
@@ -357,10 +368,10 @@ class MatManage extends Model
         try {
             $re_data = [];
             if($upkind == 3) {
-                $this->product_id = DB::table($this->table)->max('product_id') + 1;
+                $this->product_code = DB::table($this->table)->max('product_code') + 1;
             }
             if($upkind == 2) {
-                $this->product_id = DB::table($this->table)->max('product_id') + 1;
+                $this->product_code = DB::table($this->table)->max('product_code') + 1;
                 //$this->created_user = 'system';
             }
             $this->now_inventory = isset($this->now_inventory) ? $this->now_inventory : "";
@@ -374,7 +385,8 @@ class MatManage extends Model
 					'department' => $this->department,
 					'charge' => $this->charge,
 					'product_name' => $this->product_name,
-					'product_id' => $this->product_id,
+					'product_code' => $this->product_code,
+					'product_number' => $this->product_number,
 					'unit' => $this->unit,
 					'quantity' => $this->quantity,
 					'receipt' => $this->receipt,
@@ -406,7 +418,7 @@ class MatManage extends Model
             }
             //Log::info("insertDataZ in id = ".$id);
             $re_data['id'] = $id;
-            $re_data['product_id'] = $this->product_id;
+            $re_data['product_code'] = $this->product_code;
             $re_data['product_name'] = $this->product_name;
             return $re_data;
 
@@ -446,7 +458,7 @@ class MatManage extends Model
                     'status' => 'newest',
                 ]);
                 $re_data['id'] = $this->id;
-                $re_data['product_id'] = $this->product_id;
+                $re_data['product_code'] = $this->product_code;
                 $re_data['product_name'] = $this->product_name;
                 return $re_data;
 
@@ -461,7 +473,8 @@ class MatManage extends Model
 					'department' => $this->department,
 					'charge' => $this->charge,
 					'product_name' => $this->product_name,
-					'product_id' => $this->product_id,
+					'product_code' => $this->product_code,
+					'product_number' => $this->product_number,
 					'unit' => $this->unit,
 					'quantity' => $this->quantity,
 					'receipt' => $this->receipt,
@@ -483,7 +496,7 @@ class MatManage extends Model
                 ]);
             }
             $re_data['id'] = $this->id;
-            $re_data['product_id'] = $this->product_id;
+            $re_data['product_code'] = $this->product_code;
             $re_data['product_name'] = $this->product_name;
             return $re_data;
 
@@ -510,7 +523,7 @@ class MatManage extends Model
     public function getDataMM(){
         //$message = "ログ出力 getDataMM";
         //Log::info("this->param_edit_id -- ".$this->param_edit_id);
-        //Log::info("this->param_product_id -- ".$this->param_product_id);
+        //Log::info("this->param_product_code -- ".$this->param_product_code);
 
         try {
             $data = DB::table($this->table)
@@ -521,7 +534,8 @@ class MatManage extends Model
 				'department',
 				'charge',
 				'product_name',
-				'product_id',
+				'product_code',
+				'product_number',
 				'unit',
 				'quantity',
 				'receipt',
@@ -552,8 +566,8 @@ class MatManage extends Model
             if(!empty($this->param_edit_id)){
                 $data->where('id',$this->param_edit_id);
             }
-            elseif(!empty($this->param_product_id)){
-                $data->where('product_id',$this->param_product_id)
+            elseif(!empty($this->param_product_code)){
+                $data->where('product_code',$this->param_product_code)
                 ->orderBy('id', 'DESC');
             }
             elseif(!empty($this->param_status)){
@@ -579,12 +593,12 @@ class MatManage extends Model
                     $data->orderBy('product_name', 'DESC');
                 }
             }
-            elseif(isset($this->param_product_id2)){
-                //Log::info("isset this->param_product_id2 -- ".$this->param_product_id2);
-                if($this->param_product_id2 == 1) {
+            elseif(isset($this->param_product_code)){
+                //Log::info("isset this->param_product_code -- ".$this->param_product_code);
+                if($this->param_product_code == 1) {
                     $data->orderBy('product_name');
                 }
-                if($this->param_product_id2 == 2) {
+                if($this->param_product_code == 2) {
                     $data->orderBy('product_name', 'DESC');
                 }
             }
@@ -642,7 +656,8 @@ class MatManage extends Model
 				'department',
 				'charge',
 				'product_name',
-				'product_id',
+				'product_code',
+				'product_number',
 				'unit',
 				'quantity',
 				'receipt',
@@ -709,26 +724,28 @@ class MatManage extends Model
      *
      * @return void
      */
-    public function getDataMiniInvZ(){
+    public function getDataMiniMM(){
 
         try {
             $data = DB::table($this->table)
             ->select(
                 [
                     'id as inv_id',
-                    'order_no',
                     'product_name',
-                    'product_id',
-                    'unit',
+                    'product_code',
+					'product_number',
+					'unit',
                     'quantity',
                     'now_inventory',
                     'nbox',
                     'status',
+					'marks',
                     'created_user',
                     'created_at',
                 ]
             );
-                $data->where('status','newest');
+                $data->where('status', 'newest');
+                $data->where('marks', $this->param_marks);
                 //->orderBy('id', 'DESC');
                 $result = $data
                 ->get();
@@ -790,7 +807,7 @@ class MatManage extends Model
 	            $mainQuery->where('id', $this->id);
 			}
 			elseif($delkind === "all") {
-	            $mainQuery->where('product_id', $this->product_id);
+	            $mainQuery->where('product_code', $this->product_code);
 			}
 			$result = $mainQuery
             ->delete();

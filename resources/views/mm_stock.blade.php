@@ -2,10 +2,9 @@
 
 @section('content')
 <div id="maincontents">
-	@include('layouts.stockmenu')
 
 <?php 
-$vbind_product_id2 = !empty($_GET["product_id2"]) ? "v-bind:product_id2=\"".$product_id2."\"" : "";
+$vbind_product_code = !empty($_GET["product_code"]) ? "v-bind:product_code=\"".$product_code."\"" : "";
 $vbind_mdate = !empty($_GET["mdate"]) ? "v-bind:mdate=\"".$mdate."\"" : "";
 $vbind_orderfr = !empty($_GET["orderfr"]) ? "v-bind:orderfr=\"".$orderfr."\"" : "";
 
@@ -13,10 +12,10 @@ $vbind_orderfr = !empty($_GET["orderfr"]) ? "v-bind:orderfr=\"".$orderfr."\"" : 
 
 $html_view = <<<EOF
 	<mm-stock
-	{$vbind_product_id2}
+	{$vbind_product_code}
 	{$vbind_mdate}
 	{$vbind_orderfr}
->
+	>
 	</mm-stock>
 	
 EOF;
