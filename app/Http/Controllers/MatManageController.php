@@ -380,6 +380,7 @@ class MatManageController extends Controller
             $params_charge = null;
             $params_orderfr = null;
             $params_marks = null;
+            $params_is_deleted = null;
 
             $material_management = new MatManage();
 
@@ -404,6 +405,10 @@ class MatManageController extends Controller
                 if (!empty($params['marks'])) {
                     $params_marks = $params['marks'];
                     $material_management->setParamMarksAttribute($params_marks);
+                }
+                if (!empty($params['is_deleted'])) {
+                    $params_is_deleted = $params['is_deleted'];
+                    $material_management->setParamIsdeletedAttribute($params_is_deleted);
                 }
             }
 
@@ -546,6 +551,8 @@ class MatManageController extends Controller
         //Log::debug("getDataDust in ");
         $this->array_messagedata = array();
         $status = "";
+        $marks = "";
+        $is_deleted = "";
         $result = true;
         try {
             // パラメータチェック
@@ -560,10 +567,14 @@ class MatManageController extends Controller
             }
             $params = $request->keyparams;
 
-            $status = $params['status'];
-            Log::debug("getDataDust status = ".$status);
+            //$status = $params['status'];
+            $marks = isset($params['marks']) ? $params['marks'] : "";
+            $is_deleted = $params['is_deleted'];
+            //Log::debug("getDataDust status = ".$status);
             $material_management = new MatManage();
-            $material_management->setParamStatusAttribute($status);
+            //$material_management->setParamStatusAttribute($status);
+            if(isset($marks))    $material_management->setParamMarksAttribute($marks);
+            $material_management->setParamIsdeletedAttribute($is_deleted);
             $details =  $material_management->getDataMM();
 
             /*

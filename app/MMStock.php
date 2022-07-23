@@ -301,6 +301,7 @@ class MMStock extends Model
                     'company_id' => $this->company_id,
                     'product_name' => $this->product_name,
                     'product_code' => $this->product_code,
+                    'product_number' => $this->product_number,
                     'unit' => $this->unit,
                     'quantity' => $this->quantity,
                     'now_inventory' => $this->now_inventory,
@@ -412,6 +413,7 @@ class MMStock extends Model
                     'company_id' => $this->company_id,
                     'product_name' => $this->product_name,
                     'product_code' => $this->product_code,
+                    'product_number' => $this->product_number,
                     'unit' => $this->unit,
                     'quantity' => $this->quantity,
                     'now_inventory' => $this->now_inventory,
@@ -477,6 +479,7 @@ class MMStock extends Model
                 END
                 ) as product_name ";
             $columnStr[] = " t1.product_code AS product_code ";
+            $columnStr[] = " t1.product_number AS product_number ";
             $columnStr[] = " t1.unit AS unit ";
             $columnStr[] = " t1.quantity AS quantity ";
 
@@ -686,6 +689,7 @@ class MMStock extends Model
                     'company_id',
                     'product_name',
                     'product_code',
+                    'product_number',
                     'unit',
                     'quantity',
                     'now_inventory AS stock_now_inventory',

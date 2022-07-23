@@ -71,7 +71,7 @@ Route::post('/material_management/search', 'MatManageController@getDatasearch');
 Route::post('/material_management/delete', 'MatManageController@delete');
 
 // 資材 在庫 閲覧ONLY
-Route::get('/mmview', 'MMviewController@index');
+Route::get('/mmv', 'MMviewController@index');
 
 // 資材 棚卸 stock
 Route::get('/mmstock_top', 'MMStockController@stockTop');
@@ -80,3 +80,8 @@ Route::post('/mmstock/invget', 'MMStockController@getDataMini');
 Route::post('/mmstock/insert', 'MMStockController@storeAll');
 Route::post('/mmstock/stockget', 'MMStockController@getStock');
 Route::post('/mmstock/update', 'MMStockController@fix');
+
+// ステータス変更（抹消）
+Route::get('/mmdust', 'MatManageController@dust');
+Route::post('/mmdust/get', 'MatManageController@getDataDust');
+Route::post('/mmdust/update', 'MatManageController@status');

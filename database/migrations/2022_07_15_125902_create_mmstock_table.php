@@ -18,6 +18,7 @@ class CreateMmstockTable extends Migration
             $table->integer('inv_id')->nullable()->comment('inventoryID');
             $table->string('product_name', 100)->nullable()->comment('商品名');
             $table->integer('product_code')->nullable()->comment('商品ID');
+            $table->string('product_number', 30)->nullable()->comment('商品Number');
             $table->string('unit', 10)->nullable()->comment('単位');
             $table->integer('quantity')->nullable()->comment('入数');
             $table->integer('now_inventory')->nullable()->comment('現在在庫');

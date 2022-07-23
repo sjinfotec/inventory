@@ -11,6 +11,9 @@
           <button type="button" class="" @click="SelectContentsBtn('b')">
             棚卸 / 在庫 2F
           </button>
+          <button type="button" class="" @click="SelectContentsBtn('c')">
+            棚卸 / 在庫 3F
+          </button>
       </div>
     </div>
 
@@ -20,6 +23,7 @@
       <div id="top_cnt">
         <h2 class="h2gc1" v-if="selectCnt=='a'">棚卸 / 資材在庫一覧 1F</h2>
         <h2 class="h2gc2" v-if="selectCnt=='b'">棚卸 / 資材在庫一覧 2F</h2>
+        <h2 class="h2gc3" v-if="selectCnt=='c'">棚卸 / 資材在庫一覧 3F</h2>
       </div>
 
       <div id="cnt3">
@@ -54,6 +58,7 @@
       <div id="top_cnt">
         <h2 class="h2gc1" v-if="selectCnt=='a'">棚卸 / 資材在庫一覧 1F</h2>
         <h2 class="h2gc2" v-if="selectCnt=='b'">棚卸 / 資材在庫一覧 2F</h2>
+        <h2 class="h2gc3" v-if="selectCnt=='c'">棚卸 / 資材在庫一覧 3F</h2>
         <form name="moveform">
           <div id="btn_cnt1">
             <div class="btn_col_1">
@@ -86,17 +91,17 @@
         <table>
           <thead>
             <tr>
-              <th class="gc4">商品名 <button type="button" class="" @click="ForwardReverse('product_name',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_name',2)">▼</button></th>
-              <th class="gc4">単位</th>
+              <th class="gc3">商品名 <button type="button" class="" @click="ForwardReverse('product_name',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_name',2)">▼</button></th>
+              <th class="gc3">単位</th>
               <!--<th class="gc4">入数</th>-->
-              <th class="gc4">在庫</th>
+              <th class="gc3">在庫</th>
               <!--<th class="gc4">箱数</th>-->
-              <th class="gc4">在庫結果</th>
+              <th class="gc3">在庫結果</th>
               <!--<th class="gc4">箱数結果</th>-->
-              <th class="gc4">棚卸在庫</th>
+              <th class="gc3">棚卸在庫</th>
               <!--<th class="gc4">棚卸箱数</th>-->
               <!--<th class="gc4">エリア</th>-->
-              <th class="gc4">&nbsp;</th>
+              <th class="gc3">&nbsp;</th>
             </tr>
           </thead>
           <tbody>
@@ -109,7 +114,7 @@
               <!--<td class="style1">{{ item['nbox'] }}</td>-->
               <td class="style1"><span class="color1" v-if="item['cal_now_inventory'] === 0">&#10004;</span><span class="color2 bold" v-else-if="item['cal_now_inventory'] !== 0">{{ item['cal_now_inventory'] }}</span></td>
               <!--<td class="style1"><span class="color1" v-if="item['cal_nbox'] === 0">&#10004;</span><span class="color2 bold" v-else-if="item['cal_nbox'] !== 0">{{ item['cal_nbox'] }}</span></td>-->
-              <td class="style1" v-bind:class="(item['status'] === 'stockup') ? 'bgcolor4' : ''"><input type="text" class="form_style bc1" v-model="details3[rowIndex].stock_now_inventory" maxlength="11" name="now_inventory"></td>
+              <td class="style3" v-bind:class="(item['status'] === 'stockup') ? 'bgcolor4' : ''"><input type="text" class="form_style bc1" v-model="details3[rowIndex].stock_now_inventory" maxlength="11" name="now_inventory"></td>
               <!--<td class="style1" v-bind:class="(item['status'] === 'stockup') ? 'bgcolor4' : ''"><input type="text" class="form_style bc1" v-model="details3[rowIndex].stock_nbox" maxlength="16" name="nbox"></td>-->
               <!--<td class="nbr"><span v-if="item['marks'] == 'a'">1F</span><span v-if="item['marks'] == 'b'">2F</span></td>-->
               <td>

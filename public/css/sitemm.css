@@ -20,7 +20,7 @@ textarea{
 body  {
   font-size:1.4rem;
   margin:0;
-  min-width:960px;
+  min-width:640px;
 }
 .wrapper {
   width: 1920px;
@@ -390,6 +390,10 @@ header button {width:auto;}
 #tbl_1 .style1 {
   text-align:right;
 }
+#tbl_1 .style3 {
+  width:15%;
+  text-align:center;
+}
 #tbl_1 .w1 {
   width:5em;
 }
@@ -440,7 +444,7 @@ header button {width:auto;}
   height:3rem;
   /*width:calc(100% - 8px);*/
   padding:0 4px;
-  width:5em;
+  width:90%;
   box-sizing: border-box;
 }
 #tbl_1 .color1 {
@@ -705,8 +709,30 @@ html { scroll-behavior: smooth;}
     visibility: visible;
   }
   #cnt_menu  .side-base {
+    background: rgba(15, 39, 66, 0.9);
+  }
+    .offcanvas-collapse-from-left {
+    position: fixed;
+    top: 40px;
+    bottom: 0;
+    right: 100%;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    visibility: hidden;
+    /*background-color: #343a40;*/
+    transition-timing-function: ease-in-out;
+    transition-duration: 0.3s;
+    transition-property: right, visibility;
+  }
+    .offcanvas-collapse-from-left.open {
+    right: 0;
+    visibility: visible;
+  }
+    .side-base {
     background: #c6c91d;
   }
+
   #menu_li  {
     padding-left:20px;
   }

@@ -106,6 +106,11 @@
     "mm-stock",
     require("./components/MMStock.vue").default
 );
+ // 抹消
+ Vue.component(
+    "mm-dust",
+    require("./components/MMDust.vue").default
+);
 
 
 

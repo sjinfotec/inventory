@@ -334,7 +334,19 @@ class MatManage extends Model
 		$this->param_marks = $value;
 	}
 	
-    // ------------- 順序・正逆・検索 --------------
+	// 削除フラグ
+	private $param_is_deleted;
+	public function getParamIsdeletedAttribute()
+	{
+		return $this->param_is_deleted;
+	}
+	public function setParamIsdeletedAttribute($value)
+	{
+		$this->param_is_deleted = $value;
+	}
+
+
+	// ------------- 順序・正逆・検索 --------------
     // 商品
     private $param_product_name;
     public function getParamProductnameAttribute(){ return $this->param_product_name;}
@@ -442,20 +454,22 @@ class MatManage extends Model
     public function updateData($upkind){
         try {
             if($upkind == 4)    {
-                //削除マーク
+                //削除マーク'status' => 'del'
                 DB::table($this->table)
-                ->where('id', $this->id)
+                //->where('id', $this->id)
+                ->where('product_code', $this->product_code)
                 ->update([
-                    'status' => 'del',
+                    'is_deleted' => '1',
                 ]);
 
             }
             elseif($upkind == 5)    {
-                //削除マーク→newest（戻す）
+                //削除マーク→newest（戻す）'status' => 'newest'
                 DB::table($this->table)
-                ->where('id', $this->id)
+                //->where('id', $this->id)
+                ->where('product_code', $this->product_code)
                 ->update([
-                    'status' => 'newest',
+                    'is_deleted' => '0',
                 ]);
                 $re_data['id'] = $this->id;
                 $re_data['product_code'] = $this->product_code;
@@ -581,6 +595,12 @@ class MatManage extends Model
             if(!empty($this->param_marks)){
                 $data->where('marks',$this->param_marks);
             }
+            if(!empty($this->param_is_deleted)){
+                $data->where('is_deleted',$this->param_is_deleted);
+            }
+			else {
+				$data->where('is_deleted', 0);
+			}
 
 
             // 順番変更 正順逆順
@@ -681,6 +701,7 @@ class MatManage extends Model
             if(!empty($this->param_charge)){
                 $data->where('charge', $this->param_charge)
                 ->where('status','newest')
+				->where('is_deleted', 0)
                 ->orderBy('id', 'DESC');
             
                 $result = $data
@@ -691,6 +712,7 @@ class MatManage extends Model
                 //Log::info("getSearchA this->param_company_name -- ".$str);
                 $data->where('product_name','LIKE', $str)
                 //->where('status','newest')
+				->where('is_deleted', 0)
                 ->orderBy('id');
             
                 $result = $data
@@ -746,6 +768,7 @@ class MatManage extends Model
             );
                 $data->where('status', 'newest');
                 $data->where('marks', $this->param_marks);
+				$data->where('is_deleted', 0);
                 //->orderBy('id', 'DESC');
                 $result = $data
                 ->get();
