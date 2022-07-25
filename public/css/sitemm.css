@@ -224,6 +224,8 @@ header button {width:auto;}
 }
 #page_top:hover{opacity: 0.9;}
 
+.mg_t20 {margin-top:20px;}
+.mg_t40 {margin-top:40px;}
 
 /*--------------------## TOP page ##--------------------*/
 #tips_cnt .lst1  {
@@ -402,11 +404,14 @@ header button {width:auto;}
   border-radius: 5px;
   padding:2px 6px;
   color:#FFF;
-  background:#bbaa88;
+  background:#88aabb;
   width:auto;
 }
 #tbl_1  button:hover  {
-  background:#DDCCAA;
+  background:#aaccdd;
+}
+#tbl_1 button:focus{
+  background: rgb(255, 174, 0);
 }
 #tbl_1 button.style1  {
   border:1px solid #888;
@@ -583,9 +588,12 @@ button.style2:hover  {
 /*--------------------## 棚卸 /  ##--------------------*/
 #cnt3 {
   display:flex;
-  /*width:100%;*/
   align-items: center;
+  justify-content: center;
   flex-wrap:wrap;
+  gap: 0px 100px;
+  margin-top:20px;
+
 }
 #cnt3 .mg1 {
   margin-left:20px;

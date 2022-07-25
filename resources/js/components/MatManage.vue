@@ -46,10 +46,10 @@
         <table>
           <thead>
             <tr>
-              <th class="gc2">日付 <a href="./material_management?mdate=1">▲</a> <a href="./material_management?mdate=2">▼</a></th>
-              <th class="gc2">部署<!-- <a href="./material_management?department=1">▲</a> <a href="./material_management?department=2">▼</a>--></th>
-              <th class="gc2">担当 <a href="./material_management?charge=1">▲</a> <a href="./material_management?charge=2">▼</a></th>
-              <th class="gc2">商品名 <a href="./material_management?product_name=1">▲</a> <a href="./material_management?product_name=2">▼</a></th>
+              <th class="gc2">日付 <button type="button" class="" @click="ForwardReverse('mdate',1)">▲</button> <button type="button" class="" @click="ForwardReverse('mdate',2)">▼</button><!-- <a href="./material_management?mdate=1">▲</a> <a href="./material_management?mdate=2">▼</a>--></th>
+              <th class="gc2">部署 <button type="button" class="" @click="ForwardReverse('department',1)">▲</button> <button type="button" class="" @click="ForwardReverse('department',2)">▼</button><!-- <a href="./material_management?department=1">▲</a> <a href="./material_management?department=2">▼</a>--></th>
+              <th class="gc2">担当 <button type="button" class="" @click="ForwardReverse('charge',1)">▲</button> <button type="button" class="" @click="ForwardReverse('charge',2)">▼</button><!-- <a href="./material_management?charge=1">▲</a> <a href="./material_management?charge=2">▼</a>--></th>
+              <th class="gc2">商品名 <button type="button" class="" @click="ForwardReverse('product_name',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_name',2)">▼</button><!-- <a href="./material_management?product_name=1">▲</a> <a href="./material_management?product_name=2">▼</a>--></th>
               <th class="gc2">単位</th>
               <th class="gc2">入庫数</th>
               <th class="gc2">出庫数</th>
@@ -418,7 +418,7 @@
 
       <div id="button1">
           <div class="btnstyle">
-            <button type="button" class="style1" @click="dataStore()">この内容で新規登録する</button>
+            <button type="button" class="style1" @click="dataStore()">新規登録する</button>
           </div>
       </div>
 
@@ -1150,6 +1150,42 @@ export default {
       this.searchItem();
       this.selectMode = "COMPLETE";
     },
+    ForwardReverse(arraykey,q1) {
+      //console.log("ForwardReverse in  = " + q1);
+      //console.log("ForwardReverse in  = " + arraykey);
+      this.sort_k = arraykey;
+      this.sort_q = q1;
+
+      var sort_target = arraykey; //ソート対象を変数で設定
+      //if(q1 == 1) this.details.sort((a, b) => a[sort_target] - b[sort_target]);
+      //if(q1 == 2) this.details.sort((a, b) => b[sort_target] - a[sort_target]);
+      //console.log("ForwardReverse in details = " + this.details);
+
+      if(q1 == 1) {
+        this.details.sort(function(a,b){
+          if(a[sort_target] > b[sort_target]) {
+            return 1;
+          }
+          if(a[sort_target] < b[sort_target]) {
+            return -1;
+          }
+          return 0;
+        });
+      }
+      if(q1 == 2) {
+        this.details.sort(function(a,b){
+          if(a[sort_target] > b[sort_target]) {
+            return -1;
+          }
+          if(a[sort_target] < b[sort_target]) {
+            return 1;
+          }
+          return 0;
+        });
+      }
+      //console.log(this.details);
+    },
+
     // -------------------- サーバー処理 ----------------------------
         // 取得処理
     getItem(sc) {

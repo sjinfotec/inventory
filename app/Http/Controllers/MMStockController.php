@@ -142,7 +142,8 @@ class MMStockController extends Controller
                     'stock_nbox' => '',
                     'stock_month' => $stock_month,
                     'status' => 'wait',
-                    'marks' => $marks
+                    'marks' => $marks,
+                    'created_at' => $systemdate
                 ]);
                 } else {
                     $insert_ok = false;
