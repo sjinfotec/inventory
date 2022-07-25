@@ -8,17 +8,9 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
     <!-- Scripts -->
     <script src="{{ mix('js/app.js') }}" defer></script>
-    <!--<script src="{{ asset('js/bootstrap.min.js') }}" defer></script>-->
     <script src="{{ asset('js/jquery-3.6.0.min.js') }}" defer></script>
     <script src="{{ asset('js/gototop.js') }}" defer></script>
     <script src="{{ asset('js/offcanvas.js') }}" defer></script>
-    <!--<script src="{{ asset('js/popper.min.js') }}" defer></script>-->
-    <!-- Fonts -->
-    <!--
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet" type="text/css">
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" >
-    -->
     <!-- Styles -->
     <link href="{{ asset('css/sitemm.css') }}" rel="stylesheet">
 </head>
@@ -34,14 +26,14 @@
                 </button>
                 <!-- /offcanvas-left toggle button -->
                 <div id="logo">
-                <a class="" href="{{ url('/mm') }}">
+                <a class="" href="{{ url('/v') }}">
                     <span><img class="logo_h" src="{{ asset('images/home-white.svg') }}"  alt="在庫管理システム －資材－"></span>
                     <span>在庫管理システム －資材－</span>
                 </a>
                 <div>
             </nav>
             <!-- /header nav -->
-            @include('layouts.mm_menu')
+            @include('layouts.mm_viewmenu')
         </header>
         <!-- /header -->
 

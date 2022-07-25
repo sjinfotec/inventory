@@ -50,6 +50,7 @@
               <th class="gc2">部署 <button type="button" class="" @click="ForwardReverse('department',1)">▲</button> <button type="button" class="" @click="ForwardReverse('department',2)">▼</button><!-- <a href="./material_management?department=1">▲</a> <a href="./material_management?department=2">▼</a>--></th>
               <th class="gc2">担当 <button type="button" class="" @click="ForwardReverse('charge',1)">▲</button> <button type="button" class="" @click="ForwardReverse('charge',2)">▼</button><!-- <a href="./material_management?charge=1">▲</a> <a href="./material_management?charge=2">▼</a>--></th>
               <th class="gc2">商品名 <button type="button" class="" @click="ForwardReverse('product_name',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_name',2)">▼</button><!-- <a href="./material_management?product_name=1">▲</a> <a href="./material_management?product_name=2">▼</a>--></th>
+              <th class="gc2">商品コード</th>
               <th class="gc2">単位</th>
               <th class="gc2">入庫数</th>
               <th class="gc2">出庫数</th>
@@ -71,6 +72,7 @@
               <td>{{ item['department'] }}</td>
               <td>{{ item['charge'] }}</td>
               <td>{{ item['product_name'] }}</td>
+              <td>{{ item['product_number'] }}</td>
               <td class="nbr">{{ item['unit'] }}</td>
               <!--<td class="style1">{{ item['quantity'] }}</td>-->
               <td class="style1">{{ item['receipt'] }}</td>
@@ -169,7 +171,7 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate gc2">Code Number</div>
+          <div class="cate gc2">商品コード</div>
           <div class="inputzone">
             <input
               type="text"
@@ -446,6 +448,7 @@
               <th class="gc2">部署</th>
               <th class="gc2">担当</th>
               <th class="gc2">商品名</th>
+              <th class="gc2">商品コード</th>
               <th class="gc2">単位</th>
               <!--<th class="gc2">入数</th>-->
               <th class="gc2">入庫数</th>
@@ -470,6 +473,7 @@
               <td>{{ item['department'] }}</td>
               <td>{{ item['charge'] }}</td>
               <td v-bind:class="(item['status'] == 'newest') ? 'bgcolor5' : ''">{{ item['product_name'] }}</td>
+              <td>{{ item['product_number'] }}</td>
               <td class="nbr">{{ item['unit'] }}</td>
               <!--<td class="style1">{{ item['quantity'] }}</td>-->
               <td class="style1" v-bind:class="(item['receipt'] === 0) ? 'color3' : ''">{{ item['receipt'] }}</td>
@@ -588,7 +592,7 @@
             </div>
           </div>
           <div class="inputgroup w1">
-            <div class="cate gc2">Code Number</div>
+            <div class="cate gc2">商品コード</div>
             <div class="inputzone">
               <input
                 type="text"

@@ -41,6 +41,7 @@
               <th class="gc4">部署</th>
               <th class="gc4">担当</th>
               <th class="gc4">商品名</th>
+              <th class="gc4">商品コード</th>
               <th class="gc4">単位</th>
               <th class="gc4">入庫数</th>
               <th class="gc4">出庫数</th>
@@ -55,6 +56,7 @@
               <td>{{ item['department'] }}</td>
               <td>{{ item['charge'] }}</td>
               <td>{{ item['product_name'] }}</td>
+              <td>{{ item['product_number'] }}</td>
               <td class="nbr">{{ item['unit'] }}</td>
               <td class="style1">{{ item['receipt'] }}</td>
               <td class="style1">{{ item['delivery'] }}</td>

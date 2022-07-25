@@ -96,7 +96,7 @@
               <input type="text" name="dummy" style="display:none;">
             </div>
             <div class="btn_col_2">
-              <input type="button" value="Code Number 移動" class="transition2 btn1" 
+              <input type="button" value="商品コード" class="transition2 btn1" 
               onclick="location.hash = document.moveform.urlname.value; return false;">
             </div>
           </div>
@@ -122,6 +122,7 @@
           <thead>
             <tr>
               <th class="gc3">商品名 <button type="button" class="" @click="ForwardReverse('product_name',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_name',2)">▼</button></th>
+              <th class="gc3">商品コード</th>
               <th class="gc3">単位</th>
               <!--<th class="gc4">入数</th>-->
               <th class="gc3">在庫</th>
@@ -138,6 +139,7 @@
             <tr v-for="(item,rowIndex) in details3" :key="rowIndex"  v-bind:class="(item['cal_now_inventory'] !== 0 ) ? 'bgcolor6' : ''">
               <!--<td class="posi_r1"></td>-->
               <td ><span class="posi_a1" v-bind:id="item['product_number']"></span>{{ item['product_name'] }}</td>
+              <td class="">{{ item['product_number'] }}</td>
               <td class="nbr">{{ item['unit'] }}</td>
               <!--<td class="style1">{{ item['quantity'] }}</td>-->
               <td class="style1">{{ item['now_inventory'] }}</td>

@@ -111,6 +111,11 @@
     "mm-dust",
     require("./components/MMDust.vue").default
 );
+ // 在庫一覧（閲覧only）
+ Vue.component(
+    "mm-view",
+    require("./components/MMView.vue").default
+);
 
 
 
