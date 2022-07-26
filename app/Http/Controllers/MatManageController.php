@@ -462,6 +462,11 @@ class MatManageController extends Controller
             $material_management = new MatManage();
             if(isset($s_charge))      $material_management->setParamChargeAttribute($s_charge);
             if(isset($s_product_name))  $material_management->setParamProductnameAttribute($s_product_name);
+            if (!empty($params['marks'])) {
+                $params_marks = $params['marks'];
+                $material_management->setParamMarksAttribute($params_marks);
+            }
+
             $details =  $material_management->getSearch();
 
             return response()->json(

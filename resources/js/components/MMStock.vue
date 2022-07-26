@@ -14,6 +14,9 @@
           <button type="button" class="" @click="SelectContentsBtn('c')">
             棚卸 / 在庫 3F
           </button>
+          <button type="button" class="" @click="SelectContentsBtn('s')">
+            棚卸 / 在庫 システム
+          </button>
       </div>
 
 
@@ -22,8 +25,8 @@
           <ul class="lst1">
           <li>棚卸する準備
             <ol class="lst2">
-            <li>『部署』をクリック、次の画面で棚卸の年月を選択し、『棚卸 新規開始』をクリックします</li>
-            <li>※既に登録されている年月の場合は「違う年月を登録してください。」と表示されるので、違う年月を選択します。</li>
+            <li>各『部署（階数）』をクリック、次の画面で棚卸の年月を選択し、『棚卸 新規開始』をクリックします</li>
+            <li>※既に登録されている年月の場合は「違う年月を登録してください。」と表示されるので、違う年月を選択します</li>
             <li>棚卸用データの読み込み、および登録作成され一覧で表示されます</li>
             <!--<li>CODEやNUMBER番号がある場合には番号移動ボックスに番号を入力しクリックすると、その番号の欄まで移動表示できます</li>-->
             </ol>
@@ -54,6 +57,7 @@
         <h2 class="h2gc1" v-if="selectCnt=='a'">棚卸 / 資材在庫一覧 1F</h2>
         <h2 class="h2gc2" v-if="selectCnt=='b'">棚卸 / 資材在庫一覧 2F</h2>
         <h2 class="h2gc3" v-if="selectCnt=='c'">棚卸 / 資材在庫一覧 3F</h2>
+        <h2 class="h2gc3" v-if="selectCnt=='s'">棚卸 / 資材在庫一覧 システム</h2>
       </div>
 
       <div id="cnt3">
@@ -89,6 +93,7 @@
         <h2 class="h2gc1" v-if="selectCnt=='a'">棚卸 / 資材在庫一覧 1F</h2>
         <h2 class="h2gc2" v-if="selectCnt=='b'">棚卸 / 資材在庫一覧 2F</h2>
         <h2 class="h2gc3" v-if="selectCnt=='c'">棚卸 / 資材在庫一覧 3F</h2>
+        <h2 class="h2gc3" v-if="selectCnt=='s'">棚卸 / 資材在庫一覧 システム</h2>
         <form name="moveform">
           <div id="btn_cnt1">
             <div class="btn_col_1">

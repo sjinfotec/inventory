@@ -468,6 +468,7 @@ class MMStock extends Model
                     WHEN t1.marks='a' THEN t2.id 
                     WHEN t1.marks='b' THEN t2.id 
                     WHEN t1.marks='c' THEN t2.id 
+                    WHEN t1.marks='s' THEN t2.id 
                     ELSE  null 
                 END
                 ) as inv_id ";
@@ -477,6 +478,7 @@ class MMStock extends Model
                     WHEN t1.marks='a' THEN t2.product_name 
                     WHEN t1.marks='b' THEN t2.product_name 
                     WHEN t1.marks='c' THEN t2.product_name 
+                    WHEN t1.marks='s' THEN t2.product_name 
                     ELSE  null 
                 END
                 ) as product_name ";
@@ -491,6 +493,7 @@ class MMStock extends Model
                     WHEN t1.marks='a' THEN t2.now_inventory 
                     WHEN t1.marks='b' THEN t2.now_inventory 
                     WHEN t1.marks='c' THEN t2.now_inventory 
+                    WHEN t1.marks='s' THEN t2.now_inventory 
                     ELSE  null 
                 END
                 ) as now_inventory ";
@@ -499,6 +502,7 @@ class MMStock extends Model
                     WHEN t1.marks='a' THEN t2.nbox 
                     WHEN t1.marks='b' THEN t2.nbox 
                     WHEN t1.marks='c' THEN t2.nbox 
+                    WHEN t1.marks='s' THEN t2.nbox 
                     ELSE  null 
                 END
                 ) as nbox ";
@@ -508,6 +512,7 @@ class MMStock extends Model
                     WHEN t1.marks='a' THEN t1.stock_now_inventory - t2.now_inventory 
                     WHEN t1.marks='b' THEN t1.stock_now_inventory - t2.now_inventory 
                     WHEN t1.marks='c' THEN t1.stock_now_inventory - t2.now_inventory 
+                    WHEN t1.marks='s' THEN t1.stock_now_inventory - t2.now_inventory 
                     ELSE  null 
                 END
                 ) as cal_now_inventory ";
@@ -516,6 +521,7 @@ class MMStock extends Model
                     WHEN t1.marks='a' THEN t1.stock_nbox - t2.nbox 
                     WHEN t1.marks='b' THEN t1.stock_nbox - t2.nbox 
                     WHEN t1.marks='c' THEN t1.stock_nbox - t2.nbox 
+                    WHEN t1.marks='s' THEN t1.stock_nbox - t2.nbox 
                     ELSE  null 
                 END
                 ) as cal_nbox ";

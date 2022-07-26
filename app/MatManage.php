@@ -589,7 +589,8 @@ class MatManage extends Model
                 ->orderBy('id');
             }
             else {
-                $data->where('status','newest');
+                $data->where('status','newest')
+				->orderBy('id', 'DESC');
             }
 
             if(!empty($this->param_marks)){
@@ -701,6 +702,7 @@ class MatManage extends Model
             if(!empty($this->param_charge)){
                 $data->where('charge', $this->param_charge)
                 ->where('status','newest')
+                ->where('marks', $this->param_marks)
 				->where('is_deleted', 0)
                 ->orderBy('id', 'DESC');
             

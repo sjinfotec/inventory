@@ -14,6 +14,9 @@
           <button type="button" class="" @click="SelectContentsBtn('c')">
             抹消 / 在庫 3F
           </button>
+          <button type="button" class="" @click="SelectContentsBtn('s')">
+            抹消 / 在庫 システム
+          </button>
       </div>
     </div>
 
@@ -23,6 +26,7 @@
         <h2 class="h2gc1" v-if="selectCnt=='a'">抹消一覧 1F</h2>
         <h2 class="h2gc2" v-if="selectCnt=='b'">抹消一覧 2F</h2>
         <h2 class="h2gc3" v-if="selectCnt=='c'">抹消一覧 3F</h2>
+        <h2 class="h2gc3" v-if="selectCnt=='s'">抹消一覧 システム</h2>
       </div>
 
       <div id="msg_cnt" v-if="actionmsgArr.length">
@@ -212,6 +216,10 @@ export default {
       if(marks === 'c')  {
         var arrayParams = { details : this.details[index] , edit_id : eid , upkind : uk };
         var msg1 = '在庫 3F';
+      }
+      if(marks === 's')  {
+        var arrayParams = { details : this.details[index] , edit_id : eid , upkind : uk };
+        var msg1 = '在庫 システム';
       }
       
       this.postRequest("/mmdust/update" , arrayParams)

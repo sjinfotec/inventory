@@ -14,6 +14,9 @@
           <button type="button" class="" @click="SelectContentsBtn('c')">
             在庫 3F
           </button>
+          <button type="button" class="" @click="SelectContentsBtn('s')">
+            在庫 システム
+          </button>
       </div>
     </div>
 
@@ -25,6 +28,7 @@
         <h2 class="h2gc1" v-if="selectCnt=='a'">資材在庫一覧 1F</h2>
         <h2 class="h2gc2" v-if="selectCnt=='b'">資材在庫一覧 2F</h2>
         <h2 class="h2gc3" v-if="selectCnt=='c'">資材在庫一覧 3F</h2>
+        <h2 class="h2gc3" v-if="selectCnt=='s'">資材在庫一覧 システム</h2>
         <form id="form1" name="form2">
           <input type="text" class="form_style bc1" v-model="s_charge" maxlength="30" name="s_charge">
           <button type="button" class="" @click="searchBtn()">
@@ -55,11 +59,11 @@
               <th class="gc2">入庫数</th>
               <th class="gc2">出庫数</th>
               <th class="gc2">現在在庫</th>
+              <th class="gc2">単価</th>
+              <th class="gc2">合計金額</th>
               <!--
               <th class="gc2">箱数</th>
               <th class="gc2">発注先</th>
-              <th class="gc2">単価</th>
-              <th class="gc2">合計</th>
               -->
               <th class="gc2">備考</th>
               <!--<th class="gc2">メモ/ノート</th>-->
@@ -78,11 +82,11 @@
               <td class="style1">{{ item['receipt'] }}</td>
               <td class="style1">{{ item['delivery'] }}</td>
               <td class="style1">{{ item['now_inventory'] }}</td>
+              <td>{{ item['unit_price'] }}</td>
+              <td>{{ item['total'] }}</td>
               <!--
               <td class="style1">{{ item['nbox'] }}</td>
               <td>{{ item['order_address'] }}</td>
-              <td>{{ item['unit_price'] }}</td>
-              <td>{{ item['total'] }}</td>
               -->
               <td>{{ item['remarks'] }}</td>
               <!--<td>{{ item['note'] }}</td>-->
@@ -277,6 +281,7 @@
             />
           </div>
         </div>
+        -->
         <div class="inputgroup w1">
           <div class="cate gc2">単価</div>
           <div class="inputzone">
@@ -290,7 +295,7 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate gc2">合計</div>
+          <div class="cate gc2">合計金額</div>
           <div class="inputzone">
             <input
               type="text"
@@ -301,8 +306,7 @@
             />
           </div>
         </div>
-        -->
-        <div class="inputgroup w4">
+        <div class="inputgroup w2">
           <div class="cate gc2">備考</div>
           <div class="inputzone">
             <textarea class="form_style_t bc2" v-model="form.remarks" maxlength="191" name="remarks" rows="3"></textarea>
@@ -454,11 +458,11 @@
               <th class="gc2">入庫数</th>
               <th class="gc2">出庫数</th>
               <th class="gc2">在庫</th>
+              <th class="gc2">単価</th>
+              <th class="gc2">合計金額</th>
               <!--
               <th class="gc2">箱数</th>
               <th class="gc2">発注先</th>
-              <th class="gc2">単価</th>
-              <th class="gc2">合計</th>
               -->
               <th class="gc2">備考</th>
               <!--
@@ -479,11 +483,11 @@
               <td class="style1" v-bind:class="(item['receipt'] === 0) ? 'color3' : ''">{{ item['receipt'] }}</td>
               <td class="style1" v-bind:class="(item['delivery'] === 0) ? 'color3' : ''">{{ item['delivery'] }}</td>
               <td class="style1" v-bind:style="(item['now_inventory'] === 0) ? 'color:red' : ''">{{ item['now_inventory'] }}</td>
+              <td>{{ item['unit_price'] }}</td>
+              <td>{{ item['total'] }}</td>
               <!--
               <td class="style1">{{ item['nbox'] }}</td>
               <td>{{ item['order_address'] }}</td>
-              <td>{{ item['unit_price'] }}</td>
-              <td>{{ item['total'] }}</td>
               -->
               <td>{{ item['remarks'] }}</td>
               <!--
@@ -712,6 +716,7 @@
               />
             </div>
           </div>
+          -->
           <div class="inputgroup w1">
             <div class="cate gc2">単価</div>
             <div class="inputzone">
@@ -721,23 +726,34 @@
                 v-model="details[index].unit_price"
                 maxlength="40"
                 name="unit_price"
+                v-bind:disabled="isDisabled"
               />
             </div>
           </div>
           <div class="inputgroup w1">
-            <div class="cate gc2">合計</div>
-            <div class="inputzone">
+            <div class="cate gc2">合計金額</div>
+            <div class="inputzone" v-if="btnMode ==='update'">
+              <input
+                type="text"
+                class="form_style bc2"
+                v-model="(details[index].now_inventory + details[index].receipt - details[index].delivery) * details[index].unit_price"
+                maxlength="100"
+                name="total"
+                v-bind:disabled="isDisabled"
+              />
+            </div>
+            <div class="inputzone" v-else>
               <input
                 type="text"
                 class="form_style bc2"
                 v-model="details[index].total"
                 maxlength="100"
                 name="total"
+                v-bind:disabled="isDisabled"
               />
             </div>
           </div>
-          -->
-          <div class="inputgroup w4">
+          <div class="inputgroup w2">
             <div class="cate gc2">備考</div>
             <div class="inputzone">
               <textarea class="form_style_t bc2" v-model="details[index].remarks" maxlength="191" name="remarks" rows="3"></textarea>
@@ -926,11 +942,11 @@
               <th class="gc2">入庫数</th>
               <th class="gc2">出庫数</th>
               <th class="gc2">現在在庫</th>
+              <th class="gc2">単価</th>
+              <th class="gc2">合計金額</th>
               <!--
               <th class="gc2">箱数</th>
               <th class="gc2">発注先</th>
-              <th class="gc2">単価</th>
-              <th class="gc2">合計</th>
               -->
               <th class="gc2">備考</th>
               <!--<th class="gc2">&nbsp;</th>-->
@@ -947,11 +963,11 @@
               <td class="style1" v-bind:class="(item['receipt'] === 0) ? 'color3' : ''">{{ item['receipt'] }}</td>
               <td class="style1" v-bind:class="(item['delivery'] === 0) ? 'color3' : ''">{{ item['delivery'] }}</td>
               <td class="style1" v-bind:style="(item['now_inventory'] === 0) ? 'color:red' : ''">{{ item['now_inventory'] }}</td>
+              <td>{{ item['unit_price'] }}</td>
+              <td>{{ item['total'] }}</td>
               <!--
               <td class="style1">{{ item['nbox'] }}</td>
               <td>{{ item['order_address'] }}</td>
-              <td>{{ item['unit_price'] }}</td>
-              <td>{{ item['total'] }}</td>
               -->
               <td>{{ item['remarks'] }}</td>
               <!--<td>{{ item['note'] }}</td>-->
@@ -1246,7 +1262,7 @@ export default {
         this.acttitle = "検索";
         var motion_msg = "検索";
         var messages = [];
-        var arrayParams = { s_charge : this.s_charge , s_product_name : this.s_product_name , marks : 'a'};
+        var arrayParams = { s_charge : this.s_charge , s_product_name : this.s_product_name , marks : this.selectCnt};
         this.postRequest("/material_management/search", arrayParams)
           .then(response  => {
             this.putThenSearch(response, motion_msg);
@@ -1316,7 +1332,10 @@ export default {
     dataUpdate(index,k) {
       if (this.checkFormStore()) {
         var messages = [];
-        if (k == 1) this.details[index].now_inventory = this.details[index].now_inventory + this.details[index].receipt - this.details[index].delivery
+        if (k == 1) {
+          this.details[index].now_inventory = this.details[index].now_inventory + this.details[index].receipt - this.details[index].delivery;
+          this.details[index].total = this.details[index].now_inventory * this.details[index].unit_price;
+        }
         var arrayParams = { details : this.details[index] , upkind : k };
         var motion_msg = "";
         if (k == 0) motion_msg = '修正';
