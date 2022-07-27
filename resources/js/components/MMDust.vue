@@ -46,10 +46,13 @@
               <th class="gc4">担当</th>
               <th class="gc4">商品名</th>
               <th class="gc4">商品コード</th>
+              <th class="gc4">発注先</th>
               <th class="gc4">単位</th>
               <th class="gc4">入庫数</th>
               <th class="gc4">出庫数</th>
               <th class="gc4">現在在庫</th>
+              <th class="gc4">単価</th>
+              <th class="gc4">合計金額</th>
               <th class="gc4">備考</th>
               <th class="gc4">&nbsp;</th>
             </tr>
@@ -61,10 +64,13 @@
               <td>{{ item['charge'] }}</td>
               <td>{{ item['product_name'] }}</td>
               <td>{{ item['product_number'] }}</td>
+              <td>{{ item['order_address'] }}</td>
               <td class="nbr">{{ item['unit'] }}</td>
               <td class="style1">{{ item['receipt'] }}</td>
               <td class="style1">{{ item['delivery'] }}</td>
               <td class="style1">{{ item['now_inventory'] }}</td>
+              <td>{{ item['unit_price'] }}</td>
+              <td>{{ item['total'] }}</td>
               <td>{{ item['remarks'] }}</td>
               <td class="style1 w1">
                 <input type="hidden" v-model="details[rowIndex].id" name="id" />

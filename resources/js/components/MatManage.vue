@@ -55,6 +55,7 @@
               <th class="gc2">担当 <button type="button" class="" @click="ForwardReverse('charge',1)">▲</button> <button type="button" class="" @click="ForwardReverse('charge',2)">▼</button><!-- <a href="./material_management?charge=1">▲</a> <a href="./material_management?charge=2">▼</a>--></th>
               <th class="gc2">商品名 <button type="button" class="" @click="ForwardReverse('product_name',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_name',2)">▼</button><!-- <a href="./material_management?product_name=1">▲</a> <a href="./material_management?product_name=2">▼</a>--></th>
               <th class="gc2">商品コード</th>
+              <th class="gc2">発注先</th>
               <th class="gc2">単位</th>
               <th class="gc2">入庫数</th>
               <th class="gc2">出庫数</th>
@@ -63,7 +64,6 @@
               <th class="gc2">合計金額</th>
               <!--
               <th class="gc2">箱数</th>
-              <th class="gc2">発注先</th>
               -->
               <th class="gc2">備考</th>
               <!--<th class="gc2">メモ/ノート</th>-->
@@ -77,6 +77,7 @@
               <td>{{ item['charge'] }}</td>
               <td>{{ item['product_name'] }}</td>
               <td>{{ item['product_number'] }}</td>
+              <td>{{ item['order_address'] }}</td>
               <td class="nbr">{{ item['unit'] }}</td>
               <!--<td class="style1">{{ item['quantity'] }}</td>-->
               <td class="style1">{{ item['receipt'] }}</td>
@@ -86,7 +87,6 @@
               <td>{{ item['total'] }}</td>
               <!--
               <td class="style1">{{ item['nbox'] }}</td>
-              <td>{{ item['order_address'] }}</td>
               -->
               <td>{{ item['remarks'] }}</td>
               <!--<td>{{ item['note'] }}</td>-->
@@ -268,7 +268,6 @@
       </div><!--## end id="cnt1" ##-->
 
       <div id="cnt1">
-        <!--
         <div class="inputgroup w2">
           <div class="cate gc2">発注先</div>
           <div class="inputzone">
@@ -281,7 +280,6 @@
             />
           </div>
         </div>
-        -->
         <div class="inputgroup w1">
           <div class="cate gc2">単価</div>
           <div class="inputzone">
@@ -306,7 +304,10 @@
             />
           </div>
         </div>
-        <div class="inputgroup w2">
+      </div><!--## end id="cnt1" ##-->
+
+      <div id="cnt1">
+        <div class="inputgroup w4">
           <div class="cate gc2">備考</div>
           <div class="inputzone">
             <textarea class="form_style_t bc2" v-model="form.remarks" maxlength="191" name="remarks" rows="3"></textarea>
@@ -453,16 +454,16 @@
               <th class="gc2">担当</th>
               <th class="gc2">商品名</th>
               <th class="gc2">商品コード</th>
+              <th class="gc2">発注先</th>
               <th class="gc2">単位</th>
               <!--<th class="gc2">入数</th>-->
               <th class="gc2">入庫数</th>
               <th class="gc2">出庫数</th>
-              <th class="gc2">在庫</th>
+              <th class="gc2">現在在庫</th>
               <th class="gc2">単価</th>
               <th class="gc2">合計金額</th>
               <!--
               <th class="gc2">箱数</th>
-              <th class="gc2">発注先</th>
               -->
               <th class="gc2">備考</th>
               <!--
@@ -478,6 +479,7 @@
               <td>{{ item['charge'] }}</td>
               <td v-bind:class="(item['status'] == 'newest') ? 'bgcolor5' : ''">{{ item['product_name'] }}</td>
               <td>{{ item['product_number'] }}</td>
+              <td>{{ item['order_address'] }}</td>
               <td class="nbr">{{ item['unit'] }}</td>
               <!--<td class="style1">{{ item['quantity'] }}</td>-->
               <td class="style1" v-bind:class="(item['receipt'] === 0) ? 'color3' : ''">{{ item['receipt'] }}</td>
@@ -682,7 +684,7 @@
                 v-model.number="details[index].now_inventory"
                 maxlength="11"
                 name="now_inventory"
-                v-bind:disabled="isDisabled"
+                
               />
             </div>
           </div>
@@ -703,7 +705,6 @@
           -->
         </div>
         <div id="cnt1">
-          <!--
           <div class="inputgroup w2">
             <div class="cate gc2">発注先</div>
             <div class="inputzone">
@@ -713,10 +714,10 @@
                 v-model="details[index].order_address"
                 maxlength="40"
                 name="order_address"
+                v-bind:disabled="isDisabled"
               />
             </div>
           </div>
-          -->
           <div class="inputgroup w1">
             <div class="cate gc2">単価</div>
             <div class="inputzone">
@@ -753,7 +754,9 @@
               />
             </div>
           </div>
-          <div class="inputgroup w2">
+        </div>
+        <div id="cnt1">
+          <div class="inputgroup w4">
             <div class="cate gc2">備考</div>
             <div class="inputzone">
               <textarea class="form_style_t bc2" v-model="details[index].remarks" maxlength="191" name="remarks" rows="3"></textarea>
@@ -938,6 +941,8 @@
               <th class="gc2">部署</th>
               <th class="gc2">担当</th>
               <th class="gc2">商品名</th>
+              <th class="gc2">商品コード</th>
+              <th class="gc2">発注先</th>
               <th class="gc2">単位</th>
               <th class="gc2">入庫数</th>
               <th class="gc2">出庫数</th>
@@ -946,7 +951,6 @@
               <th class="gc2">合計金額</th>
               <!--
               <th class="gc2">箱数</th>
-              <th class="gc2">発注先</th>
               -->
               <th class="gc2">備考</th>
               <!--<th class="gc2">&nbsp;</th>-->
@@ -958,6 +962,8 @@
               <td>{{ item['department'] }}</td>
               <td>{{ item['charge'] }}</td>
               <td>{{ item['product_name'] }}</td>
+              <td>{{ item['product_number'] }}</td>
+              <td>{{ item['order_address'] }}</td>
               <td class="nbr">{{ item['unit'] }}</td>
               <!--<td class="style1">{{ item['quantity'] }}</td>-->
               <td class="style1" v-bind:class="(item['receipt'] === 0) ? 'color3' : ''">{{ item['receipt'] }}</td>
@@ -967,7 +973,6 @@
               <td>{{ item['total'] }}</td>
               <!--
               <td class="style1">{{ item['nbox'] }}</td>
-              <td>{{ item['order_address'] }}</td>
               -->
               <td>{{ item['remarks'] }}</td>
               <!--<td>{{ item['note'] }}</td>-->
