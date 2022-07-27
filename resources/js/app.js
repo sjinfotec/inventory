@@ -89,6 +89,40 @@
 
 
 
+ // -------------------------- 資材 在庫 material management ----------------------------------------------
+
+ // 在庫home
+ Vue.component(
+    "mm-home",
+    require("./components/MMHome.vue").default
+);
+ // 在庫一覧
+ Vue.component(
+    "mat-manage",
+    require("./components/MatManage.vue").default
+);
+ // 棚卸
+ Vue.component(
+    "mm-stock",
+    require("./components/MMStock.vue").default
+);
+ // 抹消
+ Vue.component(
+    "mm-dust",
+    require("./components/MMDust.vue").default
+);
+ // 在庫一覧（閲覧only）
+ Vue.component(
+    "mm-view",
+    require("./components/MMView.vue").default
+);
+
+
+
+
+
+
+
 
  // -------------------------- 設定 ----------------------------------------------
  

@@ -1,6 +1,6 @@
 // CONST
 // const C_ROOT_URL = "http://onefr.onedawn.net/";
-const C_ROOT_URL = "http://192.168.0.47/";
+const C_ROOT_URL = "http://192.168.0.92/";
 
 export const dialogable = {
 

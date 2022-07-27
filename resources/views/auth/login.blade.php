@@ -6,7 +6,7 @@
         <div class="card">
             <div class="card-body" style="text-align:center;">
                 <div class="px-4 pb-4">
-                    <img class="" src="{{ asset('images/order_loginlogo.svg') }}" alt="受発注管理システム" width="80%" height="80%">
+                    <img class="" src="{{ asset('images/order_loginlogo.svg') }}" alt="管理システム" width="80%" height="80%">
                 </div>
                 <form method="POST" action="{{ route('login') }}">
                     @csrf
