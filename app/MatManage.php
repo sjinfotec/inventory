@@ -590,6 +590,7 @@ class MatManage extends Model
             }
             else {
                 $data->where('status','newest')
+				//->orderBy('product_code')
 				->orderBy('id', 'DESC');
             }
 
