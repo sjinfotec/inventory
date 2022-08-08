@@ -1123,7 +1123,7 @@ export default {
       // 会社名
       var required = true;
       var equalength = 0;
-      var maxlength = 20;
+      var maxlength = 40;
       var itemname = '会社名';
       chkArray = 
         this.checkHeader(this.form.company_name, required, equalength, maxlength, itemname);
@@ -1137,7 +1137,7 @@ export default {
       // 商品名
       required = true;
       equalength = 0;
-      maxlength = 40;
+      maxlength = 80;
       itemname = '商品名';
       chkArray = 
         this.checkHeader(this.form.product_name, required, equalength, maxlength, itemname);
