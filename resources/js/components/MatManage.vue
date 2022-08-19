@@ -40,6 +40,8 @@
           <button type="button" class="" @click="searchBtn()">
             商品 検索
           </button>
+          <input type="checkbox" id="s_history" name="s_history" class="mg_l20" v-model="s_history" value="on">
+          <label for="s_history">履歴も含む</label>
         </form>
         <button type="button" class="" @click="NewBtn()">
           新規登録
@@ -1059,6 +1061,8 @@ export default {
       i: 2,
       s_charge: "",
       s_product_name: "",
+      s_history: "",
+      str_s_history: "",
       btnMode: 0,
       calc_now_inventory: "",
       calc_nbox: "",
@@ -1267,7 +1271,7 @@ export default {
         this.acttitle = "検索";
         var motion_msg = "検索";
         var messages = [];
-        var arrayParams = { s_charge : this.s_charge , s_product_name : this.s_product_name , marks : this.selectCnt};
+        var arrayParams = { s_charge : this.s_charge , s_product_name : this.s_product_name , marks : this.selectCnt , s_history : this.s_history};
         this.postRequest("/material_management/search", arrayParams)
           .then(response  => {
             this.putThenSearch(response, motion_msg);
@@ -1411,7 +1415,13 @@ export default {
       if (res.details.length > 0) {
           this.details = res.details;
           //this.classObj1 = (this.details[0].status == 'newest') ? 'bgcolor3' : '';
-          this.product_title = res.s_charge + res.s_product_name;
+          if(res.s_history) {
+            this.str_s_history = ' 履歴含む';
+          }
+          else {
+            this.str_s_history = '';
+          }
+          this.product_title = res.s_charge + res.s_product_name + this.str_s_history;
           //console.log("putThenSearch in res.s_product_name = " + res.s_product_name);
           this.$toasted.show(this.product_title + " " + eventtext + "しました");
           this.actionmsgArr.push(this.product_title + " を検索しました。");
