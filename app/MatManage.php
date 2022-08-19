@@ -359,6 +359,10 @@ class MatManage extends Model
     private $param_charge;
     public function getParamChargeAttribute(){ return $this->param_charge;}
     public function setParamChargeAttribute($value){  $this->param_charge = $value;}
+    // 履歴検索チェック
+    private $param_shistory;
+    public function getParamSHistoryAttribute(){ return $this->param_shistory;}
+    public function setParamSHistoryAttribute($value){  $this->param_shistory = $value;}
 
     // 日付
     private $param_mdate;
@@ -712,10 +716,11 @@ class MatManage extends Model
             }
             if(!empty($this->param_product_name)){
                 $str = "%".$this->param_product_name."%";
+				if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
+				$matchThese['is_deleted'] = 0;
                 //Log::info("getSearchA this->param_company_name -- ".$str);
                 $data->where('product_name','LIKE', $str)
-                //->where('status','newest')
-				->where('is_deleted', 0)
+                ->where($matchThese)
                 ->orderBy('id');
             
                 $result = $data

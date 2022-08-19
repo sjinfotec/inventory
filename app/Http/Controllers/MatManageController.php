@@ -434,6 +434,7 @@ class MatManageController extends Controller
         $this->array_messagedata = array();
         $s_charge = "";
         $s_product_name = "";
+        $s_history = "";
         $result = true;
         try {
             // パラメータチェック
@@ -458,10 +459,12 @@ class MatManageController extends Controller
             }
             $s_charge = isset($params['s_charge']) ? $params['s_charge'] : "";
             $s_product_name = isset($params['s_product_name']) ? $params['s_product_name'] : "";
+            $s_history = isset($params['s_history']) ? $params['s_history'] : "";
             //Log::debug("getDataZsearch s_company_name = ".$s_company_name);
             $material_management = new MatManage();
             if(isset($s_charge))      $material_management->setParamChargeAttribute($s_charge);
             if(isset($s_product_name))  $material_management->setParamProductnameAttribute($s_product_name);
+            if(isset($s_history))      $material_management->setParamSHistoryAttribute($s_history);
             if (!empty($params['marks'])) {
                 $params_marks = $params['marks'];
                 $material_management->setParamMarksAttribute($params_marks);
@@ -470,7 +473,7 @@ class MatManageController extends Controller
             $details =  $material_management->getSearch();
 
             return response()->json(
-                ['result' => $result, 'details' => $details, 's_charge' => $s_charge, 's_product_name' => $s_product_name,
+                ['result' => $result, 'details' => $details, 's_charge' => $s_charge, 's_product_name' => $s_product_name, 's_history' => $s_history,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
