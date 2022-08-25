@@ -6,13 +6,22 @@
     <div v-if="selectMode=='HOME'">
       <div id="btn_top">
           <button type="button" class="" @click="SelectContentsBtn('a')">
-            棚卸 / 在庫 1F
+            棚卸 / 在庫 印刷1
           </button>
           <button type="button" class="" @click="SelectContentsBtn('b')">
-            棚卸 / 在庫 2F
+            棚卸 / 在庫 印刷2
           </button>
           <button type="button" class="" @click="SelectContentsBtn('c')">
-            棚卸 / 在庫 3F
+            棚卸 / 在庫 加工1
+          </button>
+          <button type="button" class="" @click="SelectContentsBtn('d')">
+            棚卸 / 在庫 加工2
+          </button>
+          <button type="button" class="" @click="SelectContentsBtn('e')">
+            棚卸 / 在庫 制作
+          </button>
+          <button type="button" class="" @click="SelectContentsBtn('f')">
+            棚卸 / 在庫 情報処理
           </button>
           <button type="button" class="" @click="SelectContentsBtn('s')">
             棚卸 / 在庫 システム
@@ -54,9 +63,12 @@
 
     <div v-if="selectMode=='DEFAULT'">
       <div id="top_cnt">
-        <h2 class="h2gc1" v-if="selectCnt=='a'">棚卸 / 資材在庫一覧 1F</h2>
-        <h2 class="h2gc2" v-if="selectCnt=='b'">棚卸 / 資材在庫一覧 2F</h2>
-        <h2 class="h2gc3" v-if="selectCnt=='c'">棚卸 / 資材在庫一覧 3F</h2>
+        <h2 class="h2gc1" v-if="selectCnt=='a'">棚卸 / 資材在庫一覧 印刷1</h2>
+        <h2 class="h2gc2" v-if="selectCnt=='b'">棚卸 / 資材在庫一覧 印刷2</h2>
+        <h2 class="h2gc1" v-if="selectCnt=='c'">棚卸 / 資材在庫一覧 加工1</h2>
+        <h2 class="h2gc2" v-if="selectCnt=='d'">棚卸 / 資材在庫一覧 加工2</h2>
+        <h2 class="h2gc3" v-if="selectCnt=='e'">棚卸 / 資材在庫一覧 制作</h2>
+        <h2 class="h2gc3" v-if="selectCnt=='f'">棚卸 / 資材在庫一覧 情報処理</h2>
         <h2 class="h2gc3" v-if="selectCnt=='s'">棚卸 / 資材在庫一覧 システム</h2>
       </div>
 
@@ -90,9 +102,12 @@
 
     <div v-if="selectMode=='LINEACTIVE'">
       <div id="top_cnt">
-        <h2 class="h2gc1" v-if="selectCnt=='a'">棚卸 / 資材在庫一覧 1F</h2>
-        <h2 class="h2gc2" v-if="selectCnt=='b'">棚卸 / 資材在庫一覧 2F</h2>
-        <h2 class="h2gc3" v-if="selectCnt=='c'">棚卸 / 資材在庫一覧 3F</h2>
+        <h2 class="h2gc1" v-if="selectCnt=='a'">棚卸 / 資材在庫一覧 印刷1</h2>
+        <h2 class="h2gc2" v-if="selectCnt=='b'">棚卸 / 資材在庫一覧 印刷2</h2>
+        <h2 class="h2gc1" v-if="selectCnt=='c'">棚卸 / 資材在庫一覧 加工1</h2>
+        <h2 class="h2gc2" v-if="selectCnt=='d'">棚卸 / 資材在庫一覧 加工2</h2>
+        <h2 class="h2gc3" v-if="selectCnt=='e'">棚卸 / 資材在庫一覧 制作</h2>
+        <h2 class="h2gc3" v-if="selectCnt=='f'">棚卸 / 資材在庫一覧 情報処理</h2>
         <h2 class="h2gc3" v-if="selectCnt=='s'">棚卸 / 資材在庫一覧 システム</h2>
         <form name="moveform">
           <div id="btn_cnt1">
