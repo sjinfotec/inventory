@@ -1162,6 +1162,7 @@ export default {
         this.isDisabled = false;
       }
       else if(smode === 'update') {
+        this.isDisabled = true;
       }
     },
     NewBtn()  {
@@ -1271,11 +1272,12 @@ export default {
       this.edit_id = e;
       this.product_code = p;
       this.product_title = pn;
+      //this.smode = md;
       //console.log("getitem one in product_title = " + this.product_title);
       var arrayParams = {  edit_id : e , product_code : p};
       this.postRequest("/material_management/getone", arrayParams)
         .then(response  => {
-          this.getThen(response);
+          this.getThen(response, md);
           if(md === 'update') {
             this.details[0].mdate = this.itsdate;
             this.details[0].receipt = "";
@@ -1381,15 +1383,17 @@ export default {
     },
     // -------------------- 共通 ----------------------------
     // 取得正常処理
-    getThen(response) {
+    getThen(response,md) {
       var res = response.data;
       //console.log('getthen in res = ' + res);
       if (res.result) {
         this.details = res.details;
         this.details2 = res.details2;
         this.count = this.details.length;
-        this.before_count = this.count;
-        this.totals = res.totals[0].totals;
+        //this.before_count = this.count;
+        if (res.totals) {
+          this.totals = res.totals[0].totals;
+        }
         if ( this.details.length > 0) {
           this.form.id = this.details[0].id;
           this.form.mdate = this.details[0].mdate;
