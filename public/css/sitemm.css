@@ -274,7 +274,7 @@ header button {width:auto;}
   display:flex;
   align-items: center;
   justify-content: center;
-  gap: 0px 100px;
+  gap: 0px 2%;
   margin-top:50px;
 
 }
@@ -296,6 +296,15 @@ header button {width:auto;}
   padding:0 10px;
   color:#333;
   background:#f5adb7;
+}
+#top_cnt h2.h2gc3  {
+  padding:0 10px;
+  color:#333;
+  
+}
+#top_cnt .ilb span {
+  display:inline-block;
+  margin: 0 10px;
 }
 #top_cnt .customize  {
   white-space:nowrap;
@@ -392,6 +401,9 @@ header button {width:auto;}
 }
 #tbl_1 .style1 {
   text-align:right;
+}
+#tbl_1 .border1 {
+  border-top:4px double #888;
 }
 #tbl_1 .style3 {
   width:15%;

@@ -350,8 +350,9 @@ class MatManageController extends Controller
         $this->array_messagedata = array();
         try {
             $details = $this->getDataFunc($request);
+            $totals = $this->getDataTotalFunc($request);
             return response()->json(
-                ['result' => true, 'details' => $details,
+                ['result' => true, 'details' => $details, 'totals' => $totals,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
@@ -423,6 +424,46 @@ class MatManageController extends Controller
             throw $e;
         }
     }
+
+
+    /**
+     * 取得total
+     *
+     * @return void
+     */
+    public function getDataTotalFunc($request){
+        $this->array_messagedata = array();
+        //$details = new Collection();
+        $result = true;
+        try {
+            // パラメータセット
+            $params = array();
+            $params_marks = null;
+
+            $material_management = new MatManage();
+
+            if (isset($request->keyparams)) {
+                $params = $request->keyparams;
+                if (!empty($params['marks'])) {
+                    $params_marks = $params['marks'];
+                    $material_management->setParamMarksAttribute($params_marks);
+                }
+            }
+
+            $details =  $material_management->getDataMMtotal();
+
+            return $details;
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+
+
 
 
     /** 検索SEARCH取得
