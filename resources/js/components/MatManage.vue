@@ -6,13 +6,22 @@
     <div v-if="selectMode=='HOME'">
       <div id="btn_top">
           <button type="button" class="" @click="SelectContentsBtn('a')">
-            在庫 1F
+            在庫 印刷1
           </button>
           <button type="button" class="" @click="SelectContentsBtn('b')">
-            在庫 2F
+            在庫 印刷2
           </button>
           <button type="button" class="" @click="SelectContentsBtn('c')">
-            在庫 3F
+            在庫 加工1
+          </button>
+          <button type="button" class="" @click="SelectContentsBtn('d')">
+            在庫 加工2
+          </button>
+          <button type="button" class="" @click="SelectContentsBtn('e')">
+            在庫 制作
+          </button>
+          <button type="button" class="" @click="SelectContentsBtn('f')">
+            在庫 情報処理
           </button>
           <button type="button" class="" @click="SelectContentsBtn('s')">
             在庫 システム
@@ -25,10 +34,13 @@
 
     <div v-if="selectMode=='LINEACTIVE'">
       <div id="top_cnt">
-        <h2 class="h2gc1" v-if="selectCnt=='a'">資材在庫一覧 1F</h2>
-        <h2 class="h2gc2" v-if="selectCnt=='b'">資材在庫一覧 2F</h2>
-        <h2 class="h2gc3" v-if="selectCnt=='c'">資材在庫一覧 3F</h2>
-        <h2 class="h2gc3" v-if="selectCnt=='s'">資材在庫一覧 システム</h2>
+        <h2 class="h2gc1 ilb" v-if="selectCnt=='a'"><span>資材在庫一覧</span><span>印刷1</span></h2>
+        <h2 class="h2gc2 ilb" v-if="selectCnt=='b'"><span>資材在庫一覧</span><span>印刷2</span></h2>
+        <h2 class="h2gc1 ilb" v-if="selectCnt=='c'"><span>資材在庫一覧</span><span>加工1</span></h2>
+        <h2 class="h2gc2 ilb" v-if="selectCnt=='d'"><span>資材在庫一覧</span><span>加工2</span></h2>
+        <h2 class="h2gc3 ilb" v-if="selectCnt=='e'"><span>資材在庫一覧</span><span>制作</span></h2>
+        <h2 class="h2gc3 ilb" v-if="selectCnt=='f'"><span>資材在庫一覧</span><span>情報処理</span></h2>
+        <h2 class="h2gc3 ilb" v-if="selectCnt=='s'"><span>資材在庫一覧</span><span>システム</span></h2>
         <form id="form1" name="form2">
           <input type="text" class="form_style bc1" v-model="s_charge" maxlength="30" name="s_charge">
           <button type="button" class="" @click="searchBtn()">
@@ -100,6 +112,11 @@
                 修正
                 </button>
               </td>
+            </tr>
+            <tr class="border1">
+              <td colspan="11" class="style1">総合計金額</td>
+              <td class="style1">{{ Number(totals) | numberFormat }}</td>
+              <td colspan="2"></td>
             </tr>
           </tbody>
         </table>
@@ -970,9 +987,9 @@
               <!--<td class="style1">{{ item['quantity'] }}</td>-->
               <td class="style1" v-bind:class="(item['receipt'] === 0) ? 'color3' : ''">{{ item['receipt'] }}</td>
               <td class="style1" v-bind:class="(item['delivery'] === 0) ? 'color3' : ''">{{ item['delivery'] }}</td>
-              <td class="style1" v-bind:style="(item['now_inventory'] === 0) ? 'color:red' : ''">{{ item['now_inventory'] }}</td>
-              <td class="style1">{{ item['unit_price'] }}</td>
-              <td class="style1">{{ item['total'] }}</td>
+              <td class="style1" v-bind:style="(item['now_inventory'] === 0) ? 'color:red' : ''">{{ Number(item.now_inventory) | numberFormat }}</td>
+              <td class="style1">{{ Number(item.unit_price) | numberFormat }}</td>
+              <td class="style1"><div v-if="item['total'] !== null">{{ Number(item['total']) | numberFormat }}</div></td>
               <!--
               <td class="style1">{{ item['nbox'] }}</td>
               -->
@@ -1070,6 +1087,7 @@ export default {
       isDisabled: "",
       smode: "",
       itsdate: "",
+      totals: "",
     };
   },
   // マウント時
@@ -1094,6 +1112,7 @@ export default {
       var equalength = 0;
       var maxlength = 20;
       var itemname = '担当者';
+      console.log("checkFormStore in  = " + this.form.charge);
       chkArray = 
         this.checkHeader(this.form.charge, required, equalength, maxlength, itemname);
       if (chkArray.length > 0) {
@@ -1106,7 +1125,7 @@ export default {
       // 商品名
       required = true;
       equalength = 0;
-      maxlength = 80;
+      maxlength = 100;
       itemname = '商品名';
       chkArray = 
         this.checkHeader(this.form.product_name, required, equalength, maxlength, itemname);
@@ -1143,6 +1162,7 @@ export default {
         this.isDisabled = false;
       }
       else if(smode === 'update') {
+        this.isDisabled = true;
       }
     },
     NewBtn()  {
@@ -1252,11 +1272,12 @@ export default {
       this.edit_id = e;
       this.product_code = p;
       this.product_title = pn;
+      //this.smode = md;
       //console.log("getitem one in product_title = " + this.product_title);
       var arrayParams = {  edit_id : e , product_code : p};
       this.postRequest("/material_management/getone", arrayParams)
         .then(response  => {
-          this.getThen(response);
+          this.getThen(response, md);
           if(md === 'update') {
             this.details[0].mdate = this.itsdate;
             this.details[0].receipt = "";
@@ -1305,7 +1326,6 @@ export default {
     },
     // ゴミ箱処理
     dataDel(index,k) {
-      if (this.checkFormStore()) {
         this.product_title = this.form.product_name;
         this.classObj1 = "bgcolor4";
         this.acttitle = "抹消へ移動";
@@ -1318,7 +1338,6 @@ export default {
           .catch(reason => {
             this.serverCatch("抹消移動");
           });
-      }
     },
     // レコード削除処理
     recordDel(index,dk) {
@@ -1344,7 +1363,6 @@ export default {
     },
     // 編集変更処理
     dataUpdate(index,k) {
-      if (this.checkFormStore()) {
         var messages = [];
         if (k == 1) {
           this.details[index].now_inventory = this.details[index].now_inventory + this.details[index].receipt - this.details[index].delivery;
@@ -1362,18 +1380,20 @@ export default {
           .catch(reason => {
             this.serverCatch(motion_msg);
           });
-      }
     },
     // -------------------- 共通 ----------------------------
     // 取得正常処理
-    getThen(response) {
+    getThen(response,md) {
       var res = response.data;
       //console.log('getthen in res = ' + res);
       if (res.result) {
         this.details = res.details;
         this.details2 = res.details2;
         this.count = this.details.length;
-        this.before_count = this.count;
+        //this.before_count = this.count;
+        if (res.totals) {
+          this.totals = res.totals[0].totals;
+        }
         if ( this.details.length > 0) {
           this.form.id = this.details[0].id;
           this.form.mdate = this.details[0].mdate;

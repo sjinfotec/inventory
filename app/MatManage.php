@@ -571,7 +571,8 @@ class MatManage extends Model
 				'updated_user',
 				'created_at',
 				'updated_at',
-				'is_deleted'
+				'is_deleted',
+				
 
 
             );
@@ -647,10 +648,12 @@ class MatManage extends Model
                 }
             }
 
-            $result = $data
+            $result1 = $data
             ->get();
+			
+			//$result = array_merge($result1, $result2);
 
-            return $result;
+            return $result1;
 
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
@@ -663,6 +666,96 @@ class MatManage extends Model
         }
 
     }
+
+
+    /**
+     * 取得totals
+     *
+     * @return void
+     */
+    public function getDataMMtotal(){
+        //$message = "ログ出力 getDataMM";
+        //Log::info("this->param_edit_id -- ".$this->param_edit_id);
+        //Log::info("this->param_product_code -- ".$this->param_product_code);
+
+        try {
+
+			/*
+
+            $datasum = DB::table($this->table)
+			->selectRaw('
+			sum(total) as totals
+			');
+
+            $datasum->where('status','newest')
+			->orderBy('id', 'DESC');
+
+            if(!empty($this->param_marks)){
+                $datasum->where('marks',$this->param_marks);
+            }
+            $result2 = $datasum
+            ->get();
+
+			*/
+
+			
+			//$result = array_merge($result1, $result2);
+
+
+            $sqlString = "";
+            $sqlString .= "select ";
+            $sqlString .= "sum(total) as totals";
+            $sqlString .= " from ";
+            $sqlString .= " ".$this->table." ";
+            $sqlString .= " where ";
+			$sqlString .= " status = 'newest' ";
+            if (!empty($this->param_marks)) {
+                $sqlString .= " AND marks = ? ";
+            }
+            if (!empty($this->param_is_deleted)) {
+                $sqlString .= " AND is_deleted = ? ";
+            }
+            // バインド
+            $array_setBindingsStr = array();
+            if (!empty($this->param_marks)) {
+                $array_setBindingsStr[] = $this->param_marks;
+            }
+            if(!empty($this->param_is_deleted)){
+                $array_setBindingsStr[] = $this->param_is_deleted;
+            }
+			else {
+                $array_setBindingsStr[] = 0;
+			}
+            $data2 = DB::select($sqlString, $array_setBindingsStr);
+
+
+			//$sqlString3 = "select sum(total) as totals from matmanage where status = 'newest' and marks = 'b'";
+            //$data3 = DB::select($sqlString3);
+
+            //$result = array_merge($data1, $data2);
+
+            $result = $data2;
+
+            return $result;
+
+
+
+
+
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+    }
+
+
+
 
 
     /**

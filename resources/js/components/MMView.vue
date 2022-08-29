@@ -6,13 +6,22 @@
     <div v-if="selectMode=='HOME'">
       <div id="btn_top">
           <button type="button" class="" @click="SelectContentsBtn('a')">
-            在庫 1F
+            在庫 印刷1
           </button>
           <button type="button" class="" @click="SelectContentsBtn('b')">
-            在庫 2F
+            在庫 印刷2
           </button>
           <button type="button" class="" @click="SelectContentsBtn('c')">
-            在庫 3F
+            在庫 加工1
+          </button>
+          <button type="button" class="" @click="SelectContentsBtn('d')">
+            在庫 加工2
+          </button>
+          <button type="button" class="" @click="SelectContentsBtn('e')">
+            在庫 制作
+          </button>
+          <button type="button" class="" @click="SelectContentsBtn('f')">
+            在庫 情報処理
           </button>
       </div>
     </div>
@@ -22,9 +31,12 @@
 
     <div v-if="selectMode=='LINEACTIVE'">
       <div id="top_cnt">
-        <h2 class="h2gc1" v-if="selectCnt=='a'">資材在庫一覧 1F</h2>
-        <h2 class="h2gc2" v-if="selectCnt=='b'">資材在庫一覧 2F</h2>
-        <h2 class="h2gc3" v-if="selectCnt=='c'">資材在庫一覧 3F</h2>
+        <h2 class="h2gc1 ilb" v-if="selectCnt=='a'"><span>資材在庫一覧</span><span>印刷1</span></h2>
+        <h2 class="h2gc2 ilb" v-if="selectCnt=='b'"><span>資材在庫一覧</span><span>印刷2</span></h2>
+        <h2 class="h2gc1 ilb" v-if="selectCnt=='c'"><span>資材在庫一覧</span><span>加工1</span></h2>
+        <h2 class="h2gc2 ilb" v-if="selectCnt=='d'"><span>資材在庫一覧</span><span>加工2</span></h2>
+        <h2 class="h2gc3 ilb" v-if="selectCnt=='e'"><span>資材在庫一覧</span><span>制作</span></h2>
+        <h2 class="h2gc3 ilb" v-if="selectCnt=='f'"><span>資材在庫一覧</span><span>情報処理</span></h2>
         <form id="form1" name="form2">
           <input type="text" class="form_style bc1" v-model="s_charge" maxlength="30" name="s_charge">
           <button type="button" class="" @click="searchBtn()">
@@ -72,9 +84,17 @@
               <td class="style1">{{ item['delivery'] }}</td>
               <td class="style1">{{ Number(item.now_inventory) | numberFormat }}</td>
               <td class="style1">{{ Number(item.unit_price) | numberFormat }}</td>
-              <td class="style1"><div v-if="item['total'] !== null">{{ Number(item['total']) | numberFormat }}</div></td>
-              <td>{{ item['remarks'] }}</td>
+              <td class="style1">
+                <div v-if="item['total'] !== null">{{ Number(item['total']) | numberFormat }}</div>
+                <div v-else-if="item['total'] === null">{{ Number(item['now_inventory'] * item['unit_price']) | numberFormat }}</div>
+              </td>
+              <td>{{ item['remarks'] }} </td>
               <!--<td>{{ item['note'] }}</td>-->
+            </tr>
+            <tr class="border1">
+              <td colspan="11" class="style1">総合計金額</td>
+              <td class="style1">{{ Number(totalItem(details)) | numberFormat }}</td>
+              <td><!--※強制計算無し {{ Number(totals) | numberFormat }}--></td>
             </tr>
           </tbody>
         </table>
@@ -208,7 +228,10 @@ export default {
       isDisabled: "",
       smode: "",
       itsdate: "",
+      totals: "",
     };
+  },
+  computed: {
   },
   // マウント時
   mounted() {
@@ -279,6 +302,15 @@ export default {
       }
       //console.log("ForwardReverse in details sort result = " + this.details);
     },
+    totalItem: function(details){
+      let sum = 0;
+      for(let i = 0; i < this.details.length; i++){
+        sum += ((this.details[i].now_inventory) * (this.details[i].unit_price));
+      }
+
+     return sum;
+    },
+
 
     // -------------------- サーバー処理 ----------------------------
         // 取得処理
@@ -356,6 +388,7 @@ export default {
         this.details2 = res.details2;
         this.count = this.details.length;
         this.before_count = this.count;
+        this.totals = res.totals[0].totals;
         if ( this.details.length > 0) {
           this.form.id = this.details[0].id;
           this.form.mdate = this.details[0].mdate;

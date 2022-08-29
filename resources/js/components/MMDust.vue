@@ -6,16 +6,25 @@
     <div v-if="selectMode=='HOME'">
       <div id="btn_top">
           <button type="button" class="" @click="SelectContentsBtn('a')">
-            抹消 / 在庫 1F
+            抹消 印刷1
           </button>
           <button type="button" class="" @click="SelectContentsBtn('b')">
-            抹消 / 在庫 2F
+            抹消 印刷2
           </button>
           <button type="button" class="" @click="SelectContentsBtn('c')">
-            抹消 / 在庫 3F
+            抹消 加工1
+          </button>
+          <button type="button" class="" @click="SelectContentsBtn('d')">
+            抹消 加工2
+          </button>
+          <button type="button" class="" @click="SelectContentsBtn('e')">
+            抹消 制作
+          </button>
+          <button type="button" class="" @click="SelectContentsBtn('f')">
+            抹消 情報処理
           </button>
           <button type="button" class="" @click="SelectContentsBtn('s')">
-            抹消 / 在庫 システム
+            抹消 システム
           </button>
       </div>
     </div>
@@ -23,9 +32,12 @@
 
     <div v-if="selectMode=='LINEACTIVE'">
       <div id="top_cnt">
-        <h2 class="h2gc1" v-if="selectCnt=='a'">抹消一覧 1F</h2>
-        <h2 class="h2gc2" v-if="selectCnt=='b'">抹消一覧 2F</h2>
-        <h2 class="h2gc3" v-if="selectCnt=='c'">抹消一覧 3F</h2>
+        <h2 class="h2gc1" v-if="selectCnt=='a'">抹消一覧 印刷1</h2>
+        <h2 class="h2gc2" v-if="selectCnt=='b'">抹消一覧 印刷2</h2>
+        <h2 class="h2gc1" v-if="selectCnt=='c'">抹消一覧 加工1</h2>
+        <h2 class="h2gc2" v-if="selectCnt=='d'">抹消一覧 加工2</h2>
+        <h2 class="h2gc3" v-if="selectCnt=='e'">抹消一覧 制作</h2>
+        <h2 class="h2gc3" v-if="selectCnt=='f'">抹消一覧 情報処理</h2>
         <h2 class="h2gc3" v-if="selectCnt=='s'">抹消一覧 システム</h2>
       </div>
 
