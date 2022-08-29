@@ -987,9 +987,9 @@
               <!--<td class="style1">{{ item['quantity'] }}</td>-->
               <td class="style1" v-bind:class="(item['receipt'] === 0) ? 'color3' : ''">{{ item['receipt'] }}</td>
               <td class="style1" v-bind:class="(item['delivery'] === 0) ? 'color3' : ''">{{ item['delivery'] }}</td>
-              <td class="style1" v-bind:style="(item['now_inventory'] === 0) ? 'color:red' : ''">{{ item['now_inventory'] }}</td>
-              <td class="style1">{{ item['unit_price'] }}</td>
-              <td class="style1">{{ item['total'] }}</td>
+              <td class="style1" v-bind:style="(item['now_inventory'] === 0) ? 'color:red' : ''">{{ Number(item.now_inventory) | numberFormat }}</td>
+              <td class="style1">{{ Number(item.unit_price) | numberFormat }}</td>
+              <td class="style1"><div v-if="item['total'] !== null">{{ Number(item['total']) | numberFormat }}</div></td>
               <!--
               <td class="style1">{{ item['nbox'] }}</td>
               -->

@@ -84,14 +84,17 @@
               <td class="style1">{{ item['delivery'] }}</td>
               <td class="style1">{{ Number(item.now_inventory) | numberFormat }}</td>
               <td class="style1">{{ Number(item.unit_price) | numberFormat }}</td>
-              <td class="style1"><div v-if="item['total'] !== null">{{ Number(item['total']) | numberFormat }}</div></td>
-              <td>{{ item['remarks'] }}</td>
+              <td class="style1">
+                <div v-if="item['total'] !== null">{{ Number(item['total']) | numberFormat }}</div>
+                <div v-else-if="item['total'] === null">{{ Number(item['now_inventory'] * item['unit_price']) | numberFormat }}</div>
+              </td>
+              <td>{{ item['remarks'] }} </td>
               <!--<td>{{ item['note'] }}</td>-->
             </tr>
             <tr class="border1">
               <td colspan="11" class="style1">総合計金額</td>
-              <td class="style1">{{ Number(totals) | numberFormat }}</td>
-              <td></td>
+              <td class="style1">{{ Number(totalItem(details)) | numberFormat }}</td>
+              <td><!--※強制計算無し {{ Number(totals) | numberFormat }}--></td>
             </tr>
           </tbody>
         </table>
@@ -226,7 +229,11 @@ export default {
       smode: "",
       itsdate: "",
       totals: "",
+      ttl: 0,
+      ttls: 0,
     };
+  },
+  computed: {
   },
   // マウント時
   mounted() {
@@ -297,6 +304,15 @@ export default {
       }
       //console.log("ForwardReverse in details sort result = " + this.details);
     },
+    totalItem: function(details){
+      let sum = 0;
+      for(let i = 0; i < this.details.length; i++){
+        sum += ((this.details[i].now_inventory) * (this.details[i].unit_price));
+      }
+
+     return sum;
+    },
+
 
     // -------------------- サーバー処理 ----------------------------
         // 取得処理
