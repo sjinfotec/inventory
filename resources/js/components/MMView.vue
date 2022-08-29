@@ -229,8 +229,6 @@ export default {
       smode: "",
       itsdate: "",
       totals: "",
-      ttl: 0,
-      ttls: 0,
     };
   },
   computed: {
