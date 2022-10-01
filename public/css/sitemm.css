@@ -119,6 +119,11 @@ header button {width:auto;}
 #footer .foot_cnt {
   text-align:center;
 }
+#version_cnt  {
+  margin-top:20px;
+  margin-right:20px;
+  text-align: right;
+}
 
 /*--------------------## メニュー ##--------------------*/
 .menu_btn {
