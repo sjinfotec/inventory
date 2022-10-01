@@ -41,6 +41,12 @@
         <h2 class="h2gc3 ilb" v-if="selectCnt=='e'"><span>資材在庫一覧</span><span>制作</span></h2>
         <h2 class="h2gc3 ilb" v-if="selectCnt=='f'"><span>資材在庫一覧</span><span>情報処理</span></h2>
         <h2 class="h2gc3 ilb" v-if="selectCnt=='s'"><span>資材在庫一覧</span><span>システム</span></h2>
+        <form id="form1" name="form3">
+          <input type="text" class="form_style bc1" v-model="s_department" maxlength="30" name="s_department">
+          <button type="button" class="" @click="searchBtn()">
+            部署 検索
+          </button>
+        </form>
         <form id="form1" name="form2">
           <input type="text" class="form_style bc1" v-model="s_charge" maxlength="30" name="s_charge">
           <button type="button" class="" @click="searchBtn()">
@@ -69,7 +75,7 @@
               <th class="gc2">担当 <button type="button" class="" @click="ForwardReverse('charge',1)">▲</button> <button type="button" class="" @click="ForwardReverse('charge',2)">▼</button><!-- <a href="./material_management?charge=1">▲</a> <a href="./material_management?charge=2">▼</a>--></th>
               <th class="gc2">商品名 <button type="button" class="" @click="ForwardReverse('product_name',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_name',2)">▼</button><!-- <a href="./material_management?product_name=1">▲</a> <a href="./material_management?product_name=2">▼</a>--></th>
               <th class="gc2">商品コード</th>
-              <th class="gc2">発注先</th>
+              <th class="gc2">発注先 <button type="button" class="" @click="ForwardReverse('order_address',1)">▲</button> <button type="button" class="" @click="ForwardReverse('order_address',2)">▼</button></th>
               <th class="gc2">単位</th>
               <th class="gc2">入庫数</th>
               <th class="gc2">出庫数</th>
@@ -1076,6 +1082,7 @@ export default {
       classObj1: "",
       view_switch: "off",
       i: 2,
+      s_department: "",
       s_charge: "",
       s_product_name: "",
       s_history: "",
@@ -1207,23 +1214,60 @@ export default {
     ForwardReverse(arraykey,q1) {
       //console.log("ForwardReverse in  = " + q1);
       //console.log("ForwardReverse in  = " + arraykey);
-      this.sort_k = arraykey;
-      this.sort_q = q1;
-
       var sort_target = arraykey; //ソート対象を変数で設定
       //if(q1 == 1) this.details.sort((a, b) => a[sort_target] - b[sort_target]);
       //if(q1 == 2) this.details.sort((a, b) => b[sort_target] - a[sort_target]);
+      //this.details = this.details.sort((x, y) => x[sort_target].localeCompare(y[sort_target], 'ja'));
+      //this.details = this.details.sort((x, y) => x[sort_target].lastIndexOf(y[sort_target], 'ja'));
       //console.log("ForwardReverse in details = " + this.details);
 
       if(q1 == 1) {
+        this.details = this.details.sort(function(x, y) {
+          if (x[sort_target] === y[sort_target]) {
+            return 0;
+          }
+          else if (x[sort_target] === null) {
+            return 1;
+          }
+          else if (y[sort_target] === null) {
+            return -1;
+          }
+          else {
+            return x[sort_target].localeCompare(y[sort_target], 'ja');
+          }
+        });
+      }
+      if(q1 == 2) {
+        this.details = this.details.sort(function(x, y) {
+          if (x[sort_target] === y[sort_target]) {
+            return 0;
+          }
+          else if (x[sort_target] === null) {
+            return 1;
+          }
+          else if (y[sort_target] === null) {
+            return -1;
+          }
+          else {
+            return y[sort_target].localeCompare(x[sort_target], 'ja');
+          }
+        });
+      }
+
+
+/*
+      if(q1 == 1) {
         this.details.sort(function(a,b){
+          console.log("sort a = " + a[sort_target]);
           if(a[sort_target] > b[sort_target]) {
             return 1;
           }
-          if(a[sort_target] < b[sort_target]) {
+          else if(a[sort_target] < b[sort_target]) {
             return -1;
           }
-          return 0;
+          else {
+            return 0;
+          }
         });
       }
       if(q1 == 2) {
@@ -1237,8 +1281,10 @@ export default {
           return 0;
         });
       }
+*/
       //console.log(this.details);
     },
+
 
     // -------------------- サーバー処理 ----------------------------
         // 取得処理
@@ -1297,7 +1343,7 @@ export default {
         this.acttitle = "検索";
         var motion_msg = "検索";
         var messages = [];
-        var arrayParams = { s_charge : this.s_charge , s_product_name : this.s_product_name , marks : this.selectCnt , s_history : this.s_history};
+        var arrayParams = { s_department : this.s_department , s_charge : this.s_charge , s_product_name : this.s_product_name , marks : this.selectCnt , s_history : this.s_history};
         this.postRequest("/material_management/search", arrayParams)
           .then(response  => {
             this.putThenSearch(response, motion_msg);
@@ -1446,12 +1492,12 @@ export default {
           else {
             this.str_s_history = '';
           }
-          this.product_title = res.s_charge + res.s_product_name + this.str_s_history;
+          this.product_title = res.s_department + res.s_charge + res.s_product_name + this.str_s_history;
           //console.log("putThenSearch in res.s_product_name = " + res.s_product_name);
           this.$toasted.show(this.product_title + " " + eventtext + "しました");
           this.actionmsgArr.push(this.product_title + " を検索しました。");
       } else {
-          this.actionmsgArr.push(this.s_charge + this.s_product_name + " が見つかりませんでした。","");
+          this.actionmsgArr.push(this.s_department + this.s_charge + this.s_product_name + " が見つかりませんでした。","");
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
