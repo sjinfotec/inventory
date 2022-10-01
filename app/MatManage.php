@@ -355,6 +355,10 @@ class MatManage extends Model
     private $param_orderfr;
     public function getParamOrderfrAttribute(){ return $this->param_orderfr;}
     public function setParamOrderfrAttribute($value){  $this->param_orderfr = $value;}
+    // 部署
+    private $param_department;
+    public function getParamDepartmentAttribute(){ return $this->param_department;}
+    public function setParamDepartmentAttribute($value){  $this->param_department = $value;}
     // 担当
     private $param_charge;
     public function getParamChargeAttribute(){ return $this->param_charge;}
@@ -797,6 +801,16 @@ class MatManage extends Model
 				'is_deleted'
 
             );
+            if(!empty($this->param_department)){
+                $data->where('department', $this->param_department)
+                ->where('status','newest')
+				->where('is_deleted', 0)
+                ->orderBy('id', 'DESC');
+                //Log::info("getSearch this->param_department -- ".$this->param_department." / this->param_marks -- ".$this->param_marks);
+
+                $result = $data
+                ->get();
+            }
             if(!empty($this->param_charge)){
                 $data->where('charge', $this->param_charge)
                 ->where('status','newest')

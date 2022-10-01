@@ -63,6 +63,7 @@
           </li>
           </ul>
       </div>
+      <div id="version_cnt">version 1.2</div>
   </div>
 </template>
 <script>
