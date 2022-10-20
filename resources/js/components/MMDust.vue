@@ -57,7 +57,7 @@
               <th class="gc4">部署</th>
               <th class="gc4">担当</th>
               <th class="gc4">商品名</th>
-              <th class="gc4">商品コード</th>
+              <th class="gc4">分類</th>
               <th class="gc4">発注先</th>
               <th class="gc4">単位</th>
               <th class="gc4">入庫数</th>

@@ -476,6 +476,7 @@ class MatManageController extends Controller
         $s_department = "";
         $s_charge = "";
         $s_product_name = "";
+        $s_product_number = "";
         $s_history = "";
         $result = true;
         try {
@@ -491,7 +492,7 @@ class MatManageController extends Controller
             }
             $params = $request->keyparams;
             //Log::debug("getDataAsearch params[s_order_no] = ".$params['s_order_no']);
-            if (!isset($params['s_department']) && !isset($params['s_charge']) && !isset($params['s_product_name'])) {
+            if (!isset($params['s_department']) && !isset($params['s_charge']) && !isset($params['s_product_name']) && !isset($params['s_product_number'])) {
                 Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "edit_id", Config::get('const.LOG_MSG.parameter_illegal')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
                 return response()->json(
@@ -502,12 +503,14 @@ class MatManageController extends Controller
             $s_department = isset($params['s_department']) ? $params['s_department'] : "";
             $s_charge = isset($params['s_charge']) ? $params['s_charge'] : "";
             $s_product_name = isset($params['s_product_name']) ? $params['s_product_name'] : "";
+            $s_product_number = isset($params['s_product_number']) ? $params['s_product_number'] : "";
             $s_history = isset($params['s_history']) ? $params['s_history'] : "";
             //Log::debug("getDataZsearch s_company_name = ".$s_company_name);
             $material_management = new MatManage();
             if(isset($s_department))      $material_management->setParamDepartmentAttribute($s_department);
             if(isset($s_charge))      $material_management->setParamChargeAttribute($s_charge);
             if(isset($s_product_name))  $material_management->setParamProductnameAttribute($s_product_name);
+            if(isset($s_product_number))  $material_management->setParamProductnumberAttribute($s_product_number);
             if(isset($s_history))      $material_management->setParamSHistoryAttribute($s_history);
             if (!empty($params['marks'])) {
                 $params_marks = $params['marks'];
@@ -515,10 +518,20 @@ class MatManageController extends Controller
             }
 
             $details =  $material_management->getSearch();
+            $search_totals =  $material_management->getSearchTotal();
 
             return response()->json(
-                ['result' => $result, 'details' => $details, 's_department' => $s_department, 's_charge' => $s_charge, 's_product_name' => $s_product_name, 's_history' => $s_history,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                [
+                    'result' => $result, 
+                    'details' => $details, 
+                    's_department' => $s_department, 
+                    's_charge' => $s_charge, 
+                    's_product_name' => $s_product_name, 
+                    's_product_number' => $s_product_number, 
+                    's_history' => $s_history,
+                    'search_totals' => $search_totals,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
+                ]
             );
         }catch(\PDOException $pe){
             throw $pe;

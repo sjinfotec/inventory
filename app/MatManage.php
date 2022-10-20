@@ -351,6 +351,10 @@ class MatManage extends Model
     private $param_product_name;
     public function getParamProductnameAttribute(){ return $this->param_product_name;}
     public function setParamProductnameAttribute($value){  $this->param_product_name = $value;}
+    // 分類
+    private $param_product_number;
+    public function getParamProductnumberAttribute(){ return $this->param_product_number;}
+    public function setParamProductnumberAttribute($value){  $this->param_product_number = $value;}
     // 正逆
     private $param_orderfr;
     public function getParamOrderfrAttribute(){ return $this->param_orderfr;}
@@ -798,9 +802,9 @@ class MatManage extends Model
 				'updated_user',
 				'created_at',
 				'updated_at',
-				'is_deleted'
+				'is_deleted',
 
-            );
+			);
             if(!empty($this->param_department)){
                 $data->where('department', $this->param_department)
                 ->where('status','newest')
@@ -834,6 +838,22 @@ class MatManage extends Model
                 ->get();
             }
 
+            if(!empty($this->param_product_number)){
+                $str = "%".$this->param_product_number."%";
+				if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
+				$matchThese['is_deleted'] = 0;
+	            $data->where('product_number','LIKE', $str)
+                ->where($matchThese)
+                ->orderBy('id');
+	
+                $result = $data
+                ->get();
+            }
+
+
+
+    			//->selectRaw('SUM(total) AS totals')		DB::raw('SUM(total) as total_s')
+				//$data->select(DB::raw('SUM(total) as total_s'))->where('status','newest');
 
             /*
             if ($result->isEmpty()) {
@@ -854,6 +874,84 @@ class MatManage extends Model
         }
 
     }
+
+
+    /**
+     * 検索SEARCH取得Total
+     *
+     * @return void
+     */
+    public function getSearchTotal(){
+		//Log::info("getSearchTotal in -- this->param_department = ".$this->param_department." / this->param_marks = ".$this->param_marks);
+
+        try {
+            $result = "";
+			$data = DB::table($this->table)
+            ->select(DB::raw('SUM(total) as total_s'));
+
+            if(!empty($this->param_department)){
+                $data->where('department', $this->param_department)
+                ->where('status','newest')
+				->where('is_deleted', 0)
+                ->orderBy('id', 'DESC');
+
+                $result = $data
+                ->get();
+            }
+            if(!empty($this->param_charge)){
+                $data->where('charge', $this->param_charge)
+                ->where('status','newest')
+                ->where('marks', $this->param_marks)
+				->where('is_deleted', 0)
+                ->orderBy('id', 'DESC');
+            
+                $result = $data
+                ->get();
+            }
+            if(!empty($this->param_product_name)){
+                $str = "%".$this->param_product_name."%";
+				if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
+				$matchThese['is_deleted'] = 0;
+                //Log::info("getSearchA this->param_company_name -- ".$str);
+                $data->where('product_name','LIKE', $str)
+                ->where($matchThese)
+                ->orderBy('id');
+				//Log::info("getSearchTotal in -- this->param_product_name = ".$this->param_product_name."");
+            
+                $result = $data
+                ->get();
+            }
+
+            if(!empty($this->param_product_number)){
+                $str = "%".$this->param_product_number."%";
+				if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
+				$matchThese['is_deleted'] = 0;
+	            $data->where('product_number','LIKE', $str)
+                ->where($matchThese)
+                ->orderBy('id');
+				//Log::info("getSearchTotal in -- this->param_product_number = ".$this->param_product_number."");
+	
+                $result = $data
+                ->get();
+            }
+
+			return $result;
+
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+    }
+
+
+
+
 
 
     /**
