@@ -109,6 +109,7 @@
         <h2 class="h2gc3" v-if="selectCnt=='e'">棚卸 / 資材在庫一覧 制作</h2>
         <h2 class="h2gc3" v-if="selectCnt=='f'">棚卸 / 資材在庫一覧 情報処理</h2>
         <h2 class="h2gc3" v-if="selectCnt=='s'">棚卸 / 資材在庫一覧 システム</h2>
+        <!--
         <form name="moveform">
           <div id="btn_cnt1">
             <div class="btn_col_1">
@@ -116,11 +117,12 @@
               <input type="text" name="dummy" style="display:none;">
             </div>
             <div class="btn_col_2">
-              <input type="button" value="商品コード" class="transition2 btn1" 
+              <input type="button" value="分類" class="transition2 btn1" 
               onclick="location.hash = document.moveform.urlname.value; return false;">
             </div>
           </div>
         </form>
+        -->
         <!--
         <form id="form1" name="form1">
           <input type="text" class="form_style bc1" v-model="s_order_no" maxlength="30" name="s_order_no">
@@ -142,7 +144,7 @@
           <thead>
             <tr>
               <th class="gc3">商品名 <button type="button" class="" @click="ForwardReverse('product_name',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_name',2)">▼</button></th>
-              <th class="gc3">商品コード</th>
+              <th class="gc3">分類 <button type="button" class="" @click="ForwardReverse('product_number',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_number',2)">▼</button></th>
               <th class="gc3">単位</th>
               <!--<th class="gc4">入数</th>-->
               <th class="gc3">在庫</th>
@@ -405,16 +407,42 @@ export default {
       }
     },
     ForwardReverse(arraykey,q1) {
-      //console.log("ForwardReverse in  = " + q1);
-      //console.log("ForwardReverse in  = " + arraykey);
-      this.sort_k = arraykey;
-      this.sort_q = q1;
-
       var sort_target = arraykey; //ソート対象を変数で設定
-      //if(q1 == 1) this.details3.sort((a, b) => a[sort_target] - b[sort_target]);
-      //if(q1 == 2) this.details3.sort((a, b) => b[sort_target] - a[sort_target]);
-      //console.log("ForwardReverse in details3 = " + this.details3);
 
+      if(q1 == 1) {
+        this.details3 = this.details3.sort(function(x, y) {
+          if (x[sort_target] === y[sort_target]) {
+            return 0;
+          }
+          else if (x[sort_target] === null) {
+            return 1;
+          }
+          else if (y[sort_target] === null) {
+            return -1;
+          }
+          else {
+            return x[sort_target].localeCompare(y[sort_target], 'ja');
+          }
+        });
+      }
+      if(q1 == 2) {
+        this.details3 = this.details3.sort(function(x, y) {
+          if (x[sort_target] === y[sort_target]) {
+            return 0;
+          }
+          else if (x[sort_target] === null) {
+            return 1;
+          }
+          else if (y[sort_target] === null) {
+            return -1;
+          }
+          else {
+            return y[sort_target].localeCompare(x[sort_target], 'ja');
+          }
+        });
+      }
+
+      /*
       if(q1 == 1) {
         this.details3.sort(function(a,b){
           if(a[sort_target] > b[sort_target]) {
@@ -437,6 +465,7 @@ export default {
           return 0;
         });
       }
+      */
       //console.log(this.details3);
     },
     StockBtn(eid,inv,nbox,details) {

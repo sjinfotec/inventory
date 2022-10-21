@@ -37,18 +37,39 @@
         <h2 class="h2gc2 ilb" v-if="selectCnt=='d'"><span>資材在庫一覧</span><span>加工2</span></h2>
         <h2 class="h2gc3 ilb" v-if="selectCnt=='e'"><span>資材在庫一覧</span><span>制作</span></h2>
         <h2 class="h2gc3 ilb" v-if="selectCnt=='f'"><span>資材在庫一覧</span><span>情報処理</span></h2>
+        <button type="button" class="btn_gc1 textcolor2" onclick="window.print();">
+            印刷
+        </button>
+      </div>
+      <div id="topform_cnt" class="print-none">
+
+        <form id="form1" name="form3">
+          <input type="text" class="form_style bc1 w4e" v-model="s_department" maxlength="30" name="s_department">
+          <button type="button" class="" @click="searchBtn()">
+            部署 検索
+          </button>
+        </form>
         <form id="form1" name="form2">
-          <input type="text" class="form_style bc1" v-model="s_charge" maxlength="30" name="s_charge">
+          <input type="text" class="form_style bc1 w4e" v-model="s_charge" maxlength="30" name="s_charge">
           <button type="button" class="" @click="searchBtn()">
             担当 検索
           </button>
         </form>
         <form id="form1" name="form1">
-          <input type="text" class="form_style bc1" v-model="s_product_name" maxlength="30" name="s_product_name">
+          <input type="text" class="form_style bc1 w10e" v-model="s_product_name" maxlength="30" name="s_product_name">
           <button type="button" class="" @click="searchBtn()">
             商品 検索
           </button>
+          <input type="checkbox" id="s_history" name="s_history" class="mg_l10" v-model="s_history" value="on">
+          <label for="s_history">履歴も含む</label>
         </form>
+        <form id="form1" name="form4">
+          <input type="text" class="form_style bc1 w5e" v-model="s_product_number" maxlength="30" name="s_product_number">
+          <button type="button" class="" @click="searchBtn()">
+            分類 検索
+          </button>
+        </form>
+
       </div>
 
       <div id="tbl_1">
@@ -59,7 +80,7 @@
               <th class="gc2">部署 <button type="button" class="" @click="ForwardReverse('department',1)">▲</button> <button type="button" class="" @click="ForwardReverse('department',2)">▼</button><!-- <a href="./material_management?department=1">▲</a> <a href="./material_management?department=2">▼</a>--></th>
               <th class="gc2">担当 <button type="button" class="" @click="ForwardReverse('charge',1)">▲</button> <button type="button" class="" @click="ForwardReverse('charge',2)">▼</button><!-- <a href="./material_management?charge=1">▲</a> <a href="./material_management?charge=2">▼</a>--></th>
               <th class="gc2">商品名 <button type="button" class="" @click="ForwardReverse('product_name',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_name',2)">▼</button><!-- <a href="./material_management?product_name=1">▲</a> <a href="./material_management?product_name=2">▼</a>--></th>
-              <th class="gc2">商品コード</th>
+              <th class="gc2">分類 <button type="button" class="" @click="ForwardReverse('product_number',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_number',2)">▼</button></th>
               <th class="gc2">発注先</th>
               <th class="gc2">単位</th>
               <th class="gc2">入庫数</th>
@@ -68,14 +89,15 @@
               <th class="gc2">単価</th>
               <th class="gc2">合計金額</th>
               <th class="gc2">備考</th>
+              <th class="gc2">&emsp;</th>
               <!--<th class="gc2">メモ/ノート</th>-->
             </tr>
           </thead>
           <tbody>
             <tr v-for="(item,rowIndex) in details" :key="rowIndex">
               <td class="nbr">{{ item['mdate'] }}</td>
-              <td>{{ item['department'] }}</td>
-              <td>{{ item['charge'] }}</td>
+              <td class="w4e">{{ item['department'] }}</td>
+              <td class="w3e">{{ item['charge'] }}</td>
               <td>{{ item['product_name'] }}</td>
               <td>{{ item['product_number'] }}</td>
               <td>{{ item['order_address'] }}</td>
@@ -89,12 +111,15 @@
                 <div v-else-if="item['total'] === null">{{ Number(item['now_inventory'] * item['unit_price']) | numberFormat }}</div>
               </td>
               <td>{{ item['remarks'] }} </td>
+              <td class="">&emsp;</td>
               <!--<td>{{ item['note'] }}</td>-->
             </tr>
             <tr class="border1">
-              <td colspan="11" class="style1">総合計金額</td>
+              <td colspan="6" class="style1">{{ this.details.length }} 件</td>
+              <td colspan="5" class="style1">総合計金額</td>
               <td class="style1">{{ Number(totalItem(details)) | numberFormat }}</td>
               <td><!--※強制計算無し {{ Number(totals) | numberFormat }}--></td>
+              <td></td>
             </tr>
           </tbody>
         </table>
@@ -103,14 +128,17 @@
     </div><!--end selectMode=='LINEACTIVE'-->
 
     <div id="input_area_1" v-if="selectMode=='COMPLETE'">
-      <div>
+      <div id="top_cnt">
         <h2>在庫 / {{ acttitle }} 完了</h2>
+        <button type="button" class="btn_gc1 textcolor2" onclick="window.print();">
+            印刷
+        </button>
       </div>
             <div id="btn_cnt2">
               <button type="button" class="" @click="backLine()">一覧へ</button>
             </div>
 
-      <div class="" v-if="actionmsgArr.length">
+      <div class="print-none" v-if="actionmsgArr.length">
           <ul class="error-red color_red">
             <li v-for="(actionmsg,index) in actionmsgArr" v-bind:key="index">{{ actionmsg }}</li>
           </ul>
@@ -123,7 +151,7 @@
               <th class="gc2">部署</th>
               <th class="gc2">担当</th>
               <th class="gc2">商品名</th>
-              <th class="gc2">商品コード</th>
+              <th class="gc2">分類</th>
               <th class="gc2">発注先</th>
               <th class="gc2">単位</th>
               <th class="gc2">入庫数</th>
@@ -132,6 +160,7 @@
               <th class="gc2">単価</th>
               <th class="gc2">合計金額</th>
               <th class="gc2">備考</th>
+              <th class="gc2">&emsp;</th>
               <!--
               <th class="gc2">メモ/ノート</th>
               -->
@@ -140,8 +169,8 @@
           <tbody>
             <tr v-for="(item,rowIndex) in details" :key="rowIndex" v-bind:class="classObj1">
               <td class="nbr">{{ item['mdate'] }}</td>
-              <td>{{ item['department'] }}</td>
-              <td>{{ item['charge'] }}</td>
+              <td class="w4e">{{ item['department'] }}</td>
+              <td class="w3e">{{ item['charge'] }}</td>
               <td v-bind:class="(item['status'] == 'newest') ? 'bgcolor5' : ''">{{ item['product_name'] }}</td>
               <td>{{ item['product_number'] }}</td>
               <td>{{ item['order_address'] }}</td>
@@ -150,12 +179,23 @@
               <td class="style1" v-bind:class="(item['delivery'] === 0) ? 'color3' : ''">{{ item['delivery'] }}</td>
               <td class="style1" v-bind:style="(item['now_inventory'] === 0) ? 'color:red' : ''">{{ item['now_inventory'] }}</td>
               <td class="style1">{{ item['unit_price'] }}</td>
-              <td class="style1">{{ item['total'] }}</td>
+              <td class="style1">
+                <div v-if="item['total'] !== null">{{ Number(item['total']) | numberFormat }}</div>
+                <div v-else-if="item['total'] === null">{{ Number(item['now_inventory'] * item['unit_price']) | numberFormat }}</div>
+              </td>
               <td>{{ item['remarks'] }}</td>
+              <td class="">&emsp;</td>
               <!--
               <td>{{ item['note'] }}</td>
               -->
             </tr>
+            <tr class="border1">
+              <td colspan="6" class="style1">{{ this.details.length }} 件</td>
+              <td colspan="5" class="style1">合計金額</td>
+              <td class="style1"><!--{{ Number(search_totals) | numberFormat }}-->{{ Number(totalItem(details)) | numberFormat }}</td>
+              <td colspan="2"></td>
+            </tr>
+
           </tbody>
         </table>
       </div><!-- end tbl_1 -->
@@ -219,8 +259,11 @@ export default {
       classObj1: "",
       view_switch: "off",
       i: 2,
+      s_department: "",
       s_charge: "",
       s_product_name: "",
+      s_product_number: "",
+      s_history: "",
       btnMode: 0,
       calc_now_inventory: "",
       calc_nbox: "",
@@ -229,6 +272,7 @@ export default {
       smode: "",
       itsdate: "",
       totals: "",
+      search_totals: "",
     };
   },
   computed: {
@@ -271,33 +315,38 @@ export default {
       this.selectMode = "COMPLETE";
     },
     ForwardReverse(arraykey,q1) {
-      this.sort_k = arraykey;
-      this.sort_q = q1;
       var sort_target = arraykey; //ソート対象を変数で設定
-      //if(q1 == 1) this.details.sort((a, b) => a[sort_target] - b[sort_target]);
-      //if(q1 == 2) this.details.sort((a, b) => b[sort_target] - a[sort_target]);
       //console.log("ForwardReverse in details = " + this.details);
-
       if(q1 == 1) {
-        this.details.sort(function(a,b){
-          if(a[sort_target] > b[sort_target]) {
+        this.details = this.details.sort(function(x, y) {
+          if (x[sort_target] === y[sort_target]) {
+            return 0;
+          }
+          else if (x[sort_target] === null) {
             return 1;
           }
-          if(a[sort_target] < b[sort_target]) {
+          else if (y[sort_target] === null) {
             return -1;
           }
-          return 0;
+          else {
+            return x[sort_target].localeCompare(y[sort_target], 'ja');
+          }
         });
       }
       if(q1 == 2) {
-        this.details.sort(function(a,b){
-          if(a[sort_target] > b[sort_target]) {
-            return -1;
+        this.details = this.details.sort(function(x, y) {
+          if (x[sort_target] === y[sort_target]) {
+            return 0;
           }
-          if(a[sort_target] < b[sort_target]) {
+          else if (x[sort_target] === null) {
             return 1;
           }
-          return 0;
+          else if (y[sort_target] === null) {
+            return -1;
+          }
+          else {
+            return y[sort_target].localeCompare(x[sort_target], 'ja');
+          }
         });
       }
       //console.log("ForwardReverse in details sort result = " + this.details);
@@ -368,7 +417,8 @@ export default {
         this.acttitle = "検索";
         var motion_msg = "検索";
         var messages = [];
-        var arrayParams = { s_charge : this.s_charge , s_product_name : this.s_product_name , marks : 'a'};
+        //var arrayParams = { s_charge : this.s_charge , s_product_name : this.s_product_name , marks : 'a'};
+        var arrayParams = { s_department : this.s_department , s_charge : this.s_charge , s_product_name : this.s_product_name , s_product_number : this.s_product_number , marks : this.selectCnt , s_history : this.s_history};
         this.postRequest("/material_management/search", arrayParams)
           .then(response  => {
             this.putThenSearch(response, motion_msg);
@@ -435,7 +485,17 @@ export default {
       if (res.details.length > 0) {
           this.details = res.details;
           //this.classObj1 = (this.details[0].status == 'newest') ? 'bgcolor3' : '';
-          this.product_title = res.s_charge + res.s_product_name;
+          if(res.s_history) {
+            this.str_s_history = ' 履歴含む';
+          }
+          else {
+            this.str_s_history = '';
+          }
+          if (res.search_totals) {
+            this.search_totals = res.search_totals[0].total_s;
+          }
+
+          this.product_title = res.s_department + res.s_charge + res.s_product_name + res.s_product_number + this.str_s_history;
           //console.log("putThenSearch in res.s_product_name = " + res.s_product_name);
           this.$toasted.show(this.product_title + " " + eventtext + "しました");
           this.actionmsgArr.push(this.product_title + " を検索しました。");
