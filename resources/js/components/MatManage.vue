@@ -41,27 +41,38 @@
         <h2 class="h2gc3 ilb" v-if="selectCnt=='e'"><span>資材在庫一覧</span><span>制作</span></h2>
         <h2 class="h2gc3 ilb" v-if="selectCnt=='f'"><span>資材在庫一覧</span><span>情報処理</span></h2>
         <h2 class="h2gc3 ilb" v-if="selectCnt=='s'"><span>資材在庫一覧</span><span>システム</span></h2>
+        <button type="button" class="btn_gc1 textcolor2" onclick="window.print();">
+            印刷
+        </button>
+      </div>
+      <div id="topform_cnt" class="print-none">
         <form id="form1" name="form3">
-          <input type="text" class="form_style bc1" v-model="s_department" maxlength="30" name="s_department">
+          <input type="text" class="form_style bc1 w4e" v-model="s_department" maxlength="30" name="s_department">
           <button type="button" class="" @click="searchBtn()">
             部署 検索
           </button>
         </form>
         <form id="form1" name="form2">
-          <input type="text" class="form_style bc1" v-model="s_charge" maxlength="30" name="s_charge">
+          <input type="text" class="form_style bc1 w4e" v-model="s_charge" maxlength="30" name="s_charge">
           <button type="button" class="" @click="searchBtn()">
             担当 検索
           </button>
         </form>
         <form id="form1" name="form1">
-          <input type="text" class="form_style bc1" v-model="s_product_name" maxlength="30" name="s_product_name">
+          <input type="text" class="form_style bc1 w10e" v-model="s_product_name" maxlength="30" name="s_product_name">
           <button type="button" class="" @click="searchBtn()">
             商品 検索
           </button>
-          <input type="checkbox" id="s_history" name="s_history" class="mg_l20" v-model="s_history" value="on">
+          <input type="checkbox" id="s_history" name="s_history" class="mg_l10" v-model="s_history" value="on">
           <label for="s_history">履歴も含む</label>
         </form>
-        <button type="button" class="" @click="NewBtn()">
+        <form id="form1" name="form4">
+          <input type="text" class="form_style bc1 w5e" v-model="s_product_number" maxlength="30" name="s_product_number">
+          <button type="button" class="" @click="searchBtn()">
+            分類 検索
+          </button>
+        </form>
+        <button type="button" class="btn_gc2" @click="NewBtn()">
           新規登録
         </button>
       </div>
@@ -74,7 +85,7 @@
               <th class="gc2">部署 <button type="button" class="" @click="ForwardReverse('department',1)">▲</button> <button type="button" class="" @click="ForwardReverse('department',2)">▼</button><!-- <a href="./material_management?department=1">▲</a> <a href="./material_management?department=2">▼</a>--></th>
               <th class="gc2">担当 <button type="button" class="" @click="ForwardReverse('charge',1)">▲</button> <button type="button" class="" @click="ForwardReverse('charge',2)">▼</button><!-- <a href="./material_management?charge=1">▲</a> <a href="./material_management?charge=2">▼</a>--></th>
               <th class="gc2">商品名 <button type="button" class="" @click="ForwardReverse('product_name',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_name',2)">▼</button><!-- <a href="./material_management?product_name=1">▲</a> <a href="./material_management?product_name=2">▼</a>--></th>
-              <th class="gc2">商品コード</th>
+              <th class="gc2">分類 <button type="button" class="" @click="ForwardReverse('product_number',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_number',2)">▼</button></th>
               <th class="gc2">発注先 <button type="button" class="" @click="ForwardReverse('order_address',1)">▲</button> <button type="button" class="" @click="ForwardReverse('order_address',2)">▼</button></th>
               <th class="gc2">単位</th>
               <th class="gc2">入庫数</th>
@@ -93,8 +104,8 @@
           <tbody>
             <tr v-for="(item,rowIndex) in details" :key="rowIndex">
               <td class="nbr">{{ item['mdate'] }}</td>
-              <td>{{ item['department'] }}</td>
-              <td>{{ item['charge'] }}</td>
+              <td class="w4e">{{ item['department'] }}</td>
+              <td class="w3e">{{ item['charge'] }}</td>
               <td>{{ item['product_name'] }}</td>
               <td>{{ item['product_number'] }}</td>
               <td>{{ item['order_address'] }}</td>
@@ -110,7 +121,7 @@
               -->
               <td>{{ item['remarks'] }}</td>
               <!--<td>{{ item['note'] }}</td>-->
-              <td class="nbr">
+              <td class="nbr w2e">
                 <button type="button" class="style1" @click="EditBtn(item['id'], item['product_code'], details[rowIndex].product_name, 'update', rowIndex)">
                 更新
                 </button>
@@ -120,7 +131,8 @@
               </td>
             </tr>
             <tr class="border1">
-              <td colspan="11" class="style1">総合計金額</td>
+              <td colspan="6" class="style1">{{ this.details.length }} 件</td>
+              <td colspan="5" class="style1">総合計金額</td>
               <td class="style1">{{ Number(totals) | numberFormat }}</td>
               <td colspan="2"></td>
             </tr>
@@ -200,7 +212,7 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate gc2">商品コード</div>
+          <div class="cate gc2">分類</div>
           <div class="inputzone">
             <input
               type="text"
@@ -458,14 +470,17 @@
 
 
     <div id="input_area_1" v-if="selectMode=='COMPLETE'">
-      <div>
+      <div id="top_cnt">
         <h2>在庫 / {{ acttitle }} 完了</h2>
+        <button type="button" class="btn_gc1 textcolor2" onclick="window.print();">
+            印刷
+        </button>
       </div>
             <div id="btn_cnt2">
               <button type="button" class="" @click="backLine()">一覧へ</button>
             </div>
 
-      <div class="" v-if="actionmsgArr.length">
+      <div class="print-none" v-if="actionmsgArr.length">
           <ul class="error-red color_red">
             <li v-for="(actionmsg,index) in actionmsgArr" v-bind:key="index">{{ actionmsg }}</li>
           </ul>
@@ -478,7 +493,7 @@
               <th class="gc2">部署</th>
               <th class="gc2">担当</th>
               <th class="gc2">商品名</th>
-              <th class="gc2">商品コード</th>
+              <th class="gc2">分類</th>
               <th class="gc2">発注先</th>
               <th class="gc2">単位</th>
               <!--<th class="gc2">入数</th>-->
@@ -500,8 +515,8 @@
           <tbody>
             <tr v-for="(item,rowIndex) in details" :key="rowIndex" v-bind:class="classObj1">
               <td class="nbr">{{ item['mdate'] }}</td>
-              <td>{{ item['department'] }}</td>
-              <td>{{ item['charge'] }}</td>
+              <td class="w4e">{{ item['department'] }}</td>
+              <td class="w3e">{{ item['charge'] }}</td>
               <td v-bind:class="(item['status'] == 'newest') ? 'bgcolor5' : ''">{{ item['product_name'] }}</td>
               <td>{{ item['product_number'] }}</td>
               <td>{{ item['order_address'] }}</td>
@@ -520,7 +535,7 @@
               <!--
               <td>{{ item['note'] }}</td>
               -->
-              <td>
+              <td class="nbr w2e">
                 <!--
                 id={{ item['id'] }} re_id={{ re_id }}
                 -->
@@ -541,6 +556,13 @@
                 </div>
               </td>
             </tr>
+            <tr class="border1">
+              <td colspan="6" class="style1">{{ this.details.length }} 件</td>
+              <td colspan="5" class="style1">合計金額</td>
+              <td class="style1">{{ Number(search_totals) | numberFormat }}</td>
+              <td colspan="2" class="style1 font1"><div v-if="this.str_s_history"> ※合計金額に履歴は含まれていません</div></td>
+            </tr>
+
           </tbody>
         </table>
       </div><!-- end tbl_1 -->
@@ -623,7 +645,7 @@
             </div>
           </div>
           <div class="inputgroup w1">
-            <div class="cate gc2">商品コード</div>
+            <div class="cate gc2">分類</div>
             <div class="inputzone">
               <input
                 type="text"
@@ -966,7 +988,7 @@
               <th class="gc2">部署</th>
               <th class="gc2">担当</th>
               <th class="gc2">商品名</th>
-              <th class="gc2">商品コード</th>
+              <th class="gc2">分類</th>
               <th class="gc2">発注先</th>
               <th class="gc2">単位</th>
               <th class="gc2">入庫数</th>
@@ -1085,6 +1107,7 @@ export default {
       s_department: "",
       s_charge: "",
       s_product_name: "",
+      s_product_number: "",
       s_history: "",
       str_s_history: "",
       btnMode: 0,
@@ -1095,6 +1118,7 @@ export default {
       smode: "",
       itsdate: "",
       totals: "",
+      search_totals: "",
     };
   },
   // マウント時
@@ -1285,7 +1309,6 @@ export default {
       //console.log(this.details);
     },
 
-
     // -------------------- サーバー処理 ----------------------------
         // 取得処理
     getItem(sc) {
@@ -1343,7 +1366,7 @@ export default {
         this.acttitle = "検索";
         var motion_msg = "検索";
         var messages = [];
-        var arrayParams = { s_department : this.s_department , s_charge : this.s_charge , s_product_name : this.s_product_name , marks : this.selectCnt , s_history : this.s_history};
+        var arrayParams = { s_department : this.s_department , s_charge : this.s_charge , s_product_name : this.s_product_name , s_product_number : this.s_product_number , marks : this.selectCnt , s_history : this.s_history};
         this.postRequest("/material_management/search", arrayParams)
           .then(response  => {
             this.putThenSearch(response, motion_msg);
@@ -1492,12 +1515,17 @@ export default {
           else {
             this.str_s_history = '';
           }
-          this.product_title = res.s_department + res.s_charge + res.s_product_name + this.str_s_history;
+          console.log("putThenSearch in res.search_totals = " + res.search_totals[0].total_s);
+          if (res.search_totals) {
+            this.search_totals = res.search_totals[0].total_s;
+          }
+
+          this.product_title = res.s_department + res.s_charge + res.s_product_name + res.s_product_number + this.str_s_history;
           //console.log("putThenSearch in res.s_product_name = " + res.s_product_name);
           this.$toasted.show(this.product_title + " " + eventtext + "しました");
           this.actionmsgArr.push(this.product_title + " を検索しました。");
       } else {
-          this.actionmsgArr.push(this.s_department + this.s_charge + this.s_product_name + " が見つかりませんでした。","");
+          this.actionmsgArr.push(this.s_department + this.s_charge + this.s_product_name + this.s_product_number + " が見つかりませんでした。","");
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
