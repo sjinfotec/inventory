@@ -447,6 +447,10 @@ header button {width:auto;}
   width:15%;
   text-align:center;
 }
+#tbl_1 .font1 {
+  font-size:1.2rem;
+  
+}
 #tbl_1 .w1 {
   width:5em;
 }

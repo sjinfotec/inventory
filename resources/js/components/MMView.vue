@@ -89,6 +89,7 @@
               <th class="gc2">単価</th>
               <th class="gc2">合計金額</th>
               <th class="gc2">備考</th>
+              <th class="gc2">&emsp;</th>
               <!--<th class="gc2">メモ/ノート</th>-->
             </tr>
           </thead>
@@ -110,12 +111,15 @@
                 <div v-else-if="item['total'] === null">{{ Number(item['now_inventory'] * item['unit_price']) | numberFormat }}</div>
               </td>
               <td>{{ item['remarks'] }} </td>
+              <td class="">&emsp;</td>
               <!--<td>{{ item['note'] }}</td>-->
             </tr>
             <tr class="border1">
-              <td colspan="11" class="style1">総合計金額</td>
+              <td colspan="6" class="style1">{{ this.details.length }} 件</td>
+              <td colspan="5" class="style1">総合計金額</td>
               <td class="style1">{{ Number(totalItem(details)) | numberFormat }}</td>
               <td><!--※強制計算無し {{ Number(totals) | numberFormat }}--></td>
+              <td></td>
             </tr>
           </tbody>
         </table>
@@ -134,7 +138,7 @@
               <button type="button" class="" @click="backLine()">一覧へ</button>
             </div>
 
-      <div class="" v-if="actionmsgArr.length">
+      <div class="print-none" v-if="actionmsgArr.length">
           <ul class="error-red color_red">
             <li v-for="(actionmsg,index) in actionmsgArr" v-bind:key="index">{{ actionmsg }}</li>
           </ul>
@@ -156,6 +160,7 @@
               <th class="gc2">単価</th>
               <th class="gc2">合計金額</th>
               <th class="gc2">備考</th>
+              <th class="gc2">&emsp;</th>
               <!--
               <th class="gc2">メモ/ノート</th>
               -->
@@ -174,12 +179,23 @@
               <td class="style1" v-bind:class="(item['delivery'] === 0) ? 'color3' : ''">{{ item['delivery'] }}</td>
               <td class="style1" v-bind:style="(item['now_inventory'] === 0) ? 'color:red' : ''">{{ item['now_inventory'] }}</td>
               <td class="style1">{{ item['unit_price'] }}</td>
-              <td class="style1">{{ item['total'] }}</td>
+              <td class="style1">
+                <div v-if="item['total'] !== null">{{ Number(item['total']) | numberFormat }}</div>
+                <div v-else-if="item['total'] === null">{{ Number(item['now_inventory'] * item['unit_price']) | numberFormat }}</div>
+              </td>
               <td>{{ item['remarks'] }}</td>
+              <td class="">&emsp;</td>
               <!--
               <td>{{ item['note'] }}</td>
               -->
             </tr>
+            <tr class="border1">
+              <td colspan="6" class="style1">{{ this.details.length }} 件</td>
+              <td colspan="5" class="style1">合計金額</td>
+              <td class="style1"><!--{{ Number(search_totals) | numberFormat }}-->{{ Number(totalItem(details)) | numberFormat }}</td>
+              <td colspan="2"></td>
+            </tr>
+
           </tbody>
         </table>
       </div><!-- end tbl_1 -->
@@ -256,6 +272,7 @@ export default {
       smode: "",
       itsdate: "",
       totals: "",
+      search_totals: "",
     };
   },
   computed: {
@@ -474,6 +491,10 @@ export default {
           else {
             this.str_s_history = '';
           }
+          if (res.search_totals) {
+            this.search_totals = res.search_totals[0].total_s;
+          }
+
           this.product_title = res.s_department + res.s_charge + res.s_product_name + res.s_product_number + this.str_s_history;
           //console.log("putThenSearch in res.s_product_name = " + res.s_product_name);
           this.$toasted.show(this.product_title + " " + eventtext + "しました");

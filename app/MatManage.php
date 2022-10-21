@@ -806,10 +806,22 @@ class MatManage extends Model
 
 			);
             if(!empty($this->param_department)){
+                $str = "%".$this->param_department."%";
+				if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
+				$matchThese['is_deleted'] = 0;
+                //Log::info("getSearch this->param_department -- ".$str);
+                $data->where('department','LIKE', $str)
+                ->where($matchThese)
+                ->orderBy('id', 'DESC');
+
+
+
+                /*
                 $data->where('department', $this->param_department)
                 ->where('status','newest')
 				->where('is_deleted', 0)
                 ->orderBy('id', 'DESC');
+                */
                 //Log::info("getSearch this->param_department -- ".$this->param_department." / this->param_marks -- ".$this->param_marks);
 
                 $result = $data
@@ -890,9 +902,19 @@ class MatManage extends Model
             ->select(DB::raw('SUM(total) as total_s'));
 
             if(!empty($this->param_department)){
+                /*
                 $data->where('department', $this->param_department)
                 ->where('status','newest')
 				->where('is_deleted', 0)
+                ->orderBy('id', 'DESC');
+                */
+
+
+                $str = "%".$this->param_department."%";
+				$matchThese['status'] = 'newest';
+				$matchThese['is_deleted'] = 0;
+                $data->where('department','LIKE', $str)
+                ->where($matchThese)
                 ->orderBy('id', 'DESC');
 
                 $result = $data
@@ -910,7 +932,7 @@ class MatManage extends Model
             }
             if(!empty($this->param_product_name)){
                 $str = "%".$this->param_product_name."%";
-				if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
+				$matchThese['status'] = 'newest';
 				$matchThese['is_deleted'] = 0;
                 //Log::info("getSearchA this->param_company_name -- ".$str);
                 $data->where('product_name','LIKE', $str)
@@ -924,7 +946,7 @@ class MatManage extends Model
 
             if(!empty($this->param_product_number)){
                 $str = "%".$this->param_product_number."%";
-				if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
+				$matchThese['status'] = 'newest';
 				$matchThese['is_deleted'] = 0;
 	            $data->where('product_number','LIKE', $str)
                 ->where($matchThese)

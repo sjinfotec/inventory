@@ -131,7 +131,8 @@
               </td>
             </tr>
             <tr class="border1">
-              <td colspan="11" class="style1">総合計金額</td>
+              <td colspan="6" class="style1">{{ this.details.length }} 件</td>
+              <td colspan="5" class="style1">総合計金額</td>
               <td class="style1">{{ Number(totals) | numberFormat }}</td>
               <td colspan="2"></td>
             </tr>
@@ -479,7 +480,7 @@
               <button type="button" class="" @click="backLine()">一覧へ</button>
             </div>
 
-      <div class="" v-if="actionmsgArr.length">
+      <div class="print-none" v-if="actionmsgArr.length">
           <ul class="error-red color_red">
             <li v-for="(actionmsg,index) in actionmsgArr" v-bind:key="index">{{ actionmsg }}</li>
           </ul>
@@ -556,9 +557,10 @@
               </td>
             </tr>
             <tr class="border1">
-              <td colspan="11" class="style1">合計金額</td>
+              <td colspan="6" class="style1">{{ this.details.length }} 件</td>
+              <td colspan="5" class="style1">合計金額</td>
               <td class="style1">{{ Number(search_totals) | numberFormat }}</td>
-              <td colspan="2"></td>
+              <td colspan="2" class="style1 font1"><div v-if="this.str_s_history"> ※合計金額に履歴は含まれていません</div></td>
             </tr>
 
           </tbody>
@@ -1305,9 +1307,6 @@ export default {
       }
 */
       //console.log(this.details);
-    },
-    totalItem: function (item) {
-      return item.total + item.total;
     },
 
     // -------------------- サーバー処理 ----------------------------
