@@ -150,7 +150,7 @@
               <th class="gc2">日付</th>
               <th class="gc2">部署</th>
               <th class="gc2">担当</th>
-              <th class="gc2">商品名</th>
+              <th class="gc2">商品名 <button type="button" class="" @click="ForwardReverse('product_name',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_name',2)">▼</button></th>
               <th class="gc2">分類</th>
               <th class="gc2">発注先</th>
               <th class="gc2">単位</th>
