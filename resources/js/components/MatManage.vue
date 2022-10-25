@@ -492,7 +492,7 @@
               <th class="gc2">日付</th>
               <th class="gc2">部署</th>
               <th class="gc2">担当</th>
-              <th class="gc2">商品名</th>
+              <th class="gc2">商品名 <button type="button" class="" @click="ForwardReverse('product_name',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_name',2)">▼</button></th>
               <th class="gc2">分類</th>
               <th class="gc2">発注先</th>
               <th class="gc2">単位</th>
@@ -1520,7 +1520,7 @@ export default {
             this.search_totals = res.search_totals[0].total_s;
           }
 
-          this.product_title = res.s_department + res.s_charge + res.s_product_name + res.s_product_number + this.str_s_history;
+          this.product_title = res.s_department + ' ' + res.s_charge + ' ' + res.s_product_name + ' ' + res.s_product_number + ' ' + this.str_s_history;
           //console.log("putThenSearch in res.s_product_name = " + res.s_product_name);
           this.$toasted.show(this.product_title + " " + eventtext + "しました");
           this.actionmsgArr.push(this.product_title + " を検索しました。");

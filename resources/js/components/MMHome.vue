@@ -63,7 +63,27 @@
           </li>
           </ul>
       </div>
-      <div id="version_cnt">version 1.2</div>
+      <!--<div id="version_cnt"><button type="button" class="customize" @click="viewBtn(2)">version 1.3</button></div>-->
+      <div id="version_cnt"><a @click="viewBtn(2)">version 1.3</a></div>
+      <div id="tbl_2" v-if="view_switch=='on'">
+      <table>
+        <thead>
+          <tr>
+          <th>version</th>
+          <th>date</th>
+          <th>overview</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1.3</td><td>2022/10/25</td><td>検索項目追加＆検索結果金額表示</td></tr>
+          <tr><td>1.2</td><td>2022/10/01</td><td>検索機能強化＆昇降順の正確性アップ</td></tr>
+          <tr><td>1.1</td><td>2022/08/25</td><td>部署項目追加変更＆小型UPDATE</td></tr>
+          <tr><td>1.0</td><td>2022/08/01</td><td>初版</td></tr>
+
+        </tbody>
+      </table>
+      
+      </div>
   </div>
 </template>
 <script>
@@ -94,6 +114,8 @@ export default {
       dialogVisible: false,
       messageshowsearch: false,
       infomationmessage: [],
+      view_switch: "off",
+      i: 2,
     };
   },
   // マウント時
@@ -102,6 +124,18 @@ export default {
     //this.login_user_role = this.authusers["role"];
   },
   methods: {
+    viewBtn(go) {
+    var amari = this.i % go;
+    console.log("viewBtn amari = " + amari);
+    if(amari == 0){
+      console.log("viewBtn amari 0");
+      this.view_switch = 'on';
+    } else {
+      this.view_switch = 'off';
+    }
+    this.i = this.i + 1;
+    console.log("viewBtn i = " + this.i);
+    },
     // ------------------------ サーバー処理 ----------------------------
     // -------------------- 共通 ----------------------------
   }
