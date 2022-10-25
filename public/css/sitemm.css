@@ -39,6 +39,7 @@ a {
   color:#3355AA;
   text-decoration: underline #55b2ff;
   text-underline-offset: 0.2em;
+  cursor: pointer;
 }
 a:hover {
   text-decoration: underline red;
@@ -290,6 +291,37 @@ header button {width:auto;}
   transform: translateY(-50%);
 */
 }
+
+#tbl_2 {
+  position: relative;
+  width:100%;
+  z-index:0;
+  font-size:1.2rem;
+  /*box-sizing: border-box;*/
+}
+#tbl_2 table{
+  width:100%;
+  border-collapse: collapse;
+  margin-bottom:0px;
+  border-spacing:0;
+  border-left:1px solid #888888;
+  border-top:1px solid #888888;
+  border-bottom:1px solid #888888;
+}
+#tbl_2 thead th{
+  white-space: nowrap;
+  /*background:#ccbb55;*/
+  border-right:1px solid #888888;
+  border-bottom:1px solid #888888;
+  padding:0.2rem;
+}
+#tbl_2 td{
+  padding:0.2rem;
+  border-right:1px solid #888888;
+  border-bottom:1px dashed #888888;
+}
+
+
 
 
 /*--------------------## 在庫 / 一覧 ##--------------------*/
