@@ -91,8 +91,8 @@
               <td class="style1">{{ item['calc_nbox'] }}箱 <span v-if="item['calc_nbox_mod'] !== 0">{{ item['calc_nbox_mod'] }}{{ item['unit'] }}</span></td>
               -->
               <td>{{ item['order_address'] }}</td>
-              <td>{{ item['unit_price'] }}</td>
-              <td>{{ item['total'] }}</td>
+              <td class="style1">{{ Number(item.unit_price) | numberFormat }}</td>
+              <td class="style1"><div v-if="item['total'] !== null">{{ Number(item['total']) | numberFormat }}</div></td>
               <td>{{ item['remarks'] }}</td>
               <td>{{ item['note'] }}</td>
               <td>
@@ -519,8 +519,8 @@
               <td class="style1" v-bind:style="(item['now_inventory'] === 0) ? 'color:red' : ''">{{ item['now_inventory'] }}</td>
               <td class="style1">{{ item['nbox'] }}</td>
               <td>{{ item['order_address'] }}</td>
-              <td>{{ item['unit_price'] }}</td>
-              <td>{{ item['total'] }}</td>
+              <td class="style1">{{ Number(item.unit_price) | numberFormat }}</td>
+              <td class="style1"><div v-if="item['total'] !== null">{{ Number(item['total']) | numberFormat }}</div></td>
               <td>{{ item['remarks'] }}</td>
               <td>{{ item['note'] }}</td>
               <td>
@@ -1000,8 +1000,8 @@
               <td class="style1" v-bind:style="(item['now_inventory'] === 0) ? 'color:red' : ''">{{ item['now_inventory'] }}</td>
               <td class="style1">{{ item['nbox'] }}</td>
               <td>{{ item['order_address'] }}</td>
-              <td>{{ item['unit_price'] }}</td>
-              <td>{{ item['total'] }}</td>
+              <td class="style1">{{ Number(item.unit_price) | numberFormat }}</td>
+              <td class="style1"><div v-if="item['total'] !== null">{{ Number(item['total']) | numberFormat }}</div></td>
               <td>{{ item['remarks'] }}</td>
               <td>{{ item['note'] }}</td>
               <td><!-- id={{ item['id'] }} edit_id={{ edit_id }} --></td>
@@ -1112,6 +1112,11 @@ export default {
   // マウント時
   mounted() {
       this.getItem();
+  },
+  filters: {
+    numberFormat: function(num){
+      return num.toLocaleString();
+    }
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
