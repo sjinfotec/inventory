@@ -146,15 +146,16 @@
               <th class="gc3">商品名 <button type="button" class="" @click="ForwardReverse('product_name',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_name',2)">▼</button></th>
               <th class="gc3">分類 <button type="button" class="" @click="ForwardReverse('product_number',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_number',2)">▼</button></th>
               <th class="gc3">単位</th>
-              <!--<th class="gc4">入数</th>-->
+              <th class="gc3">単価</th>
               <th class="gc3">在庫</th>
               <!--<th class="gc4">箱数</th>-->
               <th class="gc3">在庫結果</th>
               <!--<th class="gc4">箱数結果</th>-->
               <th class="gc3">棚卸在庫</th>
+              <th class="gc3">合計金額</th>
               <!--<th class="gc4">棚卸箱数</th>-->
-              <!--<th class="gc4">エリア</th>-->
               <th class="gc3">&nbsp;</th>
+              <th class="gc3">備考</th>
             </tr>
           </thead>
           <tbody>
@@ -163,22 +164,24 @@
               <td ><span class="posi_a1" v-bind:id="item['product_number']"></span>{{ item['product_name'] }}</td>
               <td class="">{{ item['product_number'] }}</td>
               <td class="nbr">{{ item['unit'] }}</td>
-              <!--<td class="style1">{{ item['quantity'] }}</td>-->
+              <td class="style1">{{ item['unit_price'] }}</td>
               <td class="style1">{{ item['now_inventory'] }}</td>
               <!--<td class="style1">{{ item['nbox'] }}</td>-->
               <td class="style1"><span class="color1" v-if="item['cal_now_inventory'] === 0">&#10004;</span><span class="color2 bold" v-else-if="item['cal_now_inventory'] !== 0">{{ item['cal_now_inventory'] }}</span></td>
               <!--<td class="style1"><span class="color1" v-if="item['cal_nbox'] === 0">&#10004;</span><span class="color2 bold" v-else-if="item['cal_nbox'] !== 0">{{ item['cal_nbox'] }}</span></td>-->
-              <td class="style3" v-bind:class="(item['status'] === 'stockup') ? 'bgcolor4' : ''"><input type="text" class="form_style bc1" v-model="details3[rowIndex].stock_now_inventory" maxlength="11" name="now_inventory"></td>
+              <td class="style3" v-bind:class="(item['status'] === 'stockup') ? 'bgcolor4' : ''"><input type="number" class="form_style bc1" v-model="details3[rowIndex].stock_now_inventory" maxlength="11" name="now_inventory"></td>
+              <td class="style1">{{ item['cal_total_price'] }}</td>
               <!--<td class="style1" v-bind:class="(item['status'] === 'stockup') ? 'bgcolor4' : ''"><input type="text" class="form_style bc1" v-model="details3[rowIndex].stock_nbox" maxlength="16" name="nbox"></td>-->
               <!--<td class="nbr"><span v-if="item['marks'] == 'a'">1F</span><span v-if="item['marks'] == 'b'">2F</span></td>-->
               <td>
-                <input type="hidden" v-model="details3[rowIndex].stock_month = stock_month" name="stock_month">
+                <input type="hidden" v-model="details3[rowIndex].stock_month" name="stock_month">
                 <div id="btn_cnt1">
                   <button type="button" class="style1 mg_r" @click="stockUpdate(rowIndex,6)">
                   棚卸更新
                   </button>
                 </div>
               </td>
+              <td class="style3" ><textarea class="form_style2 bc1" v-model="details3[rowIndex].remarks" name="remarks"></textarea></td>
             </tr>
           </tbody>
         </table>

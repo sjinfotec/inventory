@@ -995,6 +995,7 @@ class MatManage extends Model
                     'quantity',
                     'now_inventory',
                     'nbox',
+                    'unit_price',
                     'status',
 					'marks',
                     'created_user',

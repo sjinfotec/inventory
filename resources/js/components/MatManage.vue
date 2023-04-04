@@ -718,7 +718,7 @@
               <input
                 type="number"
                 class="form_style bc2"
-                v-model.number="details[index].now_inventory + details[index].receipt - details[index].delivery"
+                v-model.number="item['now_inventory'] + item['receipt'] - item['delivery']"
                 maxlength="11"
                 name="now_inventory"
                 v-bind:disabled="isDisabled"
@@ -1004,7 +1004,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr  v-for="(item,rowIndex) in details2" :key="rowIndex" v-bind:class="(item['id'] == edit_id) ? 'bgcolor3' : ''"">
+            <tr  v-for="(item,rowIndex) in details2" :key="rowIndex" v-bind:class="(item['id'] == edit_id) ? 'bgcolor3' : ''">
               <td>{{ item['mdate'] }}</td>
               <td>{{ item['department'] }}</td>
               <td>{{ item['charge'] }}</td>
@@ -1119,6 +1119,7 @@ export default {
       itsdate: "",
       totals: "",
       search_totals: "",
+      ivtotal: "",
     };
   },
   // マウント時

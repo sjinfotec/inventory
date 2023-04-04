@@ -411,6 +411,8 @@ class MMStockController extends Controller
             $mm_stock->setNboxAttribute($details['nbox']);
             $mm_stock->setStocknowinventoryAttribute($details['stock_now_inventory']);
             $mm_stock->setStocknboxAttribute($details['stock_nbox']);
+            $mm_stock->setUnitpriceAttribute($details['unit_price']);
+            $mm_stock->setRemarksAttribute($details['remarks']);
             $mm_stock->setStatusAttribute($details['status']);
             $mm_stock->setMarksAttribute($details['marks']);
             $mm_stock->setStockmonthAttribute($details['stock_month']);
