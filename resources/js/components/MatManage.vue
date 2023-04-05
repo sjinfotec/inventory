@@ -718,7 +718,7 @@
               <input
                 type="number"
                 class="form_style bc2"
-                v-model.number="item['now_inventory'] + item['receipt'] - item['delivery']"
+                v-model.number="nowInventory"
                 maxlength="11"
                 name="now_inventory"
                 v-bind:disabled="isDisabled"
@@ -784,7 +784,7 @@
               <input
                 type="text"
                 class="form_style bc2"
-                v-model="(details[index].now_inventory + details[index].receipt - details[index].delivery) * details[index].unit_price"
+                v-model="priceTotal"
                 maxlength="100"
                 name="total"
                 v-bind:disabled="isDisabled"
@@ -886,6 +886,19 @@
             </div>
           </div>
 
+          <div class="inputgroup">
+            <div class="cate">ID</div>
+            <div class="inputzone">
+              <input
+                type="hidden"
+                class="form_style"
+                v-model="details[index].id"
+                maxlength="11"
+                name="id"
+              />
+              <span>{{ details[index].id }}</span>
+            </div>
+          </div>
           <div class="inputgroup">
             <div class="cate">商品CODE</div>
             <div class="inputzone">
@@ -1119,13 +1132,34 @@ export default {
       itsdate: "",
       totals: "",
       search_totals: "",
-      ivtotal: "",
+      innerNowIv: "",
+      innerTotal: "",
     };
   },
   // マウント時
   mounted() {
       //this.getItem();
       this.dateset();
+  },
+  computed: {
+    nowInventory: {
+      get () {
+        this.innerNowIv = this.details[0].now_inventory + this.details[0].receipt - this.details[0].delivery;
+        return this.innerNowIv
+      },
+      set (value) {
+        this.innerNowIv = value;
+      }
+    },
+    priceTotal: {
+      get () {
+        this.innerTotal = (this.details[0].now_inventory + this.details[0].receipt - this.details[0].delivery) * this.details[0].unit_price;
+        return this.innerTotal
+      },
+      set (value) {
+        this.innerTotal = value;
+      }
+    }
   },
   filters: {
     numberFormat: function(num){

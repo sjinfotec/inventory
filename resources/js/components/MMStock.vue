@@ -167,9 +167,9 @@
               <td class="style1">{{ item['unit_price'] }}</td>
               <td class="style1">{{ item['now_inventory'] }}</td>
               <!--<td class="style1">{{ item['nbox'] }}</td>-->
-              <td class="style1"><span class="color1" v-if="item['cal_now_inventory'] === 0">&#10004;</span><span class="color2 bold" v-else-if="item['cal_now_inventory'] !== 0">{{ item['cal_now_inventory'] }}</span></td>
+              <td class="style1"><span class="color1" v-if="item['cal_now_inventory'] == 0">&#10004;</span><span class="color2 bold" v-else-if="item['cal_now_inventory'] !== 0">{{ item['cal_now_inventory'] }}</span></td>
               <!--<td class="style1"><span class="color1" v-if="item['cal_nbox'] === 0">&#10004;</span><span class="color2 bold" v-else-if="item['cal_nbox'] !== 0">{{ item['cal_nbox'] }}</span></td>-->
-              <td class="style3" v-bind:class="(item['status'] === 'stockup') ? 'bgcolor4' : ''"><input type="number" class="form_style bc1" v-model="details3[rowIndex].stock_now_inventory" maxlength="11" name="now_inventory"></td>
+              <td class="style3" v-bind:class="(item['status'] === 'stockup') ? 'bgcolor4' : ''"><input type="number" class="form_style bc1" v-model="details3[rowIndex].stock_now_inventory" maxlength="11" name="now_inventory" min="0"></td>
               <td class="style1">{{ item['cal_total_price'] }}</td>
               <!--<td class="style1" v-bind:class="(item['status'] === 'stockup') ? 'bgcolor4' : ''"><input type="text" class="form_style bc1" v-model="details3[rowIndex].stock_nbox" maxlength="16" name="nbox"></td>-->
               <!--<td class="nbr"><span v-if="item['marks'] == 'a'">1F</span><span v-if="item['marks'] == 'b'">2F</span></td>-->
@@ -183,6 +183,13 @@
               </td>
               <td class="style3" ><textarea class="form_style2 bc1" v-model="details3[rowIndex].remarks" name="remarks"></textarea></td>
             </tr>
+            <tr class="border1">
+              <td colspan="4" class="style1">{{ this.details3.length }} 件</td>
+              <td colspan="3" class="style1">合計金額</td>
+              <td class="style1">{{ Number(totals) | numberFormat }}</td>
+              <td colspan="2" class="style1 font1"><div v-if="this.str_s_history"> ※合計金額に履歴は含まれていません</div></td>
+            </tr>
+
           </tbody>
         </table>
       </div><!-- end tbl_1 -->
@@ -274,7 +281,7 @@ import {requestable} from '../mixins/requestable.js';
 import { useRouter } from 'vue-router';
 
 export default {
- components: {
+  components: {
 
   },
   mixins: [ requestable , checkable ],
@@ -293,6 +300,11 @@ export default {
     }
   },
   computed: {
+  },
+  filters: {
+    numberFormat: function(num){
+      return num.toLocaleString();
+    }
   },
   data() {
     return {
@@ -335,6 +347,9 @@ export default {
       s_order_no: "",
       btnMode: 0,
       stock_month: "",
+      totals: "",
+      search_totals: "",
+      str_s_history: "",
             
     };
   },
@@ -350,8 +365,6 @@ export default {
   },
   setup() {
 
-  },
-  filters:{ 
   },
   // マウント時
   mounted() {
@@ -697,6 +710,17 @@ export default {
         this.details = res.details;
         this.details2 = res.details2;
         this.details3 = res.details3;
+        this.count = this.details3.length;
+        var pt = 0;
+        
+        this.details3.forEach(function(element, index) {
+          //console.log('getThen in details3.forEach = ' + element.cal_total_price);
+          if((typeof element.cal_total_price == 'string')) {
+            pt = pt + Number(element.cal_total_price);
+            console.log('getThen in typeof element.cal_total_price = ' + pt);
+          }
+        });
+        this.totals = pt;
         //this.product_title = res.details[0].product_name;
         if (typeof this.details3 !== 'undefined') {
           //console.log('getthen in this.details3.length = ' + this.details3.length); 

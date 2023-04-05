@@ -51,7 +51,7 @@
                     <!-- .panel -->
                     <div id="footer">
                         <div class="foot_cnt">
-                            <small>© 2022 Inventory Controll System</small>
+                            <small>© 2022-2023 Inventory Controll System</small>
                         </div>
                     </div>
                     <!-- /.panel -->

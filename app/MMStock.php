@@ -303,6 +303,17 @@ class MMStock extends Model
 	}
 
 
+	// 在庫数差
+	private $param_cal_now_inventory;
+	public function getParamCalnowinventoryAttribute(){
+		return $this->param_cal_now_inventory;
+	}
+	public function setParamCalnowinventoryAttribute($value)
+	{
+		$this->param_cal_now_inventory = $value;
+	}
+
+
 
     // ------------- メソッド --------------
 
@@ -386,6 +397,7 @@ class MMStock extends Model
      */
     public function updateDataStock($upkind){
         try {
+            $result_tablemm = "";
             if($upkind == 4)    {
                 //削除マーク
                 DB::table($this->table)
@@ -430,11 +442,28 @@ class MMStock extends Model
                     'updated_user'=>$this->updated_user,
                     'updated_at'=>$this->updated_at
                 ]);
+
+                if($this->param_cal_now_inventory !== 0) {
+                    $result_tablemm = DB::table($this->table_mm)
+                    ->where('product_code', $this->product_code)
+                    ->where('status', 'newest')
+                    ->update([
+                        'now_inventory' => $this->stock_now_inventory,
+                        'total' => $this->unit_price * $this->stock_now_inventory,
+                        'updated_user'=> $this->updated_user,
+                        'updated_at'=> $this->updated_at
+                    ]);
+    
+                }
+
+
+
                 $re_data['id'] = $this->id;
                 $re_data['stock_now_inventory'] = $this->stock_now_inventory;
                 $re_data['stock_nbox'] = $this->stock_nbox;
                 $re_data['product_code'] = $this->product_code;
                 $re_data['product_name'] = $this->product_name;
+                $re_data['result_tablemm'] = $result_tablemm;
                 return $re_data;
 
             }

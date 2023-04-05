@@ -418,6 +418,8 @@ class MMStockController extends Controller
             $mm_stock->setStockmonthAttribute($details['stock_month']);
             $mm_stock->setUpdateduserAttribute($updateuser);
             $mm_stock->setUpdatedatAttribute($systemdate);
+            $mm_stock->setParamCalnowinventoryAttribute($details['cal_now_inventory']);
+            Log::debug("MMStockController update cal_now_inventory = ".$details['cal_now_inventory']);
 
             
             //if ($details['id'] == "" || $details['id'] == null) {
