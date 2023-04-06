@@ -1,5 +1,16 @@
 <template>
   <div>
+    <div v-if="dataarr['selecthtml'] == 'select_cnt'">
+      {{ dataarr['selecthtml'] }}
+      <div>
+        <ul>
+          <li><a href="/">在庫管理システム －預かり・在庫－</a></li>
+          <li><a href="/mm">在庫管理システム －資材－</a></li>
+        </ul>
+
+      </div>
+    </div>
+    <div v-else>
       <div id="tips_cnt">
           <h3 class="">在庫管理システム／使い方</h3>
           <ul class="lst1">
@@ -50,6 +61,7 @@
           </li>
           </ul>
       </div>
+    </div>
   </div>
 </template>
 <script>
@@ -59,8 +71,6 @@ import { checkable } from "../mixins/checkable.js";
 import { requestable } from "../mixins/requestable.js";
 
 // CONST
-const CONST_C025 = "C025";
-const CONST_C038 = "C038";
 
 export default {
   name: "Home",
@@ -72,6 +82,10 @@ export default {
       default: []
     }
   */
+    dataarr: {
+      type: Object,
+      default: []
+    }
   },
   data() {
     return {
@@ -83,6 +97,7 @@ export default {
       dialogVisible: false,
       messageshowsearch: false,
       infomationmessage: [],
+      
     };
   },
   // マウント時

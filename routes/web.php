@@ -15,7 +15,22 @@
 //     return view('home');
 // });
 
-Auth::routes();
+
+
+//Auth::routes([
+//    'register' => false,
+//    'reset'    => false,
+//]);
+
+//Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
+//Route::post('login', 'Auth\LoginController@login');
+//Route::post('logout', 'Auth\LoginController@logout')->name('logout');
+
+Route::get('login', 'HomeController@contents_select')->name('login');
+Route::post('login', 'HomeController@contents_select');
+Route::post('logout', 'HomeController@contents_select')->name('logout');
+
+
 // Route::get('/{any}', function () {
 //     return view('app');
 // })->where('any', '.*');
@@ -23,7 +38,7 @@ Auth::routes();
 // ------------------ ホーム --------------------------------
 //Route::get('/', 'HomeController@index')->middleware('auth');
 Route::get('/', 'HomeController@index');
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/home', 'HomeController@index');
 
 Route::get('/view_inventory', 'ViewInventoryController@index');
 Route::get('/inventory', 'ViewInventoryController@search');

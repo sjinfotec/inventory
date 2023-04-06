@@ -312,7 +312,27 @@ class MMStock extends Model
 	{
 		$this->param_cal_now_inventory = $value;
 	}
+    
+	// MM在庫数setParamMmnowinventoryAttribute
+	private $param_mm_now_inventory;
+	public function getParamMmnowinventoryAttribute(){
+		return $this->param_mm_now_inventory;
+	}
+	public function setParamMmnowinventoryAttribute($value)
+	{
+		$this->param_mm_now_inventory = $value;
+	}
 
+    
+	// MM単価Mmunitprice
+	private $param_mm_unit_price;
+	public function getParamMmunitpriceAttribute(){
+		return $this->param_mm_unit_price;
+	}
+	public function setParamMmunitpriceAttribute($value)
+	{
+		$this->param_mm_unit_price = $value;
+	}
 
 
     // ------------- メソッド --------------
@@ -443,7 +463,12 @@ class MMStock extends Model
                     'updated_at'=>$this->updated_at
                 ]);
 
-                if($this->param_cal_now_inventory !== 0) {
+
+                $snini = $this->stock_now_inventory - $this->param_mm_now_inventory;
+                //Log::debug("MMStock updateDataStock snini gettype -> ".gettype($snini));
+                //Log::debug("MMStock updateDataStock snini val -> ".$snini);
+                if(!empty($snini)) {
+                    //Log::debug("MMStock updateDataStock snini !empty in ");
                     $result_tablemm = DB::table($this->table_mm)
                     ->where('product_code', $this->product_code)
                     ->where('status', 'newest')
@@ -651,6 +676,8 @@ class MMStock extends Model
             $columnStr[] = " t1.stock_nbox - t1.nbox AS cal_nbox ";
             */
 
+            $columnStr[] = " t2.unit_price AS mm_unit_price ";
+            $columnStr[] = " t2.now_inventory AS mm_now_inventory ";
             $columnStr[] = " t1.stock_now_inventory AS stock_now_inventory ";
             $columnStr[] = " t1.stock_nbox AS stock_nbox ";
             $columnStr[] = " t1.remarks AS remarks ";

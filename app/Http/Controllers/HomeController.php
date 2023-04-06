@@ -27,11 +27,23 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $authusers = Auth::user();
+        //$authusers = Auth::user();
 
         return view('home',
-            compact(
-                'authusers'
-            ));
+            //compact(
+                //'authusers'
+            //)
+        );
+    }
+    public function contents_select()
+    {
+        $dataarr = array(
+            "selecthtml" => "select_cnt",
+        );
+        return view('home',
+            [
+                'dataarr' => $dataarr
+            ]
+        );
     }
 }
