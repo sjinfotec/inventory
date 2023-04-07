@@ -986,7 +986,7 @@
               <td>note</td>
             </tr>
             -->
-            <tr  v-for="(item,rowIndex) in details2" :key="rowIndex" v-bind:class="(item['id'] == edit_id) ? 'bgcolor3' : ''"">
+            <tr  v-for="(item,rowIndex) in details2" :key="rowIndex" v-bind:class="(item['id'] == edit_id) ? 'bgcolor3' : ''">
               <td>{{ item['charge'] }}</td>
               <td>{{ item['order_no'] }}</td>
               <td>{{ item['company_name'] }}</td>

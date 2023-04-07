@@ -635,11 +635,11 @@ class InventoryZ extends Model
     }
 
     /**
-     * 削除
+     * 削除 // 未使用
      *
      * @return void
      */
-    public function delDataZ(){
+    public function delDataZxxx(){
         try {
             $mainQuery = DB::table($this->table);
             //$mainQuery->where('account_id',$this->param_account_id);
@@ -654,5 +654,40 @@ class InventoryZ extends Model
             throw $e;
         }
     }
+
+
+        /**
+     * 削除
+     *
+     * @return void
+     */
+    public function delData($delkind){
+        try {
+            $mainQuery = DB::table($this->table);
+            //$mainQuery->where('account_id',$this->param_account_id);
+            //$result = $mainQuery->where('status','del')->delete();
+			if($delkind === "one") {
+	            $mainQuery->where('id', $this->id);
+			}
+			elseif($delkind === "all") {
+	            $mainQuery->where('product_id', $this->product_id);
+			}
+			$result = $mainQuery
+            ->delete();
+			$re_data['id'] = $this->id;
+            return $re_data;
+
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+
 
 }

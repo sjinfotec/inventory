@@ -576,8 +576,8 @@
     <div id="input_area_1" v-if="selectMode=='EDT'">
 
       <div id="top_cnt">
-        <h2 v-if="btnMode==='update'">在庫 / 更新</h2>
-        <h2 v-if="btnMode==='fix'">在庫 / 修正</h2>
+        <h2 v-if="btnMode=='update'">在庫 / 更新</h2>
+        <h2 v-if="btnMode=='fix'">在庫 / 修正</h2>
         <button type="button" class="customize" @click="viewBtn(2)">
           追加情報
         </button>

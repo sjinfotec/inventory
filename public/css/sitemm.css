@@ -291,6 +291,15 @@ header button {width:auto;}
   transform: translateY(-50%);
 */
 }
+#tips_cnt .new {
+  display: inline-block;
+  width: 3em;
+  text-align: center;
+  margin-right: 1em;
+  color: #FFFFFF;
+  background:linear-gradient(to bottom, #FF3333 0%, #FF8888 50%, #ccbb55 90%,  #aaeedd 100%);
+  border-radius: 1em;
+}
 
 #tbl_2 {
   position: relative;

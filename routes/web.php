@@ -50,6 +50,7 @@ Route::post('/view_inventory_a/getone', 'ViewInventoryController@getDataAone');
 Route::post('/view_inventory_a/update', 'ViewInventoryController@fixA');
 Route::post('/view_inventory_a/insert', 'ViewInventoryController@storeA');
 Route::post('/view_inventory_a/search', 'ViewInventoryController@getDataAsearch');
+Route::post('/view_inventory_a/delete', 'ViewInventoryController@delete');
 
 // 在庫
 Route::get('/view_inventory_z', 'ViewInventoryController@inventoryz');
@@ -58,6 +59,7 @@ Route::post('/view_inventory_z/getone', 'ViewInventoryController@getDataZone');
 Route::post('/view_inventory_z/update', 'ViewInventoryController@fixZ');
 Route::post('/view_inventory_z/insert', 'ViewInventoryController@storeZ');
 Route::post('/view_inventory_z/search', 'ViewInventoryController@getDataZsearch');
+Route::post('/view_inventory_z/delete', 'ViewInventoryController@delete');
 
 // ステータス変更（ゴミ箱）
 Route::get('/view_inventory_dust', 'ViewInventoryController@inventorydust');

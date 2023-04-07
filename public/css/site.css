@@ -50,6 +50,7 @@ button  {
   color:#FFF;
   background:#bbaa88;
   width:10em;
+  border: 1px solid #888;
 }
 button:hover  {
   background:#DDCCAA;
@@ -219,6 +220,11 @@ header button {width:auto;}
 }
 #page_top:hover{opacity: 0.9;}
 
+.w4e {width: 4em;}
+.w6e {width: 6em;}
+.w8e {width: 8em;}
+.w10e {width: 10em;}
+
 
 /*--------------------## TOP page ##--------------------*/
 #tips_cnt .lst1  {
@@ -288,7 +294,7 @@ header button {width:auto;}
   height:3rem;
   /*width:calc(100% - 8px);*/
   padding:0 4px;
-  width:50%;
+  /*width:50%;*/
   box-sizing: border-box;
   margin-right:10px;
 }

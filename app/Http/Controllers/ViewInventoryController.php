@@ -816,6 +816,7 @@ class ViewInventoryController extends Controller
         $this->array_messagedata = array();
         $s_order_no = "";
         $s_company_name = "";
+        $s_product_name = "";
         $result = true;
         try {
             // パラメータチェック
@@ -840,10 +841,12 @@ class ViewInventoryController extends Controller
             }
             $s_order_no = isset($params['s_order_no']) ? $params['s_order_no'] : "";
             $s_company_name = isset($params['s_company_name']) ? $params['s_company_name'] : "";
+            $s_product_name = isset($params['s_product_name']) ? $params['s_product_name'] : "";
             //Log::debug("getDataAsearch s_company_name = ".$s_company_name);
             $inventory_a = new InventoryA();
             if(isset($s_order_no))      $inventory_a->setParamOrdernoAttribute($s_order_no);
             if(isset($s_company_name))  $inventory_a->setParamCompanynameAttribute($s_company_name);
+            if(isset($s_product_name))  $inventory_a->setParamProductnameAttribute($s_product_name);
             $details =  $inventory_a->getSearchA();
 
             return response()->json(
@@ -1179,6 +1182,111 @@ class ViewInventoryController extends Controller
         }
     }
 
+
+    /**
+     * レコード削除
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function delete(Request $request){
+        global $id ;
+        $this->array_messagedata = array();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['details'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $details = $params['details'];
+            $delkind = $params['delkind'];
+            $re_data = $this->fixdel($details,$delkind);
+            if (!isset($re_data['id'])) {
+                $result = false;
+            }
+
+            return response()->json(
+                ['result' => $result, 'id' => $re_data['id'], 
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * DELETE
+     *
+     * @param [type] $inputs
+     * @return void
+     */
+    private function fixdel($details,$delkind){
+        //$material_management = new MatManage();
+        $systemdate = Carbon::now();
+ 
+        DB::beginTransaction();
+        try{
+
+
+            if($details['order_info'] == 'a') {
+                $inventory_a = new InventoryA();
+                $inventory_a->setIdAttribute($details['id']);
+                $inventory_a->setProductidAttribute($details['product_id']);
+                $re_data = $inventory_a->delData($delkind);
+    
+            }
+            elseif($details['order_info'] == 'z') {
+                $inventory_z = new InventoryZ();
+                $inventory_z->setIdAttribute($details['id']);
+                $inventory_z->setProductidAttribute($details['product_id']);
+                $re_data = $inventory_z->delData($delkind);
+
+            }
+
+            
+            /*
+            $is_exists = $inventory_a->isExistsInfo();
+            if($is_exists){
+                $inventory_a->delDataA();
+            }
+            */
+
+            //$re_data = $material_management->delData($delkind);
+            //Log::info("insertZ in inventory_z = ".$inventory_z);
+
+            DB::commit();
+            return $re_data;
+
+        }catch(\PDOException $pe){
+            Log::error($pe->getMessage());
+            DB::rollBack();
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            DB::rollBack();
+            throw $e;
+        }
+
+    }
 
 
 

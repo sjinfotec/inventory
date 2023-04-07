@@ -7,15 +7,19 @@
       <div id="top_cnt">
         <h2>預かり一覧</h2>
         <form id="form1" name="form2">
-          <input type="text" class="form_style bc1" v-model="s_company_name" maxlength="30" name="s_company_name">
+          <input type="text" class="form_style bc1 w6e" v-model="s_company_name" maxlength="30" name="s_company_name">
           <button type="button" class="" @click="searchBtn2()">
             会社名 検索
           </button>
         </form>
         <form id="form1" name="form1">
-          <input type="text" class="form_style bc1" v-model="s_order_no" maxlength="30" name="s_order_no">
+          <input type="text" class="form_style bc1 w4e" v-model="s_order_no" maxlength="30" name="s_order_no">
           <button type="button" class="" @click="searchBtn()">
             受注番号 検索
+          </button>
+          <input type="text" class="form_style bc1 w8e" v-model="s_product_name" maxlength="30" name="s_product_name">
+          <button type="button" class="" @click="searchBtn()">
+            商品 検索
           </button>
         </form>
         <button type="button" class="" @click="NewBtn()">
@@ -88,10 +92,18 @@
               <td>{{ item['rnum'] }}</td>
               <td>{{ item['shipping_address'] }}</td>
               <td>{{ item['remarks'] }}</td>
-              <td>
+              <td class="nbr">
+                <button type="button" class="style1" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name, 'update', rowIndex)">
+                更新
+                </button>
+                <button type="button" class="style2" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name, 'fix', rowIndex)">
+                修正
+                </button>
+                <!--
                 <button type="button" class="" @click="EditBtn(item['id'],item['product_id'],item['product_name'])">
                 編集
                 </button>
+                -->
               </td>
             </tr>
           </tbody>
@@ -473,6 +485,10 @@
         <h2>預かり / {{ acttitle }} 完了</h2>
       </div>
 
+      <div>
+        <button type="button" onClick="window.location=''">一覧へ</button>
+      </div>
+
       <div class="" v-if="actionmsgArr.length">
           <ul class="error-red color_red">
             <li v-for="(actionmsg,index) in actionmsgArr" v-bind:key="index">{{ actionmsg }}</li>
@@ -521,13 +537,28 @@
               <td>{{ item['rnum'] }}</td>
               <td>{{ item['shipping_address'] }}</td>
               <td>{{ item['remarks'] }}</td>
-              <td>
+              <td class="nbr">
                 <!--
                 id={{ item['id'] }} re_id={{ re_id }}              
                 -->
+                <div v-if="item['status']=='newest'">
+                  <button type="button" class="style1" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name, 'update', rowIndex)">
+                  更新
+                  </button>
+                  <button type="button" class="style2" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name, 'fix', rowIndex)">
+                  修正
+                  </button>
+                </div>
+                <div v-else>
+                  <button type="button" class="style2" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name, 'fix', rowIndex)">
+                  修正
+                  </button>
+                </div>
+                <!--
                 <button v-if="btnMode=='1'" type="button" class="" @click="EditBtn(item['id'], item['product_id'], details[rowIndex].product_name)">
                 編集
                 </button>
+                -->
               </td>
             </tr>
           </tbody>
@@ -540,9 +571,10 @@
     <div id="input_area_1" v-if="selectMode=='EDT'">
 
       <div id="top_cnt">
-        <h2>預かり / 更新-追加-修正</h2>
+        <h2 v-if="btnMode=='update'">預かり / 更新</h2>
+        <h2 v-if="btnMode=='fix'">預かり / 修正</h2>
         <button type="button" class="customize" @click="viewBtn(2)">
-          追加情報
+          管理者
         </button>
       </div>
 
@@ -577,6 +609,7 @@
                 v-model="details[index].order_no"
                 maxlength="30"
                 name="order_no"
+                v-bind:disabled="isDisabled"
               />
             </div>
           </div>
@@ -589,6 +622,7 @@
                 v-model="details[index].company_name"
                 maxlength="40"
                 name="company_name"
+                v-bind:disabled="isDisabled"
               />
             </div>
           </div>
@@ -601,6 +635,7 @@
                 v-model="details[index].product_name"
                 maxlength="100"
                 name="product_name"
+                v-bind:disabled="isDisabled"
               />
             </div>
           </div>
@@ -616,6 +651,7 @@
                 v-model="details[index].unit"
                 maxlength="10"
                 name="unit"
+                v-bind:disabled="isDisabled"
               />
             </div>
           </div>
@@ -628,6 +664,7 @@
                 v-model="details[index].quantity"
                 maxlength="11"
                 name="quantity"
+                v-bind:disabled="isDisabled"
               />
             </div>
           </div>
@@ -751,6 +788,7 @@
                 v-model="details[index].other1"
                 maxlength="10"
                 name="other1"
+                v-bind:disabled="isDisabled"
               />
             </div>
           </div>
@@ -773,7 +811,7 @@
             <div class="cate">グループ</div>
             <div class="inputzone">
               <input
-                type="hidden"
+                type="text"
                 class="form_style"
                 v-model="details[index].marks"
                 maxlength="10"
@@ -799,13 +837,13 @@
             <div class="cate">修正ユーザー</div>
             <div class="inputzone">
               <input
-                type="hidden"
+                type="text"
                 class="form_style"
                 v-model="details[index].updated_user"
                 maxlength="20"
                 name="updated_user"
               />
-              <span>{{ details[index].updated_user }}</span>
+              
             </div>
           </div>
           <div class="inputgroup">
@@ -836,6 +874,19 @@
           </div>
 
           <div class="inputgroup">
+            <div class="cate">ID</div>
+            <div class="inputzone">
+              <input
+                type="hidden"
+                class="form_style"
+                v-model="details[index].id"
+                maxlength="11"
+                name="id"
+              />
+              <span>{{ details[index].id }}</span>
+            </div>
+          </div>
+          <div class="inputgroup">
             <div class="cate">会社ID</div>
             <div class="inputzone">
               <input
@@ -865,26 +916,24 @@
             <div class="cate">ステータス</div>
             <div class="inputzone">
               <input
-                type="hidden"
+                type="text"
                 class="form_style"
                 v-model="details[index].status"
                 maxlength="20"
                 name="status"
               />
-              <span>{{ details[index].status }}</span>
             </div>
           </div>
           <div class="inputgroup">
             <div class="cate">発注情報</div>
             <div class="inputzone">
               <input
-                type="hidden"
+                type="text"
                 class="form_style"
                 v-model="details[index].order_info"
                 maxlength="20"
                 name="order_info"
               />
-              <span>{{ details[index].order_info }}</span>
             </div>
           </div>
           <div class="inputgroup">
@@ -900,14 +949,20 @@
               <span>{{ details[index].is_deleted }}</span>
             </div>
           </div>
-        </div>
+
+          <div id="button1">
+            <button type="button" class="" @click="recordDel(index,'all')">この商品（履歴含む）を削除</button>
+            <button type="button" class="" @click="recordDel(index,'one')">この登録（レコード）を削除</button>
+          </div>
+        </div><!--end v-if="view_switch=='on'-->
+
 
         <div id="button1">
           <div>
-            <div class="btnstyle">
+            <div class="btnstyle" v-if="btnMode==='update'">
               <button type="button" class="style1" @click="dataUpdate(index,1)">在庫の更新</button>
             </div>
-            <div class="btnstyle">
+            <div class="btnstyle" v-if="btnMode==='fix'">
               <button type="button" class="style2" @click="dataUpdate(index,0)">在庫の修正</button>
             </div>
           </div>
@@ -918,10 +973,45 @@
             </div>
             -->
             <div class="btnstyle">
+              <button type="button" class="" @click="backLine()">一覧へ</button>
+            </div>
+            <div class="btnstyle">
+              <button type="button" class="" @click="resultLine()">検索一覧へ</button>
+            </div>
+            <div class="btnstyle" v-if="btnMode==='fix'">
+              <button type="button" class="" @click="dataDel(index,4)">ゴミ箱へ移す</button>
+            </div>
+            <div class="btnstyle" v-if="btnMode==='great'">
+              <button type="button" class="" @click="recordDel(index,'one')">この登録を削除</button>
+            </div>
+          </div>
+        </div>
+
+
+
+
+        <!--
+        <div id="button1">
+          <div>
+            <div class="btnstyle">
+              <button type="button" class="style1" @click="dataUpdate(index,1)">在庫の更新</button>
+            </div>
+            <div class="btnstyle">
+              <button type="button" class="style2" @click="dataUpdate(index,0)">在庫の修正</button>
+            </div>
+          </div>
+          <div>
+            
+            <div class="btnstyle">
+              <button type="button" class="" @click="dataUpdate(index,2)"><span>{{ item['company_name'] }} </span><span>の新しい商品を登録する</span></button>
+            </div>
+            
+            <div class="btnstyle">
               <button type="button" class="" @click="dataDel(index,4)">ゴミ箱へ移す</button>
             </div>
           </div>
         </div>
+        -->
 
       </div><!--end v-for-->
 
@@ -960,9 +1050,9 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item,rowIndex) in details2" :key="rowIndex" v-bind:class="(item['id'] == edit_id) ? 'bgcolor3' : ''"">
+            <tr v-for="(item,rowIndex) in details2" :key="rowIndex" v-bind:class="(item['id'] == edit_id) ? 'bgcolor3' : ''">
               <td >{{ item['charge'] }}</td>
-              <td>{{ item['order_no'] }}</td>
+              <td v-bind:class="(item['status'] == 'newest') ? 'bgcolor5' : ''">{{ item['order_no'] }}</td>
               <td>{{ item['company_name'] }}</td>
               <td>{{ item['product_name'] }}</td>
               <td class="nbr">{{ item['unit'] }}</td>
@@ -978,7 +1068,22 @@
               <td>{{ item['rnum'] }}</td>
               <td>{{ item['shipping_address'] }}</td>
               <td>{{ item['remarks'] }}</td>
-              <td><!-- id={{ item['id'] }} edit_id={{ edit_id }} product_id= {{ product_id }} --></td>
+              <td class="nbr">
+                <!-- id={{ item['id'] }} edit_id={{ edit_id }} product_id= {{ product_id }} -->
+                <div v-if="item['status']=='newest'">
+                  <button type="button" class="style1" @click="EditBtn(item['id'], item['product_id'], details2[rowIndex].product_name, 'update', rowIndex)">
+                  更新
+                  </button>
+                  <button type="button" class="style2" @click="EditBtn(item['id'], item['product_id'], details2[rowIndex].product_name, 'fix', rowIndex)">
+                  修正
+                  </button>
+                </div>
+                <div v-else>
+                  <button type="button" class="style2" @click="EditBtn(item['id'], item['product_id'], details2[rowIndex].product_name, 'fix', rowIndex)">
+                  修正
+                  </button>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -994,12 +1099,12 @@
 <script>
 //import toasted from "vue-toasted";
 import moment from "moment";
-//import {dialogable} from '../mixins/dialogable.js';
+import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
 export default {
-  mixins: [ requestable , checkable ],
+  mixins: [ requestable , checkable , dialogable],
   props: {
     order_info: {
       type: [String, Number],
@@ -1088,7 +1193,9 @@ export default {
       i: 2,
       s_order_no: "",
       s_company_name: "",
+      s_product_name: "",
       btnMode: 0,
+      isDisabled: "",
     };
   },
   // マウント時
@@ -1138,12 +1245,26 @@ export default {
       return flag;
     },
     // ------------------------ イベント処理 ------------------------------------
-    EditBtn(eid,pid,pname) {
+    EditBtnxxxx(eid,pid,pname) {
       //var edit_id = eid;
       //console.log("EditBtn in");
       //console.log(edit_id);
       this.selectMode = 'EDT';
       this.getItemOne(eid,pid,pname);
+    },
+    EditBtn(eid,pid,pname,smode,index) {
+      //var edit_id = eid;
+      //console.log("EditBtn in");
+      //console.log(edit_id);
+      this.selectMode = 'EDT';
+      this.btnMode = smode;
+      this.getItemOne(eid,pid,pname,smode);
+      if(smode === 'fix') {
+        this.isDisabled = false;
+      }
+      else if(smode === 'update') {
+        this.isDisabled = true;
+      }
     },
     NewBtn()  {
       this.inputClear();
@@ -1167,6 +1288,17 @@ export default {
       this.view_switch = 'off';
     }
     this.i = this.i + 1;
+    },
+    backLine() {
+      this.selectMode = "LINEACTIVE";
+      const sc = this.selectCnt;
+      this.getItem(sc);
+
+    },
+    resultLine() {
+      this.details = [];
+      this.searchItem();
+      this.selectMode = "COMPLETE";
     },
     // -------------------- サーバー処理 ----------------------------
     // 取得処理
@@ -1195,7 +1327,7 @@ export default {
         });
     },
     // 取得処理(単)
-    getItemOne(e,p,pn) {
+    getItemOne(e,p,pn,md) {
       this.inputClear();
       //console.log("getitem one in edit_id = " + e);
       //console.log("getitem one in product_id = " + p);
@@ -1206,7 +1338,7 @@ export default {
       this.postRequest("/view_inventory_a/getone", arrayParams)
         .then(response  => {
           //console.log(response);
-          this.getThen(response);
+          this.getThen(response, md);
         })
         .catch(reason => {
           //console.log("getitem reason");
@@ -1221,7 +1353,7 @@ export default {
         this.acttitle = "検索";
         var motion_msg = "検索";
         var messages = [];
-        var arrayParams = { s_order_no : this.s_order_no , order_info : 'a'};
+        var arrayParams = { s_order_no : this.s_order_no , s_company_name : this.s_company_name , s_product_name : this.s_product_name , order_info : 'a'};
         this.postRequest("/view_inventory_a/search", arrayParams)
           .then(response  => {
             this.putThenSearch(response, motion_msg);
@@ -1281,6 +1413,28 @@ export default {
           });
       }
     },
+    // レコード削除処理
+    recordDel(index,dk) {
+        var messages = [];
+        messages.push("この登録を削除しますか？");
+        this.htmlMessageSwal(this.details[index].product_name, messages, "info", true, true).then(
+          result => {
+            if (result) {
+              //this.storeData();
+              var arrayParams = { details : this.details[index] , delkind : dk  };
+              this.postRequest("/view_inventory_a/delete", arrayParams)
+                .then(response  => {
+                  this.putThenRecordDel(response, "削除");
+                })
+                .catch(reason => {
+                  this.serverCatch("削除");
+                });
+
+            }
+          }
+        );
+
+    },
     // 編集変更処理
     dataUpdate(index,k) {
       if (this.checkFormStore()) {
@@ -1294,7 +1448,7 @@ export default {
         if (k == 2) motion_msg = '新しい商品追加';
         this.postRequest("/view_inventory_a/update", arrayParams)
           .then(response  => {
-            this.putThenHead(response, motion_msg);
+            this.putThenHead(response, motion_msg, k);
           })
           .catch(reason => {
             this.serverCatch(motion_msg);
@@ -1375,7 +1529,9 @@ export default {
       }
     },
     // 更新系正常処理
-    putThenHead(response, eventtext) {
+    putThenHead(response, eventtext, k) {
+      let object_mode = {0: 'fix', 1: 'update', 2: 'new'};
+      console.log('key: ' + k + 'value: ' + object_mode[k]);
       var messages = [];
       var res = response.data;
       if (res.result) {
@@ -1388,7 +1544,7 @@ export default {
         this.$toasted.show(this.product_title + " " + eventtext + "しました");
         //console.log("putThenHead in edit_id = " + this.edit_id);
         //console.log("putThenHead in product_id = " + this.product_id);
-        this.getItemOne(this.edit_id,this.product_id,this.product_title);
+        this.getItemOne(this.edit_id,this.product_id,this.product_title,object_mode[k]);
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -1427,6 +1583,26 @@ export default {
         this.getItemOne(this.re_id,this.product_id,this.product_title);
         this.$toasted.show(this.product_title + "を" + eventtext + "しました");
         this.actionmsgArr.push(this.product_title + "ゴミ箱へ移動しました。","");
+        this.selectMode = 'COMPLETE';
+
+      } else {
+        if (res.messagedata.length > 0) {
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
+        } else {
+          this.serverCatch(eventtext);
+        }
+      }
+    },
+    // レコード削除正常処理
+    putThenRecordDel(response, eventtext) {
+      var messages = [];
+      var res = response.data;
+      if (res.result) {
+        this.re_id = res.id;
+        this.acttitle = "削除";
+        this.getItemOne(this.re_id,this.product_id,this.product_title);
+        this.$toasted.show(this.product_title + "を" + eventtext + "しました");
+        this.actionmsgArr.push(this.product_title + " を削除しました。");
         this.selectMode = 'COMPLETE';
 
       } else {
