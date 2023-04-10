@@ -13,11 +13,11 @@
           </button>
         </form>
         <form id="form1" name="form1">
-          <input type="text" class="form_style bc1 w4e" v-model="s_order_no" maxlength="30" name="s_order_no">
+          <input type="text" class="form_style bc1 w6e" v-model="s_order_no" maxlength="30" name="s_order_no">
           <button type="button" class="" @click="searchBtn()">
             受注番号 検索
           </button>
-          <input type="text" class="form_style bc1 w8e" v-model="s_product_name" maxlength="30" name="s_product_name">
+          <input type="text" class="form_style bc1 w8e mg_l2e" v-model="s_product_name" maxlength="30" name="s_product_name">
           <button type="button" class="" @click="searchBtn()">
             商品 検索
           </button>
@@ -486,7 +486,8 @@
       </div>
 
       <div>
-        <button type="button" onClick="window.location=''">一覧へ</button>
+        <!--<button type="button" onClick="window.location=''">一覧へ</button>-->
+        <button type="button" class="" @click="backLine()">一覧へ</button>
       </div>
 
       <div class="" v-if="actionmsgArr.length">
@@ -817,7 +818,6 @@
                 maxlength="10"
                 name="marks"
               />
-              <span>{{ details[index].marks }}</span>
             </div>
           </div>
           <div class="inputgroup">
@@ -979,7 +979,7 @@
               <button type="button" class="" @click="resultLine()">検索一覧へ</button>
             </div>
             <div class="btnstyle" v-if="btnMode==='fix'">
-              <button type="button" class="" @click="dataDel(index,4)">ゴミ箱へ移す</button>
+              <button type="button" class="" @click="dataDel(index,4)">登録抹消</button>
             </div>
             <div class="btnstyle" v-if="btnMode==='great'">
               <button type="button" class="" @click="recordDel(index,'one')">この登録を削除</button>
@@ -1515,12 +1515,13 @@ export default {
           this.details = res.details;
           //this.classObj1 = (this.details[0].status == 'newest') ? 'bgcolor3' : '';
           //if(this.details[0].status == 'newest') this.classObj1 = "bgcolor5";
-          this.product_title = res.s_order_no + res.s_company_name;
+          this.product_title = res.s_order_no + res.s_company_name + res.s_product_name;
           console.log("putThenSearch in res.s_order_no = " + res.s_order_no);
           this.$toasted.show(this.product_title + " " + eventtext + "しました");
-          this.actionmsgArr.push(this.product_title + " を検索しました。","");
+          //this.actionmsgArr.push(this.product_title + " を検索しました。","");
+          this.actionmsgArr.push(this.product_title + " を検索しました。");
       } else {
-          this.actionmsgArr.push(this.s_order_no + this.s_company_name + " が見つかりませんでした。","");
+          this.actionmsgArr.push(this.s_order_no + this.s_company_name + this.s_product_name + " が見つかりませんでした。","");
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {

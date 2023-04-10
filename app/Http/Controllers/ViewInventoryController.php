@@ -831,8 +831,9 @@ class ViewInventoryController extends Controller
             }
             $params = $request->keyparams;
             //Log::debug("getDataAsearch params[s_order_no] = ".$params['s_order_no']);
-            if (!isset($params['s_order_no']) && !isset($params['s_company_name'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "edit_id", Config::get('const.LOG_MSG.parameter_illegal')));
+            if (!isset($params['s_order_no']) && !isset($params['s_company_name']) && !isset($params['s_product_name'])) {
+                //Log::debug("getDataAsearch isset params = ".$params['s_product_name']);
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
                 return response()->json(
                     ['result' => false, 'details' => null,
@@ -842,7 +843,7 @@ class ViewInventoryController extends Controller
             $s_order_no = isset($params['s_order_no']) ? $params['s_order_no'] : "";
             $s_company_name = isset($params['s_company_name']) ? $params['s_company_name'] : "";
             $s_product_name = isset($params['s_product_name']) ? $params['s_product_name'] : "";
-            //Log::debug("getDataAsearch s_company_name = ".$s_company_name);
+            //Log::debug("getDataAsearch s_product_name = ".$s_product_name);
             $inventory_a = new InventoryA();
             if(isset($s_order_no))      $inventory_a->setParamOrdernoAttribute($s_order_no);
             if(isset($s_company_name))  $inventory_a->setParamCompanynameAttribute($s_company_name);
@@ -850,7 +851,7 @@ class ViewInventoryController extends Controller
             $details =  $inventory_a->getSearchA();
 
             return response()->json(
-                ['result' => $result, 'details' => $details, 's_order_no' => $s_order_no, 's_company_name' => $s_company_name,
+                ['result' => $result, 'details' => $details, 's_order_no' => $s_order_no, 's_company_name' => $s_company_name, 's_product_name' => $s_product_name,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
@@ -1023,7 +1024,7 @@ class ViewInventoryController extends Controller
      * @return list results
      */
     public function getDataZsearch(Request $request){
-        //Log::debug("getDataAone in ");
+        //Log::debug("getDataZsearch in ");
         $this->array_messagedata = array();
         $s_order_no = "";
         $s_company_name = "";
@@ -1041,8 +1042,8 @@ class ViewInventoryController extends Controller
             }
             $params = $request->keyparams;
             //Log::debug("getDataAsearch params[s_order_no] = ".$params['s_order_no']);
-            if (!isset($params['s_order_no']) && !isset($params['s_company_name'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "edit_id", Config::get('const.LOG_MSG.parameter_illegal')));
+            if (!isset($params['s_order_no']) && !isset($params['s_company_name']) && !isset($params['s_product_name'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
                 return response()->json(
                     ['result' => false, 'details' => null,
@@ -1051,14 +1052,16 @@ class ViewInventoryController extends Controller
             }
             $s_order_no = isset($params['s_order_no']) ? $params['s_order_no'] : "";
             $s_company_name = isset($params['s_company_name']) ? $params['s_company_name'] : "";
-            //Log::debug("getDataZsearch s_company_name = ".$s_company_name);
+            $s_product_name = isset($params['s_product_name']) ? $params['s_product_name'] : "";
+            //Log::debug("getDataAsearch s_product_name = ".$s_product_name);
             $inventory_z = new InventoryZ();
             if(isset($s_order_no))      $inventory_z->setParamOrdernoAttribute($s_order_no);
             if(isset($s_company_name))  $inventory_z->setParamCompanynameAttribute($s_company_name);
+            if(isset($s_product_name))  $inventory_z->setParamProductnameAttribute($s_product_name);
             $details =  $inventory_z->getSearchZ();
 
             return response()->json(
-                ['result' => $result, 'details' => $details, 's_order_no' => $s_order_no, 's_company_name' => $s_company_name,
+                ['result' => $result, 'details' => $details, 's_order_no' => $s_order_no, 's_company_name' => $s_company_name, 's_product_name' => $s_product_name,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){

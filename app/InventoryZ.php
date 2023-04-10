@@ -180,6 +180,10 @@ class InventoryZ extends Model
     private $param_order_day;
     public function getParamOrderdayAttribute(){ return $this->param_order_day;}
     public function setParamOrderdayAttribute($value){  $this->param_order_day = $value;}
+    // 商品名
+    private $param_product_name;
+    public function getParamProductnameAttribute(){ return $this->param_product_name;}
+    public function setParamProductnameAttribute($value){  $this->param_product_name = $value;}
 
 
     // ------------- メソッド --------------
@@ -523,6 +527,18 @@ class InventoryZ extends Model
                 $data->where('order_no', $this->param_order_no)
                 //->where('status','newest')
                 ->orderBy('id', 'DESC');
+            
+                $result = $data
+                ->get();
+            }
+            if(!empty($this->param_product_name)){
+                $str = "%".$this->param_product_name."%";
+				//if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
+				$matchThese['is_deleted'] = 0;
+                Log::info("getSearchA this->param_product_name -- ".$str);
+                $data->where('product_name','LIKE', $str)
+                ->where($matchThese)
+                ->orderBy('id');
             
                 $result = $data
                 ->get();
