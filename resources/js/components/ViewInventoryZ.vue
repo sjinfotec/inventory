@@ -651,7 +651,7 @@
             <div class="cate gc2">入数</div>
             <div class="inputzone">
               <input
-                type="text"
+                type="number"
                 class="form_style bc2"
                 v-model="details[index].quantity"
                 maxlength="11"
@@ -675,11 +675,13 @@
             <div class="cate gc2">納入数</div>
             <div class="inputzone">
               <input
-                type="text"
+                type="number"
                 class="form_style bc2"
                 v-model="details[index].supply_quantity"
                 maxlength="11"
                 name="supply_quantity"
+                min="0"
+                step="10"
               />
             </div>
           </div>
@@ -699,11 +701,13 @@
             <div class="cate gc2">発注数</div>
             <div class="inputzone">
               <input
-                type="text"
+                type="number"
                 class="form_style bc2"
                 v-model="details[index].order_quantity"
                 maxlength="11"
                 name="order_quantity"
+                min="0"
+                step="10"
               />
             </div>
           </div>
@@ -711,11 +715,12 @@
             <div class="cate gc2">現在在庫</div>
             <div class="inputzone">
               <input
-                type="text"
+                type="number"
                 class="form_style bc2"
-                v-model="details[index].now_inventory"
+                v-model.number="nowInventory"
                 maxlength="11"
                 name="now_inventory"
+                readonly
               />
             </div>
           </div>
@@ -725,7 +730,7 @@
               <input
                 type="text"
                 class="form_style bc2"
-                v-model="details[index].nbox"
+                v-model="boxTotal"
                 maxlength="16"
                 name="nbox"
               />
@@ -764,9 +769,10 @@
               <input
                 type="text"
                 class="form_style bc2"
-                v-model="details[index].total"
+                v-model="priceTotal"
                 maxlength="100"
                 name="total"
+                readonly
               />
             </div>
           </div>
@@ -1171,12 +1177,48 @@ export default {
       btnMode: 0,
       isDisabled: "",
       calc_now_inventory: "",
-      calc_nbox: ""
+      calc_nbox: "",
+      innerNowIv: "",
+      innerTotal: "",
+      innerBox: "",
     };
   },
   // マウント時
   mounted() {
       this.getItem();
+  },
+  computed: {
+    nowInventory: {
+      get () {
+        this.innerNowIv = Number(this.details[0].now_inventory) + Number(this.details[0].supply_quantity) - Number(this.details[0].order_quantity);
+        return this.innerNowIv
+      },
+      set (value) {
+        this.innerNowIv = value;
+      }
+    },
+    priceTotal: {
+      get () {
+        this.innerTotal = parseFloat((Number(this.details[0].now_inventory) + Number(this.details[0].supply_quantity) - Number(this.details[0].order_quantity)) * this.details[0].unit_price).toFixed(2);
+        return this.innerTotal
+      },
+      set (value) {
+        this.innerTotal = value;
+      }
+    },
+    boxTotal: {
+      get () {
+        this.innerBox = Math.floor(this.innerNowIv / Number(this.details[0].quantity));
+        var BoxAmari = this.innerNowIv % Number(this.details[0].quantity);
+        if(BoxAmari !== 0) {
+          this.innerBox += ' ＋ ' + BoxAmari;
+        }
+        return this.innerBox
+      },
+      set (value) {
+        this.innerBox = value;
+      }
+    }
   },
   filters: {
     numberFormat: function(num){
@@ -1404,7 +1446,12 @@ export default {
     dataUpdate(index,k) {
       if (this.checkFormStore()) {
         var messages = [];
-        var arrayParams = { details : this.details[index] , upkind : k };
+        var arrayParams = { 
+          details : this.details[index],
+          upkind : k,
+          now_inventory : this.nowInventory,
+          price_total : this.priceTotal,
+        };
         var motion_msg = "";
         if (k == 0) motion_msg = '修正';
         if (k == 1) motion_msg = '在庫を更新';
