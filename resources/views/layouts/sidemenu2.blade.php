@@ -8,7 +8,7 @@
                                         <li class="gc1"><a class="" href="{{ url('/view_inventory_a') }}"><img class="iconsize_sm" src="{{ asset('images/round-add-circle-w.svg') }}" alt="">預かり</a></li>
                                         <li class="gc2"><a class="" href="{{ url('/view_inventory_z') }}"><img class="iconsize_sm" src="{{ asset('images/round-add-circle-w.svg') }}" alt="">在庫</a></li>
                                         <li class="gc4"><a class="" href="{{ url('/stock_a') }}"><img class="iconsize_sm" src="{{ asset('images/round-add-circle-w.svg') }}" alt="">棚卸</a></li>
-                                        <li class="gc3"><a class="" href="{{ url('/view_inventory_dust') }}"><img class="iconsize_sm" src="{{ asset('images/round-add-circle-w.svg') }}" alt="">ゴミ箱</a></li>
+                                        <li class="gc3"><a class="" href="{{ url('/view_inventory_dust') }}"><img class="iconsize_sm" src="{{ asset('images/round-add-circle-w.svg') }}" alt="">抹消リスト</a></li>
                                         <!--
                                         <li><a class="" href="{{ url('/') }}"><img class="iconsize_sm" src="{{ asset('images/round-business-w.svg') }}" alt=""><span>検索</span></a></li>
                                         -->

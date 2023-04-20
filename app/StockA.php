@@ -27,6 +27,9 @@ class StockA extends Model
     private $nbox;                // 箱数
     private $stock_now_inventory;       // 棚卸在庫
     private $stock_nbox;                // 棚卸箱数
+	private $unit_price;				// 単価
+	private $total;	        			// 合計
+	private $remarks;		    		// 備考
     private $status;              // ステータス
     private $order_info;          // 発注情報
     private $stock_month;         // 棚卸月
@@ -74,6 +77,35 @@ class StockA extends Model
     // 棚卸箱数
     public function getStocknboxAttribute(){ return $this->stock_nbox;}
     public function setStocknboxAttribute($value){  $this->stock_nbox = $value;}
+	// 単価
+	public function getUnitpriceAttribute()
+	{
+		return $this->unit_price;
+	}
+	public function setUnitpriceAttribute($value)
+	{
+		$this->unit_price = $value;
+	}
+
+	// 合計
+	public function getTotalAttribute()
+	{
+		return $this->total;
+	}
+	public function setTotalAttribute($value)
+	{
+		$this->total = $value;
+	}
+
+	// 備考
+	public function getRemarksAttribute()
+	{
+		return $this->remarks;
+	}
+	public function setRemarksAttribute($value)
+	{
+		$this->remarks = $value;
+	}
     // ステータス
     public function getStatusAttribute(){ return $this->status;}
     public function setStatusAttribute($value){  $this->status = $value;}
@@ -273,6 +305,8 @@ class StockA extends Model
             }
             elseif($upkind == 6)    {
                 //棚卸更新
+                if(empty($this->stock_now_inventory) && !empty($this->stock_nbox)) $this->stock_now_inventory = $this->stock_nbox * $this->quantity;
+                if(!empty($this->stock_now_inventory) && empty($this->stock_nbox)) $this->stock_nbox = $this->stock_now_inventory / $this->quantity;
                 DB::table($this->table)
                 ->where('id', $this->id)
                 ->update([
@@ -372,7 +406,8 @@ class StockA extends Model
             $columnStr[] = " t1.unit AS unit ";
             $columnStr[] = " t1.quantity AS quantity ";
 
-            
+            /* now_inventory,nbox,をt1(stock)にすると作成時の値に固定。 t2、t3(inventoryAZ)はリアルタイム在庫による変動制。 */
+            /*
             $columnStr[] = " (
                 CASE 
                     WHEN t1.order_info='a' THEN t2.now_inventory 
@@ -402,16 +437,36 @@ class StockA extends Model
                     ELSE  null 
                 END
                 ) as cal_nbox ";
+            */
             
-            /*
             $columnStr[] = " t1.now_inventory AS now_inventory ";
             $columnStr[] = " t1.nbox AS nbox ";
             $columnStr[] = " t1.stock_now_inventory - t1.now_inventory AS cal_now_inventory ";
-            $columnStr[] = " t1.stock_nbox - t1.nbox AS cal_nbox ";
-            */
+            $columnStr[] = " ROUND(t1.stock_nbox - t1.nbox, 2) AS cal_nbox ";
+
+            
+
 
             $columnStr[] = " t1.stock_now_inventory AS stock_now_inventory ";
             $columnStr[] = " t1.stock_nbox AS stock_nbox ";
+
+
+            $columnStr[] = " (
+                CASE 
+                    WHEN t1.order_info='z' THEN t3.unit_price 
+                    ELSE  null 
+                END
+                ) as unit_price ";
+               
+            $columnStr[] = " (
+                CASE 
+                    WHEN t1.order_info='z' THEN t3.unit_price * t1.stock_now_inventory 
+                    ELSE  null 
+                END
+                ) as cal_total_price ";
+
+
+
 
             $columnStr[] = " t1.status AS status ";
             $columnStr[] = " t1.order_info AS order_info ";

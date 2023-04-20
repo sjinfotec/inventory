@@ -939,8 +939,9 @@ class ViewInventoryController extends Controller
         $this->array_messagedata = array();
         try {
             $details = $this->getDataZFunc($request);
+            $totals = $this->getDataTotalFunc($request);
             return response()->json(
-                ['result' => true, 'details' => $details,
+                ['result' => true, 'details' => $details, 'totals' => $totals,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
@@ -1019,6 +1020,41 @@ class ViewInventoryController extends Controller
     }
 
 
+    /**
+     * 取得total
+     *
+     * @return void
+     */
+    public function getDataTotalFunc($request){
+        $this->array_messagedata = array();
+        //$details = new Collection();
+        $result = true;
+        try {
+            // パラメータセット
+            $params = array();
+            $params_marks = null;
+
+            $inventory_z = new InventoryZ();
+
+            if (isset($request->keyparams)) {
+                $params = $request->keyparams;
+            }
+
+            $details =  $inventory_z->getDataInvtotal();
+
+            return $details;
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+
+
+
     /** z検索SEARCH取得
      *
      * @return list results
@@ -1059,10 +1095,18 @@ class ViewInventoryController extends Controller
             if(isset($s_company_name))  $inventory_z->setParamCompanynameAttribute($s_company_name);
             if(isset($s_product_name))  $inventory_z->setParamProductnameAttribute($s_product_name);
             $details =  $inventory_z->getSearchZ();
+            $search_totals =  $inventory_z->getSearchTotal();
 
             return response()->json(
-                ['result' => $result, 'details' => $details, 's_order_no' => $s_order_no, 's_company_name' => $s_company_name, 's_product_name' => $s_product_name,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                [
+                    'result' => $result, 
+                    'details' => $details, 
+                    's_order_no' => $s_order_no, 
+                    's_company_name' => $s_company_name, 
+                    's_product_name' => $s_product_name,
+                    'search_totals' => $search_totals,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
+                ]
             );
         }catch(\PDOException $pe){
             throw $pe;

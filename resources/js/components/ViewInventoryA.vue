@@ -106,6 +106,12 @@
                 -->
               </td>
             </tr>
+            <tr class="border1">
+              <td colspan="4" class="style1">{{ this.details.length }} 件</td>
+              <td colspan="7" class="style1"></td>
+              <td class="style1"></td>
+              <td colspan="6" class="style1 font1"></td>
+            </tr>
           </tbody>
         </table>
       </div><!-- end tbl_1 -->
@@ -562,6 +568,13 @@
                 -->
               </td>
             </tr>
+            <tr class="border1">
+              <td colspan="4" class="style1">{{ this.details.length }} 件</td>
+              <td colspan="7" class="style1"></td>
+              <td class="style1"></td>
+              <td colspan="6" class="style1 font1"></td>
+            </tr>
+
           </tbody>
         </table>
       </div><!-- end tbl_1 -->
@@ -685,11 +698,13 @@
             <div class="cate gc1">発注数</div>
             <div class="inputzone">
               <input
-                type="text"
+                type="number"
                 class="form_style bc1"
                 v-model="details[index].order_quantity"
                 maxlength="11"
                 name="order_quantity"
+                step="100"
+                min="0"
               />
             </div>
           </div>
@@ -697,11 +712,13 @@
             <div class="cate gc1">入庫数</div>
             <div class="inputzone">
               <input
-                type="text"
+                type="number"
                 class="form_style bc1"
                 v-model="details[index].receipt"
                 maxlength="11"
                 name="receipt"
+                step="100"
+                min="0"
               />
             </div>
           </div>
@@ -721,29 +738,52 @@
             <div class="cate gc1">出庫数</div>
             <div class="inputzone">
               <input
-                type="text"
+                type="number"
                 class="form_style bc1"
                 v-model="details[index].delivery"
                 maxlength="11"
                 name="delivery"
+                step="100"
+                min="0"
               />
             </div>
           </div>
           <div class="inputgroup w1">
             <div class="cate gc1">現在在庫</div>
-            <div class="inputzone">
+            <div class="inputzone" v-if="btnMode==='update'">
               <input
-                type="text"
+                type="number"
                 class="form_style bc1"
-                v-model="details[index].now_inventory"
+                v-model.number="nowInventory"
                 maxlength="11"
                 name="now_inventory"
+                v-bind:disabled="isDisabled"
+              />
+            </div>
+            <div class="inputzone" v-else>
+              <input
+                type="number"
+                class="form_style bc1"
+                v-model.number="details[index].now_inventory"
+                maxlength="11"
+                name="now_inventory"
+                step="100"
               />
             </div>
           </div>
           <div class="inputgroup w1">
             <div class="cate gc1">箱数</div>
-            <div class="inputzone">
+            <div class="inputzone" v-if="btnMode==='update'">
+              <input
+                type="text"
+                class="form_style bc1"
+                v-model="boxTotal"
+                maxlength="16"
+                name="nbox"
+                v-bind:disabled="isDisabled"
+              />
+            </div>
+            <div class="inputzone" v-else>
               <input
                 type="text"
                 class="form_style bc1"
@@ -1196,12 +1236,38 @@ export default {
       s_product_name: "",
       btnMode: 0,
       isDisabled: "",
+      innerNowIv: "",
+      innerBox: "",
     };
   },
   // マウント時
   mounted() {
       this.getItem();
       //this.todayset();
+  },
+  computed: {
+    nowInventory: {
+      get () {
+        this.innerNowIv = Number(this.details[0].now_inventory) + Number(this.details[0].receipt) - Number(this.details[0].delivery);
+        return this.innerNowIv
+      },
+      set (value) {
+        this.innerNowIv = value;
+      }
+    },
+    boxTotal: {
+      get () {
+        this.innerBox = Math.floor(this.innerNowIv / Number(this.details[0].quantity));
+        var BoxAmari = this.innerNowIv % Number(this.details[0].quantity);
+        if(BoxAmari !== 0) {
+          this.innerBox += '+' + BoxAmari;
+        }
+        return this.innerBox
+      },
+      set (value) {
+        this.innerBox = value;
+      }
+    }
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -1245,13 +1311,6 @@ export default {
       return flag;
     },
     // ------------------------ イベント処理 ------------------------------------
-    EditBtnxxxx(eid,pid,pname) {
-      //var edit_id = eid;
-      //console.log("EditBtn in");
-      //console.log(edit_id);
-      this.selectMode = 'EDT';
-      this.getItemOne(eid,pid,pname);
-    },
     EditBtn(eid,pid,pname,smode,index) {
       //var edit_id = eid;
       //console.log("EditBtn in");
@@ -1339,6 +1398,10 @@ export default {
         .then(response  => {
           //console.log(response);
           this.getThen(response, md);
+          if(md == 'update') {
+            this.details[0].receipt = 0;
+            this.details[0].delivery = 0;
+          }
         })
         .catch(reason => {
           //console.log("getitem reason");

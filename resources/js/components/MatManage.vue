@@ -969,7 +969,7 @@
             <div class="btnstyle">
               <button type="button" class="" @click="resultLine()">検索一覧へ</button>
             </div>
-            <div class="btnstyle" v-if="btnMode==='fix'">
+            <div class="btnstyle" v-if="btnMode==='fix' && details[index].status=='newest'">
               <button type="button" class="" @click="dataDel(index,4)">抹消</button>
             </div>
             <div class="btnstyle" v-if="btnMode==='great'">

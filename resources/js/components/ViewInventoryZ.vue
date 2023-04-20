@@ -111,6 +111,13 @@
                 </button>-->
               </td>
             </tr>
+            <tr class="border1">
+              <td colspan="4" class="style1">{{ this.details.length }} 件</td>
+              <td colspan="10" class="style1">総合計金額</td>
+              <td class="style1">{{ Number(totals) | numberFormat }}</td>
+              <td colspan="3"></td>
+            </tr>
+
           </tbody>
         </table>
       </div><!-- end tbl_1 -->
@@ -555,6 +562,13 @@
                 </button>-->
               </td>
             </tr>
+            <tr class="border1">
+              <td colspan="4" class="style1">{{ this.details.length }} 件</td>
+              <td colspan="10" class="style1">合計金額</td>
+              <td class="style1">{{ Number(search_totals) | numberFormat }}</td>
+              <td colspan="3" class="style1 font1"> ※合計金額に履歴は含まれていません</td>
+            </tr>
+
           </tbody>
         </table>
       </div><!-- end tbl_1 -->
@@ -681,7 +695,7 @@
                 maxlength="11"
                 name="supply_quantity"
                 min="0"
-                step="10"
+                step="100"
               />
             </div>
           </div>
@@ -707,30 +721,50 @@
                 maxlength="11"
                 name="order_quantity"
                 min="0"
-                step="10"
+                step="100"
               />
             </div>
           </div>
           <div class="inputgroup w1">
             <div class="cate gc2">現在在庫</div>
-            <div class="inputzone">
+            <div class="inputzone" v-if="btnMode==='update'">
               <input
                 type="number"
                 class="form_style bc2"
                 v-model.number="nowInventory"
                 maxlength="11"
                 name="now_inventory"
-                readonly
+                v-bind:disabled="isDisabled"
+              />
+            </div>
+            <div class="inputzone" v-else>
+              <input
+                type="number"
+                class="form_style bc2"
+                v-model.number="details[index].now_inventory"
+                maxlength="11"
+                name="now_inventory"
+                step="100"
               />
             </div>
           </div>
           <div class="inputgroup w1">
             <div class="cate gc2">箱数</div>
-            <div class="inputzone">
+            <div class="inputzone" v-if="btnMode==='update'">
               <input
                 type="text"
                 class="form_style bc2"
                 v-model="boxTotal"
+                maxlength="16"
+                name="nbox"
+                v-bind:disabled="isDisabled"
+              />
+            </div>
+            <div class="inputzone" v-else>
+              <input
+                type="text"
+                class="form_style bc2"
+                v-model="details[index].nbox"
                 maxlength="16"
                 name="nbox"
               />
@@ -765,14 +799,24 @@
           </div>
           <div class="inputgroup w1">
             <div class="cate gc2">合計</div>
-            <div class="inputzone">
+            <div class="inputzone" v-if="btnMode==='update'">
               <input
                 type="text"
                 class="form_style bc2"
                 v-model="priceTotal"
                 maxlength="100"
                 name="total"
-                readonly
+                v-bind:disabled="isDisabled"
+              />
+            </div>
+            <div class="inputzone" v-else>
+              <input
+                type="number"
+                class="form_style bc2"
+                v-model="details[index].total"
+                maxlength="100"
+                name="total"
+                step="100"
               />
             </div>
           </div>
@@ -971,7 +1015,7 @@
             <div class="btnstyle">
               <button type="button" class="" @click="resultLine()">検索一覧へ</button>
             </div>
-            <div class="btnstyle" v-if="btnMode==='fix'">
+            <div class="btnstyle" v-if="btnMode==='fix' && details[index].status=='newest'">
               <button type="button" class="" @click="dataDel(index,4)">登録抹消</button>
             </div>
             <div class="btnstyle" v-if="btnMode==='great'">
@@ -1178,6 +1222,8 @@ export default {
       isDisabled: "",
       calc_now_inventory: "",
       calc_nbox: "",
+      totals: "",
+      search_totals: "",
       innerNowIv: "",
       innerTotal: "",
       innerBox: "",
@@ -1199,7 +1245,7 @@ export default {
     },
     priceTotal: {
       get () {
-        this.innerTotal = parseFloat((Number(this.details[0].now_inventory) + Number(this.details[0].supply_quantity) - Number(this.details[0].order_quantity)) * this.details[0].unit_price).toFixed(2);
+        this.innerTotal = parseFloat(this.innerNowIv * this.details[0].unit_price).toFixed(2);
         return this.innerTotal
       },
       set (value) {
@@ -1211,7 +1257,7 @@ export default {
         this.innerBox = Math.floor(this.innerNowIv / Number(this.details[0].quantity));
         var BoxAmari = this.innerNowIv % Number(this.details[0].quantity);
         if(BoxAmari !== 0) {
-          this.innerBox += ' ＋ ' + BoxAmari;
+          this.innerBox += '+' + BoxAmari;
         }
         return this.innerBox
       },
@@ -1267,13 +1313,6 @@ export default {
       return flag;
     },
     // ------------------------ イベント処理 ------------------------------------
-    EditBtnxxxx(eid,pid,pname) {
-      //var edit_id = eid;
-      //console.log("EditBtn in");
-      //console.log(edit_id);
-      this.selectMode = 'EDT';
-      this.getItemOne(eid,pid,pname);
-    },
     EditBtn(eid,pid,pname,smode,index) {
       this.selectMode = 'EDT';
       this.btnMode = smode;
@@ -1363,6 +1402,10 @@ export default {
       this.postRequest("/view_inventory_z/getone", arrayParams)
         .then(response  => {
           this.getThen(response, md);
+          if(md == 'update') {
+            this.details[0].supply_quantity = 0;
+            this.details[0].order_quantity = 0;
+          }
         })
         .catch(reason => {
           //console.log("getitem reason");
@@ -1445,6 +1488,11 @@ export default {
     // 編集変更処理
     dataUpdate(index,k) {
       if (this.checkFormStore()) {
+        if(k == 1) {
+          this.details[index].now_inventory = this.nowInventory;
+          this.details[index].total = this.innerTotal;
+          this.details[index].nbox = this.boxTotal;
+        }
         var messages = [];
         var arrayParams = { 
           details : this.details[index],
@@ -1475,6 +1523,10 @@ export default {
         this.details2 = res.details2;
         this.count = this.details.length;
         this.before_count = this.count;
+        
+        if (res.totals) {
+          this.totals = res.totals[0].totals;
+        }
         if ( this.details.length > 0) {
           this.form.id = this.details[0].id;
           this.form.charge = this.details[0].charge;
@@ -1524,6 +1576,10 @@ export default {
       if (res.details.length > 0) {
           this.details = res.details;
           //this.classObj1 = (this.details[0].status == 'newest') ? 'bgcolor3' : '';
+          if (res.search_totals) {
+            this.search_totals = res.search_totals[0].total_s;
+          }
+
           this.product_title = res.s_order_no + res.s_company_name + res.s_product_name;
           console.log("putThenSearch in res.s_order_no = " + res.s_order_no);
           this.$toasted.show(this.product_title + " " + eventtext + "しました");

@@ -438,7 +438,8 @@ class InventoryA extends Model
                 ->orderBy('id');
             }
             else {
-                $data->where('status','newest');
+                $data->where('status','newest')
+                ->orderBy('id', 'DESC');
             }
             // 順番変更 正順逆順
             if(isset($this->param_order_no)){
@@ -490,6 +491,7 @@ class InventoryA extends Model
             
             $result = $data
             //->where('status','newest')
+            
             ->get();
             //$result = $data->get();
 
@@ -570,7 +572,7 @@ class InventoryA extends Model
                 Log::info("getSearchA this->param_product_name -- ".$str);
                 $data->where('product_name','LIKE', $str)
                 ->where($matchThese)
-                ->orderBy('id');
+                ->orderBy('id', 'DESC');
             
                 $result = $data
                 ->get();
@@ -580,7 +582,7 @@ class InventoryA extends Model
                 //Log::info("getSearchA this->param_company_name -- ".$str);
                 $data->where('company_name','LIKE', $str)
                 ->where('status','newest')
-                ->orderBy('id');
+                ->orderBy('id', 'DESC');
             
                 $result = $data
                 ->get();
