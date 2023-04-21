@@ -129,6 +129,12 @@
               <td class="style1">{{ item['unit_price'] }}</td>
               <td class="style1">{{ item['cal_total_price'] }}</td>
             </tr>
+            <tr class="border1">
+              <td colspan="3" class="style1">{{ this.details3.length }} 件</td>
+              <td colspan="11" class="style1">合計金額</td>
+              <td class="style1">{{ Number(totals) | numberFormat }}</td>
+              <!--<td colspan="2" class="style1 font1"> ※合計金額に履歴は含まれていません</td>-->
+            </tr>
           </tbody>
         </table>
       </div><!-- end tbl_1 -->
@@ -1221,6 +1227,7 @@ export default {
       s_order_no: "",
       btnMode: 0,
       stock_month: "",
+      totals: "",
       
     };
   },
@@ -1248,6 +1255,9 @@ export default {
 
   },
   filters:{ 
+    numberFormat: function(num){
+      return num.toLocaleString();
+    }
   },
   // マウント時
   mounted() {
@@ -1601,9 +1611,20 @@ export default {
         this.details = res.details;
         this.details2 = res.details2;
         this.details3 = res.details3;
+        var pt = 0;
         //this.product_title = res.details[0].product_name;
         if (typeof this.details3 !== 'undefined') {
           console.log('getthen in this.details3.length = ' + this.details3.length); 
+          this.details3.forEach(function(element, index) {
+            console.log('getThen in details3.forEach = ' + element.cal_total_price);
+            pt = pt + Number(element.cal_total_price);
+            //if((typeof element.cal_total_price == 'string')) {
+            //  pt = pt + Number(element.cal_total_price);
+            //  console.log('getThen in typeof element.cal_total_price = ' + pt);
+            //}
+          });
+          this.totals = pt;
+
           if (this.details3.length == 0) this.actionmsgArr.push("" + this.stock_month + " 該当データがありません");
         }
         //console.log('getthen in sort_q = ' + sort_q);
