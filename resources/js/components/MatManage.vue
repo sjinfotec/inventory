@@ -1401,7 +1401,14 @@ export default {
         this.acttitle = "検索";
         var motion_msg = "検索";
         var messages = [];
-        var arrayParams = { s_department : this.s_department , s_charge : this.s_charge , s_product_name : this.s_product_name , s_product_number : this.s_product_number , marks : this.selectCnt , s_history : this.s_history};
+        var arrayParams = { 
+          s_department : this.s_department , 
+          s_charge : this.s_charge , 
+          s_product_name : this.s_product_name , 
+          s_product_number : this.s_product_number , 
+          marks : this.selectCnt , 
+          s_history : this.s_history
+        };
         this.postRequest("/material_management/search", arrayParams)
           .then(response  => {
             this.putThenSearch(response, motion_msg);

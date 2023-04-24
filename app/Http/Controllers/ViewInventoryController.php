@@ -1064,6 +1064,7 @@ class ViewInventoryController extends Controller
         $this->array_messagedata = array();
         $s_order_no = "";
         $s_company_name = "";
+        $s_history = "";
         $result = true;
         try {
             // パラメータチェック
@@ -1089,11 +1090,13 @@ class ViewInventoryController extends Controller
             $s_order_no = isset($params['s_order_no']) ? $params['s_order_no'] : "";
             $s_company_name = isset($params['s_company_name']) ? $params['s_company_name'] : "";
             $s_product_name = isset($params['s_product_name']) ? $params['s_product_name'] : "";
+            $s_history = isset($params['s_history']) ? $params['s_history'] : "";
             //Log::debug("getDataAsearch s_product_name = ".$s_product_name);
             $inventory_z = new InventoryZ();
             if(isset($s_order_no))      $inventory_z->setParamOrdernoAttribute($s_order_no);
             if(isset($s_company_name))  $inventory_z->setParamCompanynameAttribute($s_company_name);
             if(isset($s_product_name))  $inventory_z->setParamProductnameAttribute($s_product_name);
+            if(isset($s_history))      $inventory_z->setParamSHistoryAttribute($s_history);
             $details =  $inventory_z->getSearchZ();
             $search_totals =  $inventory_z->getSearchTotal();
 
@@ -1104,6 +1107,7 @@ class ViewInventoryController extends Controller
                     's_order_no' => $s_order_no, 
                     's_company_name' => $s_company_name, 
                     's_product_name' => $s_product_name,
+                    's_history' => $s_history,
                     'search_totals' => $search_totals,
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
                 ]

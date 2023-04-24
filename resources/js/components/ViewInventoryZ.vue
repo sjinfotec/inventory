@@ -21,6 +21,9 @@
           <button type="button" class="" @click="searchBtn()">
             商品 検索
           </button>
+          &emsp;
+          <input type="checkbox" id="s_history" name="s_history" class="mg_l10" v-model="s_history" value="on">
+          <label for="s_history">履歴も含む</label>
         </form>
         <button type="button" class="" @click="NewBtn()">
           新規登録
@@ -566,7 +569,7 @@
               <td colspan="4" class="style1">{{ this.details.length }} 件</td>
               <td colspan="10" class="style1">合計金額</td>
               <td class="style1">{{ Number(search_totals) | numberFormat }}</td>
-              <td colspan="3" class="style1 font1"> ※合計金額に履歴は含まれていません</td>
+              <td colspan="3" class="style1 font1"><div v-if="this.str_s_history"> ※合計金額に履歴は含まれていません</div></td>
             </tr>
 
           </tbody>
@@ -1218,6 +1221,8 @@ export default {
       s_order_no: "",
       s_company_name: "",
       s_product_name: "",
+      s_history: "",
+      str_s_history: "",
       btnMode: 0,
       isDisabled: "",
       calc_now_inventory: "",
@@ -1419,7 +1424,13 @@ export default {
         this.acttitle = "検索";
         var motion_msg = "検索";
         var messages = [];
-        var arrayParams = { s_order_no : this.s_order_no , s_company_name : this.s_company_name , s_product_name : this.s_product_name , order_info : 'z'};
+        var arrayParams = {
+          s_order_no : this.s_order_no ,
+          s_company_name : this.s_company_name , 
+          s_product_name : this.s_product_name , 
+          s_history : this.s_history,
+          order_info : 'z'
+        };
         this.postRequest("/view_inventory_z/search", arrayParams)
           .then(response  => {
             this.putThenSearch(response, motion_msg);
@@ -1575,18 +1586,24 @@ export default {
       //if (res.result) {
       if (res.details.length > 0) {
           this.details = res.details;
+          if(res.s_history) {
+            this.str_s_history = ' 履歴含む';
+          }
+          else {
+            this.str_s_history = '';
+          }
           //this.classObj1 = (this.details[0].status == 'newest') ? 'bgcolor3' : '';
           if (res.search_totals) {
             this.search_totals = res.search_totals[0].total_s;
           }
 
-          this.product_title = res.s_order_no + res.s_company_name + res.s_product_name;
+          this.product_title = res.s_order_no + ' ' + res.s_company_name + ' ' + res.s_product_name + ' ' + this.str_s_history;
           console.log("putThenSearch in res.s_order_no = " + res.s_order_no);
           this.$toasted.show(this.product_title + " " + eventtext + "しました");
           //this.actionmsgArr.push(this.product_title + " を検索しました。","");
           this.actionmsgArr.push(this.product_title + " を検索しました。");
       } else {
-          this.actionmsgArr.push(this.s_order_no + this.s_company_name + this.s_product_name + " が見つかりませんでした。","");
+          this.actionmsgArr.push(this.s_order_no + ' ' + this.s_company_name + ' ' + this.s_product_name + ' ' + this.str_s_history + " が見つかりませんでした。","");
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {

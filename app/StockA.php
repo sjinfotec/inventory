@@ -273,6 +273,7 @@ class StockA extends Model
      */
     public function updateDataStockA($upkind){
         try {
+            $total = $this->stock_now_inventory > 0 ? $this->stock_now_inventory * $this->unit_price : "0";
             if($upkind == 4)    {
                 //削除マーク
                 DB::table($this->table)
@@ -312,6 +313,9 @@ class StockA extends Model
                 ->update([
                     'stock_now_inventory' => $this->stock_now_inventory,
                     'stock_nbox' => $this->stock_nbox,
+                    'unit_price' => $this->unit_price,
+                    'total' => $total,
+                    'remarks' => $this->remarks,
                     'status' => 'stockup',
                     'updated_user'=>$this->updated_user,
                     'updated_at'=>$this->updated_at
@@ -342,7 +346,7 @@ class StockA extends Model
                     'stock_now_inventory' => $this->stock_now_inventory,
                     'stock_nbox' => $this->stock_nbox,
                     'unit_price' => $this->unit_price,
-                    'total' => $this->total,
+                    'total' => $total,
                     'remarks' => $this->remarks,
                     'status' => $this->status,
                     'order_info' => $this->order_info,
@@ -549,7 +553,7 @@ class StockA extends Model
             }
             else {
                 $sqlString .= " order by ";
-                $sqlString .= " t1.id asc ";
+                $sqlString .= " t1.id DESC ";
     
             }
 
