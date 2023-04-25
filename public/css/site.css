@@ -50,6 +50,8 @@ button  {
   color:#FFF;
   background:#bbaa88;
   width:10em;
+  border: 1px solid #888;
+  cursor: pointer;
 }
 button:hover  {
   background:#DDCCAA;
@@ -67,6 +69,8 @@ button:hover  {
 .gc4b  {  background:linear-gradient(to bottom, #FFF 0%, #FFF 80%, #eecc55 80%,  #eecc55 100%);}
 .bc4  {  border:2px solid #eecc55;}
 .bcc4 {  border-color:#eecc55;}
+.gc5  {  background:#99ccee;}
+.bc5  {  border:2px solid #99ccee;}
 .stock_active {  background:linear-gradient(to bottom, #ffeecc 0%, #ffeecc 80%, #eecc55 80%,  #eecc55 100%);}
 .bold { font-weight: bold;}
 
@@ -219,6 +223,14 @@ header button {width:auto;}
 }
 #page_top:hover{opacity: 0.9;}
 
+.w4e {width: 4em;}
+.w6e {width: 6em;}
+.w8e {width: 8em;}
+.w10e {width: 10em;}
+
+.mg_l2e {margin-left: 2em;}
+.mg_l4e {margin-left: 4em;}
+
 
 /*--------------------## TOP page ##--------------------*/
 #tips_cnt .lst1  {
@@ -258,6 +270,34 @@ header button {width:auto;}
   transform: translateY(-50%);
 */
 }
+#tbl_2 {
+  position: relative;
+  width:100%;
+  z-index:0;
+  font-size:1.2rem;
+  /*box-sizing: border-box;*/
+}
+#tbl_2 table{
+  width:100%;
+  border-collapse: collapse;
+  margin-bottom:0px;
+  border-spacing:0;
+  border-left:1px solid #888888;
+  border-top:1px solid #888888;
+  border-bottom:1px solid #888888;
+}
+#tbl_2 thead th{
+  white-space: nowrap;
+  /*background:#ccbb55;*/
+  border-right:1px solid #888888;
+  border-bottom:1px solid #888888;
+  padding:0.2rem;
+}
+#tbl_2 td{
+  padding:0.2rem;
+  border-right:1px solid #888888;
+  border-bottom:1px dashed #888888;
+}
 
 
 /*--------------------## 預かり在庫 / 一覧 ##--------------------*/
@@ -288,7 +328,7 @@ header button {width:auto;}
   height:3rem;
   /*width:calc(100% - 8px);*/
   padding:0 4px;
-  width:50%;
+  /*width:50%;*/
   box-sizing: border-box;
   margin-right:10px;
 }

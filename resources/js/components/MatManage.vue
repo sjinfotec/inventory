@@ -362,7 +362,7 @@
 
       <div id="cnt1" v-if="view_switch=='on'">
         <div class="inputgroup w1">
-          <div class="cate">グループ</div>
+          <div class="cate gc5">グループ</div>
           <div class="inputzone">
             <input
               type="text"
@@ -374,7 +374,7 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate">作成ユーザー</div>
+          <div class="cate gc5">作成ユーザー</div>
           <div class="inputzone">
             <input
               type="text"
@@ -386,7 +386,7 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate">修正ユーザー</div>
+          <div class="cate gc5">修正ユーザー</div>
           <div class="inputzone">
             <input
               type="text"
@@ -398,7 +398,7 @@
           </div>
         </div>
         <div class="inputgroup w2">
-          <div class="cate">作成日時</div>
+          <div class="cate gc5">作成日時</div>
           <div class="inputzone">
             <input
               type="text"
@@ -410,7 +410,7 @@
           </div>
         </div>
         <div class="inputgroup w2">
-          <div class="cate">修正日時</div>
+          <div class="cate gc5">修正日時</div>
           <div class="inputzone">
             <input
               type="text"
@@ -423,7 +423,7 @@
         </div>
 
         <div class="inputgroup w1">
-          <div class="cate">商品CODE</div>
+          <div class="cate gc5">商品CODE</div>
           <div class="inputzone">
             <input
               type="text"
@@ -435,7 +435,7 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate">ステータス</div>
+          <div class="cate gc5">ステータス</div>
           <div class="inputzone">
             <input
               type="text"
@@ -447,7 +447,7 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate">削除フラグ</div>
+          <div class="cate gc5">削除フラグ</div>
           <div class="inputzone">
             <input
               type="text"
@@ -576,10 +576,10 @@
     <div id="input_area_1" v-if="selectMode=='EDT'">
 
       <div id="top_cnt">
-        <h2 v-if="btnMode==='update'">在庫 / 更新</h2>
-        <h2 v-if="btnMode==='fix'">在庫 / 修正</h2>
+        <h2 v-if="btnMode=='update'">在庫 / 更新</h2>
+        <h2 v-if="btnMode=='fix'">在庫 / 修正</h2>
         <button type="button" class="customize" @click="viewBtn(2)">
-          追加情報
+          管理者用
         </button>
       </div>
 
@@ -718,7 +718,7 @@
               <input
                 type="number"
                 class="form_style bc2"
-                v-model.number="details[index].now_inventory + details[index].receipt - details[index].delivery"
+                v-model.number="nowInventory"
                 maxlength="11"
                 name="now_inventory"
                 v-bind:disabled="isDisabled"
@@ -784,7 +784,7 @@
               <input
                 type="text"
                 class="form_style bc2"
-                v-model="(details[index].now_inventory + details[index].receipt - details[index].delivery) * details[index].unit_price"
+                v-model="priceTotal"
                 maxlength="100"
                 name="total"
                 v-bind:disabled="isDisabled"
@@ -821,7 +821,7 @@
 
         <div id="cnt1" v-if="view_switch=='on'">
           <div class="inputgroup">
-            <div class="cate">グループ</div>
+            <div class="cate gc5">グループ</div>
             <div class="inputzone">
               <input
                 type="text"
@@ -834,7 +834,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">作成ユーザー</div>
+            <div class="cate gc5">作成ユーザー</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -847,7 +847,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">修正ユーザー</div>
+            <div class="cate gc5">修正ユーザー</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -860,7 +860,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">作成日時</div>
+            <div class="cate gc5">作成日時</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -873,7 +873,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">修正日時</div>
+            <div class="cate gc5">修正日時</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -887,7 +887,20 @@
           </div>
 
           <div class="inputgroup">
-            <div class="cate">商品CODE</div>
+            <div class="cate gc5">ID</div>
+            <div class="inputzone">
+              <input
+                type="hidden"
+                class="form_style"
+                v-model="details[index].id"
+                maxlength="11"
+                name="id"
+              />
+              <span>{{ details[index].id }}</span>
+            </div>
+          </div>
+          <div class="inputgroup">
+            <div class="cate gc5">商品CODE</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -900,7 +913,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">ステータス</div>
+            <div class="cate gc5">ステータス</div>
             <div class="inputzone">
               <input
                 type="text"
@@ -913,7 +926,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">削除フラグ</div>
+            <div class="cate gc5">削除フラグ</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -926,8 +939,12 @@
             </div>
           </div>
           <div id="button1">
-            <button type="button" class="" @click="recordDel(index,'all')">この商品（履歴含む）を削除</button>
-            <button type="button" class="" @click="recordDel(index,'one')">この登録（レコード）を削除</button>
+            <div class="btnstyle">
+              <button type="button" class="" @click="recordDel(index,'all')">この商品（履歴含む）を削除</button>
+            </div>
+            <div class="btnstyle">
+              <button type="button" class="" @click="recordDel(index,'one')">この登録（レコード）を削除</button>
+            </div>
           </div>
 
         </div>
@@ -956,7 +973,7 @@
             <div class="btnstyle">
               <button type="button" class="" @click="resultLine()">検索一覧へ</button>
             </div>
-            <div class="btnstyle" v-if="btnMode==='fix'">
+            <div class="btnstyle" v-if="btnMode==='fix' && details[index].status=='newest'">
               <button type="button" class="" @click="dataDel(index,4)">抹消</button>
             </div>
             <div class="btnstyle" v-if="btnMode==='great'">
@@ -1004,7 +1021,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr  v-for="(item,rowIndex) in details2" :key="rowIndex" v-bind:class="(item['id'] == edit_id) ? 'bgcolor3' : ''"">
+            <tr  v-for="(item,rowIndex) in details2" :key="rowIndex" v-bind:class="(item['id'] == edit_id) ? 'bgcolor3' : ''">
               <td>{{ item['mdate'] }}</td>
               <td>{{ item['department'] }}</td>
               <td>{{ item['charge'] }}</td>
@@ -1119,12 +1136,34 @@ export default {
       itsdate: "",
       totals: "",
       search_totals: "",
+      innerNowIv: "",
+      innerTotal: "",
     };
   },
   // マウント時
   mounted() {
       //this.getItem();
       this.dateset();
+  },
+  computed: {
+    nowInventory: {
+      get () {
+        this.innerNowIv = this.details[0].now_inventory + this.details[0].receipt - this.details[0].delivery;
+        return this.innerNowIv
+      },
+      set (value) {
+        this.innerNowIv = value;
+      }
+    },
+    priceTotal: {
+      get () {
+        this.innerTotal = (this.details[0].now_inventory + this.details[0].receipt - this.details[0].delivery) * this.details[0].unit_price;
+        return this.innerTotal
+      },
+      set (value) {
+        this.innerTotal = value;
+      }
+    }
   },
   filters: {
     numberFormat: function(num){
@@ -1366,7 +1405,14 @@ export default {
         this.acttitle = "検索";
         var motion_msg = "検索";
         var messages = [];
-        var arrayParams = { s_department : this.s_department , s_charge : this.s_charge , s_product_name : this.s_product_name , s_product_number : this.s_product_number , marks : this.selectCnt , s_history : this.s_history};
+        var arrayParams = { 
+          s_department : this.s_department , 
+          s_charge : this.s_charge , 
+          s_product_name : this.s_product_name , 
+          s_product_number : this.s_product_number , 
+          marks : this.selectCnt , 
+          s_history : this.s_history
+        };
         this.postRequest("/material_management/search", arrayParams)
           .then(response  => {
             this.putThenSearch(response, motion_msg);

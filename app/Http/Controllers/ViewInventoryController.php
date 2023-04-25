@@ -816,6 +816,8 @@ class ViewInventoryController extends Controller
         $this->array_messagedata = array();
         $s_order_no = "";
         $s_company_name = "";
+        $s_product_name = "";
+        $s_history = "";
         $result = true;
         try {
             // パラメータチェック
@@ -830,8 +832,9 @@ class ViewInventoryController extends Controller
             }
             $params = $request->keyparams;
             //Log::debug("getDataAsearch params[s_order_no] = ".$params['s_order_no']);
-            if (!isset($params['s_order_no']) && !isset($params['s_company_name'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "edit_id", Config::get('const.LOG_MSG.parameter_illegal')));
+            if (!isset($params['s_order_no']) && !isset($params['s_company_name']) && !isset($params['s_product_name'])) {
+                //Log::debug("getDataAsearch isset params = ".$params['s_product_name']);
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
                 return response()->json(
                     ['result' => false, 'details' => null,
@@ -840,15 +843,26 @@ class ViewInventoryController extends Controller
             }
             $s_order_no = isset($params['s_order_no']) ? $params['s_order_no'] : "";
             $s_company_name = isset($params['s_company_name']) ? $params['s_company_name'] : "";
-            //Log::debug("getDataAsearch s_company_name = ".$s_company_name);
+            $s_product_name = isset($params['s_product_name']) ? $params['s_product_name'] : "";
+            $s_history = isset($params['s_history']) ? $params['s_history'] : "";
+            //Log::debug("getDataAsearch s_product_name = ".$s_product_name);
             $inventory_a = new InventoryA();
             if(isset($s_order_no))      $inventory_a->setParamOrdernoAttribute($s_order_no);
             if(isset($s_company_name))  $inventory_a->setParamCompanynameAttribute($s_company_name);
+            if(isset($s_product_name))  $inventory_a->setParamProductnameAttribute($s_product_name);
+            if(isset($s_history))      $inventory_a->setParamSHistoryAttribute($s_history);
             $details =  $inventory_a->getSearchA();
 
             return response()->json(
-                ['result' => $result, 'details' => $details, 's_order_no' => $s_order_no, 's_company_name' => $s_company_name,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                [
+                    'result' => $result, 
+                    'details' => $details, 
+                    's_order_no' => $s_order_no, 
+                    's_company_name' => $s_company_name, 
+                    's_product_name' => $s_product_name,
+                    's_history' => $s_history,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
+                ]
             );
         }catch(\PDOException $pe){
             throw $pe;
@@ -935,8 +949,9 @@ class ViewInventoryController extends Controller
         $this->array_messagedata = array();
         try {
             $details = $this->getDataZFunc($request);
+            $totals = $this->getDataTotalFunc($request);
             return response()->json(
-                ['result' => true, 'details' => $details,
+                ['result' => true, 'details' => $details, 'totals' => $totals,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
@@ -1015,15 +1030,51 @@ class ViewInventoryController extends Controller
     }
 
 
+    /**
+     * 取得total
+     *
+     * @return void
+     */
+    public function getDataTotalFunc($request){
+        $this->array_messagedata = array();
+        //$details = new Collection();
+        $result = true;
+        try {
+            // パラメータセット
+            $params = array();
+            $params_marks = null;
+
+            $inventory_z = new InventoryZ();
+
+            if (isset($request->keyparams)) {
+                $params = $request->keyparams;
+            }
+
+            $details =  $inventory_z->getDataInvtotal();
+
+            return $details;
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+
+
+
     /** z検索SEARCH取得
      *
      * @return list results
      */
     public function getDataZsearch(Request $request){
-        //Log::debug("getDataAone in ");
+        //Log::debug("getDataZsearch in ");
         $this->array_messagedata = array();
         $s_order_no = "";
         $s_company_name = "";
+        $s_history = "";
         $result = true;
         try {
             // パラメータチェック
@@ -1038,8 +1089,8 @@ class ViewInventoryController extends Controller
             }
             $params = $request->keyparams;
             //Log::debug("getDataAsearch params[s_order_no] = ".$params['s_order_no']);
-            if (!isset($params['s_order_no']) && !isset($params['s_company_name'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "edit_id", Config::get('const.LOG_MSG.parameter_illegal')));
+            if (!isset($params['s_order_no']) && !isset($params['s_company_name']) && !isset($params['s_product_name'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
                 return response()->json(
                     ['result' => false, 'details' => null,
@@ -1048,15 +1099,28 @@ class ViewInventoryController extends Controller
             }
             $s_order_no = isset($params['s_order_no']) ? $params['s_order_no'] : "";
             $s_company_name = isset($params['s_company_name']) ? $params['s_company_name'] : "";
-            //Log::debug("getDataZsearch s_company_name = ".$s_company_name);
+            $s_product_name = isset($params['s_product_name']) ? $params['s_product_name'] : "";
+            $s_history = isset($params['s_history']) ? $params['s_history'] : "";
+            //Log::debug("getDataAsearch s_product_name = ".$s_product_name);
             $inventory_z = new InventoryZ();
             if(isset($s_order_no))      $inventory_z->setParamOrdernoAttribute($s_order_no);
             if(isset($s_company_name))  $inventory_z->setParamCompanynameAttribute($s_company_name);
+            if(isset($s_product_name))  $inventory_z->setParamProductnameAttribute($s_product_name);
+            if(isset($s_history))      $inventory_z->setParamSHistoryAttribute($s_history);
             $details =  $inventory_z->getSearchZ();
+            $search_totals =  $inventory_z->getSearchTotal();
 
             return response()->json(
-                ['result' => $result, 'details' => $details, 's_order_no' => $s_order_no, 's_company_name' => $s_company_name,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                [
+                    'result' => $result, 
+                    'details' => $details, 
+                    's_order_no' => $s_order_no, 
+                    's_company_name' => $s_company_name, 
+                    's_product_name' => $s_product_name,
+                    's_history' => $s_history,
+                    'search_totals' => $search_totals,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
+                ]
             );
         }catch(\PDOException $pe){
             throw $pe;
@@ -1179,6 +1243,111 @@ class ViewInventoryController extends Controller
         }
     }
 
+
+    /**
+     * レコード削除
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function delete(Request $request){
+        global $id ;
+        $this->array_messagedata = array();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['details'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $details = $params['details'];
+            $delkind = $params['delkind'];
+            $re_data = $this->fixdel($details,$delkind);
+            if (!isset($re_data['id'])) {
+                $result = false;
+            }
+
+            return response()->json(
+                ['result' => $result, 'id' => $re_data['id'], 
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * DELETE
+     *
+     * @param [type] $inputs
+     * @return void
+     */
+    private function fixdel($details,$delkind){
+        //$material_management = new MatManage();
+        $systemdate = Carbon::now();
+ 
+        DB::beginTransaction();
+        try{
+
+
+            if($details['order_info'] == 'a') {
+                $inventory_a = new InventoryA();
+                $inventory_a->setIdAttribute($details['id']);
+                $inventory_a->setProductidAttribute($details['product_id']);
+                $re_data = $inventory_a->delData($delkind);
+    
+            }
+            elseif($details['order_info'] == 'z') {
+                $inventory_z = new InventoryZ();
+                $inventory_z->setIdAttribute($details['id']);
+                $inventory_z->setProductidAttribute($details['product_id']);
+                $re_data = $inventory_z->delData($delkind);
+
+            }
+
+            
+            /*
+            $is_exists = $inventory_a->isExistsInfo();
+            if($is_exists){
+                $inventory_a->delDataA();
+            }
+            */
+
+            //$re_data = $material_management->delData($delkind);
+            //Log::info("insertZ in inventory_z = ".$inventory_z);
+
+            DB::commit();
+            return $re_data;
+
+        }catch(\PDOException $pe){
+            Log::error($pe->getMessage());
+            DB::rollBack();
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            DB::rollBack();
+            throw $e;
+        }
+
+    }
 
 
 

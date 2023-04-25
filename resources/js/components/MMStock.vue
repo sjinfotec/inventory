@@ -43,8 +43,11 @@
           <li>棚卸を更新するには
             <ol class="lst2">
             <li>棚卸在庫に数字を半角で入力</li>
-            <li>『棚卸更新』をクリックすると棚卸在庫・棚卸箱数が更新され、在庫結果に数があっているかの結果が表示されます</li>
+            <li>『棚卸更新』をクリックすると棚卸在庫が更新され、在庫結果に数があっているかの結果が表示されます</li>
             <li>実在庫と入力在庫があっているとチェック（合致）マークが付き、あっていないと過不足が表示されます</li>
+            <li><span class="new">New</span>備考欄にコメントを残せます。『棚卸更新』のクリックで在庫入力との同時更新が可能です</li>
+            <li><span class="new">New</span>棚卸の更新を行うと合計金額が表示されます。※単価は『棚卸 新規開始』をクリックした時点の値になります。</li>
+            <li><span class="new">New</span>過不足があった場合、在庫の本データに在庫結果が自動反映されます。※通常の在庫入出庫更新は棚卸更新を終えた後の操作を推奨します</li>
             </ol>
           </li>
           <li>棚卸の再開
@@ -146,15 +149,16 @@
               <th class="gc3">商品名 <button type="button" class="" @click="ForwardReverse('product_name',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_name',2)">▼</button></th>
               <th class="gc3">分類 <button type="button" class="" @click="ForwardReverse('product_number',1)">▲</button> <button type="button" class="" @click="ForwardReverse('product_number',2)">▼</button></th>
               <th class="gc3">単位</th>
-              <!--<th class="gc4">入数</th>-->
+              <th class="gc3">単価</th>
               <th class="gc3">在庫</th>
               <!--<th class="gc4">箱数</th>-->
               <th class="gc3">在庫結果</th>
               <!--<th class="gc4">箱数結果</th>-->
               <th class="gc3">棚卸在庫</th>
+              <th class="gc3">合計金額</th>
               <!--<th class="gc4">棚卸箱数</th>-->
-              <!--<th class="gc4">エリア</th>-->
               <th class="gc3">&nbsp;</th>
+              <th class="gc3">備考</th>
             </tr>
           </thead>
           <tbody>
@@ -163,23 +167,32 @@
               <td ><span class="posi_a1" v-bind:id="item['product_number']"></span>{{ item['product_name'] }}</td>
               <td class="">{{ item['product_number'] }}</td>
               <td class="nbr">{{ item['unit'] }}</td>
-              <!--<td class="style1">{{ item['quantity'] }}</td>-->
+              <td class="style1">{{ item['unit_price'] }}</td>
               <td class="style1">{{ item['now_inventory'] }}</td>
               <!--<td class="style1">{{ item['nbox'] }}</td>-->
-              <td class="style1"><span class="color1" v-if="item['cal_now_inventory'] === 0">&#10004;</span><span class="color2 bold" v-else-if="item['cal_now_inventory'] !== 0">{{ item['cal_now_inventory'] }}</span></td>
+              <td class="style1"><span class="color1" v-if="item['cal_now_inventory'] == 0">&#10004;</span><span class="color2 bold" v-else-if="item['cal_now_inventory'] !== 0">{{ item['cal_now_inventory'] }}</span></td>
               <!--<td class="style1"><span class="color1" v-if="item['cal_nbox'] === 0">&#10004;</span><span class="color2 bold" v-else-if="item['cal_nbox'] !== 0">{{ item['cal_nbox'] }}</span></td>-->
-              <td class="style3" v-bind:class="(item['status'] === 'stockup') ? 'bgcolor4' : ''"><input type="text" class="form_style bc1" v-model="details3[rowIndex].stock_now_inventory" maxlength="11" name="now_inventory"></td>
+              <td class="style3" v-bind:class="(item['status'] === 'stockup') ? 'bgcolor4' : ''"><input type="number" class="form_style bc1" v-model="details3[rowIndex].stock_now_inventory" maxlength="11" name="now_inventory" min="0"></td>
+              <td class="style1">{{ item['cal_total_price'] }}</td>
               <!--<td class="style1" v-bind:class="(item['status'] === 'stockup') ? 'bgcolor4' : ''"><input type="text" class="form_style bc1" v-model="details3[rowIndex].stock_nbox" maxlength="16" name="nbox"></td>-->
               <!--<td class="nbr"><span v-if="item['marks'] == 'a'">1F</span><span v-if="item['marks'] == 'b'">2F</span></td>-->
               <td>
-                <input type="hidden" v-model="details3[rowIndex].stock_month = stock_month" name="stock_month">
+                <input type="hidden" v-model="details3[rowIndex].stock_month" name="stock_month">
                 <div id="btn_cnt1">
                   <button type="button" class="style1 mg_r" @click="stockUpdate(rowIndex,6)">
                   棚卸更新
                   </button>
                 </div>
               </td>
+              <td class="style3" ><textarea class="form_style2 bc1" v-model="details3[rowIndex].remarks" name="remarks"></textarea></td>
             </tr>
+            <tr class="border1">
+              <td colspan="4" class="style1">{{ this.details3.length }} 件</td>
+              <td colspan="3" class="style1">合計金額</td>
+              <td class="style1">{{ Number(totals) | numberFormat }}</td>
+              <td colspan="2" class="style1 font1"><div v-if="this.str_s_history"> ※合計金額に履歴は含まれていません</div></td>
+            </tr>
+
           </tbody>
         </table>
       </div><!-- end tbl_1 -->
@@ -271,7 +284,7 @@ import {requestable} from '../mixins/requestable.js';
 import { useRouter } from 'vue-router';
 
 export default {
- components: {
+  components: {
 
   },
   mixins: [ requestable , checkable ],
@@ -290,6 +303,11 @@ export default {
     }
   },
   computed: {
+  },
+  filters: {
+    numberFormat: function(num){
+      return num.toLocaleString();
+    }
   },
   data() {
     return {
@@ -332,6 +350,9 @@ export default {
       s_order_no: "",
       btnMode: 0,
       stock_month: "",
+      totals: "",
+      search_totals: "",
+      str_s_history: "",
             
     };
   },
@@ -347,8 +368,6 @@ export default {
   },
   setup() {
 
-  },
-  filters:{ 
   },
   // マウント時
   mounted() {
@@ -694,6 +713,17 @@ export default {
         this.details = res.details;
         this.details2 = res.details2;
         this.details3 = res.details3;
+        this.count = this.details3.length;
+        var pt = 0;
+        
+        this.details3.forEach(function(element, index) {
+          //console.log('getThen in details3.forEach = ' + element.cal_total_price);
+          if((typeof element.cal_total_price == 'string')) {
+            pt = pt + Number(element.cal_total_price);
+            console.log('getThen in typeof element.cal_total_price = ' + pt);
+          }
+        });
+        this.totals = pt;
         //this.product_title = res.details[0].product_name;
         if (typeof this.details3 !== 'undefined') {
           //console.log('getthen in this.details3.length = ' + this.details3.length); 

@@ -411,11 +411,17 @@ class MMStockController extends Controller
             $mm_stock->setNboxAttribute($details['nbox']);
             $mm_stock->setStocknowinventoryAttribute($details['stock_now_inventory']);
             $mm_stock->setStocknboxAttribute($details['stock_nbox']);
+            $mm_stock->setUnitpriceAttribute($details['unit_price']);
+            $mm_stock->setRemarksAttribute($details['remarks']);
             $mm_stock->setStatusAttribute($details['status']);
             $mm_stock->setMarksAttribute($details['marks']);
             $mm_stock->setStockmonthAttribute($details['stock_month']);
             $mm_stock->setUpdateduserAttribute($updateuser);
             $mm_stock->setUpdatedatAttribute($systemdate);
+            $mm_stock->setParamCalnowinventoryAttribute($details['cal_now_inventory']);
+            $mm_stock->setParamMmnowinventoryAttribute($details['mm_now_inventory']);
+            $mm_stock->setParamMmunitpriceAttribute($details['mm_unit_price']);
+            //Log::debug("MMStockController update cal_now_inventory = ".$details['cal_now_inventory']);
 
             
             //if ($details['id'] == "" || $details['id'] == null) {

@@ -23,6 +23,9 @@ class MMStock extends Model
 	private $nbox;						// 箱数
 	private $stock_now_inventory;		// 棚卸在庫
 	private $stock_nbox;				// 棚卸箱数
+	private $unit_price;				// 単価
+	private $total;	        			// 合計
+	private $remarks;		    		// 備考
 	private $status;					// ステータス
 	private $marks;						// マークグループ
 	private $stock_month;				// 棚卸月
@@ -132,7 +135,37 @@ class MMStock extends Model
 		$this->stock_nbox = $value;
 	}
 
-	//ステータス
+	// 単価
+	public function getUnitpriceAttribute()
+	{
+		return $this->unit_price;
+	}
+	public function setUnitpriceAttribute($value)
+	{
+		$this->unit_price = $value;
+	}
+
+	// 合計
+	public function getTotalAttribute()
+	{
+		return $this->total;
+	}
+	public function setTotalAttribute($value)
+	{
+		$this->total = $value;
+	}
+
+	// 備考
+	public function getRemarksAttribute()
+	{
+		return $this->remarks;
+	}
+	public function setRemarksAttribute($value)
+	{
+		$this->remarks = $value;
+	}
+
+    //ステータス
 	public function getStatusAttribute()
 	{
 		return $this->status;
@@ -270,6 +303,37 @@ class MMStock extends Model
 	}
 
 
+	// 在庫数差
+	private $param_cal_now_inventory;
+	public function getParamCalnowinventoryAttribute(){
+		return $this->param_cal_now_inventory;
+	}
+	public function setParamCalnowinventoryAttribute($value)
+	{
+		$this->param_cal_now_inventory = $value;
+	}
+    
+	// MM在庫数setParamMmnowinventoryAttribute
+	private $param_mm_now_inventory;
+	public function getParamMmnowinventoryAttribute(){
+		return $this->param_mm_now_inventory;
+	}
+	public function setParamMmnowinventoryAttribute($value)
+	{
+		$this->param_mm_now_inventory = $value;
+	}
+
+    
+	// MM単価Mmunitprice
+	private $param_mm_unit_price;
+	public function getParamMmunitpriceAttribute(){
+		return $this->param_mm_unit_price;
+	}
+	public function setParamMmunitpriceAttribute($value)
+	{
+		$this->param_mm_unit_price = $value;
+	}
+
 
     // ------------- メソッド --------------
 
@@ -353,6 +417,7 @@ class MMStock extends Model
      */
     public function updateDataStock($upkind){
         try {
+            $result_tablemm = "";
             if($upkind == 4)    {
                 //削除マーク
                 DB::table($this->table)
@@ -385,20 +450,45 @@ class MMStock extends Model
             }
             elseif($upkind == 6)    {
                 //棚卸更新
+                $this->totalprice = $this->unit_price * $this->stock_now_inventory;
                 DB::table($this->table)
                 ->where('id', $this->id)
                 ->update([
                     'stock_now_inventory' => $this->stock_now_inventory,
                     'stock_nbox' => $this->stock_nbox,
+                    'total' => $this->unit_price * $this->stock_now_inventory,
+                    'remarks' => $this->remarks,
                     'status' => 'stockup',
                     'updated_user'=>$this->updated_user,
                     'updated_at'=>$this->updated_at
                 ]);
+
+
+                $snini = $this->stock_now_inventory - $this->param_mm_now_inventory;
+                //Log::debug("MMStock updateDataStock snini gettype -> ".gettype($snini));
+                //Log::debug("MMStock updateDataStock snini val -> ".$snini);
+                if(!empty($snini)) {
+                    //Log::debug("MMStock updateDataStock snini !empty in ");
+                    $result_tablemm = DB::table($this->table_mm)
+                    ->where('product_code', $this->product_code)
+                    ->where('status', 'newest')
+                    ->update([
+                        'now_inventory' => $this->stock_now_inventory,
+                        'total' => $this->unit_price * $this->stock_now_inventory,
+                        'updated_user'=> $this->updated_user,
+                        'updated_at'=> $this->updated_at
+                    ]);
+    
+                }
+
+
+
                 $re_data['id'] = $this->id;
                 $re_data['stock_now_inventory'] = $this->stock_now_inventory;
                 $re_data['stock_nbox'] = $this->stock_nbox;
                 $re_data['product_code'] = $this->product_code;
                 $re_data['product_name'] = $this->product_name;
+                $re_data['result_tablemm'] = $result_tablemm;
                 return $re_data;
 
             }
@@ -420,6 +510,9 @@ class MMStock extends Model
                     'nbox' => $this->nbox,
                     'stock_now_inventory' => $this->stock_now_inventory,
                     'stock_nbox' => $this->stock_nbox,
+                    'unit_price' => $this->unit_price,
+                    'total' => $this->total,
+                    'remarks' => $this->remarks,
                     'status' => $this->status,
                     'order_info' => $this->order_info,
                     'stock_month' => $this->stock_month,
@@ -546,6 +639,36 @@ class MMStock extends Model
                 END
                 ) as cal_nbox ";
             
+            $columnStr[] = " (
+                CASE 
+                    WHEN t1.marks='a' THEN t1.unit_price 
+                    WHEN t1.marks='b' THEN t1.unit_price 
+                    WHEN t1.marks='c' THEN t1.unit_price 
+                    WHEN t1.marks='d' THEN t1.unit_price 
+                    WHEN t1.marks='e' THEN t1.unit_price 
+                    WHEN t1.marks='f' THEN t1.unit_price 
+                    WHEN t1.marks='s' THEN t1.unit_price 
+                    ELSE  null 
+                END
+                ) as unit_price ";
+
+
+                
+            $columnStr[] = " (
+                CASE 
+                    WHEN t1.marks='a' THEN t1.unit_price * t1.stock_now_inventory 
+                    WHEN t1.marks='b' THEN t1.unit_price * t1.stock_now_inventory 
+                    WHEN t1.marks='c' THEN t1.unit_price * t1.stock_now_inventory 
+                    WHEN t1.marks='d' THEN t1.unit_price * t1.stock_now_inventory 
+                    WHEN t1.marks='e' THEN t1.unit_price * t1.stock_now_inventory 
+                    WHEN t1.marks='f' THEN t1.unit_price * t1.stock_now_inventory 
+                    WHEN t1.marks='s' THEN t1.unit_price * t1.stock_now_inventory 
+                    ELSE  null 
+                END
+                ) as cal_total_price ";
+
+
+
             /*
             $columnStr[] = " t1.now_inventory AS now_inventory ";
             $columnStr[] = " t1.nbox AS nbox ";
@@ -553,8 +676,11 @@ class MMStock extends Model
             $columnStr[] = " t1.stock_nbox - t1.nbox AS cal_nbox ";
             */
 
+            $columnStr[] = " t2.unit_price AS mm_unit_price ";
+            $columnStr[] = " t2.now_inventory AS mm_now_inventory ";
             $columnStr[] = " t1.stock_now_inventory AS stock_now_inventory ";
             $columnStr[] = " t1.stock_nbox AS stock_nbox ";
+            $columnStr[] = " t1.remarks AS remarks ";
 
             $columnStr[] = " t1.status AS status ";
             $columnStr[] = " t1.marks AS marks ";

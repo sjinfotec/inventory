@@ -180,6 +180,14 @@ class InventoryZ extends Model
     private $param_order_day;
     public function getParamOrderdayAttribute(){ return $this->param_order_day;}
     public function setParamOrderdayAttribute($value){  $this->param_order_day = $value;}
+    // 商品名
+    private $param_product_name;
+    public function getParamProductnameAttribute(){ return $this->param_product_name;}
+    public function setParamProductnameAttribute($value){  $this->param_product_name = $value;}
+    // 履歴検索チェック
+    private $param_shistory;
+    public function getParamSHistoryAttribute(){ return $this->param_shistory;}
+    public function setParamSHistoryAttribute($value){  $this->param_shistory = $value;}
 
 
     // ------------- メソッド --------------
@@ -408,7 +416,8 @@ class InventoryZ extends Model
                 ->orderBy('id');
             }
             else {
-                $data->where('status','newest');
+                $data->where('status','newest')
+                ->orderBy('id', 'DESC');
             }
 
             // 順番変更 正順逆順
@@ -476,6 +485,92 @@ class InventoryZ extends Model
     }
 
 
+
+    /**
+     * 取得totals
+     *
+     * @return void
+     */
+    public function getDataInvtotal(){
+        //$message = "ログ出力 getDataMM";
+        //Log::info("this->param_edit_id -- ".$this->param_edit_id);
+        //Log::info("this->param_product_code -- ".$this->param_product_code);
+
+        try {
+
+			
+
+            $datasum = DB::table($this->table)
+			->selectRaw('
+			sum(total) as totals
+			');
+
+            $datasum->where('status','newest')
+			->orderBy('id', 'DESC');
+
+            $result = $datasum
+            ->get();
+
+			
+
+			
+			//$result = array_merge($result1, $result2);
+
+
+            $sqlString = "";
+            $sqlString .= "select ";
+            $sqlString .= "sum(total) as totals";
+            $sqlString .= " from ";
+            $sqlString .= " ".$this->table." ";
+            $sqlString .= " where ";
+			$sqlString .= " status = 'newest' ";
+            /*
+            if (!empty($this->param_marks)) {
+                $sqlString .= " AND marks = ? ";
+            }
+            if (!empty($this->param_is_deleted)) {
+                $sqlString .= " AND is_deleted = ? ";
+            }
+            // バインド
+            $array_setBindingsStr = array();
+            if (!empty($this->param_marks)) {
+                $array_setBindingsStr[] = $this->param_marks;
+            }
+            if(!empty($this->param_is_deleted)){
+                $array_setBindingsStr[] = $this->param_is_deleted;
+            }
+			else {
+                $array_setBindingsStr[] = 0;
+			}
+            
+            $data2 = DB::select($sqlString, $array_setBindingsStr);
+            */
+
+
+			//$sqlString3 = "select sum(total) as totals from matmanage where status = 'newest' and marks = 'b'";
+            //$data3 = DB::select($sqlString3);
+
+            //$result = array_merge($data1, $data2);
+
+            //$result = $data2;
+
+            return $result;
+
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+    }
+
+
+
+
     /**
      * 検索SEARCH取得
      *
@@ -484,6 +579,7 @@ class InventoryZ extends Model
     public function getSearchZ(){
 
         try {
+            $matchThese = Array();
             $result = "";
             $data = DB::table($this->table)
             ->select(
@@ -520,8 +616,22 @@ class InventoryZ extends Model
 
             );
             if(!empty($this->param_order_no)){
+				if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
                 $data->where('order_no', $this->param_order_no)
                 //->where('status','newest')
+                ->where($matchThese)
+                ->orderBy('id', 'DESC');
+            
+                $result = $data
+                ->get();
+            }
+            if(!empty($this->param_product_name)){
+                $str = "%".$this->param_product_name."%";
+				if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
+				$matchThese['is_deleted'] = 0;
+                //Log::info("getSearchA this->param_product_name -- ".$str);
+                $data->where('product_name','LIKE', $str)
+                ->where($matchThese)
                 ->orderBy('id', 'DESC');
             
                 $result = $data
@@ -529,10 +639,12 @@ class InventoryZ extends Model
             }
             if(!empty($this->param_company_name)){
                 $str = "%".$this->param_company_name."%";
+				if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
                 //Log::info("getSearchA this->param_company_name -- ".$str);
                 $data->where('company_name','LIKE', $str)
-                ->where('status','newest')
-                ->orderBy('id');
+                //->where('status','newest')
+                ->where($matchThese)
+                ->orderBy('id', 'DESC');
             
                 $result = $data
                 ->get();
@@ -557,6 +669,74 @@ class InventoryZ extends Model
         }
 
     }
+
+
+    /**
+     * 検索SEARCH取得Total
+     *
+     * @return void
+     */
+    public function getSearchTotal(){
+		//Log::info("getSearchTotal in -- this->param_department = ".$this->param_department." / this->param_marks = ".$this->param_marks);
+
+        try {
+            $result = "";
+			$data = DB::table($this->table)
+            ->select(DB::raw('SUM(total) as total_s'));
+
+            if(!empty($this->param_order_no)){
+                $data->where('order_no', $this->param_order_no)
+                ->where('status','newest')
+                ->orderBy('id', 'DESC');
+            
+                $result = $data
+                ->get();
+            }
+            if(!empty($this->param_product_name)){
+                $str = "%".$this->param_product_name."%";
+				//if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
+                $matchThese['status'] = 'newest';
+				$matchThese['is_deleted'] = 0;
+                Log::info("getSearchA this->param_product_name -- ".$str);
+                $data->where('product_name','LIKE', $str)
+                ->where($matchThese)
+                ->orderBy('id');
+            
+                $result = $data
+                ->get();
+            }
+            if(!empty($this->param_company_name)){
+                $str = "%".$this->param_company_name."%";
+                //Log::info("getSearchA this->param_company_name -- ".$str);
+                $data->where('company_name','LIKE', $str)
+                ->where('status','newest')
+                ->orderBy('id');
+            
+                $result = $data
+                ->get();
+            }
+
+
+			return $result;
+
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+    }
+
+
+
+
+
+
+
 
 
     /**
@@ -635,11 +815,11 @@ class InventoryZ extends Model
     }
 
     /**
-     * 削除
+     * 削除 // 未使用
      *
      * @return void
      */
-    public function delDataZ(){
+    public function delDataZxxx(){
         try {
             $mainQuery = DB::table($this->table);
             //$mainQuery->where('account_id',$this->param_account_id);
@@ -654,5 +834,40 @@ class InventoryZ extends Model
             throw $e;
         }
     }
+
+
+        /**
+     * 削除
+     *
+     * @return void
+     */
+    public function delData($delkind){
+        try {
+            $mainQuery = DB::table($this->table);
+            //$mainQuery->where('account_id',$this->param_account_id);
+            //$result = $mainQuery->where('status','del')->delete();
+			if($delkind === "one") {
+	            $mainQuery->where('id', $this->id);
+			}
+			elseif($delkind === "all") {
+	            $mainQuery->where('product_id', $this->product_id);
+			}
+			$result = $mainQuery
+            ->delete();
+			$re_data['id'] = $this->id;
+            return $re_data;
+
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+
 
 }
