@@ -188,6 +188,10 @@ class InventoryA extends Model
     private $param_delivery_day;
     public function getParamDeliverydayAttribute(){ return $this->param_delivery_day;}
     public function setParamDeliverydayAttribute($value){  $this->param_delivery_day = $value;}
+    // 履歴検索チェック
+    private $param_shistory;
+    public function getParamSHistoryAttribute(){ return $this->param_shistory;}
+    public function setParamSHistoryAttribute($value){  $this->param_shistory = $value;}
     
 
 
@@ -520,6 +524,7 @@ class InventoryA extends Model
     public function getSearchA(){
 
         try {
+            $matchThese = Array();
             $result = "";
             $data = DB::table($this->table)
             ->select(
@@ -558,8 +563,10 @@ class InventoryA extends Model
             if(!empty($this->param_order_no)){
                 //Log::info("getSearchA this->params_order_no -- ".$this->params_order_no);
                 //Log::info("getSearchA this->param_order_no -- ".$this->param_order_no);
+                if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
                 $data->where('order_no', $this->param_order_no)
                 //->where('status','newest')
+                ->where($matchThese)
                 ->orderBy('id', 'DESC');
             
                 $result = $data
@@ -567,9 +574,9 @@ class InventoryA extends Model
             }
             if(!empty($this->param_product_name)){
                 $str = "%".$this->param_product_name."%";
-				//if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
+				if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
 				$matchThese['is_deleted'] = 0;
-                Log::info("getSearchA this->param_product_name -- ".$str);
+                //Log::info("getSearchA this->param_product_name -- ".$str);
                 $data->where('product_name','LIKE', $str)
                 ->where($matchThese)
                 ->orderBy('id', 'DESC');
@@ -579,9 +586,11 @@ class InventoryA extends Model
             }
             if(!empty($this->param_company_name)){
                 $str = "%".$this->param_company_name."%";
+                if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
                 //Log::info("getSearchA this->param_company_name -- ".$str);
                 $data->where('company_name','LIKE', $str)
-                ->where('status','newest')
+                //->where('status','newest')
+                ->where($matchThese)
                 ->orderBy('id', 'DESC');
             
                 $result = $data

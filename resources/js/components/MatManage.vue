@@ -362,7 +362,7 @@
 
       <div id="cnt1" v-if="view_switch=='on'">
         <div class="inputgroup w1">
-          <div class="cate">グループ</div>
+          <div class="cate gc5">グループ</div>
           <div class="inputzone">
             <input
               type="text"
@@ -374,7 +374,7 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate">作成ユーザー</div>
+          <div class="cate gc5">作成ユーザー</div>
           <div class="inputzone">
             <input
               type="text"
@@ -386,7 +386,7 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate">修正ユーザー</div>
+          <div class="cate gc5">修正ユーザー</div>
           <div class="inputzone">
             <input
               type="text"
@@ -398,7 +398,7 @@
           </div>
         </div>
         <div class="inputgroup w2">
-          <div class="cate">作成日時</div>
+          <div class="cate gc5">作成日時</div>
           <div class="inputzone">
             <input
               type="text"
@@ -410,7 +410,7 @@
           </div>
         </div>
         <div class="inputgroup w2">
-          <div class="cate">修正日時</div>
+          <div class="cate gc5">修正日時</div>
           <div class="inputzone">
             <input
               type="text"
@@ -423,7 +423,7 @@
         </div>
 
         <div class="inputgroup w1">
-          <div class="cate">商品CODE</div>
+          <div class="cate gc5">商品CODE</div>
           <div class="inputzone">
             <input
               type="text"
@@ -435,7 +435,7 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate">ステータス</div>
+          <div class="cate gc5">ステータス</div>
           <div class="inputzone">
             <input
               type="text"
@@ -447,7 +447,7 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate">削除フラグ</div>
+          <div class="cate gc5">削除フラグ</div>
           <div class="inputzone">
             <input
               type="text"
@@ -579,7 +579,7 @@
         <h2 v-if="btnMode=='update'">在庫 / 更新</h2>
         <h2 v-if="btnMode=='fix'">在庫 / 修正</h2>
         <button type="button" class="customize" @click="viewBtn(2)">
-          追加情報
+          管理者用
         </button>
       </div>
 
@@ -821,7 +821,7 @@
 
         <div id="cnt1" v-if="view_switch=='on'">
           <div class="inputgroup">
-            <div class="cate">グループ</div>
+            <div class="cate gc5">グループ</div>
             <div class="inputzone">
               <input
                 type="text"
@@ -834,7 +834,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">作成ユーザー</div>
+            <div class="cate gc5">作成ユーザー</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -847,7 +847,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">修正ユーザー</div>
+            <div class="cate gc5">修正ユーザー</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -860,7 +860,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">作成日時</div>
+            <div class="cate gc5">作成日時</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -873,7 +873,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">修正日時</div>
+            <div class="cate gc5">修正日時</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -887,7 +887,7 @@
           </div>
 
           <div class="inputgroup">
-            <div class="cate">ID</div>
+            <div class="cate gc5">ID</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -900,7 +900,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">商品CODE</div>
+            <div class="cate gc5">商品CODE</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -913,7 +913,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">ステータス</div>
+            <div class="cate gc5">ステータス</div>
             <div class="inputzone">
               <input
                 type="text"
@@ -926,7 +926,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">削除フラグ</div>
+            <div class="cate gc5">削除フラグ</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -939,8 +939,12 @@
             </div>
           </div>
           <div id="button1">
-            <button type="button" class="" @click="recordDel(index,'all')">この商品（履歴含む）を削除</button>
-            <button type="button" class="" @click="recordDel(index,'one')">この登録（レコード）を削除</button>
+            <div class="btnstyle">
+              <button type="button" class="" @click="recordDel(index,'all')">この商品（履歴含む）を削除</button>
+            </div>
+            <div class="btnstyle">
+              <button type="button" class="" @click="recordDel(index,'one')">この登録（レコード）を削除</button>
+            </div>
           </div>
 
         </div>

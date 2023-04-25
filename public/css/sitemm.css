@@ -235,6 +235,8 @@ header button {width:auto;}
 .bcc4 {  border-color:#66eecc;}
 .btn_gc1  {background: #DDD;}
 .btn_gc2  {background: #8CC;}
+.gc5  {  background:#114466; color: #FFF;}
+.bc5  {  border:2px solid #114466;}
 .stock_active {  background:linear-gradient(to bottom, #ffeecc 0%, #ffeecc 80%, #eecc55 80%,  #eecc55 100%);}
 .bold { font-weight: bold;}
 

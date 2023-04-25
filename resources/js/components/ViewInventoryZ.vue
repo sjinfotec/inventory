@@ -23,7 +23,7 @@
           </button>
           &emsp;
           <input type="checkbox" id="s_history" name="s_history" class="mg_l10" v-model="s_history" value="on">
-          <label for="s_history">履歴も含む</label>
+          <label for="s_history">履歴を含む</label>
         </form>
         <button type="button" class="" @click="NewBtn()">
           新規登録
@@ -359,11 +359,11 @@
 
       <div id="cnt1" v-if="view_switch=='on'">
         <div class="inputgroup w1">
-          <div class="cate">グループ</div>
+          <div class="cate gc5">グループ</div>
           <div class="inputzone">
             <input
               type="text"
-              class="form_style"
+              class="form_style bc5"
               v-model="form.marks"
               maxlength="10"
               name="marks"
@@ -371,11 +371,11 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate">作成ユーザー</div>
+          <div class="cate gc5">作成ユーザー</div>
           <div class="inputzone">
             <input
               type="text"
-              class="form_style"
+              class="form_style bc5"
               v-model="form.created_user"
               maxlength="20"
               name="created_user"
@@ -383,11 +383,11 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate">修正ユーザー</div>
+          <div class="cate gc5">修正ユーザー</div>
           <div class="inputzone">
             <input
               type="text"
-              class="form_style"
+              class="form_style bc5"
               v-model="form.updated_user"
               maxlength="20"
               name="updated_user"
@@ -395,11 +395,11 @@
           </div>
         </div>
         <div class="inputgroup w2">
-          <div class="cate">作成日時</div>
+          <div class="cate gc5">作成日時</div>
           <div class="inputzone">
             <input
               type="text"
-              class="form_style"
+              class="form_style bc5"
               v-model="form.created_at"
               maxlength="16"
               name="created_at"
@@ -407,11 +407,11 @@
           </div>
         </div>
         <div class="inputgroup w2">
-          <div class="cate">修正日時</div>
+          <div class="cate gc5">修正日時</div>
           <div class="inputzone">
             <input
               type="text"
-              class="form_style"
+              class="form_style bc5"
               v-model="form.updated_at"
               maxlength="16"
               name="updated_at"
@@ -420,11 +420,11 @@
         </div>
 
         <div class="inputgroup w1">
-          <div class="cate">会社ID</div>
+          <div class="cate gc5">会社ID</div>
           <div class="inputzone">
             <input
               type="text"
-              class="form_style"
+              class="form_style bc5"
               v-model="form.company_id"
               maxlength="11"
               name="company_id"
@@ -432,11 +432,11 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate">商品ID</div>
+          <div class="cate gc5">商品ID</div>
           <div class="inputzone">
             <input
               type="text"
-              class="form_style"
+              class="form_style bc5"
               v-model="form.product_id"
               maxlength="11"
               name="product_id"
@@ -444,11 +444,11 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate">ステータス</div>
+          <div class="cate gc5">ステータス</div>
           <div class="inputzone">
             <input
               type="text"
-              class="form_style"
+              class="form_style bc5"
               v-model="form.status"
               maxlength="20"
               name="status"
@@ -456,11 +456,11 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate">発注情報</div>
+          <div class="cate gc5">発注情報</div>
           <div class="inputzone">
             <input
               type="text"
-              class="form_style"
+              class="form_style bc5"
               v-model="form.order_info"
               maxlength="20"
               name="order_info"
@@ -468,11 +468,11 @@
           </div>
         </div>
         <div class="inputgroup w1">
-          <div class="cate">削除フラグ</div>
+          <div class="cate gc5">削除フラグ</div>
           <div class="inputzone">
             <input
               type="text"
-              class="form_style"
+              class="form_style bc5"
               v-model="form.is_deleted"
               maxlength="20"
               name="is_deleted"
@@ -585,9 +585,10 @@
     <div id="input_area_1" v-if="selectMode=='EDT'">
 
       <div id="top_cnt">
-        <h2>在庫 / 更新-追加-修正</h2>
+        <h2 v-if="btnMode=='update'">在庫 / 更新</h2>
+        <h2 v-if="btnMode=='fix'">在庫 / 修正</h2>
         <button type="button" class="customize" @click="viewBtn(2)">
-          追加情報
+          管理者
         </button>
       </div>
 
@@ -851,11 +852,11 @@
 
         <div id="cnt1" v-if="view_switch=='on'">
           <div class="inputgroup">
-            <div class="cate">グループ</div>
+            <div class="cate gc5">グループ</div>
             <div class="inputzone">
               <input
                 type="text"
-                class="form_style"
+                class="form_style bc5"
                 v-model="details[index].marks"
                 maxlength="10"
                 name="marks"
@@ -863,7 +864,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">作成ユーザー</div>
+            <div class="cate gc5">作成ユーザー</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -876,11 +877,11 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">修正ユーザー</div>
+            <div class="cate gc5">修正ユーザー</div>
             <div class="inputzone">
               <input
                 type="text"
-                class="form_style"
+                class="form_style bc5"
                 v-model="details[index].updated_user"
                 maxlength="20"
                 name="updated_user"
@@ -888,7 +889,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">作成日時</div>
+            <div class="cate gc5">作成日時</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -901,7 +902,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">修正日時</div>
+            <div class="cate gc5">修正日時</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -915,7 +916,7 @@
           </div>
 
           <div class="inputgroup">
-            <div class="cate">ID</div>
+            <div class="cate gc5">ID</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -928,7 +929,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">会社ID</div>
+            <div class="cate gc5">会社ID</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -941,7 +942,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">商品ID</div>
+            <div class="cate gc5">商品ID</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -954,11 +955,11 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">ステータス</div>
+            <div class="cate gc5">ステータス</div>
             <div class="inputzone">
               <input
                 type="text"
-                class="form_style"
+                class="form_style bc5"
                 v-model="details[index].status"
                 maxlength="20"
                 name="status"
@@ -966,11 +967,11 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">発注情報</div>
+            <div class="cate gc5">発注情報</div>
             <div class="inputzone">
               <input
                 type="text"
-                class="form_style"
+                class="form_style bc5"
                 v-model="details[index].order_info"
                 maxlength="20"
                 name="order_info"
@@ -978,7 +979,7 @@
             </div>
           </div>
           <div class="inputgroup">
-            <div class="cate">削除フラグ</div>
+            <div class="cate gc5">削除フラグ</div>
             <div class="inputzone">
               <input
                 type="hidden"
@@ -991,8 +992,12 @@
             </div>
           </div>
           <div id="button1">
-            <button type="button" class="" @click="recordDel(index,'all')">この商品（履歴含む）を削除</button>
-            <button type="button" class="" @click="recordDel(index,'one')">この登録（レコード）を削除</button>
+            <div class="btnstyle">
+              <button type="button" class="" @click="recordDel(index,'all')">この商品（履歴含む）を削除</button>
+            </div>
+            <div class="btnstyle">
+              <button type="button" class="" @click="recordDel(index,'one')">この登録（レコード）を削除</button>
+            </div>
           </div>
         </div><!--end v-if="view_switch=='on'-->
 

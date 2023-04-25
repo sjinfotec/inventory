@@ -817,6 +817,7 @@ class ViewInventoryController extends Controller
         $s_order_no = "";
         $s_company_name = "";
         $s_product_name = "";
+        $s_history = "";
         $result = true;
         try {
             // パラメータチェック
@@ -843,16 +844,25 @@ class ViewInventoryController extends Controller
             $s_order_no = isset($params['s_order_no']) ? $params['s_order_no'] : "";
             $s_company_name = isset($params['s_company_name']) ? $params['s_company_name'] : "";
             $s_product_name = isset($params['s_product_name']) ? $params['s_product_name'] : "";
+            $s_history = isset($params['s_history']) ? $params['s_history'] : "";
             //Log::debug("getDataAsearch s_product_name = ".$s_product_name);
             $inventory_a = new InventoryA();
             if(isset($s_order_no))      $inventory_a->setParamOrdernoAttribute($s_order_no);
             if(isset($s_company_name))  $inventory_a->setParamCompanynameAttribute($s_company_name);
             if(isset($s_product_name))  $inventory_a->setParamProductnameAttribute($s_product_name);
+            if(isset($s_history))      $inventory_a->setParamSHistoryAttribute($s_history);
             $details =  $inventory_a->getSearchA();
 
             return response()->json(
-                ['result' => $result, 'details' => $details, 's_order_no' => $s_order_no, 's_company_name' => $s_company_name, 's_product_name' => $s_product_name,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                [
+                    'result' => $result, 
+                    'details' => $details, 
+                    's_order_no' => $s_order_no, 
+                    's_company_name' => $s_company_name, 
+                    's_product_name' => $s_product_name,
+                    's_history' => $s_history,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
+                ]
             );
         }catch(\PDOException $pe){
             throw $pe;

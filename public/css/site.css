@@ -51,6 +51,7 @@ button  {
   background:#bbaa88;
   width:10em;
   border: 1px solid #888;
+  cursor: pointer;
 }
 button:hover  {
   background:#DDCCAA;
@@ -68,6 +69,8 @@ button:hover  {
 .gc4b  {  background:linear-gradient(to bottom, #FFF 0%, #FFF 80%, #eecc55 80%,  #eecc55 100%);}
 .bc4  {  border:2px solid #eecc55;}
 .bcc4 {  border-color:#eecc55;}
+.gc5  {  background:#99ccee;}
+.bc5  {  border:2px solid #99ccee;}
 .stock_active {  background:linear-gradient(to bottom, #ffeecc 0%, #ffeecc 80%, #eecc55 80%,  #eecc55 100%);}
 .bold { font-weight: bold;}
 
@@ -266,6 +269,34 @@ header button {width:auto;}
   -webkit-transform: translateY(-50%);
   transform: translateY(-50%);
 */
+}
+#tbl_2 {
+  position: relative;
+  width:100%;
+  z-index:0;
+  font-size:1.2rem;
+  /*box-sizing: border-box;*/
+}
+#tbl_2 table{
+  width:100%;
+  border-collapse: collapse;
+  margin-bottom:0px;
+  border-spacing:0;
+  border-left:1px solid #888888;
+  border-top:1px solid #888888;
+  border-bottom:1px solid #888888;
+}
+#tbl_2 thead th{
+  white-space: nowrap;
+  /*background:#ccbb55;*/
+  border-right:1px solid #888888;
+  border-bottom:1px solid #888888;
+  padding:0.2rem;
+}
+#tbl_2 td{
+  padding:0.2rem;
+  border-right:1px solid #888888;
+  border-bottom:1px dashed #888888;
 }
 
 
