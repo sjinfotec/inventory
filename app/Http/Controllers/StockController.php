@@ -412,6 +412,9 @@ class StockController extends Controller
             $stock_a->setNboxAttribute($details['nbox']);
             $stock_a->setStocknowinventoryAttribute($details['stock_now_inventory']);
             $stock_a->setStocknboxAttribute($details['stock_nbox']);
+            $stock_a->setUnitpriceAttribute($details['unit_price']);
+            //$stock_a->setTotalAttribute($details['total']);
+            //$stock_a->setRemarksAttribute($details['remarks']);
             $stock_a->setStatusAttribute($details['status']);
             $stock_a->setOrderinfoAttribute($details['order_info']);
             $stock_a->setStockmonthAttribute($details['stock_month']);

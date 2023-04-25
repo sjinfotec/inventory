@@ -90,6 +90,8 @@
               <th class="gc4">棚卸箱数</th>
               <th class="gc4">発注情報</th>
               <th class="gc4">&nbsp;</th>
+              <th class="gc4">単価<span>（在庫のみ）</span></th>
+              <th class="gc4">合計金額<span>（在庫のみ）</span></th>
             </tr>
           </thead>
           <tbody>
@@ -102,12 +104,12 @@
               <td class="style1">{{ item['now_inventory'] }}</td>
               <td class="style1">{{ item['nbox'] }}</td>
               <td class="style1"><span class="color1" v-if="item['cal_now_inventory'] === 0">&#10004;</span><span class="color2 bold" v-else-if="item['cal_now_inventory'] !== 0">{{ item['cal_now_inventory'] }}</span></td>
-              <td class="style1"><span class="color1" v-if="item['cal_nbox'] === 0">&#10004;</span><span class="color2 bold" v-else-if="item['cal_nbox'] !== 0">{{ item['cal_nbox'] }}</span></td>
+              <td class="style1"><span class="color1" v-if="item['cal_nbox'] === 0">&#10004;</span><span class="color2 bold" v-else-if="item['cal_nbox'] !== 0">{{ Number(item['cal_nbox']) }}</span></td>
               <td class="style1" v-bind:class="(item['status'] === 'stockup') ? 'bgcolor4' : ''"><input type="text" class="form_style bc1" v-model="details3[rowIndex].stock_now_inventory" maxlength="11" name="now_inventory"></td>
               <td class="style1" v-bind:class="(item['status'] === 'stockup') ? 'bgcolor4' : ''"><input type="text" class="form_style bc1" v-model="details3[rowIndex].stock_nbox" maxlength="16" name="nbox"></td>
               <td class="nbr"><span v-if="item['order_info'] == 'a'">預かり</span><span v-if="item['order_info'] == 'z'">在庫</span></td>
               <td>
-                <input type="hidden" v-model="details3[rowIndex].stock_month = stock_month" name="stock_month">
+                <input type="hidden" v-model="stock_month" name="stock_month">
                 <div id="btn_cnt1">
                   <button type="button" class="style1 mg_r" @click="stockUpdate(rowIndex,6)">
                   棚卸更新
@@ -117,11 +119,21 @@
                   登録
                   </button>
                   -->
+                  <!--
                   <button type="button" class="" @click="InvBtn(details3[rowIndex].inv_id,details3[rowIndex].product_id,details3[rowIndex].product_name,details3[rowIndex].order_info)">
                   編集
                   </button>
+                  -->
                 </div>
               </td>
+              <td class="style1">{{ item['unit_price'] }}</td>
+              <td class="style1">{{ item['cal_total_price'] }}</td>
+            </tr>
+            <tr class="border1">
+              <td colspan="3" class="style1">{{ this.details3.length }} 件</td>
+              <td colspan="11" class="style1">合計金額</td>
+              <td class="style1">{{ Number(totals) | numberFormat }}</td>
+              <!--<td colspan="2" class="style1 font1"> ※合計金額に履歴は含まれていません</td>-->
             </tr>
           </tbody>
         </table>
@@ -632,7 +644,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item,rowIndex) in details2" :key="rowIndex" v-bind:class="(item['id'] == edit_id) ? 'bgcolor3' : ''"">
+            <tr v-for="(item,rowIndex) in details2" :key="rowIndex" v-bind:class="(item['id'] == edit_id) ? 'bgcolor3' : ''">
               <td >{{ item['charge'] }}</td>
               <td>{{ item['order_no'] }}</td>
               <td>{{ item['company_name'] }}</td>
@@ -1080,7 +1092,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr  v-for="(item,rowIndex) in details2" :key="rowIndex" v-bind:class="(item['id'] == edit_id) ? 'bgcolor3' : ''"">
+            <tr  v-for="(item,rowIndex) in details2" :key="rowIndex" v-bind:class="(item['id'] == edit_id) ? 'bgcolor3' : ''">
               <td>{{ item['charge'] }}</td>
               <td>{{ item['order_no'] }}</td>
               <td>{{ item['company_name'] }}</td>
@@ -1215,6 +1227,7 @@ export default {
       s_order_no: "",
       btnMode: 0,
       stock_month: "",
+      totals: "",
       
     };
   },
@@ -1242,6 +1255,9 @@ export default {
 
   },
   filters:{ 
+    numberFormat: function(num){
+      return num.toLocaleString();
+    }
   },
   // マウント時
   mounted() {
@@ -1595,9 +1611,20 @@ export default {
         this.details = res.details;
         this.details2 = res.details2;
         this.details3 = res.details3;
+        var pt = 0;
         //this.product_title = res.details[0].product_name;
         if (typeof this.details3 !== 'undefined') {
           console.log('getthen in this.details3.length = ' + this.details3.length); 
+          this.details3.forEach(function(element, index) {
+            console.log('getThen in details3.forEach = ' + element.cal_total_price);
+            pt = pt + Number(element.cal_total_price);
+            //if((typeof element.cal_total_price == 'string')) {
+            //  pt = pt + Number(element.cal_total_price);
+            //  console.log('getThen in typeof element.cal_total_price = ' + pt);
+            //}
+          });
+          this.totals = pt;
+
           if (this.details3.length == 0) this.actionmsgArr.push("" + this.stock_month + " 該当データがありません");
         }
         //console.log('getthen in sort_q = ' + sort_q);

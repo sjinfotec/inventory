@@ -174,6 +174,10 @@ class InventoryA extends Model
     private $param_company_name;
     public function getParamCompanynameAttribute(){ return $this->param_company_name;}
     public function setParamCompanynameAttribute($value){  $this->param_company_name = $value;}
+    // 商品名
+    private $param_product_name;
+    public function getParamProductnameAttribute(){ return $this->param_product_name;}
+    public function setParamProductnameAttribute($value){  $this->param_product_name = $value;}
 
 
     // 入庫日
@@ -184,6 +188,10 @@ class InventoryA extends Model
     private $param_delivery_day;
     public function getParamDeliverydayAttribute(){ return $this->param_delivery_day;}
     public function setParamDeliverydayAttribute($value){  $this->param_delivery_day = $value;}
+    // 履歴検索チェック
+    private $param_shistory;
+    public function getParamSHistoryAttribute(){ return $this->param_shistory;}
+    public function setParamSHistoryAttribute($value){  $this->param_shistory = $value;}
     
 
 
@@ -434,7 +442,8 @@ class InventoryA extends Model
                 ->orderBy('id');
             }
             else {
-                $data->where('status','newest');
+                $data->where('status','newest')
+                ->orderBy('id', 'DESC');
             }
             // 順番変更 正順逆順
             if(isset($this->param_order_no)){
@@ -486,6 +495,7 @@ class InventoryA extends Model
             
             $result = $data
             //->where('status','newest')
+            
             ->get();
             //$result = $data->get();
 
@@ -514,6 +524,7 @@ class InventoryA extends Model
     public function getSearchA(){
 
         try {
+            $matchThese = Array();
             $result = "";
             $data = DB::table($this->table)
             ->select(
@@ -552,8 +563,22 @@ class InventoryA extends Model
             if(!empty($this->param_order_no)){
                 //Log::info("getSearchA this->params_order_no -- ".$this->params_order_no);
                 //Log::info("getSearchA this->param_order_no -- ".$this->param_order_no);
+                if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
                 $data->where('order_no', $this->param_order_no)
                 //->where('status','newest')
+                ->where($matchThese)
+                ->orderBy('id', 'DESC');
+            
+                $result = $data
+                ->get();
+            }
+            if(!empty($this->param_product_name)){
+                $str = "%".$this->param_product_name."%";
+				if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
+				$matchThese['is_deleted'] = 0;
+                //Log::info("getSearchA this->param_product_name -- ".$str);
+                $data->where('product_name','LIKE', $str)
+                ->where($matchThese)
                 ->orderBy('id', 'DESC');
             
                 $result = $data
@@ -561,10 +586,12 @@ class InventoryA extends Model
             }
             if(!empty($this->param_company_name)){
                 $str = "%".$this->param_company_name."%";
+                if(empty($this->param_shistory)) $matchThese['status'] = 'newest';
                 //Log::info("getSearchA this->param_company_name -- ".$str);
                 $data->where('company_name','LIKE', $str)
-                ->where('status','newest')
-                ->orderBy('id');
+                //->where('status','newest')
+                ->where($matchThese)
+                ->orderBy('id', 'DESC');
             
                 $result = $data
                 ->get();
@@ -572,7 +599,7 @@ class InventoryA extends Model
 
             /*
             if ($result->isEmpty()) {
-                $result = "";
+                $result = "";param_product_name
             } 
             */
             return $result;
@@ -670,17 +697,29 @@ class InventoryA extends Model
         return $is_exists;
     }
 
+
+
     /**
      * 削除
      *
      * @return void
      */
-    public function delDataA(){
+    public function delData($delkind){
         try {
-            
             $mainQuery = DB::table($this->table);
-            $mainQuery->where('account_id',$this->param_account_id);
-            $result = $mainQuery->where('is_deleted',0)->delete();
+            //$mainQuery->where('account_id',$this->param_account_id);
+            //$result = $mainQuery->where('status','del')->delete();
+			if($delkind === "one") {
+	            $mainQuery->where('id', $this->id);
+			}
+			elseif($delkind === "all") {
+	            $mainQuery->where('product_id', $this->product_id);
+			}
+			$result = $mainQuery
+            ->delete();
+			$re_data['id'] = $this->id;
+            return $re_data;
+
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$pe');
             Log::error($pe->getMessage());
@@ -691,5 +730,8 @@ class InventoryA extends Model
             throw $e;
         }
     }
+
+
+
 
 }

@@ -5,7 +5,7 @@
 
     <div v-if="selectMode=='LINEACTIVE'">
       <div id="top_cnt">
-        <h2>ゴミ箱一覧</h2>
+        <h2>抹消リスト</h2>
       </div>
 
       <div id="msg_cnt" v-if="actionmsgArr.length">
@@ -134,7 +134,7 @@
 
     <div id="input_area_1" v-if="selectMode=='COMPLETE'">
       <div>
-        <h2>ゴミ箱 / {{ acttitle }} 完了</h2>
+        <h2>抹消リスト / {{ acttitle }} 完了</h2>
       </div>
 
       <div class="" v-if="actionmsgArr.length">
