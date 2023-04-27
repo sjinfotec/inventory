@@ -1007,10 +1007,10 @@
         <div id="button1">
           <div>
             <div class="btnstyle" v-if="btnMode==='update'">
-              <button type="button" class="style1" @click="dataUpdate(index,1)">在庫の更新</button>
+              <button type="button" class="style1" @click="dataUpdate(index,1)">預かりの更新</button>
             </div>
             <div class="btnstyle" v-if="btnMode==='fix'">
-              <button type="button" class="style2" @click="dataUpdate(index,0)">在庫の修正</button>
+              <button type="button" class="style2" @click="dataUpdate(index,0)">預かりの修正</button>
             </div>
           </div>
           <div>
@@ -1518,11 +1518,20 @@ export default {
       if (this.checkFormStore()) {
         //console.log("dataUpdate in edit_id = " + this.edit_id);
         //console.log("dataUpdate in product_id = " + this.product_id);
+        if(k == 1) {
+          this.details[index].now_inventory = this.nowInventory;
+          this.details[index].nbox = this.boxTotal;
+          //console.log("k == 1 nowInventory -> " + this.nowInventory + "; boxTotal -> " + this.boxTotal);
+        }
         var messages = [];
-        var arrayParams = { details : this.details[index] , upkind : k };
+        var arrayParams = { 
+          details : this.details[index],
+          upkind : k,
+          now_inventory : this.nowInventory,
+        };
         var motion_msg = "";
         if (k == 0) motion_msg = '修正';
-        if (k == 1) motion_msg = '在庫を更新';
+        if (k == 1) motion_msg = '預かりを更新';
         if (k == 2) motion_msg = '新しい商品追加';
         this.postRequest("/view_inventory_a/update", arrayParams)
           .then(response  => {
