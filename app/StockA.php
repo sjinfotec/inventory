@@ -305,9 +305,23 @@ class StockA extends Model
 
             }
             elseif($upkind == 6)    {
-                //棚卸更新
-                if(empty($this->stock_now_inventory) && !empty($this->stock_nbox)) $this->stock_now_inventory = $this->stock_nbox * $this->quantity;
-                if(!empty($this->stock_now_inventory) && empty($this->stock_nbox)) $this->stock_nbox = $this->stock_now_inventory / $this->quantity;
+                //棚卸更新 [0-9]{1,}一桁以上の数値
+                $ptr = "/[0-9]{1,}/";
+                if(empty($this->stock_now_inventory) && !empty($this->stock_nbox)) {
+                    $match_result1 = preg_match_all($ptr,$this->stock_nbox,$matches_stock_nbox);
+                    $matches_stock_nbox00 = isset($matches_stock_nbox[0][0]) ? $matches_stock_nbox[0][0] : 0 ;
+                    $matches_stock_nbox01 = isset($matches_stock_nbox[0][1]) ? $matches_stock_nbox[0][1] : 0 ;
+                    $this->stock_now_inventory = $matches_stock_nbox00 * $this->quantity + $matches_stock_nbox01;
+                    //$this->stock_now_inventory = $this->stock_nbox * $this->quantity;
+                }
+                if(!empty($this->stock_now_inventory) && empty($this->stock_nbox)) {
+                    $match_result2 = preg_match($ptr,$this->stock_now_inventory,$matches_stock_now_inventory);
+                    $matches_stock_now_inventory0 = isset($matches_stock_now_inventory[0]) ? $matches_stock_now_inventory[0] : 0 ;
+                    $floor_stock_nbox = floor($matches_stock_now_inventory0 / $this->quantity);
+                    $amari_stock_nbox = $matches_stock_now_inventory0 % $this->quantity;
+                    $this->stock_nbox = $floor_stock_nbox ."+".$amari_stock_nbox;
+                    //$this->stock_nbox = $this->stock_now_inventory / $this->quantity;
+                }
                 DB::table($this->table)
                 ->where('id', $this->id)
                 ->update([
