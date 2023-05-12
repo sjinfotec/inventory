@@ -420,6 +420,7 @@ class StockController extends Controller
             $stock_a->setStockmonthAttribute($details['stock_month']);
             $stock_a->setUpdateduserAttribute($updateuser);
             $stock_a->setUpdatedatAttribute($systemdate);
+            $stock_a->setParamNowinventoryAttribute($details['now_inventory']);
 
             
             //if ($details['id'] == "" || $details['id'] == null) {

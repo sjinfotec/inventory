@@ -150,7 +150,16 @@ class StockA extends Model
     private $param_stock_month;
     public function getParamStockmonthAttribute(){ return $this->param_stock_month;}
     public function setParamStockmonthAttribute($value){  $this->param_stock_month = $value;}
-    
+    // 在庫数setParamMmnowinventoryAttribute
+	private $param_now_inventory;
+	public function getParamNowinventoryAttribute(){
+		return $this->param_now_inventory;
+	}
+	public function setParamNowinventoryAttribute($value)
+	{
+		$this->param_now_inventory = $value;
+	}
+
 
     // ------------- 順序・正逆・検索 --------------
     // 発注情報
@@ -334,6 +343,85 @@ class StockA extends Model
                     'updated_user'=>$this->updated_user,
                     'updated_at'=>$this->updated_at
                 ]);
+
+                $snini = $this->stock_now_inventory - $this->param_now_inventory;
+                //Log::debug("MMStock updateDataStock snini gettype -> ".gettype($snini));
+                //Log::debug("MMStock updateDataStock snini val -> ".$snini);
+                if(!empty($snini)) {
+                    //Log::debug("MMStock updateDataStock snini !empty in ");
+                    if($this->order_info == "a") {
+                        /*
+                        $result_tablemm = DB::table($this->table_inva)
+                        ->where('product_id', $this->product_id)
+                        ->where('status', 'newest')
+                        ->update([
+                            'now_inventory' => $this->stock_now_inventory,
+                            'nbox' => $this->stock_nbox,
+                            'updated_user'=> $this->updated_user,
+                            'updated_at'=> $this->updated_at
+                        ]);
+                        */
+
+                        DB::table($this->table_inva)
+                        ->where('product_id', $this->product_id)
+                        ->where('status', 'newest')
+                        ->update([
+                            'status' => '',
+                        ]);
+                        // ->where('id', $this->inv_id)
+
+                        $id = DB::table($this->table_inva)->insertGetId(
+                            [
+                                'charge' => $this->charge,
+                                'order_no' => $this->order_no,
+                                'company_name' => $this->company_name,
+                                'company_id' => $this->company_id,
+                                'product_name' => $this->product_name,
+                                'product_id' => $this->product_id,
+                                'unit' => $this->unit,
+                                'quantity' => $this->quantity,
+                                'now_inventory' => $this->stock_now_inventory,
+                                'nbox' => $this->stock_nbox,
+                                'dnum' => $this->dnum,
+                                'rnum' => $this->rnum,
+                                'shipping_address' => $this->shipping_address,
+                                'remarks' => $this->remarks,
+                                'status' => 'newest',
+                                'order_info' => $this->order_info,
+                                'other1' => $this->other1,
+                                'marks' => $this->marks,
+                                'created_user' => $this->updated_user,
+                                'created_at' => $this->created_at,
+                                'updated_at' => NULL
+                
+                            ]
+                        );
+
+
+
+
+
+                    }
+
+                    if($this->order_info == "z") {
+                        $result_tablemm = DB::table($this->table_invz)
+                        ->where('product_id', $this->product_id)
+                        ->where('status', 'newest')
+                        ->update([
+                            'now_inventory' => $this->stock_now_inventory,
+                            'nbox' => $this->stock_nbox,
+                            'total' => $this->unit_price * $this->stock_now_inventory,
+                            'updated_user'=> $this->updated_user,
+                            'updated_at'=> $this->updated_at
+                        ]);
+                    }
+
+
+
+
+    
+                }
+
                 $re_data['id'] = $this->id;
                 $re_data['stock_now_inventory'] = $this->stock_now_inventory;
                 $re_data['stock_nbox'] = $this->stock_nbox;
@@ -412,6 +500,13 @@ class StockA extends Model
                     ELSE  null 
                 END
                 ) as inv_id ";
+            $columnStr[] = " (
+                CASE 
+                    WHEN t1.order_info='a' THEN t2.charge 
+                    WHEN t1.order_info='z' THEN t3.charge 
+                    ELSE  null 
+                END
+                ) as charge ";
             $columnStr[] = " t1.order_no AS order_no ";
             $columnStr[] = " t1.company_name AS company_name ";
             $columnStr[] = " t1.company_id AS company_id ";
