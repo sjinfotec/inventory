@@ -401,6 +401,7 @@ class StockController extends Controller
 
             $stock_a->setIdAttribute($details['id']);
             $stock_a->setInvidAttribute($details['inv_id']);
+            $stock_a->setChargeAttribute($details['charge']);
             $stock_a->setOrdernoAttribute($details['order_no']);
             $stock_a->setCompanynameAttribute($details['company_name']);
             $stock_a->setCompanyidAttribute($details['company_id']);

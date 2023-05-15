@@ -16,6 +16,7 @@ class StockA extends Model
 
     private $id;
     private $inv_id;              // inventoryID
+    private $charge;              // 担当
     private $order_no;            // 受注番号
     private $company_name;        // 会社名
     private $company_id;          // 会社ID
@@ -44,6 +45,9 @@ class StockA extends Model
     // inventoryID
     public function getInvidAttribute(){ return $this->inv_id;}
     public function setInvidAttribute($value){  $this->inv_id = $value;}
+    // 担当 inventory update用
+    public function getChargeAttribute(){ return $this->charge;}
+    public function setChargeAttribute($value){  $this->charge = $value;}
     // 受注番号
     public function getOrdernoAttribute(){ return $this->order_no;}
     public function setOrdernoAttribute($value){  $this->order_no = $value;}
@@ -328,7 +332,8 @@ class StockA extends Model
                     $matches_stock_now_inventory0 = isset($matches_stock_now_inventory[0]) ? $matches_stock_now_inventory[0] : 0 ;
                     $floor_stock_nbox = floor($matches_stock_now_inventory0 / $this->quantity);
                     $amari_stock_nbox = $matches_stock_now_inventory0 % $this->quantity;
-                    $this->stock_nbox = $floor_stock_nbox ."+".$amari_stock_nbox;
+                    $amari_num = $amari_stock_nbox == 0 ? "" : "+".$amari_stock_nbox;
+                    $this->stock_nbox = $floor_stock_nbox . $amari_num;
                     //$this->stock_nbox = $this->stock_now_inventory / $this->quantity;
                 }
                 DB::table($this->table)
@@ -345,22 +350,24 @@ class StockA extends Model
                 ]);
 
                 $snini = $this->stock_now_inventory - $this->param_now_inventory;
-                //Log::debug("MMStock updateDataStock snini gettype -> ".gettype($snini));
-                //Log::debug("MMStock updateDataStock snini val -> ".$snini);
-                if(!empty($snini)) {
-                    //Log::debug("MMStock updateDataStock snini !empty in ");
+                //Log::debug("Stock updateDataStock snini gettype -> ".gettype($snini));
+                //Log::debug("Stock updateDataStock snini val -> ".$snini);
+                //if(!empty($snini)) {
+                if($this->stock_now_inventory !== $this->param_now_inventory) {
+                        //Log::debug("Stock updateDataStock snini !empty in ");
                     if($this->order_info == "a") {
-                        /*
-                        $result_tablemm = DB::table($this->table_inva)
+
+                        $result_tableinva = DB::table($this->table_inva)
+                        ->select('charge','dnum','rnum','shipping_address','remarks','created_user')
                         ->where('product_id', $this->product_id)
-                        ->where('status', 'newest')
-                        ->update([
-                            'now_inventory' => $this->stock_now_inventory,
-                            'nbox' => $this->stock_nbox,
-                            'updated_user'=> $this->updated_user,
-                            'updated_at'=> $this->updated_at
-                        ]);
-                        */
+                        ->where('status', 'newest')->get();
+                        $this->charge = $result_tableinva[0]->charge;
+                        $this->dnum = $result_tableinva[0]->dnum;
+                        $this->rnum = $result_tableinva[0]->rnum;
+                        $this->shipping_address = $result_tableinva[0]->shipping_address;
+                        $this->remarks = $result_tableinva[0]->remarks;
+                        $this->created_user = $result_tableinva[0]->created_user;
+                        $this->remarks = "※棚卸修正\n".$this->remarks;
 
                         DB::table($this->table_inva)
                         ->where('product_id', $this->product_id)
@@ -390,36 +397,72 @@ class StockA extends Model
                                 'order_info' => $this->order_info,
                                 'other1' => $this->other1,
                                 'marks' => $this->marks,
-                                'created_user' => $this->updated_user,
+                                'created_user' => $this->created_user,
+                                'updated_user'=> $this->updated_user,
                                 'created_at' => $this->created_at,
-                                'updated_at' => NULL
+                                'updated_at'=> NULL
                 
                             ]
                         );
 
-
-
-
-
                     }
 
                     if($this->order_info == "z") {
-                        $result_tablemm = DB::table($this->table_invz)
+                        $result_tableinvz = DB::table($this->table_invz)
+                        ->select('charge','order_address','remarks','note','other1','created_user')
+                        ->where('product_id', $this->product_id)
+                        ->where('status', 'newest')->get();
+                        $this->charge = $result_tableinvz[0]->charge;
+                        $this->order_address = $result_tableinvz[0]->order_address;
+                        $this->remarks = $result_tableinvz[0]->remarks;
+                        $this->note = $result_tableinvz[0]->note;
+                        $this->other1 = $result_tableinvz[0]->other1;
+                        $this->created_user = $result_tableinvz[0]->created_user;
+                        $this->remarks = "※棚卸修正\n".$this->remarks;
+
+                        
+                        DB::table($this->table_invz)
                         ->where('product_id', $this->product_id)
                         ->where('status', 'newest')
                         ->update([
-                            'now_inventory' => $this->stock_now_inventory,
-                            'nbox' => $this->stock_nbox,
-                            'total' => $this->unit_price * $this->stock_now_inventory,
-                            'updated_user'=> $this->updated_user,
-                            'updated_at'=> $this->updated_at
+                            'status' => '',
                         ]);
+                        
+
+                        $id = DB::table($this->table_invz)->insertGetId(
+                            [
+                                'charge' => $this->charge,
+                                'order_no' => $this->order_no,
+                                'company_name' => $this->company_name,
+                                'company_id' => $this->company_id,
+                                'product_name' => $this->product_name,
+                                'product_id' => $this->product_id,
+                                'unit' => $this->unit,
+                                'quantity' => $this->quantity,
+                                'supply_day' => $this->supply_day,
+                                'supply_quantity' => $this->supply_quantity,
+                                'order_day' => $this->order_day,
+                                'order_quantity' => $this->order_quantity,
+                                'now_inventory' => $this->stock_now_inventory,
+                                'nbox' => $this->stock_nbox,
+                                'order_address' => $this->order_address,
+                                'unit_price' => $this->unit_price,
+                                'total' => $this->unit_price * $this->stock_now_inventory,
+                                'remarks' => $this->remarks,
+                                'note' => $this->note,
+                                'status' => 'newest',
+                                'order_info' => $this->order_info,
+                                'other1' => $this->other1,
+                                'marks' => $this->marks,
+                                'created_user' => $this->created_user,
+                                'updated_user'=> $this->updated_user,
+                                'updated_at'=> NULL
+                            
+                            ]
+                        );
+
                     }
 
-
-
-
-    
                 }
 
                 $re_data['id'] = $this->id;
@@ -453,9 +496,10 @@ class StockA extends Model
                     'status' => $this->status,
                     'order_info' => $this->order_info,
                     'stock_month' => $this->stock_month,
+                    'created_user' => $this->created_user,
                     'updated_user'=>$this->updated_user,
                     'updated_at'=>$this->updated_at
-                ]);
+    ]);
 
                 $re_data['id'] = $this->id;
                 $re_data['inv_id'] = $this->inv_id;
