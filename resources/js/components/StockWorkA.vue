@@ -1616,7 +1616,7 @@ export default {
         if (typeof this.details3 !== 'undefined') {
           console.log('getthen in this.details3.length = ' + this.details3.length); 
           this.details3.forEach(function(element, index) {
-            console.log('getThen in details3.forEach = ' + element.cal_total_price);
+            //console.log('getThen in details3.forEach = ' + element.cal_total_price);
             pt = pt + Number(element.cal_total_price);
             //if((typeof element.cal_total_price == 'string')) {
             //  pt = pt + Number(element.cal_total_price);

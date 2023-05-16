@@ -179,107 +179,6 @@ class StockController extends Controller
     }
 
 
-    /**
-     * 新規登録
-     *
-     * @param Request $request
-     * @return void
-     */
-    public function storeA(Request $request){
-        $this->array_messagedata = array();
-        $result = true;
-        try {
-            // パラメータチェック
-            $params = array();
-            if (!isset($request->keyparams)) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $params = $request->keyparams;
-            if (!isset($params['form'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "form", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $details = $params['form'];
-            $re_data = $this->insertA($details);
-            if (!isset($re_data['id'])) {
-                $result = false;
-            }
-
-            return response()->json(
-                ['result' => $result, 'id' => $re_data['id'], 'inv_id' => $re_data['inv_id'], 'product_id' => $re_data['product_id'], 'product_name' => $re_data['product_name'],
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
-
-    /**
-     * INSERT
-     *
-     * @param [type] $inputs
-     * @return void
-     */
-    private function insertA($details){
-        $stock_a = new StockA();
-        $systemdate = Carbon::now();
-        $inputsys = "manual";
-        //$apply_term_from = Config::get('const.INIT_DATE.initdate');
-
-        DB::beginTransaction();
-        try{
-            $stock_a->setInvidAttribute($details['inv_id']);
-            $stock_a->setOrdernoAttribute($details['order_no']);
-            $stock_a->setCompanynameAttribute($details['company_name']);
-            $stock_a->setCompanyidAttribute($details['company_id']);
-            $stock_a->setProductnameAttribute($details['product_name']);
-            $stock_a->setProductidAttribute($details['product_id']);
-            $stock_a->setUnitAttribute($details['unit']);
-            $stock_a->setQuantityAttribute($details['quantity']);
-            $stock_a->setNowinventoryAttribute($details['now_inventory']);
-            $stock_a->setNboxAttribute($details['nbox']);
-            $stock_a->setStatusAttribute($details['status']);
-            $stock_a->setOrderinfoAttribute($details['order_info']);
-            $stock_a->setMarksAttribute($details['marks']);
-            $stock_a->setCreateduserAttribute($inputsys);
-            $stock_a->setCreatedatAttribute($systemdate);
-            
-            /*
-            $is_exists = $inventory_a->isExistsInfo();
-            if($is_exists){
-                $inventory_a->delDataA();
-            }
-            */
-
-            $re_data = $stock_a->insertDataA();   //引数 3 ＝ 新規登録
-            DB::commit();
-            return $re_data;
-
-        }catch(\PDOException $pe){
-            Log::error($pe->getMessage());
-            DB::rollBack();
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error($e->getMessage());
-            DB::rollBack();
-            throw $e;
-        }
-
-    }
-
 
 
 
@@ -335,49 +234,6 @@ class StockController extends Controller
     }
 
     /**
-     * ステートボタン押下 
-     *
-     * @param Request $request
-     * @return response
-     */
-    public function statusA(Request $request){
-        $this->array_messagedata = array();
-        $details = array();
-        $result = true;
-        try {
-            // パラメータチェック
-            $params = array();
-            if (!isset($request->keyparams)) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $params = $request->keyparams;
-            $details = $params['details'];
-            //$details['id'] = $params['edit_id'];
-            $upkind = $params['upkind'];
-            $re_data = $this->updateA($details,$upkind);
-            return response()->json(
-                ['result' => $result, 'id' => $re_data['id'], 'product_id' => $re_data['product_id'], 'product_name' => $re_data['product_name'],
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
-            Log::error($e->getMessage());
-            throw $e;
-        }
-
-        return $response;
-    }
-
-
-
-    /**
      * 更新
      *
      * @param [type] $details
@@ -422,6 +278,9 @@ class StockController extends Controller
             $stock_a->setUpdateduserAttribute($updateuser);
             $stock_a->setUpdatedatAttribute($systemdate);
             $stock_a->setParamNowinventoryAttribute($details['now_inventory']);
+            $stock_a->setParamNboxAttribute($details['nbox']);
+            $stock_a->setParamOldstockNowinventoryAttribute($details['old_stock_now_inventory']);
+            $stock_a->setParamOldctockNboxAttribute($details['old_stock_nbox']);
 
             
             //if ($details['id'] == "" || $details['id'] == null) {
@@ -592,123 +451,6 @@ class StockController extends Controller
             throw $e;
         }
     }
-
-
-    /** 検索SEARCH取得
-     *
-     * @return list results
-     */
-    public function getDataAsearch(Request $request){
-        //Log::debug("getDataAone in ");
-        $this->array_messagedata = array();
-        $s_order_no = "";
-        $result = true;
-        try {
-            // パラメータチェック
-            $params = array();
-            if (!isset($request->keyparams)) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => null,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $params = $request->keyparams;
-            //Log::debug("getDataAsearch params[s_order_no] = ".$params['s_order_no']);
-            if (!isset($params['s_order_no'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "edit_id", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => null,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $s_order_no = $params['s_order_no'];
-            //Log::debug("getDataAone edit_id = ".$edit_id);
-            $inventory_a = new InventoryA();
-            $inventory_a->setParamOrdernoAttribute($s_order_no);
-            $details =  $inventory_a->getSearchA();
-
-            return response()->json(
-                ['result' => $result, 'details' => $details, 's_order_no' => $s_order_no,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
-
-
-
-    /** 詳細取得
-     *
-     * @return list results
-     */
-    public function getDataAone(Request $request){
-        //Log::debug("getDataAone in ");
-        $this->array_messagedata = array();
-        $edit_id = "";
-        $product_id = "";
-        $result = true;
-        try {
-            // パラメータチェック
-            $params = array();
-            if (!isset($request->keyparams)) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => null,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $params = $request->keyparams;
-            //Log::debug("getDataAone params[edit_id] = ".$params['edit_id']);
-            //Log::debug("getDataAone params[product_id] = ".$params['product_id']);
-            if (!isset($params['edit_id'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "edit_id", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => null,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $edit_id = $params['edit_id'];
-            //Log::debug("getDataAone edit_id = ".$edit_id);
-            $inventory_a = new InventoryA();
-            $inventory_a->setParamEditidAttribute($edit_id);
-            $details =  $inventory_a->getDataInvA();
-
-            
-            $product_id = $params['product_id'];
-            //Log::debug("getDataAone product_id = ".$product_id);
-            if(isset($product_id)) {
-                $inventory_a2 = new InventoryA();
-                $inventory_a2->setParamProductidAttribute($product_id);
-                $details2 =  $inventory_a2->getDataInvA();
-            }  else {
-                $details2 = "";
-            }
-        
-
-
-            return response()->json(
-                ['result' => $result, 'details' => $details, 'details2' => $details2, 'edit_id' => $edit_id, 'product_id' => $product_id,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
-
 
 
 

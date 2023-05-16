@@ -163,6 +163,33 @@ class StockA extends Model
 	{
 		$this->param_now_inventory = $value;
 	}
+    // 在庫箱数setParamNboxAttribute
+	private $param_nbox;
+	public function getParamNboxAttribute(){
+		return $this->param_nbox;
+	}
+	public function setParamNboxAttribute($value)
+	{
+		$this->param_nbox = $value;
+	}
+    // old在庫数
+	private $param_old_stock_now_inventory;
+	public function getParamOldstockNowinventoryAttribute(){
+		return $this->param_old_stock_now_inventory;
+	}
+	public function setParamOldstockNowinventoryAttribute($value)
+	{
+		$this->param_old_stock_now_inventory = $value;
+	}
+    // old在庫箱数
+	private $param_old_stock_nbox;
+	public function getParamOldctockNboxAttribute(){
+		return $this->param_old_stock_nbox;
+	}
+	public function setParamOldctockNboxAttribute($value)
+	{
+		$this->param_old_stock_nbox = $value;
+	}
 
 
     // ------------- 順序・正逆・検索 --------------
@@ -349,11 +376,12 @@ class StockA extends Model
                     'updated_at'=>$this->updated_at
                 ]);
 
-                $snini = $this->stock_now_inventory - $this->param_now_inventory;
+                //$snini = $this->stock_now_inventory - $this->param_now_inventory;
                 //Log::debug("Stock updateDataStock snini gettype -> ".gettype($snini));
-                //Log::debug("Stock updateDataStock snini val -> ".$snini);
+                //Log::debug("Stock updateDataStock nbox val stock -> ".$this->stock_nbox." : nbox-> ".$this->nbox. " : p_nbox-> ".$this->param_nbox. " : p_old_nbox-> ".$this->param_old_stock_nbox);
+                //Log::debug("Stock updateDataStock now_inventory val stock_now -> ".$this->stock_now_inventory." : now -> ".$this->now_inventory. " : param_now -> ".$this->param_now_inventory. " : p_old_now -> ".$this->param_old_stock_now_inventory);
                 //if(!empty($snini)) {
-                if($this->stock_now_inventory !== $this->param_now_inventory) {
+                if($this->stock_now_inventory !== $this->param_old_stock_now_inventory) {
                         //Log::debug("Stock updateDataStock snini !empty in ");
                     if($this->order_info == "a") {
 
@@ -499,7 +527,7 @@ class StockA extends Model
                     'created_user' => $this->created_user,
                     'updated_user'=>$this->updated_user,
                     'updated_at'=>$this->updated_at
-    ]);
+                ]);
 
                 $re_data['id'] = $this->id;
                 $re_data['inv_id'] = $this->inv_id;
@@ -609,6 +637,8 @@ class StockA extends Model
 
             $columnStr[] = " t1.stock_now_inventory AS stock_now_inventory ";
             $columnStr[] = " t1.stock_nbox AS stock_nbox ";
+            $columnStr[] = " t1.stock_now_inventory AS old_stock_now_inventory ";
+            $columnStr[] = " t1.stock_nbox AS old_stock_nbox ";
 
 
             $columnStr[] = " (
