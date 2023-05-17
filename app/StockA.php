@@ -395,7 +395,7 @@ class StockA extends Model
                         $this->shipping_address = $result_tableinva[0]->shipping_address;
                         $this->remarks = $result_tableinva[0]->remarks;
                         $this->created_user = $result_tableinva[0]->created_user;
-                        $this->remarks = "※棚卸修正\n".$this->remarks;
+                        $this->remarks = "※{$this->stock_month}棚卸修正\n".$this->remarks;
 
                         DB::table($this->table_inva)
                         ->where('product_id', $this->product_id)
@@ -446,7 +446,7 @@ class StockA extends Model
                         $this->note = $result_tableinvz[0]->note;
                         $this->other1 = $result_tableinvz[0]->other1;
                         $this->created_user = $result_tableinvz[0]->created_user;
-                        $this->remarks = "※棚卸修正\n".$this->remarks;
+                        $this->remarks = "※{$this->stock_month}棚卸修正\n".$this->remarks;
 
                         
                         DB::table($this->table_invz)
@@ -798,249 +798,11 @@ class StockA extends Model
 
     }
 
-
-
-    
+  
 
     
-    /**
-     * 取得
-     *
-     * @return void
-     */
-    public function getDataStockA(){
-        $message = "ログ出力 getDataInvA";
-        //echo '<pre>' . var_export($message, true) . '</pre>';
-        //Log::debug("debug --".$message);
-        /*
-        Log::info("this->param_edit_id -- ".$this->param_edit_id);
-        Log::info("this->param_product_id -- ".$this->param_product_id);
-        Log::info("this->param_order_info -- ".$this->param_order_info);
-        Log::info("this->param_order_no -- ".$this->param_order_no);
-        Log::info("this->param_company_id -- ".$this->param_company_id);
-        Log::info("this->param_product_id2 -- ".$this->param_product_id2);
-        Log::info("this->param_orderfr -- ".$this->param_orderfr);
-        */
-
-        try {
-            $data = DB::table($this->table)
-            ->select(
-                [
-                    'id',
-                    'inv_id',
-                    'order_no',
-                    'company_name',
-                    'company_id',
-                    'product_name',
-                    'product_id',
-                    'unit',
-                    'quantity',
-                    'now_inventory AS stock_now_inventory',
-                    'nbox AS stock_nbox',
-                    'status',
-                    'order_info',
-                    'stock_month',
-                    'created_user',
-                    'updated_user',
-                    'created_at',
-                    'updated_at'
-                ]
-            );
-            //$data->where('account_id',$this->param_account_id);
-            if(!empty($this->param_edit_id)){
-                $data->where('id',$this->param_edit_id);
-            }
-            elseif(!empty($this->param_product_id)){
-                $data->where('product_id',$this->param_product_id)
-                ->orderBy('id', 'DESC');
-            }
-            elseif(!empty($this->param_status)){
-                $data->where('status',$this->param_status)
-                ->orderBy('id');
-            }
-            else {
-                $data->where('stock_month',$this->param_stock_month);
-            }
-            // 順番変更 正順逆順
-            if(isset($this->param_order_no)){
-                Log::info("isset this->param_order_no -- ".$this->param_order_no);
-                if($this->param_order_no == 1) {
-                    $data->orderBy('order_no');
-                }
-                if($this->param_order_no == 2) {
-                    $data->orderBy('order_no', 'DESC');
-                }
-            }
-            elseif(isset($this->param_company_id)){
-                Log::info("isset this->param_company_id -- ".$this->param_company_id);
-                if($this->param_company_id == 1) {
-                    $data->orderBy('company_name');
-                }
-                if($this->param_company_id == 2) {
-                    $data->orderBy('company_name', 'DESC');
-                }
-            }
-            elseif(isset($this->param_product_id2)){
-                Log::info("isset this->param_product_id2 -- ".$this->param_product_id2);
-                if($this->param_product_id2 == 1) {
-                    $data->orderBy('product_name');
-                }
-                if($this->param_product_id2 == 2) {
-                    $data->orderBy('product_name', 'DESC');
-                }
-            }
-            if(isset($this->param_receipt_day)){
-                Log::info("isset this->param_receipt_day -- ".$this->param_receipt_day);
-                if($this->param_receipt_day == 1) {
-                    $data->orderBy('receipt_day');
-                }
-                if($this->param_receipt_day == 2) {
-                    $data->orderBy('receipt_day', 'DESC');
-                }
-            }
-            if(isset($this->param_delivery_day)){
-                Log::info("isset this->param_delivery_day -- ".$this->param_delivery_day);
-                if($this->param_delivery_day == 1) {
-                    $data->orderBy('delivery_day');
-                }
-                if($this->param_delivery_day == 2) {
-                    $data->orderBy('delivery_day', 'DESC');
-                }
-            }
-
-            
-            $result = $data
-            //->where('status','newest')
-            ->get();
-            //$result = $data->get();
-
-            return $result;
 
 
 
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-
-    }
-
-
-    /**
-     * 検索SEARCH取得
-     *
-     * @return void
-     */
-    public function getSearchStockA(){
-
-        try {
-            $data = DB::table($this->table)
-            ->select(
-
-                'id',
-                'inv_id',
-                'order_no',
-                'company_name',
-                'company_id',
-                'product_name',
-                'product_id',
-                'unit',
-                'quantity',
-                'now_inventory',
-                'nbox',
-                'stock_now_inventory',
-                'stock_nbox',
-                'status',
-                'order_info',
-                'stock_month',
-                'created_user',
-                'updated_user',
-                'created_at',
-                'updated_at'
-
-            );
-            if(!empty($this->param_order_no)){
-                //Log::info("getSearchA this->params_order_no -- ".$this->params_order_no);
-                //Log::info("getSearchA this->param_order_no -- ".$this->param_order_no);
-                $data->where('order_no', $this->param_order_no)
-                //->where('status','newest')
-                ->orderBy('id', 'DESC');
-            
-                $result = $data
-                ->get();
-            }
-
-            if ($result->isEmpty()) {
-                $result = "";
-            } 
-            return $result;
-
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-
-    }
-
-
-
-
-
-
-    /**
-     * 存在チェック
-     *
-     * @return boolean
-     */
-    public function isExistsInfo(){
-        try {
-            $mainQuery = DB::table($this->table);
-            $mainQuery->where('account_id',$this->param_account_id);
-            $is_exists = $mainQuery->where('is_deleted',0)
-                ->exists();
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-
-        return $is_exists;
-    }
-
-    /**
-     * 削除
-     *
-     * @return void
-     */
-    public function delDataStockA(){
-        try {
-            
-            $mainQuery = DB::table($this->table);
-            $mainQuery->where('account_id',$this->param_account_id);
-            $result = $mainQuery->where('is_deleted',0)->delete();
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
 
 }
