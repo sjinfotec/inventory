@@ -16,6 +16,7 @@ class StockA extends Model
 
     private $id;
     private $inv_id;              // inventoryID
+    private $charge;              // 担当
     private $order_no;            // 受注番号
     private $company_name;        // 会社名
     private $company_id;          // 会社ID
@@ -44,6 +45,9 @@ class StockA extends Model
     // inventoryID
     public function getInvidAttribute(){ return $this->inv_id;}
     public function setInvidAttribute($value){  $this->inv_id = $value;}
+    // 担当 inventory update用
+    public function getChargeAttribute(){ return $this->charge;}
+    public function setChargeAttribute($value){  $this->charge = $value;}
     // 受注番号
     public function getOrdernoAttribute(){ return $this->order_no;}
     public function setOrdernoAttribute($value){  $this->order_no = $value;}
@@ -150,7 +154,43 @@ class StockA extends Model
     private $param_stock_month;
     public function getParamStockmonthAttribute(){ return $this->param_stock_month;}
     public function setParamStockmonthAttribute($value){  $this->param_stock_month = $value;}
-    
+    // 在庫数setParamMmnowinventoryAttribute
+	private $param_now_inventory;
+	public function getParamNowinventoryAttribute(){
+		return $this->param_now_inventory;
+	}
+	public function setParamNowinventoryAttribute($value)
+	{
+		$this->param_now_inventory = $value;
+	}
+    // 在庫箱数setParamNboxAttribute
+	private $param_nbox;
+	public function getParamNboxAttribute(){
+		return $this->param_nbox;
+	}
+	public function setParamNboxAttribute($value)
+	{
+		$this->param_nbox = $value;
+	}
+    // old在庫数
+	private $param_old_stock_now_inventory;
+	public function getParamOldstockNowinventoryAttribute(){
+		return $this->param_old_stock_now_inventory;
+	}
+	public function setParamOldstockNowinventoryAttribute($value)
+	{
+		$this->param_old_stock_now_inventory = $value;
+	}
+    // old在庫箱数
+	private $param_old_stock_nbox;
+	public function getParamOldctockNboxAttribute(){
+		return $this->param_old_stock_nbox;
+	}
+	public function setParamOldctockNboxAttribute($value)
+	{
+		$this->param_old_stock_nbox = $value;
+	}
+
 
     // ------------- 順序・正逆・検索 --------------
     // 発注情報
@@ -305,9 +345,24 @@ class StockA extends Model
 
             }
             elseif($upkind == 6)    {
-                //棚卸更新
-                if(empty($this->stock_now_inventory) && !empty($this->stock_nbox)) $this->stock_now_inventory = $this->stock_nbox * $this->quantity;
-                if(!empty($this->stock_now_inventory) && empty($this->stock_nbox)) $this->stock_nbox = $this->stock_now_inventory / $this->quantity;
+                //棚卸更新 [0-9]{1,}一桁以上の数値
+                $ptr = "/[0-9]{1,}/";
+                if(empty($this->stock_now_inventory) && !empty($this->stock_nbox)) {
+                    $match_result1 = preg_match_all($ptr,$this->stock_nbox,$matches_stock_nbox);
+                    $matches_stock_nbox00 = isset($matches_stock_nbox[0][0]) ? $matches_stock_nbox[0][0] : 0 ;
+                    $matches_stock_nbox01 = isset($matches_stock_nbox[0][1]) ? $matches_stock_nbox[0][1] : 0 ;
+                    $this->stock_now_inventory = $matches_stock_nbox00 * $this->quantity + $matches_stock_nbox01;
+                    //$this->stock_now_inventory = $this->stock_nbox * $this->quantity;
+                }
+                if(!empty($this->stock_now_inventory) && empty($this->stock_nbox)) {
+                    $match_result2 = preg_match($ptr,$this->stock_now_inventory,$matches_stock_now_inventory);
+                    $matches_stock_now_inventory0 = isset($matches_stock_now_inventory[0]) ? $matches_stock_now_inventory[0] : 0 ;
+                    $floor_stock_nbox = floor($matches_stock_now_inventory0 / $this->quantity);
+                    $amari_stock_nbox = $matches_stock_now_inventory0 % $this->quantity;
+                    $amari_num = $amari_stock_nbox == 0 ? "" : "+".$amari_stock_nbox;
+                    $this->stock_nbox = $floor_stock_nbox . $amari_num;
+                    //$this->stock_nbox = $this->stock_now_inventory / $this->quantity;
+                }
                 DB::table($this->table)
                 ->where('id', $this->id)
                 ->update([
@@ -320,6 +375,124 @@ class StockA extends Model
                     'updated_user'=>$this->updated_user,
                     'updated_at'=>$this->updated_at
                 ]);
+
+                //$snini = $this->stock_now_inventory - $this->param_now_inventory;
+                //Log::debug("Stock updateDataStock snini gettype -> ".gettype($snini));
+                //Log::debug("Stock updateDataStock nbox val stock -> ".$this->stock_nbox." : nbox-> ".$this->nbox. " : p_nbox-> ".$this->param_nbox. " : p_old_nbox-> ".$this->param_old_stock_nbox);
+                //Log::debug("Stock updateDataStock now_inventory val stock_now -> ".$this->stock_now_inventory." : now -> ".$this->now_inventory. " : param_now -> ".$this->param_now_inventory. " : p_old_now -> ".$this->param_old_stock_now_inventory);
+                //if(!empty($snini)) {
+                if($this->stock_now_inventory !== $this->param_old_stock_now_inventory) {
+                        //Log::debug("Stock updateDataStock snini !empty in ");
+                    if($this->order_info == "a") {
+
+                        $result_tableinva = DB::table($this->table_inva)
+                        ->select('charge','dnum','rnum','shipping_address','remarks','created_user')
+                        ->where('product_id', $this->product_id)
+                        ->where('status', 'newest')->get();
+                        $this->charge = $result_tableinva[0]->charge;
+                        $this->dnum = $result_tableinva[0]->dnum;
+                        $this->rnum = $result_tableinva[0]->rnum;
+                        $this->shipping_address = $result_tableinva[0]->shipping_address;
+                        $this->remarks = $result_tableinva[0]->remarks;
+                        $this->created_user = $result_tableinva[0]->created_user;
+                        $this->remarks = "※{$this->stock_month}棚卸修正\n".$this->remarks;
+
+                        DB::table($this->table_inva)
+                        ->where('product_id', $this->product_id)
+                        ->where('status', 'newest')
+                        ->update([
+                            'status' => '',
+                        ]);
+                        // ->where('id', $this->inv_id)
+
+                        $id = DB::table($this->table_inva)->insertGetId(
+                            [
+                                'charge' => $this->charge,
+                                'order_no' => $this->order_no,
+                                'company_name' => $this->company_name,
+                                'company_id' => $this->company_id,
+                                'product_name' => $this->product_name,
+                                'product_id' => $this->product_id,
+                                'unit' => $this->unit,
+                                'quantity' => $this->quantity,
+                                'now_inventory' => $this->stock_now_inventory,
+                                'nbox' => $this->stock_nbox,
+                                'dnum' => $this->dnum,
+                                'rnum' => $this->rnum,
+                                'shipping_address' => $this->shipping_address,
+                                'remarks' => $this->remarks,
+                                'status' => 'newest',
+                                'order_info' => $this->order_info,
+                                'other1' => $this->other1,
+                                'marks' => $this->marks,
+                                'created_user' => $this->created_user,
+                                'updated_user'=> $this->updated_user,
+                                'created_at' => $this->created_at,
+                                'updated_at'=> NULL
+                
+                            ]
+                        );
+
+                    }
+
+                    if($this->order_info == "z") {
+                        $result_tableinvz = DB::table($this->table_invz)
+                        ->select('charge','order_address','remarks','note','other1','created_user')
+                        ->where('product_id', $this->product_id)
+                        ->where('status', 'newest')->get();
+                        $this->charge = $result_tableinvz[0]->charge;
+                        $this->order_address = $result_tableinvz[0]->order_address;
+                        $this->remarks = $result_tableinvz[0]->remarks;
+                        $this->note = $result_tableinvz[0]->note;
+                        $this->other1 = $result_tableinvz[0]->other1;
+                        $this->created_user = $result_tableinvz[0]->created_user;
+                        $this->remarks = "※{$this->stock_month}棚卸修正\n".$this->remarks;
+
+                        
+                        DB::table($this->table_invz)
+                        ->where('product_id', $this->product_id)
+                        ->where('status', 'newest')
+                        ->update([
+                            'status' => '',
+                        ]);
+                        
+
+                        $id = DB::table($this->table_invz)->insertGetId(
+                            [
+                                'charge' => $this->charge,
+                                'order_no' => $this->order_no,
+                                'company_name' => $this->company_name,
+                                'company_id' => $this->company_id,
+                                'product_name' => $this->product_name,
+                                'product_id' => $this->product_id,
+                                'unit' => $this->unit,
+                                'quantity' => $this->quantity,
+                                'supply_day' => $this->supply_day,
+                                'supply_quantity' => $this->supply_quantity,
+                                'order_day' => $this->order_day,
+                                'order_quantity' => $this->order_quantity,
+                                'now_inventory' => $this->stock_now_inventory,
+                                'nbox' => $this->stock_nbox,
+                                'order_address' => $this->order_address,
+                                'unit_price' => $this->unit_price,
+                                'total' => $this->unit_price * $this->stock_now_inventory,
+                                'remarks' => $this->remarks,
+                                'note' => $this->note,
+                                'status' => 'newest',
+                                'order_info' => $this->order_info,
+                                'other1' => $this->other1,
+                                'marks' => $this->marks,
+                                'created_user' => $this->created_user,
+                                'updated_user'=> $this->updated_user,
+                                'updated_at'=> NULL
+                            
+                            ]
+                        );
+
+                    }
+
+                }
+
                 $re_data['id'] = $this->id;
                 $re_data['stock_now_inventory'] = $this->stock_now_inventory;
                 $re_data['stock_nbox'] = $this->stock_nbox;
@@ -351,6 +524,7 @@ class StockA extends Model
                     'status' => $this->status,
                     'order_info' => $this->order_info,
                     'stock_month' => $this->stock_month,
+                    'created_user' => $this->created_user,
                     'updated_user'=>$this->updated_user,
                     'updated_at'=>$this->updated_at
                 ]);
@@ -398,6 +572,13 @@ class StockA extends Model
                     ELSE  null 
                 END
                 ) as inv_id ";
+            $columnStr[] = " (
+                CASE 
+                    WHEN t1.order_info='a' THEN t2.charge 
+                    WHEN t1.order_info='z' THEN t3.charge 
+                    ELSE  null 
+                END
+                ) as charge ";
             $columnStr[] = " t1.order_no AS order_no ";
             $columnStr[] = " t1.company_name AS company_name ";
             $columnStr[] = " t1.company_id AS company_id ";
@@ -456,6 +637,8 @@ class StockA extends Model
 
             $columnStr[] = " t1.stock_now_inventory AS stock_now_inventory ";
             $columnStr[] = " t1.stock_nbox AS stock_nbox ";
+            $columnStr[] = " t1.stock_now_inventory AS old_stock_now_inventory ";
+            $columnStr[] = " t1.stock_nbox AS old_stock_nbox ";
 
 
             $columnStr[] = " (
@@ -615,249 +798,11 @@ class StockA extends Model
 
     }
 
-
-
-    
+  
 
     
-    /**
-     * 取得
-     *
-     * @return void
-     */
-    public function getDataStockA(){
-        $message = "ログ出力 getDataInvA";
-        //echo '<pre>' . var_export($message, true) . '</pre>';
-        //Log::debug("debug --".$message);
-        /*
-        Log::info("this->param_edit_id -- ".$this->param_edit_id);
-        Log::info("this->param_product_id -- ".$this->param_product_id);
-        Log::info("this->param_order_info -- ".$this->param_order_info);
-        Log::info("this->param_order_no -- ".$this->param_order_no);
-        Log::info("this->param_company_id -- ".$this->param_company_id);
-        Log::info("this->param_product_id2 -- ".$this->param_product_id2);
-        Log::info("this->param_orderfr -- ".$this->param_orderfr);
-        */
-
-        try {
-            $data = DB::table($this->table)
-            ->select(
-                [
-                    'id',
-                    'inv_id',
-                    'order_no',
-                    'company_name',
-                    'company_id',
-                    'product_name',
-                    'product_id',
-                    'unit',
-                    'quantity',
-                    'now_inventory AS stock_now_inventory',
-                    'nbox AS stock_nbox',
-                    'status',
-                    'order_info',
-                    'stock_month',
-                    'created_user',
-                    'updated_user',
-                    'created_at',
-                    'updated_at'
-                ]
-            );
-            //$data->where('account_id',$this->param_account_id);
-            if(!empty($this->param_edit_id)){
-                $data->where('id',$this->param_edit_id);
-            }
-            elseif(!empty($this->param_product_id)){
-                $data->where('product_id',$this->param_product_id)
-                ->orderBy('id', 'DESC');
-            }
-            elseif(!empty($this->param_status)){
-                $data->where('status',$this->param_status)
-                ->orderBy('id');
-            }
-            else {
-                $data->where('stock_month',$this->param_stock_month);
-            }
-            // 順番変更 正順逆順
-            if(isset($this->param_order_no)){
-                Log::info("isset this->param_order_no -- ".$this->param_order_no);
-                if($this->param_order_no == 1) {
-                    $data->orderBy('order_no');
-                }
-                if($this->param_order_no == 2) {
-                    $data->orderBy('order_no', 'DESC');
-                }
-            }
-            elseif(isset($this->param_company_id)){
-                Log::info("isset this->param_company_id -- ".$this->param_company_id);
-                if($this->param_company_id == 1) {
-                    $data->orderBy('company_name');
-                }
-                if($this->param_company_id == 2) {
-                    $data->orderBy('company_name', 'DESC');
-                }
-            }
-            elseif(isset($this->param_product_id2)){
-                Log::info("isset this->param_product_id2 -- ".$this->param_product_id2);
-                if($this->param_product_id2 == 1) {
-                    $data->orderBy('product_name');
-                }
-                if($this->param_product_id2 == 2) {
-                    $data->orderBy('product_name', 'DESC');
-                }
-            }
-            if(isset($this->param_receipt_day)){
-                Log::info("isset this->param_receipt_day -- ".$this->param_receipt_day);
-                if($this->param_receipt_day == 1) {
-                    $data->orderBy('receipt_day');
-                }
-                if($this->param_receipt_day == 2) {
-                    $data->orderBy('receipt_day', 'DESC');
-                }
-            }
-            if(isset($this->param_delivery_day)){
-                Log::info("isset this->param_delivery_day -- ".$this->param_delivery_day);
-                if($this->param_delivery_day == 1) {
-                    $data->orderBy('delivery_day');
-                }
-                if($this->param_delivery_day == 2) {
-                    $data->orderBy('delivery_day', 'DESC');
-                }
-            }
-
-            
-            $result = $data
-            //->where('status','newest')
-            ->get();
-            //$result = $data->get();
-
-            return $result;
 
 
 
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-
-    }
-
-
-    /**
-     * 検索SEARCH取得
-     *
-     * @return void
-     */
-    public function getSearchStockA(){
-
-        try {
-            $data = DB::table($this->table)
-            ->select(
-
-                'id',
-                'inv_id',
-                'order_no',
-                'company_name',
-                'company_id',
-                'product_name',
-                'product_id',
-                'unit',
-                'quantity',
-                'now_inventory',
-                'nbox',
-                'stock_now_inventory',
-                'stock_nbox',
-                'status',
-                'order_info',
-                'stock_month',
-                'created_user',
-                'updated_user',
-                'created_at',
-                'updated_at'
-
-            );
-            if(!empty($this->param_order_no)){
-                //Log::info("getSearchA this->params_order_no -- ".$this->params_order_no);
-                //Log::info("getSearchA this->param_order_no -- ".$this->param_order_no);
-                $data->where('order_no', $this->param_order_no)
-                //->where('status','newest')
-                ->orderBy('id', 'DESC');
-            
-                $result = $data
-                ->get();
-            }
-
-            if ($result->isEmpty()) {
-                $result = "";
-            } 
-            return $result;
-
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-
-    }
-
-
-
-
-
-
-    /**
-     * 存在チェック
-     *
-     * @return boolean
-     */
-    public function isExistsInfo(){
-        try {
-            $mainQuery = DB::table($this->table);
-            $mainQuery->where('account_id',$this->param_account_id);
-            $is_exists = $mainQuery->where('is_deleted',0)
-                ->exists();
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-
-        return $is_exists;
-    }
-
-    /**
-     * 削除
-     *
-     * @return void
-     */
-    public function delDataStockA(){
-        try {
-            
-            $mainQuery = DB::table($this->table);
-            $mainQuery->where('account_id',$this->param_account_id);
-            $result = $mainQuery->where('is_deleted',0)->delete();
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
 
 }
