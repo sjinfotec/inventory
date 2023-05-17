@@ -117,11 +117,12 @@ class MMStockController extends Controller
             $mmstock = new MMStock();
             $systemdate = Carbon::now();
             $inputsys = "manual";
-            $table = 'mmstock';
+            $table_mms = 'mmstock';
+            $table_mat = 'matmanage';
 
 
-            $max_stock_month = DB::table($table)->max('stock_month');
-            $distinct_stock_month = DB::table($table)
+            $max_stock_month = DB::table($table_mms)->max('stock_month');
+            $distinct_stock_month = DB::table($table_mms)
             ->select('stock_month')
             ->where('marks', $marks)
             ->distinct()
@@ -134,8 +135,8 @@ class MMStockController extends Controller
             $arrayin = isset($distinct_stock_month) ? in_array( $stock_month , array_column( $distinct_stock_month, 'stock_month')) : false;
 
             if($arrayin === false) {
-                if( $insert_ok = DB::table($table)->insert($details) ) {
-                $update_num = DB::table($table)
+                if( $insert_ok = DB::table($table_mms)->insert($details) ) {
+                $update_num = DB::table($table_mms)
                 ->where('status', 'newest')
                 ->update([
                     'stock_now_inventory' => null,
@@ -162,13 +163,18 @@ class MMStockController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
             */
-            return response()->json(
-                ['result' => $result, 'stock_month' => $stock_month, 'max_stock_month' => $max_stock_month,
-                'distinct_stock_month' => $distinct_stock_month, 'stock_month_arr' => $stock_month_arr, 'arrayin' => $arrayin,
-                'insert_ok' => $insert_ok, 'update_num' => $update_num,
+            return response()->json([
+                'result' => $result, 
+                'stock_month' => $stock_month, 
+                'max_stock_month' => $max_stock_month,
+                'distinct_stock_month' => $distinct_stock_month, 
+                'stock_month_arr' => $stock_month_arr, 
+                'arrayin' => $arrayin,
+                'insert_ok' => $insert_ok, 
+                'update_num' => $update_num,
                 'detailstr' => $detailstr, 
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
+            ]);
 
 
         }catch(\PDOException $pe){
