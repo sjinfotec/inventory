@@ -45,9 +45,9 @@
             <li>棚卸在庫に数字を半角で入力</li>
             <li>『棚卸更新』をクリックすると棚卸在庫が更新され、在庫結果に数があっているかの結果が表示されます</li>
             <li>実在庫と入力在庫があっているとチェック（合致）マークが付き、あっていないと過不足が表示されます</li>
-            <li><span class="new">New</span>備考欄にコメントを残せます。『棚卸更新』のクリックで在庫入力との同時更新が可能です</li>
-            <li><span class="new">New</span>棚卸の更新を行うと合計金額が表示されます。※単価は『棚卸 新規開始』をクリックした時点の値になります。</li>
-            <li><span class="new">New</span>過不足があった場合、在庫の本データに在庫結果が自動反映されます。※通常の在庫入出庫更新は棚卸更新を終えた後の操作を推奨します</li>
+            <li><!--<span class="new">New</span>-->備考欄にコメントを残せます。『棚卸更新』のクリックで在庫入力との同時更新が可能です</li>
+            <li>棚卸の更新を行うと合計金額が表示されます。※単価は『棚卸 新規開始』をクリックした時点の値になります。</li>
+            <li>過不足があった場合、在庫の本データに在庫結果が自動反映されます。※通常の在庫入出庫更新は棚卸更新を終えた後の操作を推奨します</li>
             </ol>
           </li>
           <li>棚卸の再開
@@ -136,7 +136,7 @@
         -->
       </div>
 
-      <div class="" v-if="actionmsgArr.length">
+      <div class="" v-if="actionmsgArr.length > 0">
           <ul class="error-red color_red">
             <li v-for="(actionmsg,index) in actionmsgArr" v-bind:key="index">{{ actionmsg }}</li>
           </ul>
@@ -187,7 +187,7 @@
               <td class="style3" ><textarea class="form_style2 bc1" v-model="details3[rowIndex].remarks" name="remarks"></textarea></td>
             </tr>
             <tr class="border1">
-              <td colspan="4" class="style1">{{ this.details3.length }} 件</td>
+              <td colspan="4" class="style1">{{ this.d3length }} 件</td>
               <td colspan="3" class="style1">合計金額</td>
               <td class="style1">{{ Number(totals) | numberFormat }}</td>
               <td colspan="2" class="style1 font1"><div v-if="this.str_s_history"> ※合計金額に履歴は含まれていません</div></td>
@@ -338,6 +338,7 @@ export default {
       details: [],
       details2: [],
       details3: [],
+      d3length: "",
       edit_id: "",
       product_title: "",
       selectMode: "HOME",
@@ -384,6 +385,7 @@ export default {
       var equalength = 0;
       var maxlength = 20;
       var itemname = '日付';
+      //console.log("checkFormInput in ");
       chkArray = 
         this.checkHeader(this.stock_month, required, equalength, maxlength, itemname);
       if (chkArray.length > 0) {
@@ -408,11 +410,12 @@ export default {
     NewStock()  {
       if (this.checkFormInput()) {
         this.getItem();
+        console.log("NewStock in details = " + this.details);
         setTimeout(this.AllStore, 3000);
-        this.actionmsgArr.push(this.product_title + "登録データ作成中です...","");
         //console.log("NewStock in details = " + this.details);
         //this.AllStore();
         this.selectMode = 'LINEACTIVE';
+        this.actionmsgArr.push(this.product_title + "登録データ作成中です...","");
       }
 
     },
@@ -729,6 +732,7 @@ export default {
           //console.log('getthen in this.details3.length = ' + this.details3.length); 
           if (this.details3.length == 0) this.actionmsgArr.push("" + this.stock_month + " 該当データがありません");
         }
+        this.d3length = this.details3.length;
         //console.log('getthen in sort_q = ' + sort_q);
         if(sort_q > 10 ) {
           //console.log('getthen in this.sort_q = ' + this.sort_k);
@@ -818,6 +822,7 @@ export default {
     },
     // 新規系正常処理
     putThenStore(response, eventtext) {
+      console.log("putThenStore in ");
       var messages = [];
       var res = response.data;
       this.product_title = this.stock_month + "";
