@@ -195,9 +195,11 @@ class MMStockController extends Controller
                         stock_nbox = ELT(FIELD(id,$idsStr), $nboxsStr), 
                         total = ELT(FIELD(id,$idsStr), $totalsStr), 
                         status = 'stockup'
-                        WHERE id IN ($idsStr) AND now_inventory = '0'";
+                        WHERE id IN ($idsStr)";
 
                         $update_result = DB::statement($sql);
+
+                        // AND now_inventory = '0'
 
                     }   //end if count
                     else {$update_result = false;}

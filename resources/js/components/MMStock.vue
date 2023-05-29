@@ -723,7 +723,7 @@ export default {
           //console.log('getThen in details3.forEach = ' + element.cal_total_price);
           if((typeof element.cal_total_price == 'string')) {
             pt = pt + Number(element.cal_total_price);
-            console.log('getThen in typeof element.cal_total_price = ' + pt);
+            //console.log('getThen in typeof element.cal_total_price = ' + pt);
           }
         });
         this.totals = pt;
