@@ -91,6 +91,7 @@
             </tr>
           </thead>
           <tbody>
+            <tr><td>2.1</td><td>2023/05/17</td><td>棚卸における入力在庫数とINVENTORY_DBの在庫数が相違の場合に自動反映</td></tr>
             <tr><td>2.0</td><td>2023/04/28</td><td>在庫金額合計及び現在在庫・箱数が自動計算、更新と修正を分けて表示等の大型UPDATE</td></tr>
             <tr><td>1.1</td><td>2022/00/00</td><td>小型UPDATE</td></tr>
             <tr><td>1.0</td><td>2022/04/01</td><td>初版</td></tr>

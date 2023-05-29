@@ -136,18 +136,83 @@ class MMStockController extends Controller
 
             if($arrayin === false) {
                 if( $insert_ok = DB::table($table_mms)->insert($details) ) {
-                $update_num = DB::table($table_mms)
-                ->where('status', 'newest')
-                ->update([
-                    'stock_now_inventory' => null,
-                    'stock_nbox' => '',
-                    'stock_month' => $stock_month,
-                    'status' => 'wait',
-                    'marks' => $marks,
-                    'created_at' => $systemdate
-                ]);
+                    $update_num = DB::table($table_mms)
+                    ->where('status', 'newest')
+                    ->update([
+                        'stock_now_inventory' => null,
+                        'stock_nbox' => '',
+                        'stock_month' => $stock_month,
+                        'status' => 'wait',
+                        'marks' => $marks,
+                        'created_at' => $systemdate
+                    ]);
+
+                    // 印刷1課のみ(marks=a)の機能、３か月前より更新がないままだと自動カウント（matmanageのtotalと同じ値になる）
+                    $mmselect_arr = DB::table('mmstock as s')
+                    ->select([
+                        's.id',
+                        's.now_inventory',
+                        's.nbox',
+                        's.unit_price',
+                        'm.mdate'
+                    ])
+                    ->join('matmanage as m', 's.inv_id', '=', 'm.id')
+                    ->where('s.stock_month', $stock_month)
+                    ->where('s.status', '=','wait')
+                    ->where('s.marks', '=','a')
+                    ->where('m.mdate', '<', $systemdate->subMonths(3))
+                    ->get()
+                    ->toArray();
+
+                    if(count($mmselect_arr) > 0 && $marks == "a") {
+
+                        $id_arr = Array();
+                        $now_inventory_arr = Array();
+                        $nbox_arr = Array();
+                        $total_arr = Array();
+
+                        foreach ($mmselect_arr as $record) {
+                            $id_arr[] = $record->id;
+                            $now_inventory_arr[] = !empty($record->now_inventory) ? $record->now_inventory : "0";
+                            $nbox_arr[] = !empty($record->nbox) ? $record->nbox : "null";
+                            $total_arr[] = $record->unit_price * $record->now_inventory ?: "null";
+                            $mdate[] = $record->mdate;
+                            $update_sql[] = "UPDATE mmstock ";
+                        }
+                        $idsStr = implode(',', $id_arr);
+                        $nowinvsStr = implode(',', $now_inventory_arr);
+                        $nboxsStr = implode(',', $nbox_arr);
+                        $totalsStr = implode(',', $total_arr);
+
+                        /*
+                        $sql = "UPDATE mmstock
+                            SET stock_now_inventory = ELT(FIELD(id,2,5,6), '大阪', '愛知', '北海道')
+                            WHERE id IN (2,5,6)";
+                            */
+
+                        $sql = "UPDATE mmstock SET 
+                        stock_now_inventory = ELT(FIELD(id,$idsStr), $nowinvsStr), 
+                        stock_nbox = ELT(FIELD(id,$idsStr), $nboxsStr), 
+                        total = ELT(FIELD(id,$idsStr), $totalsStr), 
+                        status = 'stockup'
+                        WHERE id IN ($idsStr)";
+
+                        $update_result = DB::statement($sql);
+
+                        // AND now_inventory = '0'
+
+                    }   //end if count
+                    else {$update_result = false;}
+
+                    //->join('matmanage', 'mmstock.inv_id', '=', 'matmanage.id')
+                    //Log::debug("storeAll in ");
+
+
+
+
                 } else {
                     $insert_ok = false;
+                    $mmselect_arr = "NO id";
                 }
     
             } else {
@@ -173,6 +238,8 @@ class MMStockController extends Controller
                 'insert_ok' => $insert_ok, 
                 'update_num' => $update_num,
                 'detailstr' => $detailstr, 
+                'mmselect_arr' => $mmselect_arr,
+                'update_result' => $update_result,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
             ]);
 

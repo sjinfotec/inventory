@@ -64,7 +64,7 @@
           </ul>
       </div>
       <!--<div id="version_cnt"><button type="button" class="customize" @click="viewBtn(2)">version 1.3</button></div>-->
-      <div id="version_cnt"><a @click="viewBtn(2)">version 1.4</a></div>
+      <div id="version_cnt"><a @click="viewBtn(2)">version 1.5</a></div>
       <div id="tbl_2" v-if="view_switch=='on'">
       <table>
         <thead>
@@ -75,6 +75,7 @@
           </tr>
         </thead>
         <tbody>
+          <tr><td>1.5</td><td>2023/05/31</td><td>棚卸入力の際、資材在庫更新が一定期間ない場合に自動で棚卸在庫更新（印刷1課のみ）</td></tr>
           <tr><td>1.4</td><td>2023/04/25</td><td>棚卸に在庫金額及び備考欄設置＆棚卸結果で差異がある場合に在庫ＤＢへ反映</td></tr>
           <tr><td>1.3</td><td>2022/10/25</td><td>検索項目追加＆検索結果金額表示</td></tr>
           <tr><td>1.2</td><td>2022/10/01</td><td>検索機能強化＆昇降順の正確性アップ</td></tr>
