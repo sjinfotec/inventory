@@ -467,6 +467,7 @@ class MMStock extends Model
                 $snini = $this->stock_now_inventory - $this->param_mm_now_inventory;
                 //Log::debug("MMStock updateDataStock snini gettype -> ".gettype($snini));
                 //Log::debug("MMStock updateDataStock snini val -> ".$snini);
+                /*
                 if(!empty($snini)) {
                     //Log::debug("MMStock updateDataStock snini !empty in ");
                     $result_tablemm = DB::table($this->table_mm)
@@ -480,6 +481,73 @@ class MMStock extends Model
                     ]);
     
                 }
+                */
+                $mdate = date('Y-m-d',  strtotime($this->updated_at));
+
+
+                //if($this->stock_now_inventory !== $this->param_mm_now_inventory) {
+                if(!empty($snini)) {
+                    //Log::debug("Stock updateDataStock snini !empty in ");
+                    //if($this->order_info == "a") {
+
+                        $result_tablemm = DB::table($this->table_mm)
+                        ->select('mdate','department','charge','product_number','order_address','remarks','note','created_user')
+                        ->where('product_code', $this->product_code)
+                        ->where('status', 'newest')->get();
+                        $this->mdate = date('Y-m-d',  strtotime($this->updated_at));
+                        $this->department = $result_tablemm[0]->department;
+                        $this->charge = $result_tablemm[0]->charge;
+                        $this->product_number = $result_tablemm[0]->product_number;
+                        $this->order_address = $result_tablemm[0]->order_address;
+                        $this->remarks = $result_tablemm[0]->remarks;
+                        $this->note = $result_tablemm[0]->note;
+                        $this->created_user = $result_tablemm[0]->created_user;
+                        //$this->remarks = "※{$this->stock_month}棚卸修正\n".$this->remarks;
+
+                        DB::table($this->table_mm)
+                        ->where('product_code', $this->product_code)
+                        ->where('status', 'newest')
+                        ->update([
+                            'status' => '',
+                        ]);
+                        // ->where('id', $this->inv_id)
+
+                        $id = DB::table($this->table_mm)->insertGetId(
+                            [
+
+                                'mdate' => $this->mdate,
+                                'department' => $this->department,
+                                'charge' => $this->charge,
+                                'product_name' => $this->product_name,
+                                'product_code' => $this->product_code,
+                                'product_number' => $this->product_number,
+                                'unit' => $this->unit,
+                                'quantity' => $this->quantity,
+                                'receipt' => NULL,
+                                'delivery' => NULL,
+                                'now_inventory' => $this->stock_now_inventory,
+                                'nbox' => '',
+                                'order_address' => $this->order_address,
+                                'unit_price' => $this->unit_price,
+                                'total' => $this->unit_price * $this->stock_now_inventory,
+                                'remarks' => $this->remarks,
+                                'note' => $this->note,
+                                'status' => 'newest',
+                                'marks' => $this->marks,
+                                'created_user' => $this->updated_user,
+                                'created_at' => now(),
+                                'updated_user'=> $this->updated_user,
+                                'updated_at' => NULL
+                        
+                
+                            ]
+                        );
+
+                    //}
+
+
+                }
+
 
 
 
